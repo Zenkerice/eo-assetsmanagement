@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --sidebar-w:260px;--radius:14px;--radius-sm:8px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px;}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+    .content{padding:32px 48px 56px;flex:1;}
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:none;}
+    .btn-primary{background:var(--blue);color:#fff;}
+    .btn-primary:hover{background:#6b9ef8;}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2);}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text);}
+    .btn-danger-ghost{background:transparent;color:var(--red);border:1px solid rgba(244,91,105,0.3);}
+    .btn-danger-ghost:hover{background:var(--red-dim);}
+    .btn-sm{padding:7px 14px;font-size:13px;}
+    /* Card */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid var(--border);}
+    .card-header h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+    /* Table */
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:14px 28px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);}
+    tbody td{padding:16px 28px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text);font-size:15px;}
+    tbody tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:rgba(255,255,255,0.025);}
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+    .badge-admin  {background:var(--blue-dim);  color:var(--blue);}
+    .badge-staff  {background:var(--green-dim); color:var(--green);}
+    .badge-viewer {background:var(--amber-dim); color:var(--amber);}
+    .mono{font-family:'DM Mono',monospace;font-size:13px;background:var(--bg3);color:var(--muted2);padding:3px 8px;border-radius:6px;border:1px solid var(--border);}
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:520px;padding:36px;box-shadow:0 24px 64px rgba(0,0,0,0.6);animation:slideUp .2s ease;}
+
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .modal-header h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;}
+    .modal-close:hover{background:var(--bg3);color:var(--text);}
+    .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
+    .form-group label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
+    .form-group input,.form-group select{padding:12px 15px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
+    .form-group select option{background:var(--bg3);}
+    .form-hint{font-size:13px;color:var(--muted);margin-top:2px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:28px;}
+    /* Role description */
+    .role-desc-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--muted2);margin-top:6px;min-height:36px;}
+    /* Toast */
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999;}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:toastIn .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+    .toast.error{border-color:var(--red);color:var(--red);}
+    .toast.success{border-color:var(--green);color:var(--green);}
+    .empty-state{text-align:center;padding:52px 20px;color:var(--muted);}
+    .empty-state .empty-icon{font-size:28px;margin-bottom:10px;}
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>User Management</h1>
+      <div class="topbar-sub">Manage accounts and role permissions</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="openModal()">+ Add User</button>
+</div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-header">
+        <h2>&#128101; All Users</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadUsers()">&#8635; Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add User</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <form id="user-form" autocomplete="off">
+      <input type="hidden" id="edit-id" />
+      <div class="form-group">
+        <label for="f-name">Full Name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Juan dela Cruz" required />
+      </div>
+      <div class="form-group">
+        <label for="f-username">Username *</label>
+        <input type="text" id="f-username" placeholder="e.g. juan" required />
+      </div>
+      <div class="form-group">
+        <label for="f-password">Password</label>
+        <input type="password" id="f-password" placeholder="Min. 6 characters" />
+        <span class="form-hint" id="pw-hint">Required for new users.</span>
+      </div>
+      <div class="form-group">
+        <label for="f-role">Role *</label>
+        <select id="f-role" onchange="updateRoleDesc()">
+          <option value="viewer">Team Leader (TL)</option>
+          <option value="staff">Human Resources (HR)</option>
+          <option value="admin">Admin</option>
+        </select>
+        <div class="role-desc-box" id="role-desc">Read-only access to inventory data.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-btn">Save User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+auth.initPage({ admin: true, onReady: () => loadUsers() });
+
+function formatDate(str) {
+  if (!str) return '&mdash;';
+  return new Date(str).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+}
+
+const roleLabels = { admin: 'System Manager', staff: 'HR · Staff', viewer: 'TL · Staff' };
+const roleDescs = {
+  viewer: 'Read-only access to inventory data.',
+  staff:  'Can add and edit assets, suppliers, and reports.',
+  admin:  'Full control including user management and deletions.',
+};
+
+function updateRoleDesc() {
+  const role = document.getElementById('f-role').value;
+  document.getElementById('role-desc').textContent = roleDescs[role] || '';
+}
+
+/* -- Load users -- */
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>';
+  try {
+    const users     = await auth.getUsers();
+    const currentId = auth.currentUser?.id;
+
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>No users yet.</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7b5bf7);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
+              ${esc(u.name.charAt(0).toUpperCase())}
+            </div>
+            <span style="font-weight:500;">${esc(u.name)}</span>
+            ${u.id === currentId ? '<span style="font-size:11px;color:var(--muted);margin-left:4px;">(you)</span>' : ''}
+          </div>
+        </td>
+        <td><span class="mono">${esc(u.username)}</span></td>
+        <td><span class="badge badge-${u.role}">${esc(roleLabels[u.role] || u.role)}</span></td>
+        <td style="color:var(--muted2);font-size:13px;">${formatDate(u.created_at)}</td>
+        <td>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="openEdit(${u.id})">Edit</button>
+            ${u.id !== currentId
+              ? `<button class="btn btn-danger-ghost btn-sm" onclick="deleteUser(${u.id}, '${esc(u.name)}')">Delete</button>`
+              : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+/* -- Modal -- */
+let _editingId = null;
+
+function openModal() {
+  _editingId = null;
+  document.getElementById('modal-title').textContent = 'Add User';
+  document.getElementById('user-form').reset();
+  document.getElementById('edit-id').value = '';
+  document.getElementById('pw-hint').textContent = 'Required for new users.';
+  document.getElementById('f-password').required = true;
+  document.getElementById('f-role').value = 'viewer';
+  updateRoleDesc();
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 80);
+}
+
+async function openEdit(id) {
+  try {
+    const users = await auth.getUsers();
+    const u = users.find(x => x.id === id);
+    if (!u) return;
+    _editingId = id;
+    document.getElementById('modal-title').textContent = 'Edit User';
+    document.getElementById('edit-id').value    = id;
+    document.getElementById('f-name').value     = u.name;
+    document.getElementById('f-username').value = u.username;
+    document.getElementById('f-password').value = '';
+    document.getElementById('f-role').value     = u.role;
+    document.getElementById('pw-hint').textContent = 'Leave blank to keep current password.';
+    document.getElementById('f-password').required = false;
+    updateRoleDesc();
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('f-name').focus(), 80);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+/* -- Save -- */
+document.getElementById('user-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving\u2026';
+
+  const payload = {
+    name:     document.getElementById('f-name').value.trim(),
+    username: document.getElementById('f-username').value.trim(),
+    role:     document.getElementById('f-role').value,
+  };
+  const pw = document.getElementById('f-password').value;
+  if (pw) payload.password = pw;
+
+  try {
+    if (_editingId) {
+      await auth.updateUser(_editingId, payload);
+      showToast('User updated', 'success');
+    } else {
+      await auth.createUser(payload);
+      showToast('User created', 'success');
+    }
+    closeModal();
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save User';
+  }
+});
+
+/* -- Delete -- */
+async function deleteUser(id, name) {
+  if (!confirm('Delete user "' + name + '"? This cannot be undone.')) return;
+  try {
+    await auth.deleteUser(id);
+    showToast('User deleted', 'success');
+    loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receive &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .content{padding:28px 48px 56px}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px 16px}
+    .stat-card-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+    .stat-card-value{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:4px}
+    .stat-card-sub{font-size:13px;color:var(--muted)}
+    .stat-card.amber .stat-card-label,.stat-card.amber .stat-card-value{color:var(--amber)}
+    .stat-card.blue  .stat-card-label,.stat-card.blue  .stat-card-value{color:var(--blue)}
+    .stat-card.green .stat-card-label,.stat-card.green .stat-card-value{color:var(--green)}
+    .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content}
+    .tab-btn{padding:8px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--muted2);transition:all .15s;display:flex;align-items:center;gap:7px}
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{background:var(--bg3);color:var(--text)}
+    .tab-badge{background:var(--amber);color:#000;font-size:11px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+    .tab-badge.green{background:var(--green)}
+    .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .search-wrap{flex:1;position:relative;max-width:420px}
+    .search-wrap input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 16px 10px 38px;outline:none;transition:border-color .15s}
+    .search-wrap input::placeholder{color:var(--muted)}
+    .search-wrap input:focus{border-color:var(--blue)}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);text-decoration:none;white-space:nowrap;background:transparent;color:var(--muted2)}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-success{background:var(--green-dim);color:var(--green);border-color:rgba(62,207,142,0.3)}
+    .btn-success:hover{background:rgba(62,207,142,0.2)}
+    .btn-success:disabled{opacity:.45;cursor:not-allowed}
+    .btn-sm{padding:7px 13px;font-size:13px}
+    .po-list{display:flex;flex-direction:column;gap:14px}
+    .po-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+    .po-card.expanded{border-color:var(--blue)}
+    .po-card-header{display:flex;align-items:center;gap:16px;padding:20px 24px;cursor:pointer;transition:background .15s;user-select:none}
+    .po-card-header:hover{background:rgba(255,255,255,0.02)}
+    .po-num{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-dim);padding:4px 10px;border-radius:6px;white-space:nowrap}
+    .po-supplier{font-weight:600;font-size:15px;color:var(--text)}
+    .po-meta{font-size:13px;color:var(--muted);margin-top:2px}
+    .po-amount{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-left:auto;white-space:nowrap}
+    .po-chevron{font-size:18px;color:var(--muted);transition:transform .2s;margin-left:12px;flex-shrink:0}
+    .po-card.expanded .po-chevron{transform:rotate(90deg)}
+    .po-progress{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+    .po-progress.done{background:var(--green-dim);color:var(--green)}
+    .po-progress.partial{background:var(--amber-dim);color:var(--amber)}
+    .po-progress.none{background:rgba(255,255,255,0.05);color:var(--muted2)}
+    .po-progress.received{background:var(--green-dim);color:var(--green)}
+    .po-units{display:none;border-top:1px solid var(--border)}
+    .po-card.expanded .po-units{display:block}
+    .item-group{border-bottom:1px solid var(--border)}
+    .item-group:last-child{border-bottom:none}
+    .item-group-header{display:flex;align-items:center;gap:12px;padding:14px 24px 10px;background:rgba(255,255,255,0.015)}
+    .item-group-name{font-weight:600;font-size:14px;color:var(--text)}
+    .item-group-sku{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-left:4px}
+    .item-group-qty{font-size:12px;color:var(--muted2);margin-left:auto}
+    .unit-rows{display:flex;flex-direction:column;padding:0 24px 14px}
+    .unit-row{display:grid;grid-template-columns:48px 1fr 1fr;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .unit-row:last-child{border-bottom:none}
+    .unit-index{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-align:center;background:var(--bg3);border-radius:6px;padding:4px 0}
+    .unit-label{font-size:13px;color:var(--muted2)}
+    .serial-input{background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none;width:100%;transition:border-color .15s,box-shadow .15s}
+    .serial-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+    .serial-input.filled{border-color:rgba(62,207,142,0.4);background:rgba(62,207,142,0.04)}
+    .serial-input.error{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim)}
+    .serial-edit-row{display:grid;grid-template-columns:48px 1fr 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .serial-edit-row:last-child{border-bottom:none}
+    .serial-edit-input{background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:8px 11px;outline:none;width:100%;transition:border-color .15s}
+    .serial-edit-input:focus{border-color:var(--blue)}
+    .serial-edit-input.saved{border-color:rgba(62,207,142,0.5);background:rgba(62,207,142,0.04)}
+    .btn-save-serial{padding:7px 12px;font-size:12px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,142,247,0.3);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;white-space:nowrap}
+    .btn-save-serial:hover{background:var(--blue);color:#fff}
+    .btn-save-serial:disabled{opacity:.4;cursor:not-allowed}
+    .po-receive-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:rgba(62,207,142,0.04);border-top:1px solid rgba(62,207,142,0.12)}
+    .receive-summary{font-size:13px;color:var(--muted2);line-height:1.6}
+    .receive-summary strong{color:var(--text)}
+    .receive-hint{font-size:12px;color:var(--amber);margin-top:3px}
+    .po-received-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(62,207,142,0.03);border-top:1px solid rgba(62,207,142,0.1)}
+    .empty-state{text-align:center;padding:64px 20px;color:var(--muted)}
+    .empty-state .empty-icon{font-size:38px;margin-bottom:12px}
+    .empty-state h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+    .empty-state p{font-size:14px;line-height:1.6}
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)}
+    .toast.success{border-color:var(--green);color:var(--green)}
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Receive</h1>
+      <div class="topbar-sub" id="topbar-sub">Loading&hellip;</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" onclick="loadAll()">&#8635; Refresh</button>
+</div>
+  </div>
+  <div class="content">
+    <div class="stat-grid">
+      <div class="stat-card amber">
+        <div class="stat-card-label">&#9203; Awaiting Receipt</div>
+        <div class="stat-card-value" id="stat-pending">&mdash;</div>
+        <div class="stat-card-sub">purchase orders</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-card-label">&#128230; Total Units</div>
+        <div class="stat-card-value" id="stat-units">&mdash;</div>
+        <div class="stat-card-sub">items to receive</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-card-label">&#10003; Received Today</div>
+        <div class="stat-card-value" id="stat-today">&mdash;</div>
+        <div class="stat-card-sub">orders completed</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-pending-btn" onclick="switchTab('pending')">
+        &#9203; Pending <span class="tab-badge" id="tab-pending-count">0</span>
+      </button>
+      <button class="tab-btn" id="tab-received-btn" onclick="switchTab('received')">
+        &#10003; Received <span class="tab-badge green" id="tab-received-count">0</span>
+      </button>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" id="search" placeholder="Search by PO number or supplier&hellip;" oninput="filterCurrent()" />
+      </div>
+    </div>
+    <div id="panel-pending" class="po-list"></div>
+    <div id="panel-received" class="po-list" style="display:none;"></div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<!-- Serial Entry Modal -->
+<div id="serial-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:300;overflow-y:auto;padding:32px 24px;">
+  <div style="max-width:760px;margin:0 auto;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 32px 80px rgba(0,0,0,0.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 28px;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;" id="sm-title">Enter Serial Numbers</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;" id="sm-sub"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);">Units to Receive</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="sm-partial-qty" min="1" value=""
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:7px 10px;outline:none;width:80px;text-align:center;"
+              placeholder="All" oninput="applyPartialQty()" />
+            <span style="font-size:12px;color:var(--muted);" id="sm-partial-hint">of <span id="sm-total-qty">0</span></span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);">Delivery Location</label>
+          <select id="sm-location" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;outline:none;cursor:pointer;min-width:160px;">
+            <option value="">� Select location �</option>
+          </select>
+        </div>
+        <button onclick="closeSerialModal()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:32px;height:32px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;align-self:flex-end;">&times;</button>
+      </div>
+    </div>
+    <div id="sm-body" style="padding:0 28px 8px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 28px 24px;border-top:1px solid var(--border);margin-top:8px;">
+      <div>
+        <div style="font-size:13px;color:var(--muted2);" id="sm-progress-text">0 / 0 serial numbers entered</div>
+        <div style="font-size:12px;color:var(--amber);margin-top:3px;" id="sm-hint">Fill in all serial numbers to proceed</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-sm" onclick="closeSerialModal()">Cancel</button>
+        <button class="btn btn-success btn-sm" id="sm-confirm-btn" disabled onclick="confirmSerials()">&#10003; Complete Receive</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+/* -- single script block � no duplicate declarations -- */
+auth.initPage({ onReady: () => loadAll() });
+
+let pendingPOs  = [];
+let receivedPOs = [];
+let currentTab  = 'pending';
+let activePoId  = null;   // PO currently open in serial modal
+
+function fmtMoney(n) {
+  return '\u20b1' + Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtDate(d) {
+  if (!d) return '\u2014';
+  return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+/* -- Load -- */
+async function loadAll() {
+  try {
+    const [pendRes, allRes] = await Promise.all([
+      api.getPendingPurchaseOrders(),
+      api.getPurchaseOrders(),
+    ]);
+    pendingPOs  = pendRes.data || [];
+    receivedPOs = (allRes.data || [])
+      .filter(p => p.status === 'received')
+      .sort((a, b) => new Date(b.received_date || b.updated_at) - new Date(a.received_date || a.updated_at));
+
+    const totalUnits = pendingPOs.reduce((s, po) =>
+      s + (po.items || []).reduce((ss, i) => ss + (parseInt(i.quantity) || 0), 0), 0);
+    const today      = new Date().toISOString().slice(0, 10);
+    const todayCount = receivedPOs.filter(p => (p.received_date || '').slice(0, 10) === today).length;
+
+    document.getElementById('stat-pending').textContent       = pendingPOs.length;
+    document.getElementById('stat-units').textContent         = totalUnits;
+    document.getElementById('stat-today').textContent         = todayCount;
+    document.getElementById('tab-pending-count').textContent  = pendingPOs.length;
+    document.getElementById('tab-received-count').textContent = receivedPOs.length;
+    document.getElementById('topbar-sub').textContent = pendingPOs.length
+      ? pendingPOs.length + ' order' + (pendingPOs.length !== 1 ? 's' : '') + ' awaiting receipt'
+      : 'No orders awaiting receipt';
+
+    filterCurrent();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Tabs -- */
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('panel-pending').style.display  = tab === 'pending'  ? '' : 'none';
+  document.getElementById('panel-received').style.display = tab === 'received' ? '' : 'none';
+  document.getElementById('tab-pending-btn').classList.toggle('active',  tab === 'pending');
+  document.getElementById('tab-received-btn').classList.toggle('active', tab === 'received');
+  document.getElementById('search').value = '';
+  filterCurrent();
+}
+
+function filterCurrent() {
+  const q = document.getElementById('search').value.toLowerCase();
+  if (currentTab === 'pending') {
+    renderPending(pendingPOs.filter(p =>
+      !q || (p.po_number || '').toLowerCase().includes(q) || (p.supplier_name || '').toLowerCase().includes(q)
+    ));
+  } else {
+    renderReceived(receivedPOs.filter(p =>
+      !q || (p.po_number || '').toLowerCase().includes(q) || (p.supplier_name || '').toLowerCase().includes(q)
+    ));
+  }
+}
+
+/* ------------------------------------------
+   PENDING TAB � PO cards with Edit button
+------------------------------------------ */
+function renderPending(data) {
+  const container = document.getElementById('panel-pending');
+  if (!data.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">&#128229;</div>
+      <h3>All caught up!</h3>
+      <p>No purchase orders awaiting receipt.<br>
+         Go to <a href="suppliers.html" style="color:var(--blue)">Suppliers</a> and click <strong>Receive PO</strong> on a pending order.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = data.map(poItem => {
+    const items    = poItem.items || [];
+    const totalQty = items.reduce((s, i) => s + (parseInt(i.quantity) || 0), 0);
+    const lineRows = items.length ? items.map(item => {
+      const qty = parseInt(item.quantity) || 0;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">${esc(item.product_name)}</div>
+          ${item.sku ? `<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${esc(item.sku)}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <span style="font-size:13px;color:var(--muted2);">${fmtMoney(item.unit_price)} &times; ${qty}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-dim);padding:3px 10px;border-radius:6px;">${qty} unit${qty!==1?'s':''}</span>
+        </div>
+      </div>`;
+    }).join('') : `<div style="padding:16px 0;font-size:13px;color:var(--muted);">No line items found.</div>`;
+
+    return `<div class="po-card" id="po-card-${poItem.id}">
+      <div class="po-card-header" onclick="togglePO(${poItem.id})">
+        <span class="po-num">${esc(poItem.po_number)}</span>
+        <div style="flex:1;min-width:0;">
+          <div class="po-supplier">${esc(poItem.supplier_name)}</div>
+          <div class="po-meta">Ordered ${fmtDate(poItem.order_date)}${poItem.expected_date ? ' &middot; Expected ' + fmtDate(poItem.expected_date) : ''} &middot; ${totalQty} unit${totalQty !== 1 ? 's' : ''}${poItem.location_name ? ' &middot; ' + String.fromCharCode(0x1F4CD) + ' ' + esc(poItem.location_name) : ''}</div>
+        </div>
+        <span class="po-progress ${totalQty > 0 ? 'partial' : 'none'}" style="margin-right:8px;">
+          ${items.length} item${items.length!==1?'s':''} &middot; ${totalQty} unit${totalQty!==1?'s':''}
+        </span>
+        <div class="po-amount">${fmtMoney(poItem.total_amount)}</div>
+        <span class="po-chevron">&#8250;</span>
+      </div>
+      <div class="po-units" id="po-body-${poItem.id}">
+        <div style="padding:4px 24px 16px;">
+          ${lineRows}
+        </div>
+        <div class="po-receive-footer">
+          <div class="receive-summary">
+            <strong>${items.length}</strong> line item${items.length!==1?'s':''} &middot;
+            <strong>${totalQty}</strong> total unit${totalQty!==1?'s':''} &middot;
+            <strong>${fmtMoney(poItem.total_amount)}</strong>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openSerialModal(${poItem.id}, event)" ${totalQty===0?'disabled':''}>
+            &#9998; Edit Serials &amp; Receive
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  if (data.length === 1) togglePO(data[0].id);
+}
+
+function togglePO(id) {
+  document.getElementById('po-card-' + id).classList.toggle('expanded');
+}
+
+/* ------------------------------------------
+   SERIAL ENTRY MODAL
+------------------------------------------ */
+async function openSerialModal(poId, e) {
+  e.stopPropagation();
+  activePoId = poId;
+  const poItem   = pendingPOs.find(p => p.id === poId);
+  if (!poItem) return;
+  const items    = poItem.items || [];
+  const totalQty = items.reduce((s, i) => s + (parseInt(i.quantity) || 0), 0);
+
+  document.getElementById('sm-title').textContent = 'Enter Serial Numbers \u2014 ' + poItem.po_number;
+  document.getElementById('sm-sub').textContent   = poItem.supplier_name + ' \u00b7 ' + totalQty + ' unit' + (totalQty !== 1 ? 's' : '') + ' to receive';
+  document.getElementById('sm-total-qty').textContent = totalQty;
+  document.getElementById('sm-partial-qty').value = '';
+  document.getElementById('sm-partial-qty').max   = totalQty;
+
+  // Store items on the modal for applyPartialQty
+  document.getElementById('sm-body').dataset.items = JSON.stringify(items);
+
+  // Populate location dropdown
+  try {
+    const locRes = await api.getLocations();
+    const locSel = document.getElementById('sm-location');
+    locSel.innerHTML = '<option value="">� Select location �</option>' +
+      (locRes.data || []).map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+    // Pre-select from PO's location_id if set
+    if (poItem.location_id) locSel.value = poItem.location_id;
+  } catch (_) {}
+
+  // Build rows � default to showing all
+  buildSerialRows(items, totalQty);
+
+  const modal = document.getElementById('serial-modal');
+  modal.style.display = 'block';
+  setTimeout(() => { const f = modal.querySelector('.sm-serial'); if (f) f.focus(); }, 100);
+}
+
+function buildSerialRows(items, limit) {
+  let rendered = 0;
+  const body = items.map(item => {
+    const qty = parseInt(item.quantity) || 0;
+    const rows = [];
+    for (let u = 0; u < qty; u++) {
+      if (rendered >= limit) break;
+      rendered++;
+      rows.push(`
+        <div style="display:grid;grid-template-columns:44px 1fr 200px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-align:center;background:var(--bg3);border-radius:6px;padding:4px 0;">#${rendered}</div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);">${esc(item.product_name)}</div>
+            <div style="font-size:11px;color:var(--muted);">Unit ${u + 1} of ${qty}${item.sku ? ' &middot; ' + esc(item.sku) : ''}</div>
+          </div>
+          <input class="serial-input sm-serial"
+            type="text"
+            placeholder="Serial number\u2026"
+            data-item-id="${item.id}"
+            data-unit="${u}"
+            oninput="updateSmProgress()"
+            autocomplete="off"
+            style="width:100%;" />
+        </div>`);
+      if (rendered >= limit) break;
+    }
+    if (!rows.length) return '';
+    const shown = rows.length;
+    return `<div style="margin-bottom:4px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:14px 0 6px;">${esc(item.product_name)} &mdash; ${shown} unit${shown!==1?'s':''}</div>
+      ${rows.join('')}
+    </div>`;
+  }).join('');
+
+  document.getElementById('sm-body').innerHTML = body;
+  document.getElementById('sm-confirm-btn').disabled = true;
+  document.getElementById('sm-progress-text').textContent = '0 / ' + rendered + ' serial numbers entered';
+  document.getElementById('sm-hint').textContent = rendered < document.getElementById('sm-total-qty').textContent
+    ? `Receiving ${rendered} of ${document.getElementById('sm-total-qty').textContent} units`
+    : 'Fill in all serial numbers to proceed';
+  document.getElementById('sm-hint').style.color = 'var(--amber)';
+}
+
+function applyPartialQty() {
+  const input    = document.getElementById('sm-partial-qty');
+  const totalQty = parseInt(document.getElementById('sm-total-qty').textContent) || 0;
+  let   qty      = parseInt(input.value) || totalQty;
+  if (qty < 1)       qty = 1;
+  if (qty > totalQty) qty = totalQty;
+  const items = JSON.parse(document.getElementById('sm-body').dataset.items || '[]');
+  buildSerialRows(items, qty);
+}
+
+function closeSerialModal() {
+  document.getElementById('serial-modal').style.display = 'none';
+  activePoId = null;
+}
+
+function updateSmProgress() {
+  const inputs  = document.querySelectorAll('.sm-serial');
+  const filled  = [...inputs].filter(i => i.value.trim().length > 0).length;
+  const total   = inputs.length;
+  const allDone = filled === total;
+  document.getElementById('sm-progress-text').textContent = filled + ' / ' + total + ' serial numbers entered';
+  document.getElementById('sm-confirm-btn').disabled = !allDone;
+  document.getElementById('sm-hint').textContent = allDone
+    ? 'All serial numbers entered \u2014 ready to receive'
+    : (total - filled) + ' remaining';
+  document.getElementById('sm-hint').style.color = allDone ? 'var(--green)' : 'var(--amber)';
+}
+
+async function confirmSerials() {
+  const inputs  = document.querySelectorAll('.sm-serial');
+  const serials = {};
+  let hasEmpty  = false;
+  let hasDupe   = false;
+  const seen    = new Set();
+
+  inputs.forEach(inp => {
+    const val = inp.value.trim();
+    if (!val) { hasEmpty = true; inp.classList.add('error'); return; }
+    inp.classList.remove('error');
+    if (seen.has(val.toLowerCase())) { hasDupe = true; inp.classList.add('error'); }
+    seen.add(val.toLowerCase());
+    if (!serials[inp.dataset.itemId]) serials[inp.dataset.itemId] = [];
+    serials[inp.dataset.itemId][parseInt(inp.dataset.unit)] = val;
+  });
+
+  if (hasEmpty) { showToast('Please fill in all serial numbers', 'error'); return; }
+  if (hasDupe)  { showToast('Duplicate serial numbers detected', 'error'); return; }
+
+  const btn = document.getElementById('sm-confirm-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Processing\u2026';
+
+  try {
+    const locationId   = document.getElementById('sm-location').value || null;
+    const totalQty     = parseInt(document.getElementById('sm-total-qty').textContent) || 0;
+    const receivingQty = inputs.length;
+    const isPartial    = receivingQty < totalQty;
+
+    if (isPartial) {
+      // Partial receive: create assets without marking PO fully received
+      await api.partialReceivePO(activePoId, serials, locationId);
+      showToast(`${receivingQty} asset${receivingQty !== 1 ? 's' : ''} received � ${totalQty - receivingQty} units still pending`, 'success');
+    } else {
+      // Full receive: marks PO as received
+      await api.receivePurchaseOrder(activePoId, serials, locationId);
+      showToast('PO received \u2014 all assets added to inventory', 'success');
+    }
+    closeSerialModal();
+    loadAll();
+  } catch (err) {
+    showToast(err.message, 'error');
+    btn.disabled   = false;
+    btn.innerHTML  = '&#10003; Complete Receive';
+  }
+}
+
+// Close modal on backdrop click
+document.getElementById('serial-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSerialModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSerialModal(); });
+</script>
+<script>
+/* ------------------------------------------
+   RECEIVED TAB � edit serial numbers
+------------------------------------------ */
+function renderReceived(data) {
+  const container = document.getElementById('panel-received');
+  if (!data.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">&#10003;</div>
+      <h3>No received orders yet</h3>
+      <p>Completed purchase orders will appear here.<br>You can edit serial numbers at any time.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = data.map(poRec => {
+    const items    = poRec.items || [];
+    const totalQty = items.reduce((s, i) => s + (parseInt(i.quantity) || 0), 0);
+    const recAt    = poRec.received_date
+      ? new Date(poRec.received_date).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+      : fmtDate(poRec.updated_at);
+    return `<div class="po-card" id="rpo-card-${poRec.id}">
+      <div class="po-card-header" onclick="toggleRPO(${poRec.id})">
+        <span class="po-num">${esc(poRec.po_number)}</span>
+        <div style="flex:1;min-width:0;">
+          <div class="po-supplier">${esc(poRec.supplier_name)}</div>
+          <div class="po-meta">Received ${recAt}${poRec.received_by ? ' by <strong>' + esc(poRec.received_by) + '</strong>' : ''} &middot; ${totalQty} unit${totalQty !== 1 ? 's' : ''}${poRec.location_name ? ' &middot; ' + String.fromCharCode(0x1F4CD) + ' ' + esc(poRec.location_name) : ''}</div>
+        </div>
+        <span class="po-progress received">&#10003; Received</span>
+        <div class="po-amount">${fmtMoney(poRec.total_amount)}</div>
+        <span class="po-chevron">&#8250;</span>
+      </div>
+      <div class="po-units" id="rpo-units-${poRec.id}">
+        <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">Loading assets&hellip;</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleRPO(poId) {
+  const card  = document.getElementById('rpo-card-' + poId);
+  const panel = document.getElementById('rpo-units-' + poId);
+  card.classList.toggle('expanded');
+  if (!card.classList.contains('expanded')) return;
+  if (panel.dataset.loaded) return;
+  panel.dataset.loaded = '1';
+
+  try {
+    const res        = await api.getProductsByPo(poId);
+    const assets     = res.data || [];
+    const poRecord   = receivedPOs.find(p => p.id === poId);
+    const poItems    = poRecord ? (poRecord.items || []) : [];
+
+    if (!assets.length) {
+      panel.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">No assets found for this PO.</div>`;
+      return;
+    }
+
+    const grouped = {};
+    assets.forEach(a => {
+      const key = a.po_item_id || 'other';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(a);
+    });
+
+    const itemGroups = Object.entries(grouped).map(([itemId, unitAssets]) => {
+      const poItem    = poItems.find(i => String(i.id) === String(itemId));
+      const groupName = poItem ? poItem.product_name : (unitAssets[0]?.name || 'Item');
+      const rows = unitAssets.map((asset, u) => `
+        <div class="serial-edit-row">
+          <div class="unit-index">#${u + 1}</div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);">${esc(asset.name)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${esc(asset.sku)}</div>
+          </div>
+          <input class="serial-edit-input${asset.serial_number ? ' saved' : ''}"
+            type="text"
+            value="${esc(asset.serial_number || '')}"
+            placeholder="No serial number&hellip;"
+            data-asset-id="${asset.id}"
+            data-original="${esc(asset.serial_number || '')}"
+            oninput="onSerialEditInput(this)"
+            autocomplete="off" />
+          <button class="btn-save-serial" id="save-ser-${asset.id}"
+            onclick="saveSerial(${asset.id}, this)" disabled>Save</button>
+        </div>`).join('');
+      return `<div class="item-group">
+        <div class="item-group-header">
+          <span class="item-group-name">${esc(groupName)}</span>
+          <span class="item-group-qty" style="margin-left:auto;">${unitAssets.length} unit${unitAssets.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="unit-rows" style="padding:0 24px 14px;">${rows}</div>
+      </div>`;
+    }).join('');
+
+    panel.innerHTML = itemGroups + `
+      <div class="po-received-footer">
+        <div style="font-size:13px;color:var(--muted2);">
+          &#10003; Received on ${poRecord ? fmtDate(poRecord.received_date || poRecord.updated_at) : ''}
+          ${poRecord?.received_by ? ' by <strong style="color:var(--green);">' + esc(poRecord.received_by) + '</strong>' : ''}
+        </div>
+        <a href="items.html" class="btn btn-sm" style="font-size:12px;">&#128065; View in Assets</a>
+      </div>`;
+  } catch (e) {
+    panel.innerHTML = `<div style="padding:24px;color:var(--red);font-size:13px;">${esc(e.message)}</div>`;
+  }
+}
+
+function onSerialEditInput(input) {
+  const changed = input.value.trim() !== input.dataset.original;
+  const btn     = document.getElementById('save-ser-' + input.dataset.assetId);
+  btn.disabled  = !changed;
+  input.classList.toggle('saved', !changed && input.value.trim().length > 0);
+}
+
+async function saveSerial(assetId, btn) {
+  const input  = document.querySelector(`.serial-edit-input[data-asset-id="${assetId}"]`);
+  const serial = input.value.trim();
+  btn.disabled    = true;
+  btn.textContent = 'Saving\u2026';
+  try {
+    await api.updateProduct(assetId, { serial_number: serial });
+    input.dataset.original = serial;
+    input.classList.add('saved');
+    showToast('Serial number updated', 'success');
+    btn.textContent      = 'Saved \u2713';
+    btn.style.background = 'var(--green-dim)';
+    btn.style.color      = 'var(--green)';
+    btn.style.borderColor = 'rgba(62,207,142,0.3)';
+    setTimeout(() => {
+      btn.textContent      = 'Save';
+      btn.style.background = '';
+      btn.style.color      = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  } catch (e) {
+    showToast(e.message, 'error');
+    btn.disabled    = false;
+    btn.textContent = 'Save';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employees &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0a0e1a; --bg2:#0f1729; --bg3:#162040;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0; --muted:#6b7080; --muted2:#9aa0b2;
+      --blue:#29b6e8; --blue-dim:rgba(41,182,232,0.12);
+      --green:#3ecf8e; --green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69; --red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623; --amber-dim:rgba(245,166,35,0.12);
+      --radius:14px; --radius-sm:8px; --sidebar-w:260px;
+    }
+    body { font-family:"DM Sans",sans-serif; background:var(--bg); color:var(--text); display:flex; min-height:100vh; font-size:16px; }
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:row; min-height:100vh; }
+
+    .assignee-panel { width:300px; flex-shrink:0; border-right:1px solid var(--border); display:flex; flex-direction:column; height:100vh; position:sticky; top:0; background:var(--bg2); }
+    .panel-header { padding:22px 18px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .panel-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .panel-header h2 { font-family:"Syne",sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted2); }
+    .panel-count { font-size:12px; color:var(--muted); margin-top:2px; }
+    .station-filter { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text); font-family:"DM Sans",sans-serif; font-size:13px; padding:8px 12px; outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
+    .station-filter:focus { border-color:var(--blue); }
+    .station-filter option { background:var(--bg3); }
+    .panel-search { position:relative; margin-top:8px; }
+    .panel-search input { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text); font-family:"DM Sans",sans-serif; font-size:13px; padding:8px 12px 8px 32px; outline:none; transition:border-color .15s; }
+    .panel-search input::placeholder { color:var(--muted); }
+    .panel-search input:focus { border-color:var(--blue); }
+    .panel-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:13px; pointer-events:none; }
+    .assignee-list { flex:1; overflow-y:auto; padding:8px 10px; }
+    .assignee-list::-webkit-scrollbar { width:4px; }
+    .assignee-list::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+    .assignee-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer; transition:background .15s; margin-bottom:2px; }
+    .assignee-item:hover { background:rgba(255,255,255,0.05); }
+    .assignee-item.active { background:rgba(41,182,232,0.12); }
+    .assignee-avatar { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .assignee-info { flex:1; min-width:0; }
+    .assignee-name { font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .assignee-sub { font-size:11px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .assignee-badge { background:var(--bg3); border:1px solid var(--border2); color:var(--muted2); font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; flex-shrink:0; }
+    .assignee-item.active .assignee-badge { background:rgba(41,182,232,0.15); border-color:rgba(41,182,232,0.3); color:var(--blue); }
+    .panel-footer { padding:12px 10px; border-top:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
+    .btn-add-assignee { background:rgba(41,182,232,0.1); color:var(--blue); border:1px solid rgba(41,182,232,0.2); width:100%; justify-content:center; border-radius:8px; padding:9px; font-size:13px; display:flex; align-items:center; gap:6px; cursor:pointer; transition:background .15s; }
+    .btn-add-assignee:hover { background:rgba(41,182,232,0.18); }
+    .panel-footer-row { display:flex; gap:8px; }
+    .btn-import { background:rgba(62,207,142,0.1); color:var(--green); border:1px solid rgba(62,207,142,0.2); flex:1; justify-content:center; border-radius:8px; padding:9px 6px; font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer; transition:background .15s; white-space:nowrap; }
+    .btn-import:hover { background:rgba(62,207,142,0.18); }
+    .btn-export-tpl { background:rgba(245,166,35,0.1); color:var(--amber); border:1px solid rgba(245,166,35,0.2); flex:1; justify-content:center; border-radius:8px; padding:9px 6px; font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer; transition:background .15s; white-space:nowrap; }
+    .btn-export-tpl:hover { background:rgba(245,166,35,0.18); }
+    .detail-panel { flex:1; overflow-y:auto; padding:32px 40px; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:var(--radius-sm); font-family:"DM Sans",sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; border:none; text-decoration:none; white-space:nowrap; }
+    .btn-primary { background:var(--blue); color:#fff; }
+    .btn-primary:hover { background:#6b9ef8; }
+    .btn-ghost { background:transparent; color:var(--muted2); border:1px solid var(--border2); }
+    .btn-ghost:hover { background:var(--bg3); color:var(--text); }
+    .btn-danger { background:var(--red-dim); color:var(--red); border:1px solid rgba(244,91,105,0.25); }
+    .btn-danger:hover { background:rgba(244,91,105,0.2); }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-warn { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
+    .btn-warn:hover { background:rgba(245,166,35,0.2); }
+    .btn-sm { padding:6px 12px; font-size:12px; }
+    .detail-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; }
+    .detail-header-left { display:flex; align-items:center; gap:18px; }
+    .detail-avatar-lg { width:60px; height:60px; border-radius:50%; display:grid; place-items:center; font-size:20px; font-weight:700; color:#fff; flex-shrink:0; }
+    .detail-name { font-family:"Syne",sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+    .detail-meta-row { display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap; }
+    .detail-chip { display:inline-flex; align-items:center; gap:5px; background:var(--bg3); border:1px solid var(--border2); border-radius:20px; padding:3px 10px; font-size:12px; color:var(--muted2); }
+    .detail-chip.blue { background:var(--blue-dim); border-color:rgba(41,182,232,0.25); color:var(--blue); }
+    .detail-actions { display:flex; gap:8px; }
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .section-title { font-family:"Syne",sans-serif; font-size:15px; font-weight:700; }
+    .asset-row { display:flex; align-items:center; gap:12px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:13px 16px; margin-bottom:8px; transition:border-color .15s; }
+    .asset-row:hover { border-color:var(--border2); }
+    .asset-icon { width:40px; height:40px; border-radius:9px; background:var(--bg3); border:1px solid var(--border); display:grid; place-items:center; color:var(--muted2); flex-shrink:0; }
+    .asset-info { flex:1; min-width:0; }
+    .asset-name { font-size:13px; font-weight:500; color:var(--text); }
+    .asset-sku { font-family:"DM Mono",monospace; font-size:11px; color:var(--muted2); margin-top:2px; }
+    .asset-category { font-size:11px; color:var(--muted); margin-top:2px; }
+    .asset-row-right { display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
+    .status-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap; }
+    .badge-working { background:var(--green-dim); color:var(--green); border:1px solid rgba(62,207,142,0.25); }
+    .badge-damaged { background:var(--red-dim); color:var(--red); border:1px solid rgba(244,91,105,0.25); }
+    .badge-repair  { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
+    .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty-state .empty-icon { margin-bottom:12px; opacity:.4; }
+    .empty-state h3 { font-family:"Syne",sans-serif; font-size:18px; font-weight:700; color:var(--muted2); margin-bottom:6px; }
+    .empty-state p { font-size:13px; line-height:1.6; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); z-index:200; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.6); animation:modalIn .2s ease; }
+    .modal-sm { max-width:420px; }
+    .del-body-wrap { padding:28px; text-align:center; }
+    .del-icon { width:52px; height:52px; background:var(--red-dim); border-radius:50%; display:grid; place-items:center; font-size:22px; margin:0 auto 14px; }
+    .del-title { font-family:"Syne",sans-serif; font-size:18px; font-weight:700; margin-bottom:8px; }
+    .del-msg { font-size:13px; color:var(--muted2); line-height:1.6; margin-bottom:22px; }
+    .del-actions { display:flex; gap:10px; justify-content:center; }
+
+    .modal::-webkit-scrollbar { width:4px; }
+    .modal::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); }
+    .modal-header h3 { font-family:"Syne",sans-serif; font-size:17px; font-weight:700; }
+    .modal-close { background:var(--bg3); border:1px solid var(--border2); color:var(--muted2); width:28px; height:28px; border-radius:6px; font-size:17px; cursor:pointer; display:grid; place-items:center; transition:all .15s; }
+    .modal-close:hover { color:var(--text); background:var(--border2); }
+    .modal-form-body { padding:22px 24px; display:flex; flex-direction:column; gap:14px; }
+    .modal-actions { display:flex; gap:10px; padding:16px 24px 22px; border-top:1px solid var(--border); }
+    .form-group { display:flex; flex-direction:column; gap:5px; }
+    .form-group label { font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--muted2); }
+    .form-group input, .form-group select, .form-group textarea { background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text); font-family:"DM Sans",sans-serif; font-size:14px; padding:10px 13px; outline:none; transition:border-color .15s; width:100%; }
+    .form-group input::placeholder, .form-group textarea::placeholder { color:var(--muted); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--blue); }
+    .form-group select { cursor:pointer; }
+    .form-group select option { background:var(--bg3); }
+    .form-group select:disabled { opacity:.45; cursor:not-allowed; }
+    .asset-results { margin-top:4px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); overflow:hidden; }
+    .asset-result-item { display:flex; flex-direction:column; padding:8px 12px; cursor:pointer; transition:background .12s; border-bottom:1px solid var(--border); }
+    .asset-result-item:last-child { border-bottom:none; }
+    .asset-result-item:hover { background:rgba(41,182,232,0.1); }
+    .asset-result-name { font-size:13px; font-weight:500; color:var(--text); }
+    .asset-result-sku { font-family:"DM Mono",monospace; font-size:11px; color:var(--blue); margin-top:2px; }
+    .asset-result-empty { padding:9px 12px; font-size:13px; color:var(--muted); font-style:italic; }
+    .asset-selected-pill { display:flex; align-items:center; justify-content:space-between; margin-top:6px; background:rgba(41,182,232,0.12); border:1px solid rgba(41,182,232,0.25); border-radius:6px; padding:7px 10px; font-size:13px; color:var(--blue); }
+    .asset-selected-pill button { background:none; border:none; color:var(--muted2); cursor:pointer; font-size:15px; line-height:1; padding:0 2px; }
+    .asset-selected-pill button:hover { color:var(--red); }
+    .import-note { font-size:12px; color:var(--muted); background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; line-height:1.7; }
+    .import-note code { font-family:"DM Mono",monospace; font-size:11px; color:var(--blue); }
+    .import-result { font-size:13px; color:var(--text); background:var(--green-dim); border:1px solid rgba(62,207,142,0.25); border-radius:var(--radius-sm); padding:10px 14px; display:none; }
+    .import-result.visible { display:block; }
+    #toast-container { position:fixed; bottom:24px; right:24px; display:flex; flex-direction:column; gap:10px; z-index:999; }
+    .toast { background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:12px 18px; font-size:13px; color:var(--text); animation:slideUp .25s ease; box-shadow:0 8px 32px rgba(0,0,0,.4); max-width:320px; }
+    .toast.error   { border-color:var(--red);   color:var(--red); }
+    .toast.success { border-color:var(--green);  color:var(--green); }
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+
+  <!-- LEFT panel -->
+  <div class="assignee-panel">
+    <div class="panel-header">
+      <div class="panel-header-top">
+        <div>
+          <h2>Employees</h2>
+          <div class="panel-count" id="panel-count">Loading&hellip;</div>
+        </div>
+</div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+  <select class="station-filter" id="location-filter" onchange="onLocationFilter()">
+    <option value="">All Locations</option>
+  </select>
+  <select class="station-filter" id="station-filter" onchange="onStationFilter()">
+    <option value="">All Stations</option>
+  </select>
+</div>
+      
+      <div class="panel-search">
+        <span class="panel-search-icon">&#128269;</span>
+        <input type="text" id="panel-search" placeholder="Search by name or seat&hellip;" oninput="renderAssigneeList()" />
+      </div>
+    </div>
+    <div class="assignee-list" id="assignee-list">
+      <div style="padding:20px 12px;color:var(--muted);font-size:13px;">Loading&hellip;</div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn-add-assignee" onclick="openAddModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add employee
+      </button>
+      <div class="panel-footer-row">
+        <button class="btn-import" onclick="openImportModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import CSV
+        </button>
+        <button class="btn-export-tpl" onclick="downloadTemplate()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Template
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT detail panel -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3>Select an employee</h3>
+      <p>Choose someone from the list on the left<br>to view their deployed assets.</p>
+    </div>
+    <div id="detail-content" style="display:none;"></div>
+  </div>
+
+</div>
+
+<!-- MODAL: Add Employee -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Employee</h3>
+      <button class="modal-close" onclick="closeModal('add-modal')">&times;</button>
+    </div>
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input id="add-name" type="text" placeholder="e.g. Juan Dela Cruz" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Station</label>
+        <input id="add-station" type="text" placeholder="e.g. Finance, IT, HR" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Seat Number</label>
+        <input id="add-seat" type="text" placeholder="e.g. A-01" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="add-location">
+          <option value="">&mdash; Select location &mdash;</option>
+        </select>
+      </div>
+      <div style="height:1px;background:var(--border);margin:2px 0;"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:-4px;">Deploy an asset (optional)</div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="add-category" onchange="onAddCategoryChange()">
+          <option value="">&mdash; Select category &mdash;</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Asset (Serial Number)</label>
+        <input id="add-asset-search" type="text" placeholder="Select a category first&hellip;" autocomplete="off" oninput="onAddAssetSearch()" disabled />
+        <div id="add-asset-results" style="display:none;"></div>
+        <input type="hidden" id="add-asset-id" />
+      </div>
+      <div class="form-group">
+        <label>Due Back (optional)</label>
+        <input id="add-due" type="date" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="submitAddEmployee()">Save Employee</button>
+      <button class="btn btn-ghost" onclick="closeModal('add-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Employee -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Employee</h3>
+      <button class="modal-close" onclick="closeModal('edit-modal')">&times;</button>
+    </div>
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input id="edit-name" type="text" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Station</label>
+        <input id="edit-station" type="text" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Seat Number</label>
+        <input id="edit-seat" type="text" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="edit-location">
+          <option value="">&mdash; Select location &mdash;</option>
+        </select>
+      </div>
+      <input type="hidden" id="edit-emp-id" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="submitEditEmployee()">Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeModal('edit-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Deploy Asset -->
+<div class="modal-overlay" id="assign-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="assign-modal-title">Deploy Asset</h3>
+      <button class="modal-close" onclick="closeModal('assign-modal')">&times;</button>
+    </div>
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="assign-category" onchange="onAssignCategoryChange()">
+          <option value="">&mdash; Select category &mdash;</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Asset (Serial Number)</label>
+        <input id="assign-asset-search" type="text" placeholder="Select a category first&hellip;" autocomplete="off" oninput="onAssignAssetSearch()" disabled />
+        <div id="assign-asset-results" style="display:none;"></div>
+        <input type="hidden" id="assign-asset-id" />
+      </div>
+      <div class="form-group">
+        <label>Due Back (optional)</label>
+        <input id="assign-due" type="date" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="submitAssignAsset()">Deploy Asset</button>
+      <button class="btn btn-ghost" onclick="closeModal('assign-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Report Status -->
+<div class="modal-overlay" id="report-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Report Asset Status</h3>
+      <button class="modal-close" onclick="closeModal('report-modal')">&times;</button>
+    </div>
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label>Asset</label>
+        <div id="report-asset-info" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;font-size:13px;color:var(--muted2);line-height:1.5;"></div>
+      </div>
+      <div class="form-group">
+        <label>Issue Description *</label>
+        <textarea id="report-issue" rows="3" placeholder="Describe the problem or damage&hellip;" style="resize:vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="report-severity">
+          <option value="damaged">Damaged</option>
+          <option value="disposed">Disposed</option>
+          <option value="donated">For Donation</option>
+        </select>
+      </div>
+      <input type="hidden" id="report-product-id" />
+      <input type="hidden" id="report-assignment-id" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-warn" onclick="submitReportStatus()">Submit Report</button>
+      <button class="btn btn-ghost" onclick="closeModal('report-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import CSV / XLSX / XLS -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3>Import Employees</h3>
+      <button class="modal-close" onclick="closeModal('import-modal')">&times;</button>
+    </div>
+    <div class="modal-form-body">
+      <div class="import-note">
+        Supported formats: <code>.csv</code>, <code>.xlsx</code>, <code>.xls</code><br>
+        Your file must have a <code>name</code> column.<br>
+        Optional columns: <code>station</code>, <code>seat_number</code>, <code>location_name</code><br>
+        Column names are case-insensitive. Example:<br><br>
+        <code>name,station,seat_number</code><br>
+        <code>Raven Ompar,AGERO,13</code><br>
+        <code>Zen Palay,JTV,5</code><br><br>
+        Existing employees matched by name will be <strong>updated</strong>. New names will be <strong>added</strong>.
+      </div>
+      <div class="form-group">
+        <label>File *</label>
+        <input id="import-file" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+      </div>
+      <div class="import-result" id="import-result"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="import-btn" onclick="submitImport()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
+      <button class="btn btn-ghost" onclick="closeModal('import-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete Employee -->
+<div class="modal-overlay" id="delete-emp-modal">
+  <div class="modal modal-sm">
+    <div class="del-body-wrap">
+      <div class="del-icon">&#128465;</div>
+      <div class="del-title">Delete Employee?</div>
+      <div class="del-msg" id="delete-emp-msg"></div>
+      <div class="del-actions">
+        <button class="btn btn-danger" id="delete-emp-confirm-btn">Yes, delete</button>
+        <button class="btn btn-ghost" id="delete-emp-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script src="js/approval_flow.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* -- State -- */
+let allEmployees  = [];
+let allAssignees  = [];
+let allProducts   = [];
+let allCategories = [];
+let allLocations  = [];
+let selectedEmpId = null;
+let currentUser   = null;
+let stationFilter  = '';
+let locationFilter = '';
+
+/* -- Bootstrap -- */
+auth.initPage({ onReady: () => loadPage() });
+
+/* -- Signal dashboard to refresh -- */
+function signalDashboard() {
+  try { localStorage.setItem('emp_dashboard_refresh', Date.now()); } catch(_) {}
+}
+
+/* -- Helpers -- */
+function avatarColor(name) {
+  const colors = ['#4f8ef7','#3ecf8e','#f5a623','#9b73f7','#f45b69','#06b6d4'];
+  let h = 0;
+  for (let i = 0; i < (name||'').length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+}
+function initials(name) {
+  return (name||'?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+}
+
+/* -- Load Page -- */
+async function loadPage() {
+  try {
+    const [empRes, assigneesData, prodRes, catRes, locRes] = await Promise.all([
+      api.getEmployees(),
+      api.getAssignees(),
+      api.getProducts(),
+      api.getCategories(),
+      api.getLocations(),
+    ]);
+    allEmployees  = empRes.data   || [];
+    allAssignees  = assigneesData || [];
+    allProducts   = prodRes.data  || [];
+    allCategories = catRes.data   || [];
+    allLocations  = locRes.data   || [];
+
+    const locId = localStorage.getItem('emp_location_id');
+    if (locId) allProducts = allProducts.filter(p => String(p.location_id) === locId);
+
+    populateStationFilter();
+    populateLocationFilter();
+    populateCategoryDropdowns();
+    renderAssigneeList();
+
+    if (selectedEmpId) {
+      const found = allEmployees.find(e => e.id === selectedEmpId);
+      if (found) renderDetail(found); else { selectedEmpId = null; showEmptyState(); }
+    }
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Station filter -- */
+function populateStationFilter() {
+  const stations = [...new Set(allEmployees.map(e => e.station).filter(Boolean))].sort();
+  const sel  = document.getElementById('station-filter');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">All Stations</option>'
+    + stations.map(s => `<option value="${esc(s)}"${s === prev ? ' selected' : ''}>${esc(s)}</option>`).join('');
+  stationFilter = sel.value;
+}
+function onStationFilter() {
+  stationFilter = document.getElementById('station-filter').value;
+  renderAssigneeList();
+}
+
+/* -- Location filter (panel) -- */
+function populateLocationFilter() {
+  const sel  = document.getElementById('location-filter');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">All Locations</option>'
+    + allLocations.map(l => `<option value="${l.id}"${String(l.id) === prev ? ' selected' : ''}>${esc(l.name)}</option>`).join('');
+  locationFilter = sel.value;
+}
+function onLocationFilter() {
+  locationFilter = document.getElementById('location-filter').value;
+  renderAssigneeList();
+}
+
+/* -- Location dropdowns (modals) -- */
+function populateLocationDropdowns() {
+  const opts = '<option value="">&mdash; Select location &mdash;</option>'
+    + allLocations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  document.getElementById('add-location').innerHTML  = opts;
+  document.getElementById('edit-location').innerHTML = opts;
+}
+
+/* -- Render employee list -- */
+function renderAssigneeList() {
+  const list = document.getElementById('assignee-list');
+  const q    = document.getElementById('panel-search').value.trim().toLowerCase();
+
+  const filtered = allEmployees.filter(e => {
+    if (stationFilter && e.station !== stationFilter) return false;
+    if (locationFilter && String(e.location_id) !== locationFilter) return false;
+    if (q && !e.name.toLowerCase().includes(q) && !(e.seat_number||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('panel-count').textContent =
+    filtered.length + ' employee' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;">No employees match your filter.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(emp => {
+    const color    = avatarColor(emp.name);
+    const ini      = initials(emp.name);
+    const active   = emp.id === selectedEmpId ? ' active' : '';
+    const assignee = allAssignees.find(a => a.name === emp.name);
+    const cnt      = assignee ? (assignee.assets || []).length : 0;
+    const parts    = [
+      emp.seat_number   ? '&#128187; ' + esc(emp.seat_number)   : '',
+      emp.station       ? '&#128205; ' + esc(emp.station)       : '',
+      emp.location_name ? '&#127968; ' + esc(emp.location_name) : '',
+    ].filter(Boolean);
+    const sub = parts.length ? parts.join('&nbsp;&nbsp;') : '<span style="color:var(--muted)">No details</span>';
+    return `<div class="assignee-item${active}" data-id="${emp.id}">
+      <div class="assignee-avatar" style="background:${color}">${esc(ini)}</div>
+      <div class="assignee-info">
+        <div class="assignee-name">${esc(emp.name)}</div>
+        <div class="assignee-sub">${sub}</div>
+      </div>
+      <span class="assignee-badge">${cnt}</span>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.assignee-item').forEach(el => {
+    el.addEventListener('click', () => selectEmployee(parseInt(el.dataset.id)));
+  });
+}
+
+function selectEmployee(id) {
+  selectedEmpId = id;
+  const emp = allEmployees.find(e => e.id === id);
+  renderAssigneeList();
+  if (emp) renderDetail(emp); else showEmptyState();
+}
+
+/* -- Detail panel -- */
+function showEmptyState() {
+  document.getElementById('empty-state').style.display = '';
+  document.getElementById('detail-content').style.display = 'none';
+}
+
+function renderDetail(emp) {
+  document.getElementById('empty-state').style.display = 'none';
+  const content  = document.getElementById('detail-content');
+  content.style.display = '';
+
+  const color    = avatarColor(emp.name);
+  const ini      = initials(emp.name);
+  const assignee = allAssignees.find(a => a.name === emp.name);
+  const assets   = assignee ? (assignee.assets || []) : [];
+
+  const assetRows = assets.length
+    ? assets.map(a => renderAssetRow(a)).join('')
+    : `<div class="empty-state" style="padding:36px 20px;">
+        <div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <h3>No assets deployed</h3>
+        <p>This employee has no active deployments.</p>
+      </div>`;
+
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <div class="detail-avatar-lg" style="background:${color}">${esc(ini)}</div>
+        <div>
+          <div class="detail-name">${esc(emp.name)}</div>
+          <div class="detail-meta-row">
+            ${emp.seat_number   ? `<span class="detail-chip blue">&#128187; Seat ${esc(emp.seat_number)}</span>` : ''}
+            ${emp.station       ? `<span class="detail-chip">&#128205; ${esc(emp.station)}</span>` : ''}
+            ${emp.location_name ? `<span class="detail-chip">&#127968; ${esc(emp.location_name)}</span>` : ''}
+            <span class="detail-chip">${assets.length} asset${assets.length !== 1 ? 's' : ''} deployed</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-edit-emp">&#9998; Edit</button>
+        <button class="btn btn-danger btn-sm" id="btn-delete-emp">&#128465; Delete</button>
+      </div>
+    </div>
+    <div class="section-header">
+      <div class="section-title">Assets deployed to ${esc(emp.name)}</div>
+      <button class="btn btn-primary btn-sm" id="btn-assign-asset">${ApprovalFlow.isStaff() ? '&#128640; Request Deployment' : '+ Deploy asset'}</button>
+    </div>
+    <div id="asset-list">${assetRows}</div>`;
+
+  document.getElementById('btn-edit-emp').addEventListener('click',    () => openEditModal(emp));
+  document.getElementById('btn-delete-emp').addEventListener('click',  () => openDeleteEmployeeModal(emp.id, emp.name));
+  document.getElementById('btn-assign-asset').addEventListener('click',() => openAssignModal(emp.name));
+}
+
+function renderAssetRow(a) {
+  const isDmg = a.asset_status === 'damaged' || a.asset_status === 'under_repair';
+  const badge = isDmg
+    ? `<span class="status-badge badge-${a.asset_status === 'under_repair' ? 'repair' : 'damaged'}">${a.asset_status === 'under_repair' ? '&#9888; Under Repair' : '&#9888; Damaged'}</span>`
+    : `<span class="status-badge badge-working">&#10003; Working</span>`;
+  const catL  = (a.category_name || '').toLowerCase();
+  const isComp = catL.includes('computer') || catL.includes('laptop') || catL.includes('monitor') || catL.includes('desktop');
+  const icon  = isComp
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`;
+  const reportBtn = isDmg
+    ? `<button class="btn btn-warn btn-sm" disabled style="opacity:.45;cursor:not-allowed;">Reported</button>`
+    : `<button class="btn btn-warn btn-sm" onclick="openReportModal(${a.id},${a.product_id},'${esc(a.product_name).replace(/'/g,"\\'")}','${esc(a.product_sku).replace(/'/g,"\\'")}')">&#9888; Report</button>`;
+  return `<div class="asset-row">
+    <div class="asset-icon">${icon}</div>
+    <div class="asset-info">
+      <div class="asset-name">${esc(a.product_name)}</div>
+      <div class="asset-sku">SN: ${esc(a.product_sku)}</div>
+      <div class="asset-category">${esc(a.category_name || 'Uncategorized')}</div>
+    </div>
+    <div class="asset-row-right">
+      ${badge}
+      ${reportBtn}
+      <button class="btn btn-danger btn-sm" onclick="unassignAsset(${a.id})">&#10005; Undeploy</button>
+    </div>
+  </div>`;
+}
+
+/* -- Add Employee -- */
+async function openAddModal() {
+  ['add-name','add-station','add-seat','add-due'].forEach(id => { document.getElementById(id).value = ''; });
+  resetAssetSearch('add');
+  populateLocationDropdowns();
+  document.getElementById('add-location').value = '';
+  try {
+    const res = await api.getProducts();
+    let fresh = res.data || [];
+    const locId = localStorage.getItem('emp_location_id');
+    if (locId) fresh = fresh.filter(p => String(p.location_id) === locId);
+    allProducts = fresh;
+  } catch(_) {}
+  populateCategoryDropdowns();
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('add-name').focus(), 100);
+}
+
+async function submitAddEmployee() {
+  const name       = document.getElementById('add-name').value.trim();
+  const station    = document.getElementById('add-station').value.trim();
+  const seat       = document.getElementById('add-seat').value.trim();
+  const locationId = document.getElementById('add-location').value;
+  const assetId    = document.getElementById('add-asset-id').value;
+  const due        = document.getElementById('add-due').value;
+  if (!name) { showToast('Name is required', 'error'); return; }
+  try {
+    const empRes = await api.createEmployee({ name, station, seat_number: seat, location_id: locationId || null });
+    if (assetId) {
+      const assignPayload = {
+        product_id:    assetId,
+        assignee_name: name,
+        assigned_by:   currentUser?.name || 'Admin',
+        due_back:      due || null,
+        location_id:   locationId || null,
+        notes:         station ? 'Station: ' + station : null,
+      };
+      // Staff: submit as approval request instead of deploying directly
+      if (ApprovalFlow.isStaff()) {
+        const asset = allProducts.find(p => String(p.id) === String(assetId));
+        const flow = await ApprovalFlow.submit({
+          action_type:   'create',
+          resource_type: 'Assignment',
+          resource_id:   null,
+          resource_name: (asset?.name || 'Asset') + ' ? ' + name,
+          payload:       assignPayload,
+          notes:         'Deploy asset to ' + name + (station ? ' (' + station + ')' : ''),
+        });
+        if (flow.queued) {
+          showToast(name + ' added. Deployment request submitted for admin approval.', 'success');
+          closeModal('add-modal');
+          selectedEmpId = empRes.data.id;
+          await loadPage();
+          return;
+        }
+      }
+      await api.createAssignment(assignPayload);
+      signalDashboard();
+    }
+    showToast(name + ' added' + (assetId ? ' and asset deployed' : ''), 'success');
+    closeModal('add-modal');
+    selectedEmpId = empRes.data.id;
+    await loadPage();
+  } catch (e) {
+    showToast(e.message.includes('cannot be checked out') ? 'That asset is already deployed.' : e.message, 'error');
+  }
+}
+
+/* -- Edit Employee -- */
+function openEditModal(emp) {
+  document.getElementById('edit-emp-id').value  = emp.id;
+  document.getElementById('edit-name').value    = emp.name;
+  document.getElementById('edit-station').value = emp.station || '';
+  document.getElementById('edit-seat').value    = emp.seat_number || '';
+  populateLocationDropdowns();
+  setTimeout(() => { document.getElementById('edit-location').value = emp.location_id || ''; }, 0);
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-name').focus(), 100);
+}
+
+async function submitEditEmployee() {
+  const id         = parseInt(document.getElementById('edit-emp-id').value);
+  const name       = document.getElementById('edit-name').value.trim();
+  const station    = document.getElementById('edit-station').value.trim();
+  const seat       = document.getElementById('edit-seat').value.trim();
+  const locationId = document.getElementById('edit-location').value;
+  if (!name) { showToast('Name is required', 'error'); return; }
+  try {
+    await api.updateEmployee(id, { name, station, seat_number: seat, location_id: locationId || null });
+    const oldEmp = allEmployees.find(e => e.id === id);
+    if (oldEmp && oldEmp.name !== name) {
+      const assignee = allAssignees.find(a => a.name === oldEmp.name);
+      if (assignee?.assets?.length) {
+        await Promise.all(assignee.assets.map(a =>
+          api.updateAssignment(a.id, { assignee_name: name, location_id: locationId || null })
+        ));
+      }
+    }
+    showToast('Employee updated', 'success');
+    closeModal('edit-modal');
+    await loadPage();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Delete Employee -- */
+let deleteEmpId = null;
+let deleteEmpName = '';
+
+function getEmployeeAssetCount(name) {
+  const assignee = allAssignees.find(a => a.name === name);
+  return assignee ? (assignee.assets || []).length : 0;
+}
+
+function openDeleteEmployeeModal(id, name) {
+  deleteEmpId = id;
+  deleteEmpName = name;
+  const assetCount = getEmployeeAssetCount(name);
+  const btn = document.getElementById('delete-emp-confirm-btn');
+  const msg = document.getElementById('delete-emp-msg');
+
+  if (assetCount > 0) {
+    msg.textContent =
+      `Cannot delete "${name}" — they still have ${assetCount} deployed asset${assetCount !== 1 ? 's' : ''}. Undeploy all assets first.`;
+    btn.disabled = true;
+  } else {
+    msg.textContent =
+      `Delete "${name}"? Their assignment records will remain but the employee profile will be removed.`;
+    btn.disabled = false;
+  }
+  document.getElementById('delete-emp-modal').classList.add('open');
+}
+
+function closeDeleteEmployeeModal() {
+  closeModal('delete-emp-modal');
+  deleteEmpId = null;
+  deleteEmpName = '';
+  document.getElementById('delete-emp-confirm-btn').disabled = false;
+}
+
+async function confirmDeleteEmployee() {
+  if (!deleteEmpId || getEmployeeAssetCount(deleteEmpName) > 0) return;
+  const id = deleteEmpId;
+  const name = deleteEmpName;
+  const btn = document.getElementById('delete-emp-confirm-btn');
+  btn.disabled = true;
+  try {
+    await api.deleteEmployee(id);
+    showToast(name + ' deleted', 'success');
+    closeDeleteEmployeeModal();
+    if (selectedEmpId === id) { selectedEmpId = null; showEmptyState(); }
+    await loadPage();
+  } catch (e) {
+    showToast(e.message, 'error');
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('delete-emp-confirm-btn').addEventListener('click', confirmDeleteEmployee);
+document.getElementById('delete-emp-cancel-btn').addEventListener('click', closeDeleteEmployeeModal);
+
+/* -- Deploy Asset -- */
+async function openAssignModal(empName) {
+  const isStaff = ApprovalFlow.isStaff();
+  const modalTitle = document.getElementById('assign-modal-title');
+  modalTitle.textContent = isStaff
+    ? 'Request Asset Deployment for ' + empName
+    : 'Deploy Asset to ' + empName;
+  // Update submit button label
+  const submitBtn = document.querySelector('#assign-modal .modal-actions .btn-primary');
+  if (submitBtn) submitBtn.textContent = isStaff ? '&#128640; Submit Request' : 'Deploy Asset';
+  document.getElementById('assign-due').value = '';
+  resetAssetSearch('assign');
+  try {
+    const res = await api.getProducts();
+    let fresh = res.data || [];
+    const locId = localStorage.getItem('emp_location_id');
+    if (locId) fresh = fresh.filter(p => String(p.location_id) === locId);
+    allProducts = fresh;
+  } catch(_) {}
+  populateCategoryDropdowns();
+  document.getElementById('assign-modal').classList.add('open');
+}
+
+async function submitAssignAsset() {
+  const assetId = document.getElementById('assign-asset-id').value;
+  const due     = document.getElementById('assign-due').value;
+  if (!assetId) { showToast('Please select an asset', 'error'); return; }
+  const emp = allEmployees.find(e => e.id === selectedEmpId);
+  if (!emp) return;
+  const assignPayload = {
+    product_id:    assetId,
+    assignee_name: emp.name,
+    assigned_by:   currentUser?.name || 'Admin',
+    due_back:      due || null,
+    location_id:   emp.location_id || null,
+    notes:         emp.station ? 'Station: ' + emp.station : null,
+  };
+  try {
+    // Staff: route through approval flow
+    if (ApprovalFlow.isStaff()) {
+      const asset = allProducts.find(p => String(p.id) === String(assetId));
+      const flow = await ApprovalFlow.submit({
+        action_type:   'create',
+        resource_type: 'Assignment',
+        resource_id:   null,
+        resource_name: (asset?.name || 'Asset') + ' ? ' + emp.name,
+        payload:       assignPayload,
+        notes:         'Deploy asset to ' + emp.name + (emp.station ? ' (' + emp.station + ')' : ''),
+      });
+      if (flow.queued) { closeModal('assign-modal'); return; }
+    }
+    await api.createAssignment(assignPayload);
+    signalDashboard();
+    showToast('Asset deployed', 'success');
+    closeModal('assign-modal');
+    await loadPage();
+  } catch (e) {
+    showToast(e.message.includes('cannot be checked out') ? 'That asset is already deployed.' : e.message, 'error');
+  }
+}
+
+/* -- Undeploy -- */
+async function unassignAsset(id) {
+  if (!confirm('Undeploy this asset?')) return;
+  try {
+    await api.returnAsset(id);
+    signalDashboard();
+    showToast('Asset undeployed', 'success');
+    await loadPage();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Report Status -- */
+function openReportModal(assignmentId, productId, productName, productSku) {
+  document.getElementById('report-product-id').value    = productId;
+  document.getElementById('report-assignment-id').value = assignmentId;
+  document.getElementById('report-issue').value         = '';
+  document.getElementById('report-severity').value      = 'damaged';
+  document.getElementById('report-asset-info').innerHTML =
+    `<strong>${esc(productName)}</strong><br>
+     <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">SN: ${esc(productSku)}</span>`;
+  document.getElementById('report-modal').classList.add('open');
+  setTimeout(() => document.getElementById('report-issue').focus(), 100);
+}
+
+async function submitReportStatus() {
+  const productId = document.getElementById('report-product-id').value;
+  const issue     = document.getElementById('report-issue').value.trim();
+  const status    = document.getElementById('report-severity').value;
+  if (!issue) { showToast('Please describe the issue', 'error'); return; }
+  const labels = { damaged:'Damaged', disposed:'Disposed', donated:'For Donation' };
+  try {
+    const res      = await api.createDamage({ product_id: productId, reported_by: currentUser?.name || 'Admin', issue: `[${labels[status]}] ${issue}` });
+    const damageId = res.data.id;
+    if (status === 'disposed')      await api.updateDamage(damageId, { status:'disposed', disposal_reason: issue });
+    else if (status === 'donated')  await api.updateDamage(damageId, { status:'donated', donated_to:'Reported via Employees' });
+    signalDashboard();
+    showToast(status === 'disposed' ? 'Asset disposed' : status === 'donated' ? 'Asset marked for donation' : 'Asset reported as damaged', 'success');
+    closeModal('report-modal');
+    await loadPage();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Export Template -- */
+function downloadTemplate() {
+  const headers = ['name', 'station', 'seat_number', 'location_name'];
+  const example = ['Juan dela Cruz', 'Engineering', 'A-01', 'Head Office'];
+  const rows = [headers.join(','), example.join(',')].join('\r\n');
+  const blob = new Blob([rows], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'employees_import_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* -- Import CSV -- */
+function openImportModal() {
+  document.getElementById('import-file').value = '';
+  const r = document.getElementById('import-result');
+  r.textContent = '';
+  r.classList.remove('visible');
+  document.getElementById('import-modal').classList.add('open');
+}
+
+async function submitImport() {
+  const fileInput = document.getElementById('import-file');
+  if (!fileInput.files.length) { showToast('Please choose a file', 'error'); return; }
+
+  const btn  = document.getElementById('import-btn');
+  btn.disabled = true;
+  btn.textContent = 'Importing\u2026';
+
+  const file = fileInput.files[0];
+  const ext  = file.name.split('.').pop().toLowerCase();
+
+  try {
+    let csvFile = file;
+
+    // Convert XLSX / XLS to CSV using SheetJS before sending
+    if (ext === 'xlsx' || ext === 'xls') {
+      const buffer = await file.arrayBuffer();
+      const wb     = XLSX.read(buffer, { type: 'array' });
+      const ws     = wb.Sheets[wb.SheetNames[0]];
+      const csv    = XLSX.utils.sheet_to_csv(ws);
+      csvFile      = new File([csv], file.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' });
+    }
+
+    const res = await api.importEmployees(csvFile);
+    const r   = document.getElementById('import-result');
+    r.textContent = res.message;
+    r.classList.add('visible');
+    showToast(res.message, 'success');
+    await loadPage();
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import`;
+  }
+}
+
+/* -- Category / Asset search -- */
+function populateCategoryDropdowns() {
+  const available = allProducts.filter(p => p.asset_status === 'available');
+  const catIds    = new Set(available.map(p => p.category_id).filter(Boolean));
+  const cats      = allCategories.filter(c => catIds.has(c.id));
+  const opts = '<option value="">&mdash; Select category &mdash;</option>'
+    + cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('add-category').innerHTML    = opts;
+  document.getElementById('assign-category').innerHTML = opts;
+}
+function onAddCategoryChange()    { const id = parseInt(document.getElementById('add-category').value)||null;    resetAssetSearch('add');    if (id) enableAssetSearch('add', id); }
+function onAddAssetSearch()       { const id = parseInt(document.getElementById('add-category').value)||null;    if (id) runAssetSearch('add', id); }
+function onAssignCategoryChange() { const id = parseInt(document.getElementById('assign-category').value)||null; resetAssetSearch('assign'); if (id) enableAssetSearch('assign', id); }
+function onAssignAssetSearch()    { const id = parseInt(document.getElementById('assign-category').value)||null; if (id) runAssetSearch('assign', id); }
+
+function resetAssetSearch(p) {
+  document.getElementById(p+'-asset-id').value = '';
+  document.getElementById(p+'-asset-search').value = '';
+  document.getElementById(p+'-asset-search').disabled = true;
+  document.getElementById(p+'-asset-search').placeholder = 'Select a category first\u2026';
+  const r = document.getElementById(p+'-asset-results');
+  r.style.display = 'none'; r.innerHTML = '';
+}
+function enableAssetSearch(p, catId) {
+  const avail = allProducts.filter(x => x.asset_status === 'available' && x.category_id === catId);
+  const inp   = document.getElementById(p+'-asset-search');
+  inp.disabled    = !avail.length;
+  inp.placeholder = avail.length ? `Search serial\u2026 (${avail.length} available)` : 'No available assets in this category';
+}
+function runAssetSearch(p, catId) {
+  const q   = document.getElementById(p+'-asset-search').value.trim().toLowerCase();
+  const res = document.getElementById(p+'-asset-results');
+  document.getElementById(p+'-asset-id').value = '';
+  const pool    = allProducts.filter(x => x.asset_status === 'available' && x.category_id === catId);
+  const matches = q ? pool.filter(x => x.sku.toLowerCase().includes(q) || x.name.toLowerCase().includes(q)) : pool;
+  res.style.display = 'block';
+  if (!matches.length) { res.innerHTML = `<div class="asset-results"><div class="asset-result-empty">No assets match</div></div>`; return; }
+  window['_am_'+p] = {};
+  matches.slice(0,8).forEach(x => { window['_am_'+p][x.id] = x; });
+  res.innerHTML = '<div class="asset-results">'
+    + matches.slice(0,8).map(x => `<div class="asset-result-item" onclick="selectAsset('${p}',${x.id})"><span class="asset-result-name">${esc(x.name)}</span><span class="asset-result-sku">${esc(x.sku)}</span></div>`).join('')
+    + '</div>';
+}
+function selectAsset(p, id) {
+  const x = (window['_am_'+p]||{})[id];
+  if (!x) return;
+  document.getElementById(p+'-asset-id').value     = id;
+  document.getElementById(p+'-asset-search').value = x.sku;
+  const res = document.getElementById(p+'-asset-results');
+  res.innerHTML = `<div class="asset-selected-pill"><span><strong>${esc(x.name)}</strong> &mdash; ${esc(x.sku)}</span><button onclick="resetAssetSearch('${p}')" title="Clear">&times;</button></div>`;
+  res.style.display = 'block';
+}
+
+/* -- Modal helpers -- */
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+</script>
+</body>
+</html>

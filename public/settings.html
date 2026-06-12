@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings &mdash; EmpireOne</title>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .content{padding:28px 48px 56px;display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
+    /* Nav */
+    .settings-nav{position:sticky;top:28px;display:flex;flex-direction:column;gap:2px}
+    .settings-nav a{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--muted2);text-decoration:none;transition:all .15s;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+    .settings-nav a:hover{background:var(--bg3);color:var(--text)}
+    .settings-nav a.active{background:var(--blue-dim);color:var(--blue)}
+    .settings-nav .nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+    .settings-nav-section{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:12px 12px 4px;margin-top:4px}
+    /* Cards */
+    .settings-panels{display:flex;flex-direction:column;gap:20px}
+    .settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .settings-card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .settings-card-header h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+    .settings-card-header p{font-size:12px;color:var(--muted);margin-top:2px}
+    .settings-card-icon{font-size:18px;flex-shrink:0}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);gap:16px}
+    .settings-row:last-child{border-bottom:none}
+    .settings-row-left{flex:1;min-width:0}
+    .settings-row-label{font-size:14px;font-weight:500;color:var(--text)}
+    .settings-row-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5}
+    /* Theme picker */
+    .theme-options{display:flex;gap:10px}
+    .theme-option{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 16px;border-radius:var(--radius-sm);border:2px solid var(--border2);cursor:pointer;transition:all .15s;background:var(--bg3);min-width:88px}
+    .theme-option:hover{border-color:var(--blue)}
+    .theme-option.selected{border-color:var(--blue);background:var(--blue-dim)}
+    .preview{width:52px;height:32px;border-radius:5px;border:1px solid var(--border2);overflow:hidden;display:flex;flex-direction:column}
+    .preview-bar{height:9px;flex-shrink:0}
+    .preview-body{flex:1;display:flex;gap:2px;padding:2px}
+    .preview-sidebar{width:11px;border-radius:2px}
+    .preview-content{flex:1;border-radius:2px}
+    .preview-dark .preview-bar{background:#1a1e28} .preview-dark .preview-sidebar{background:#13161e} .preview-dark .preview-body{background:#0d0f14} .preview-dark .preview-content{background:#13161e}
+    .preview-light .preview-bar{background:#e5e7eb} .preview-light .preview-sidebar{background:#fff} .preview-light .preview-body{background:#f0f2f7} .preview-light .preview-content{background:#fff}
+    .theme-name{font-size:12px;font-weight:600;color:var(--text)}
+    .theme-option.selected .theme-name{color:var(--blue)}
+    /* Toggle */
+    .toggle-wrap{display:flex;align-items:center;gap:8px}
+    .toggle{position:relative;width:42px;height:22px;cursor:pointer;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:11px;transition:all .2s}
+    .toggle input:checked + .toggle-track{background:var(--blue);border-color:var(--blue)}
+    .toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .toggle input:checked ~ .toggle-thumb{transform:translateX(20px)}
+    /* Inputs */
+    .s-input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;transition:border-color .15s;width:100%}
+    .s-input:focus{border-color:var(--blue)}
+    .s-input::placeholder{color:var(--muted)}
+    .s-input-sm{width:80px;text-align:center}
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);white-space:nowrap}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover{background:#6b9ef8}
+    .btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,.25)}
+    .btn-danger:hover{background:rgba(244,91,105,.2)}
+    .btn-sm{padding:7px 13px;font-size:12px}
+    /* Stats grid */
+    .stats-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 24px}
+    .stat-mini{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-align:center}
+    .stat-mini-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1}
+    .stat-mini-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+    /* Danger zone */
+    .danger-zone{border-color:rgba(244,91,105,.25) !important}
+    .danger-zone .settings-card-header{background:rgba(244,91,105,.05)}
+    /* Toast */
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)} .toast.success{border-color:var(--green);color:var(--green)}
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:460px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
+
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+    .modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+    .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center}
+    .modal-close:hover{color:var(--text)}
+    .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+    .modal-body .form-group{display:flex;flex-direction:column;gap:5px}
+    .modal-body label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}
+    .modal-actions{display:flex;gap:10px;padding:16px 24px 20px;border-top:1px solid var(--border)}
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Settings</h1>
+      <div class="topbar-sub" id="topbar-sub">Customize your experience</div>
+    </div>
+    <div class="topbar-actions">
+</div>
+  </div>
+  <div class="content">
+    <!-- Left nav -->
+    <nav class="settings-nav">
+      <div class="settings-nav-section">General</div>
+      <a onclick="navTo(this,'s-appearance')"><span class="nav-icon">&#127775;</span> Appearance</a>
+      <a onclick="navTo(this,'s-account')"><span class="nav-icon">&#128100;</span> Account</a>
+      <div class="settings-nav-section">System</div>
+      <a onclick="navTo(this,'s-inventory')"><span class="nav-icon">&#128230;</span> Inventory</a>
+      <a onclick="navTo(this,'s-locations')"><span class="nav-icon">&#128205;</span> Locations</a>
+      <a onclick="navTo(this,'s-data')"><span class="nav-icon">&#128202;</span> Data &amp; Export</a>
+      <div class="settings-nav-section" id="nav-admin-section" style="display:none;">Admin</div>
+      <a onclick="navTo(this,'s-users')" id="nav-users" style="display:none;"><span class="nav-icon">&#128101;</span> Users</a>
+      <a onclick="navTo(this,'s-danger')" id="nav-danger" style="display:none;"><span class="nav-icon">&#9888;</span> Danger Zone</a>
+    </nav>
+
+    <!-- Right panels -->
+    <div class="settings-panels">
+
+      <!-- Appearance -->
+      <div class="settings-card" id="s-appearance">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#127775;</span>
+          <div><h2>Appearance</h2><p>Choose how the interface looks</p></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Theme</div>
+            <div class="settings-row-desc">Applies instantly across all pages</div>
+          </div>
+          <div class="theme-options">
+            <div class="theme-option" id="opt-dark" onclick="setTheme('dark')">
+              <div class="preview preview-dark"><div class="preview-bar"></div><div class="preview-body"><div class="preview-sidebar"></div><div class="preview-content"></div></div></div>
+              <span class="theme-name">Dark</span>
+            </div>
+            <div class="theme-option" id="opt-light" onclick="setTheme('light')">
+              <div class="preview preview-light"><div class="preview-bar"></div><div class="preview-body"><div class="preview-sidebar"></div><div class="preview-content"></div></div></div>
+              <span class="theme-name">Light</span>
+            </div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Sidebar collapsed by default</div>
+            <div class="settings-row-desc">Start with the sidebar minimized on load</div>
+          </div>
+          <label class="toggle" for="pref-sidebar-collapsed"><input type="checkbox" id="pref-sidebar-collapsed" onchange="savePref('sidebarCollapsed',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div class="settings-card" id="s-account">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#128100;</span>
+          <div><h2>Account</h2><p>Your profile and security settings</p></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Full Name</div>
+            <div class="settings-row-desc" id="acc-name">&mdash;</div>
+          </div>
+          <button class="btn btn-sm" onclick="openEditProfile()">Edit</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Username</div>
+            <div class="settings-row-desc" id="acc-username" style="font-family:'DM Mono',monospace;">&mdash;</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Role</div>
+            <div class="settings-row-desc" id="acc-role">&mdash;</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Password</div>
+            <div class="settings-row-desc">Change your login password</div>
+          </div>
+          <button class="btn btn-sm" onclick="openChangePassword()">Change Password</button>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="settings-card" id="s-inventory">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#128230;</span>
+          <div><h2>Inventory</h2><p>Asset and stock preferences</p></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Low Stock Threshold</div>
+            <div class="settings-row-desc">Assets at or below this quantity are flagged as low stock</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" class="s-input s-input-sm" id="pref-low-stock" min="0" max="100" value="5" />
+            <button class="btn btn-primary btn-sm" onclick="saveLowStock()">Save</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Default Assets View</div>
+            <div class="settings-row-desc">How assets are displayed when you open the Assets page</div>
+          </div>
+          <select class="s-input" style="width:140px;" id="pref-assets-view" onchange="savePref('assetsView',this.value)">
+            <option value="grouped">Grouped by name</option>
+            <option value="list">Flat list</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Show Damage Badge on Sidebar</div>
+            <div class="settings-row-desc">Display open damage count on the sidebar nav item</div>
+          </div>
+          <label class="toggle" for="pref-damage-badge"><input type="checkbox" id="pref-damage-badge" checked onchange="savePref('damageBadge',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Show Pending PO Badge</div>
+            <div class="settings-row-desc">Display pending receive count on the Receive nav item</div>
+          </div>
+          <label class="toggle" for="pref-po-badge"><input type="checkbox" id="pref-po-badge" checked onchange="savePref('poBadge',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+
+      <!-- Locations -->
+      <div class="settings-card" id="s-locations">
+        <div class="settings-card-header" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="settings-card-icon">&#128205;</span>
+            <div><h2>Locations</h2><p>Manage site locations for asset tracking</p></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openLocationModal()">+ Add Location</button>
+        </div>
+        <div id="locations-list">
+          <div class="settings-row"><div class="settings-row-left"><div class="settings-row-desc">Loading&hellip;</div></div></div>
+        </div>
+      </div>
+
+      <!-- Data & Export -->
+      <div class="settings-card" id="s-data">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#128202;</span>
+          <div><h2>Data &amp; Export</h2><p>System statistics and data export</p></div>
+        </div>
+        <!-- Live stats -->
+        <div class="stats-mini" id="system-stats">
+          <div class="stat-mini"><div class="stat-mini-val" id="st-assets" style="color:var(--blue);">-</div><div class="stat-mini-lbl">Assets</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="st-categories" style="color:var(--green);">-</div><div class="stat-mini-lbl">Categories</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="st-suppliers" style="color:var(--amber);">-</div><div class="stat-mini-lbl">Suppliers</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="st-assignments" style="color:var(--purple);">-</div><div class="stat-mini-lbl">Assignments</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="st-damages" style="color:var(--red);">-</div><div class="stat-mini-lbl">Open Issues</div></div>
+          <div class="stat-mini"><div class="stat-mini-val" id="st-pos" style="color:var(--muted2);">-</div><div class="stat-mini-lbl">Purchase Orders</div></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Import via CSV / Excel</div>
+            <div class="settings-row-desc">Bulk upload assets or categories from a spreadsheet</div>
+          </div>
+          <a href="import.html" class="btn btn-primary btn-sm">&#8593; Import Data</a>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Export All Assets</div>
+            <div class="settings-row-desc">Download all assets as a CSV file</div>
+          </div>
+          <button class="btn btn-sm" onclick="exportData('assets')">&#8595; Export CSV</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Export Damage Reports</div>
+            <div class="settings-row-desc">Download all damage and disposal records</div>
+          </div>
+          <button class="btn btn-sm" onclick="exportData('damages')">&#8595; Export CSV</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Export Assignments</div>
+            <div class="settings-row-desc">Download all active and historical assignments</div>
+          </div>
+          <button class="btn btn-sm" onclick="exportData('assignments')">&#8595; Export CSV</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Export Purchase Orders</div>
+            <div class="settings-row-desc">Download all PO records</div>
+          </div>
+          <button class="btn btn-sm" onclick="exportData('purchase_orders')">&#8595; Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Users (admin only) -->
+      <div class="settings-card" id="s-users" style="display:none;">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#128101;</span>
+          <div><h2>Users</h2><p>Manage system accounts</p></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">User Accounts</div>
+            <div class="settings-row-desc" id="user-count-desc">Loading&hellip;</div>
+          </div>
+          <a href="users.html" class="btn btn-primary btn-sm">Manage Users</a>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Allow Self-Registration</div>
+            <div class="settings-row-desc">Let new users create accounts from the login page</div>
+          </div>
+          <label class="toggle" for="pref-self-register"><input type="checkbox" id="pref-self-register" checked onchange="savePref('selfRegister',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+
+      <!-- Danger Zone (admin only) -->
+      <div class="settings-card danger-zone" id="s-danger" style="display:none;">
+        <div class="settings-card-header">
+          <span class="settings-card-icon">&#9888;</span>
+          <div><h2>Danger Zone</h2><p>Irreversible actions &mdash; proceed with caution</p></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Clear Resolved Damage Reports</div>
+            <div class="settings-row-desc">Permanently delete all reports with status &ldquo;Resolved&rdquo;</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="clearResolved()">Clear Resolved</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-label">Clear Disposed Assets Log</div>
+            <div class="settings-row-desc">Permanently delete all disposed asset records</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="clearDisposed()">Clear Disposed</button>
+        </div>
+      </div>
+
+    </div><!-- /settings-panels -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Profile</h3>
+      <button class="modal-close" onclick="closeModal('modal-profile')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Full Name *</label><input class="s-input" type="text" id="ep-name" placeholder="Your full name" /></div>
+      <div class="form-group"><label>Username *</label><input class="s-input" type="text" id="ep-username" placeholder="Username" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+      <button class="btn" onclick="closeModal('modal-profile')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-overlay" id="modal-password">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Change Password</h3>
+      <button class="modal-close" onclick="closeModal('modal-password')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>New Password *</label><input class="s-input" type="password" id="pw-new" placeholder="Min. 6 characters" /></div>
+      <div class="form-group"><label>Confirm Password *</label><input class="s-input" type="password" id="pw-confirm" placeholder="Repeat new password" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="savePassword()">Update Password</button>
+      <button class="btn" onclick="closeModal('modal-password')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Location Modal -->
+<div class="modal-overlay" id="modal-location">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="loc-modal-title">Add Location</h3>
+      <button class="modal-close" onclick="closeModal('modal-location')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Location Name *</label>
+        <input class="s-input" type="text" id="loc-name" placeholder="e.g. Dungganon" />
+      </div>
+      <div class="form-group">
+        <label>Building</label>
+        <input class="s-input" type="text" id="loc-building" placeholder="e.g. Main Building" />
+      </div>
+      <div class="form-group">
+        <label>Floor</label>
+        <input class="s-input" type="text" id="loc-floor" placeholder="e.g. 2nd Floor" />
+      </div>
+      <div class="form-group">
+        <label>Room</label>
+        <input class="s-input" type="text" id="loc-room" placeholder="e.g. Server Room" />
+      </div>
+      <input type="hidden" id="loc-editing-id" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveLocation()">Save Location</button>
+      <button class="btn" onclick="closeModal('modal-location')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+let currentUser = null;
+
+(async () => {
+  const user = await auth.requireAuth();
+  if (!user) return;
+  auth.renderUserInfo();
+  currentUser = user;
+
+  // Populate account section
+  document.getElementById('acc-name').textContent     = user.name;
+  document.getElementById('acc-username').textContent = user.username;
+  const roleLabels = { admin:'Administrator', staff:'HR · Staff', viewer:'TL · Staff' };
+  document.getElementById('acc-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('topbar-sub').textContent =
+    'Logged in as ' + user.name + ' \u00b7 ' + (roleLabels[user.role] || user.role);
+
+  // Show admin-only sections
+  if (user.role === 'admin') {
+    ['s-users','s-danger','nav-users','nav-danger','nav-admin-section'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    loadUserCount();
+  }
+
+  loadPrefs();
+  loadStats();
+  loadLocations();
+  syncThemeUI();
+  setTimeout(initScrollSpy, 150);
+})();
+
+/* -- Theme -- */
+function setTheme(t) {
+  theme.set(t);
+  syncThemeUI();
+  showToast('Theme set to ' + (t === 'dark' ? 'Dark' : 'Light') + ' mode', 'success');
+}
+function syncThemeUI() {
+  const t = theme.current();
+  document.getElementById('opt-dark').classList.toggle('selected',  t === 'dark');
+  document.getElementById('opt-light').classList.toggle('selected', t === 'light');
+}
+document.addEventListener('themechange', syncThemeUI);
+
+/* -- Preferences (localStorage) -- */
+const PREFS_KEY = 'inv_prefs';
+function getPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}'); } catch { return {}; }
+}
+function savePref(key, value) {
+  const p = getPrefs();
+  p[key] = value;
+  localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+  showToast('Preference saved', 'success');
+}
+function loadPrefs() {
+  const p = getPrefs();
+  const set = (id, val, def) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = val !== undefined ? val : def;
+    else el.value = val !== undefined ? val : def;
+  };
+  set('pref-sidebar-collapsed', p.sidebarCollapsed, false);
+  set('pref-low-stock',         p.lowStock,         5);
+  set('pref-assets-view',       p.assetsView,       'grouped');
+  set('pref-damage-badge',      p.damageBadge,      true);
+  set('pref-po-badge',          p.poBadge,          true);
+  set('pref-self-register',     p.selfRegister,     true);
+}
+function saveLowStock() {
+  const val = parseInt(document.getElementById('pref-low-stock').value);
+  if (isNaN(val) || val < 0) { showToast('Enter a valid number', 'error'); return; }
+  savePref('lowStock', val);
+}
+
+/* -- Stats -- */
+async function loadStats() {
+  try {
+    const [assets, cats, suppliers, assignments, damages, pos] = await Promise.all([
+      api.getProducts(), api.getCategories(), api.getSuppliers(),
+      api.getAssignments(), api.getDamages(), api.getPurchaseOrders(),
+    ]);
+    document.getElementById('st-assets').textContent      = (assets.data||[]).length;
+    document.getElementById('st-categories').textContent  = (cats.data||[]).length;
+    document.getElementById('st-suppliers').textContent   = (suppliers.data||[]).length;
+    document.getElementById('st-assignments').textContent = (assignments.data||[]).filter(a=>a.status==='active').length;
+    document.getElementById('st-damages').textContent     = (damages.data||[]).filter(d=>d.status==='damaged').length;
+    document.getElementById('st-pos').textContent         = (pos.data||[]).length;
+  } catch(e) { /* stats are non-critical */ }
+}
+
+/* -- User count (admin) -- */
+async function loadUserCount() {
+  try {
+    const users = await auth.getUsers();
+    document.getElementById('user-count-desc').textContent =
+      users.length + ' account' + (users.length !== 1 ? 's' : '') + ' registered';
+  } catch(e) {}
+}
+
+/* -- Export -- */
+async function exportData(type) {
+  try {
+    let rows = [], filename = type + '.csv';
+    if (type === 'assets') {
+      const res = await api.getProducts();
+      rows = [['ID','Name','SKU','Serial','Brand/Model','Category','Supplier','Quantity','Status','Created']];
+      (res.data||[]).forEach(p => rows.push([p.id,p.name,p.sku,p.serial_number||'',p.brand_model||'',p.category_name||'',p.supplier_name||'',p.quantity,p.asset_status,p.created_at]));
+    } else if (type === 'damages') {
+      const res = await api.getDamages();
+      rows = [['ID','Asset','SKU','Category','Issue','Reported By','Status','Disposal Reason','Date']];
+      (res.data||[]).forEach(d => rows.push([d.id,d.product_name,d.product_sku,d.category_name||'',d.issue,d.reported_by,d.status,d.disposal_reason||'',d.created_at]));
+    } else if (type === 'assignments') {
+      const res = await api.getAssignments();
+      rows = [['ID','Asset','Assignee','Assigned By','Deployed At','Due Back','Returned At','Status']];
+      (res.data||[]).forEach(a => rows.push([a.id,a.product_name||'',a.assignee_name,a.assigned_by,a.assigned_at,a.due_back||'',a.returned_at||'',a.status]));
+    } else if (type === 'purchase_orders') {
+      const res = await api.getPurchaseOrders();
+      rows = [['ID','PO Number','Supplier','Order Date','Expected','Total','Status','Created By']];
+      (res.data||[]).forEach(p => rows.push([p.id,p.po_number,p.supplier_name,p.order_date,p.expected_date||'',p.total_amount,p.status,p.created_by||'']));
+    }
+    if (rows.length <= 1) { showToast('No data to export', 'error'); return; }
+    const csv  = rows.map(r => r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type:'text/csv' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    showToast('Exported ' + (rows.length - 1) + ' records', 'success');
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+/* -- Edit Profile -- */
+function openEditProfile() {
+  document.getElementById('ep-name').value     = currentUser?.name || '';
+  document.getElementById('ep-username').value = currentUser?.username || '';
+  document.getElementById('modal-profile').classList.add('open');
+}
+async function saveProfile() {
+  const name     = document.getElementById('ep-name').value.trim();
+  const username = document.getElementById('ep-username').value.trim();
+  if (!name || !username) { showToast('Name and username are required', 'error'); return; }
+  try {
+    await auth.updateUser(currentUser.id, { name, username });
+    currentUser.name     = name;
+    currentUser.username = username;
+    document.getElementById('acc-name').textContent     = name;
+    document.getElementById('acc-username').textContent = username;
+    auth.currentUser = currentUser;
+    closeModal('modal-profile');
+    showToast('Profile updated', 'success');
+    if (window.refreshSidebar) refreshSidebar();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+/* -- Change Password -- */
+function openChangePassword() {
+  document.getElementById('pw-new').value     = '';
+  document.getElementById('pw-confirm').value = '';
+  document.getElementById('modal-password').classList.add('open');
+}
+async function savePassword() {
+  const pw1 = document.getElementById('pw-new').value;
+  const pw2 = document.getElementById('pw-confirm').value;
+  if (!pw1 || pw1.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+  if (pw1 !== pw2)             { showToast('Passwords do not match', 'error'); return; }
+  try {
+    await auth.updateUser(currentUser.id, { password: pw1 });
+    closeModal('modal-password');
+    showToast('Password updated', 'success');
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+/* -- Danger Zone -- */
+async function clearResolved() {
+  if (!confirm('Permanently delete ALL resolved damage reports? This cannot be undone.')) return;
+  try {
+    const res = await api.getDamages();
+    const resolved = (res.data||[]).filter(d => d.status === 'resolved');
+    if (!resolved.length) { showToast('No resolved reports to clear', 'error'); return; }
+    await Promise.all(resolved.map(d => api.deleteDamage(d.id)));
+    showToast(resolved.length + ' resolved report' + (resolved.length!==1?'s':'') + ' deleted', 'success');
+    loadStats();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+async function clearDisposed() {
+  if (!confirm('Permanently delete ALL disposed asset records? This cannot be undone.')) return;
+  try {
+    const res = await api.getDamages();
+    const disposed = (res.data||[]).filter(d => d.status === 'disposed');
+    if (!disposed.length) { showToast('No disposed records to clear', 'error'); return; }
+    await Promise.all(disposed.map(d => api.deleteDamage(d.id)));
+    showToast(disposed.length + ' disposed record' + (disposed.length!==1?'s':'') + ' deleted', 'success');
+    loadStats();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+/* -- Scroll nav -- */
+function navTo(link, id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.querySelectorAll('.settings-nav a').forEach(a => a.classList.remove('active'));
+  link.classList.add('active');
+}
+
+/* -- Scroll spy -- */
+function initScrollSpy() {
+  const sections = ['s-appearance','s-account','s-inventory','s-locations','s-data','s-users','s-danger']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  const navLinks = document.querySelectorAll('.settings-nav a[onclick]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(a => {
+          const isMatch = a.getAttribute('onclick')?.includes(id);
+          a.classList.toggle('active', isMatch);
+        });
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '-20% 0px -70% 0px',  // trigger when section is in upper 30% of viewport
+    threshold: 0,
+  });
+
+  sections.forEach(s => observer.observe(s));
+}
+
+// Run after DOM is ready
+document.addEventListener('DOMContentLoaded', initScrollSpy);
+// Also run immediately in case DOM is already ready
+if (document.readyState !== 'loading') initScrollSpy();
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+/* -- Locations -- */
+let allLocations = [];
+
+async function loadLocations() {
+  try {
+    const res = await api.getLocations();
+    allLocations = res.data || [];
+    renderLocations();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+function renderLocations() {
+  const container = document.getElementById('locations-list');
+  if (!allLocations.length) {
+    container.innerHTML = '<div class="settings-row"><div class="settings-row-left"><div class="settings-row-desc" style="color:var(--muted);">No locations yet. Click &ldquo;+ Add Location&rdquo; to create one.</div></div></div>';
+    return;
+  }
+  container.innerHTML = allLocations.map(l => `
+    <div class="settings-row">
+      <div class="settings-row-left">
+        <div class="settings-row-label">&#128205; ${esc(l.name)}</div>
+        <div class="settings-row-desc">
+          ${[l.building, l.floor, l.room].filter(Boolean).join(' � ') || '<span style="color:var(--muted)">No details</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="openLocationModal(${l.id})">&#9998; Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteLocation(${l.id}, '${esc(l.name).replace(/'/g,"\\'")}')">&#128465;</button>
+      </div>
+    </div>`).join('');
+}
+
+function openLocationModal(id) {
+  document.getElementById('loc-editing-id').value = id || '';
+  document.getElementById('loc-modal-title').textContent = id ? 'Edit Location' : 'Add Location';
+  if (id) {
+    const loc = allLocations.find(l => l.id === id);
+    if (loc) {
+      document.getElementById('loc-name').value     = loc.name     || '';
+      document.getElementById('loc-building').value = loc.building || '';
+      document.getElementById('loc-floor').value    = loc.floor    || '';
+      document.getElementById('loc-room').value     = loc.room     || '';
+    }
+  } else {
+    document.getElementById('loc-name').value     = '';
+    document.getElementById('loc-building').value = '';
+    document.getElementById('loc-floor').value    = '';
+    document.getElementById('loc-room').value     = '';
+  }
+  document.getElementById('modal-location').classList.add('open');
+  setTimeout(() => document.getElementById('loc-name').focus(), 100);
+}
+
+async function saveLocation() {
+  const id       = document.getElementById('loc-editing-id').value;
+  const name     = document.getElementById('loc-name').value.trim();
+  const building = document.getElementById('loc-building').value.trim();
+  const floor    = document.getElementById('loc-floor').value.trim();
+  const room     = document.getElementById('loc-room').value.trim();
+
+  if (!name) { showToast('Location name is required', 'error'); return; }
+
+  const data = { name, building: building || null, floor: floor || null, room: room || null };
+
+  try {
+    if (id) {
+      await api.updateLocation(parseInt(id), data);
+      showToast('Location updated', 'success');
+    } else {
+      await api.createLocation(data);
+      showToast('Location added', 'success');
+    }
+    closeModal('modal-location');
+    loadLocations();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function deleteLocation(id, name) {
+  if (!confirm(`Delete location "${name}"? Assets deployed to this location will lose their location.`)) return;
+  try {
+    await api.deleteLocation(id);
+    showToast('Location deleted', 'success');
+    loadLocations();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+</script>
+</body>
+</html>

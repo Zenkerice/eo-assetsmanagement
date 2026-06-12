@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approvals - EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0e1a;--bg2:#0f1729;--bg3:#162040;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:#29b6e8;--blue-dim:rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .content{padding:28px 48px 56px;display:flex;flex-direction:column;gap:20px}
+
+    /* stat cards */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px 16px;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+    .stat-card.amber::before{background:var(--amber)}
+    .stat-card.green::before{background:var(--green)}
+    .stat-card.red::before{background:var(--red)}
+    .stat-card.blue::before{background:var(--blue)}
+    .stat-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .stat-value{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1}
+    .stat-card.amber .stat-value{color:var(--amber)}
+    .stat-card.green .stat-value{color:var(--green)}
+    .stat-card.red   .stat-value{color:var(--red)}
+    .stat-card.blue  .stat-value{color:var(--blue)}
+    .stat-sub{font-size:12px;color:var(--muted);margin-top:5px}
+
+    /* tabs */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+    .tab-btn{padding:11px 22px;border:none;background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:8px}
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{color:var(--text);border-bottom-color:var(--blue)}
+    .tab-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+    .tab-badge.amber{background:var(--amber-dim);color:var(--amber)}
+    .tab-badge.green{background:var(--green-dim);color:var(--green)}
+    .tab-badge.red  {background:var(--red-dim);color:var(--red)}
+    .tab-badge.blue {background:var(--blue-dim);color:var(--blue)}
+
+    /* card + table */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .filter-bar{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+    .filter-bar input[type="text"]{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 13px;outline:none}
+    .filter-bar input:focus{border-color:var(--blue)}
+    .filter-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 13px;outline:none;cursor:pointer}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead th{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);white-space:nowrap}
+    tbody td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px;color:var(--text)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .empty-state{text-align:center;padding:52px 20px;color:var(--muted)}
+
+    /* status pills */
+    .pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+    .pill.pending  {background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
+    .pill.approved {background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+    .pill.rejected {background:var(--red-dim);  color:var(--red);  border:1px solid rgba(244,91,105,.25)}
+    .pill-action{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.2)}
+    .pill-resource{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
+
+    /* buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);text-decoration:none;white-space:nowrap}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover{background:#6b9ef8;border-color:#6b9ef8}
+    .btn-success{background:var(--green-dim);color:var(--green);border-color:rgba(62,207,142,.3)}
+    .btn-success:hover{background:rgba(62,207,142,.22)}
+    .btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,.25)}
+    .btn-danger:hover{background:rgba(244,91,105,.22)}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+    .btn-sm{padding:5px 11px;font-size:12px}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
+
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+    .modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+    .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
+    .modal-close:hover{color:var(--text);background:var(--border2)}
+    .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+    .detail-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+    .detail-row:last-child{border-bottom:none}
+    .detail-key{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);min-width:120px;padding-top:1px}
+    .detail-val{font-size:13px;color:var(--text);flex:1;line-height:1.5;word-break:break-word}
+    .payload-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);white-space:pre-wrap;max-height:180px;overflow-y:auto}
+    /* Improved payload table */
+    .payload-table{width:100%;border-collapse:collapse;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+    .payload-table tr{border-bottom:1px solid var(--border)}
+    .payload-table tr:last-child{border-bottom:none}
+    .payload-table td{padding:8px 12px;font-size:12px;vertical-align:middle}
+    .payload-key{font-family:'DM Mono',monospace;color:var(--muted2);font-size:11px;white-space:nowrap;width:1%;padding-right:16px;background:rgba(255,255,255,0.02)}
+    .payload-val{color:var(--text)}
+    .pv-str{color:#3ecf8e}
+    .pv-num{color:#29b6e8;font-family:'DM Mono',monospace}
+    .pv-null{color:var(--muted);font-style:italic}
+    .pv-bool{color:#f5a623;font-family:'DM Mono',monospace}
+    .pv-label{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 7px;border-radius:20px;margin-right:6px}
+    .pv-label-str{background:rgba(62,207,142,.12);color:#3ecf8e;border:1px solid rgba(62,207,142,.2)}
+    .pv-label-num{background:rgba(41,182,232,.12);color:#29b6e8;border:1px solid rgba(41,182,232,.2)}
+    .pv-label-null{background:rgba(107,112,128,.12);color:var(--muted);border:1px solid rgba(107,112,128,.2)}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    .form-group label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}
+    .form-group textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;transition:border-color .15s}
+    .form-group textarea:focus{border-color:var(--blue)}
+    .modal-actions{display:flex;gap:10px;padding:16px 24px 20px;border-top:1px solid var(--border)}
+
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)}
+    .toast.success{border-color:var(--green);color:var(--green)}
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Approvals</h1>
+      <div class="topbar-sub">Review and act on staff-submitted requests</div>
+    </div>
+    <div class="topbar-actions">
+</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card amber">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="stat-pending">�</div>
+        <div class="stat-sub">awaiting review</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value" id="stat-approved">�</div>
+        <div class="stat-sub">actions applied</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-value" id="stat-rejected">�</div>
+        <div class="stat-sub">requests declined</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="stat-total">�</div>
+        <div class="stat-sub">all requests</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-pending-btn" onclick="switchTab('pending')">
+        ? Pending <span class="tab-badge amber" id="tab-pending-count">0</span>
+      </button>
+      <button class="tab-btn" id="tab-approved-btn" onclick="switchTab('approved')">
+        ? Approved <span class="tab-badge green" id="tab-approved-count">0</span>
+      </button>
+      <button class="tab-btn" id="tab-rejected-btn" onclick="switchTab('rejected')">
+        ? Rejected <span class="tab-badge red" id="tab-rejected-count">0</span>
+      </button>
+    </div>
+
+    <!-- Table card -->
+    <div class="card">
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="&#128269; Search by staff, resource or notes�" oninput="renderTable()" />
+        <select id="filter-resource" onchange="renderTable()">
+          <option value="">All Resources</option>
+          <option value="Asset">Assets</option>
+          <option value="Assignment">Assignments</option>
+          <option value="Damage">Damage Reports</option>
+          <option value="Supplier">Suppliers</option>
+          <option value="Category">Categories</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Requested By</th>
+              <th>Action</th>
+              <th>Resource</th>
+              <th>Notes</th>
+              <th>Submitted</th>
+              <th id="col-reviewed-head">Reviewed By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="approval-table">
+            <tr><td colspan="8"><div class="empty-state">Loading�</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="review-modal-title">Review Request</h3>
+      <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="review-detail-rows"></div>
+      <div class="form-group" id="review-notes-group">
+        <label for="review-notes">Notes / Reason (optional)</label>
+        <textarea id="review-notes" placeholder="Add a note for the staff member�"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions" id="review-modal-actions">
+      <button class="btn btn-success" id="btn-approve" onclick="submitReview('approved')">? Approve</button>
+      <button class="btn btn-danger"  id="btn-reject"  onclick="submitReview('rejected')">? Reject</button>
+      <button class="btn btn-ghost"   onclick="closeReviewModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+auth.initPage({ admin: true, onReady: () => loadApprovals() });
+
+let allRequests  = [];
+let currentTab   = 'pending';
+let reviewingId  = null;
+let _locationsCache   = {};   // id ? name
+let _categoriesCache  = {};
+let _suppliersCache   = {};
+let _productsCache    = {};   // id ? name
+
+function fmtDate(s) {
+  if (!s) return '�';
+  return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric',
+    hour:'numeric', minute:'2-digit' });
+}
+
+/* -- Human-readable field labels -- */
+const _fieldLabels = {
+  product_id:     'Asset',
+  assignee_name:  'Assignee',
+  assigned_by:    'Assigned By',
+  due_back:       'Due Back',
+  location_id:    'Location',
+  category_id:    'Category',
+  supplier_id:    'Supplier',
+  notes:          'Notes',
+  name:           'Name',
+  sku:            'Serial No.',
+  brand_model:    'Brand / Model',
+  quantity:       'Quantity',
+  description:    'Description',
+  reported_by:    'Reported By',
+  issue:          'Issue',
+  status:         'Status',
+  disposal_reason:'Disposal Reason',
+  donated_to:     'Donated To',
+  contact_name:   'Contact',
+  email:          'Email',
+  phone:          'Phone',
+  address:        'Address',
+};
+
+/* -- Render payload as a clean key-value table -- */
+
+// Fields to skip entirely � internal IDs or system fields not useful to humans
+const _skipFields = new Set(['_method', 'image', 'image_path', 'po_id', 'po_item_id', 'updated_at', 'created_at']);
+
+// Status value ? color
+const _statusColors = {
+  available:    { bg: 'rgba(62,207,142,.12)',  color: '#3ecf8e' },
+  assigned:     { bg: 'rgba(41,182,232,.12)',  color: '#29b6e8' },
+  damaged:      { bg: 'rgba(244,91,105,.12)',  color: '#f45b69' },
+  disposed:     { bg: 'rgba(244,91,105,.12)',  color: '#f45b69' },
+  donated:      { bg: 'rgba(155,115,247,.15)', color: '#9b73f7' },
+  resolved:     { bg: 'rgba(62,207,142,.12)',  color: '#3ecf8e' },
+  under_repair: { bg: 'rgba(245,166,35,.12)',  color: '#f5a623' },
+};
+
+function _renderPayload(payload) {
+  const entries = Object.entries(payload)
+    .filter(([k, v]) => !_skipFields.has(k) && v !== undefined && v !== null && v !== '');
+
+  if (!entries.length) return '<span style="color:var(--muted);font-size:12px;">No payload data.</span>';
+
+  const rows = entries.map(([k, v]) => {
+    const label = _fieldLabels[k] || k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    // Resolve ID fields to names
+    let resolved = v;
+    if (k === 'product_id'  && v) resolved = _productsCache[v]   || v;
+    if (k === 'location_id' && v) resolved = _locationsCache[v]  || v;
+    if (k === 'category_id' && v) resolved = _categoriesCache[v] || v;
+    if (k === 'supplier_id' && v) resolved = _suppliersCache[v]  || v;
+
+    let valHtml;
+    if (k === 'status' && _statusColors[String(v)]) {
+      const sc = _statusColors[String(v)];
+      valHtml = `<span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${sc.bg};color:${sc.color};">${esc(String(v))}</span>`;
+    } else if (typeof resolved === 'boolean') {
+      valHtml = `<span class="pv-bool">${resolved ? 'true' : 'false'}</span>`;
+    } else if (typeof resolved === 'object') {
+      valHtml = `<code style="font-size:10px;color:var(--muted2);">${esc(JSON.stringify(resolved))}</code>`;
+    } else if (typeof resolved === 'number') {
+      valHtml = `<span class="pv-num">${esc(String(resolved))}</span>`;
+    } else {
+      // Format YYYY-MM-DD dates
+      const dateMatch = String(resolved).match(/^(\d{4}-\d{2}-\d{2})$/);
+      if (dateMatch) {
+        const d   = new Date(resolved + 'T00:00:00');
+        const fmt = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        valHtml = `<span class="pv-str">${esc(fmt)}</span>`;
+      } else {
+        valHtml = `<span class="pv-str">${esc(String(resolved))}</span>`;
+      }
+    }
+    return `<tr>
+      <td class="payload-key">${esc(label)}</td>
+      <td class="payload-val">${valHtml}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table class="payload-table">${rows}</table>`;
+}
+
+/* -- Load -- */
+async function loadApprovals() {
+  try {
+    const [appRes, locRes, catRes, supRes, prodRes] = await Promise.all([
+      api.getApprovals(),
+      api.getLocations().catch(() => ({ data: [] })),
+      api.getCategories().catch(() => ({ data: [] })),
+      api.getSuppliers().catch(() => ({ data: [] })),
+      api.getProducts().catch(() => ({ data: [] })),
+    ]);
+    allRequests = appRes.data || [];
+
+    // Build lookup caches id ? name
+    (locRes.data  || []).forEach(l => { _locationsCache[l.id]  = l.name; });
+    (catRes.data  || []).forEach(c => { _categoriesCache[c.id] = c.name; });
+    (supRes.data  || []).forEach(s => { _suppliersCache[s.id]  = s.name; });
+    (prodRes.data || []).forEach(p => { _productsCache[p.id]   = p.name + (p.sku ? ' (' + p.sku + ')' : ''); });
+
+    updateCounts();
+    renderTable();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function updateCounts() {
+  const pending  = allRequests.filter(r => r.status === 'pending').length;
+  const approved = allRequests.filter(r => r.status === 'approved').length;
+  const rejected = allRequests.filter(r => r.status === 'rejected').length;
+
+  document.getElementById('stat-pending').textContent  = pending;
+  document.getElementById('stat-approved').textContent = approved;
+  document.getElementById('stat-rejected').textContent = rejected;
+  document.getElementById('stat-total').textContent    = allRequests.length;
+
+  document.getElementById('tab-pending-count').textContent  = pending;
+  document.getElementById('tab-approved-count').textContent = approved;
+  document.getElementById('tab-rejected-count').textContent = rejected;
+}
+
+/* -- Tabs -- */
+function switchTab(tab) {
+  currentTab = tab;
+  ['pending','approved','rejected'].forEach(t => {
+    document.getElementById(`tab-${t}-btn`).classList.toggle('active', t === tab);
+  });
+  // Show/hide reviewed-by column
+  document.getElementById('col-reviewed-head').style.display = tab === 'pending' ? 'none' : '';
+  renderTable();
+}
+
+/* -- Table -- */
+function renderTable() {
+  const q        = document.getElementById('search-input').value.toLowerCase();
+  const resource = document.getElementById('filter-resource').value;
+
+  const data = allRequests.filter(r => {
+    if (r.status !== currentTab) return false;
+    if (resource && r.resource_type !== resource) return false;
+    if (q) {
+      const hay = [r.requested_by, r.resource_type, r.resource_name, r.notes, r.action_type]
+        .join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('approval-table');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No ${currentTab} requests found.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(r => {
+    const actionStyle = {
+      create: 'background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)',
+      update: 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)',
+      delete: 'background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)',
+    }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)';
+
+    const reviewedCell = currentTab !== 'pending'
+      ? `<td style="font-size:12px;color:var(--muted2)">${esc(r.reviewed_by || '�')}</td>`
+      : `<td style="display:none;"></td>`;
+
+    const retryBtn = r.status === 'approved' && r.resource_type === 'Assignment' && r.action_type === 'create'
+      ? `<button class="btn btn-success btn-sm" onclick="retryDeployment(${r.id})">Complete Deployment</button>`
+      : '';
+    const actions = r.status === 'pending'
+      ? `<div class="actions">
+           <button class="btn btn-success btn-sm" onclick="openReviewModal(${r.id}, true)">? Approve</button>
+           <button class="btn btn-danger btn-sm"  onclick="openReviewModal(${r.id}, false)">? Reject</button>
+           <button class="btn btn-ghost btn-sm"   onclick="openDetailModal(${r.id})">View</button>
+         </div>`
+      : `<div class="actions">${retryBtn}<button class="btn btn-ghost btn-sm" onclick="openDetailModal(${r.id})">View</button></div>`;
+
+    // Resource name � split "Asset ? Employee" style for assignments
+    let resourceNameHtml = '';
+    if (r.resource_name) {
+      const arrow = r.resource_name.includes(' ? ');
+      if (arrow) {
+        const [left, right] = r.resource_name.split(' ? ');
+        resourceNameHtml = `<div style="display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:var(--text);font-weight:500;">${esc(left.trim())}</span>
+          <span style="font-size:10px;color:var(--muted);">?</span>
+          <span style="font-size:11px;color:var(--blue);font-weight:500;">${esc(right.trim())}</span>
+        </div>`;
+      } else {
+        resourceNameHtml = `<div style="font-size:11px;color:var(--muted2);margin-top:3px;">${esc(r.resource_name)}</div>`;
+      }
+    }
+
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">#${r.id}</td>
+      <td style="font-weight:500">${esc(r.requested_by)}</td>
+      <td><span class="pill" style="${actionStyle};text-transform:capitalize">${esc(r.action_type)}</span></td>
+      <td>
+        <span class="pill pill-resource">${esc(r.resource_type)}</span>
+        ${resourceNameHtml}
+      </td>
+      <td style="max-width:200px;font-size:12px;color:var(--muted2);">${esc(r.notes || '�')}</td>
+      <td style="font-size:12px;color:var(--muted2);white-space:nowrap">${fmtDate(r.created_at)}</td>
+      ${reviewedCell}
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* -- Review modal -- */
+function openReviewModal(id, approveMode) {
+  reviewingId = id;
+  const r = allRequests.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('review-modal-title').textContent =
+    approveMode ? '? Approve Request' : '? Reject Request';
+
+  // Highlight buttons
+  document.getElementById('btn-approve').style.display = approveMode ? '' : 'none';
+  document.getElementById('btn-reject').style.display  = approveMode ? 'none' : '';
+
+  const payload = (() => {
+    try { return JSON.parse(r.payload || '{}'); } catch { return {}; }
+  })();
+
+  document.getElementById('review-detail-rows').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px;">
+      <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
+      <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${{ create:'background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)', update:'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)', delete:'background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)' }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)'};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
+      <div class="detail-row"><div class="detail-key">Resource</div><div class="detail-val"><span class="pill pill-resource">${esc(r.resource_type)}</span>${r.resource_name ? ' <span style="font-size:13px;color:var(--muted2);">'+esc(r.resource_name)+'</span>' : ''}</div></div>
+      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '�')}</div></div>
+      <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val" style="color:var(--muted2);">${fmtDate(r.created_at)}</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Request Details</div>
+    ${_renderPayload(payload)}`;
+
+  document.getElementById('review-notes').value = '';
+  document.getElementById('review-modal').classList.add('open');
+}
+
+function openDetailModal(id) {
+  const r = allRequests.find(x => x.id === id);
+  if (!r) return;
+  reviewingId = id;
+
+  document.getElementById('review-modal-title').textContent = 'Request Details';
+  document.getElementById('btn-approve').style.display = 'none';
+  document.getElementById('btn-reject').style.display  = 'none';
+
+  const payload = (() => {
+    try { return JSON.parse(r.payload || '{}'); } catch { return {}; }
+  })();
+
+  const reviewInfo = r.reviewed_by
+    ? `<div class="detail-row"><div class="detail-key">Reviewed By</div><div class="detail-val">${esc(r.reviewed_by)}</div></div>
+       <div class="detail-row"><div class="detail-key">Reviewed At</div><div class="detail-val">${fmtDate(r.reviewed_at)}</div></div>
+       ${r.review_notes ? `<div class="detail-row"><div class="detail-key">Review Notes</div><div class="detail-val">${esc(r.review_notes)}</div></div>` : ''}`
+    : '';
+
+  document.getElementById('review-detail-rows').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px;">
+      <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val"><span class="pill ${r.status}">${r.status}</span></div></div>
+      <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
+      <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${{ create:'background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)', update:'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)', delete:'background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)' }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)'};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
+      <div class="detail-row"><div class="detail-key">Resource</div><div class="detail-val"><span class="pill pill-resource">${esc(r.resource_type)}</span>${r.resource_name ? ' <span style="font-size:13px;color:var(--muted2);">'+esc(r.resource_name)+'</span>' : ''}</div></div>
+      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '�')}</div></div>
+      <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val" style="color:var(--muted2);">${fmtDate(r.created_at)}</div></div>
+      ${reviewInfo}
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Request Details</div>
+    ${_renderPayload(payload)}`;
+
+  document.getElementById('review-notes').value = '';
+  document.getElementById('review-notes-group').style.display = 'none';
+  document.getElementById('review-modal').classList.add('open');
+}
+
+function closeReviewModal() {
+  document.getElementById('review-modal').classList.remove('open');
+  document.getElementById('review-notes-group').style.display = '';
+  reviewingId = null;
+}
+
+async function retryDeployment(id) {
+  try {
+    await api.reviewApproval(id, { decision: 'approved', review_notes: '' });
+    showToast('Deployment completed', 'success');
+    await loadApprovals();
+    if (window.refreshSidebar) refreshSidebar();
+  } catch (e) {
+    showToast(e.message, 'error');
+    await loadApprovals();
+  }
+}
+
+async function submitReview(decision) {
+  if (!reviewingId) return;
+  const notes = document.getElementById('review-notes').value.trim();
+  const approveBtn = document.getElementById('btn-approve');
+  const rejectBtn  = document.getElementById('btn-reject');
+  approveBtn.disabled = true;
+  rejectBtn.disabled  = true;
+  try {
+    await api.reviewApproval(reviewingId, { decision, review_notes: notes });
+    showToast(decision === 'approved' ? 'Request approved' : 'Request rejected',
+      decision === 'approved' ? 'success' : 'error');
+    closeReviewModal();
+    await loadApprovals();
+    if (window.refreshSidebar) refreshSidebar();
+  } catch (e) {
+    showToast(e.message, 'error');
+    await loadApprovals();
+  } finally {
+    approveBtn.disabled = false;
+    rejectBtn.disabled  = false;
+  }
+}
+
+// Close on overlay click / Escape
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeReviewModal(); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeReviewModal();
+});
+
+// Init tab header
+switchTab('pending');
+</script>
+</body>
+</html>

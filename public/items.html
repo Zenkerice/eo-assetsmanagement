@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assets - EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .content{padding:28px 48px 56px}
+    .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .search-wrap{flex:1;position:relative;min-width:200px;max-width:400px}
+    .search-wrap input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px 10px 38px;outline:none;transition:border-color .15s}
+    .search-wrap input::placeholder{color:var(--muted)}
+    .search-wrap input:focus{border-color:var(--blue)}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+    select.filter-select{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 14px;outline:none;cursor:pointer;display:none}
+    select.filter-select:focus{border-color:var(--blue)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);text-decoration:none;white-space:nowrap;background:transparent;color:var(--muted2)}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover{background:#6b9ef8;border-color:#6b9ef8}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+    .btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,0.25)}
+    .btn-danger:hover{background:rgba(244,91,105,0.22)}
+    .btn-amber{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,166,35,0.25)}
+    .btn-amber:hover{background:rgba(245,166,35,0.22)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead th{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:13px 16px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);white-space:nowrap}
+    tbody td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:14px;color:var(--text)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    tbody tr.row-damaged td{background:rgba(244,91,105,0.04)}
+    .cat-cell{display:flex;align-items:center;gap:10px}
+    .cat-icon-box{width:36px;height:36px;border-radius:8px;background:var(--blue-dim);border:1px solid rgba(79,142,247,0.2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+    .cat-icon-box.damaged{background:var(--red-dim);border-color:rgba(244,91,105,0.2)}
+    .cat-name-text{font-weight:500;font-size:14px}
+    .cat-name-text.damaged{color:var(--red)}
+    .item-name{font-weight:500;font-size:14px}
+    .damage-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--red);background:var(--red-dim);border:1px solid rgba(244,91,105,0.2);border-radius:20px;padding:2px 8px;margin-top:3px}
+    .sku-chip{font-family:'DM Mono',monospace;font-size:11px;background:var(--bg3);color:var(--muted2);padding:3px 8px;border-radius:6px;border:1px solid var(--border);white-space:nowrap}
+    .sku-chip.damaged{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,0.2)}
+    .supplier-cell{font-size:13px;color:var(--muted2);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .qty-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:700;color:var(--muted2);font-family:'DM Mono',monospace;padding:0 8px}
+    .assignee-cell{display:flex;align-items:center;gap:8px}
+    .assignee-avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+    .assignee-name{font-size:13px;font-weight:500;color:var(--text)}
+    .unassigned-pill{font-size:12px;color:var(--muted);font-style:italic}
+    /* Assignee chips in grouped table */
+    .assignee-chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+    .assignee-chip{display:inline-flex;align-items:center;gap:5px;background:var(--blue-dim);border:1px solid rgba(79,142,247,0.2);border-radius:20px;padding:3px 9px 3px 4px;font-size:12px;color:var(--blue);}
+    .assignee-chip .chip-av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+    .assignee-chip .chip-name{font-weight:500;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .more-chip{display:inline-flex;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:3px 9px;font-size:12px;color:var(--muted2);}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .empty-state{text-align:center;padding:52px 20px;color:var(--muted)}
+    .empty-icon{font-size:28px;margin-bottom:10px}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .2s ease}
+
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--border)}
+    .modal-header h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+    .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
+    .modal-close:hover{color:var(--text);background:var(--border2)}
+    .form-body{padding:24px 26px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    .form-group label{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2)}
+    .form-group input,.form-group select,.form-group textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;transition:border-color .15s;width:100%}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted)}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+    .form-group select{cursor:pointer}
+    .form-group select option{background:var(--bg3)}
+    .form-group textarea{min-height:80px;resize:vertical;line-height:1.5}
+    .form-group input[type=file]{padding:8px 13px;font-size:13px;color:var(--muted2)}
+    .form-actions{display:flex;gap:10px;padding:18px 26px 24px;border-top:1px solid var(--border);margin-top:4px}
+    .image-preview-wrap{margin-top:8px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border2)}
+    .image-preview-wrap img{width:100%;max-height:180px;object-fit:cover;display:block}
+    .image-preview-note{font-size:11px;color:var(--muted);padding:6px 10px;background:var(--bg3)}
+    .view-image-wrap{background:var(--bg3);border-bottom:1px solid var(--border);min-height:120px;display:grid;place-items:center}
+    .view-image-wrap img{width:100%;max-height:260px;object-fit:cover;display:block}
+    .view-image-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px}
+    .view-detail-table{display:flex;flex-direction:column;gap:0}
+    .view-detail-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+    .view-detail-row:last-child{border-bottom:none}
+    .view-detail-key{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;min-width:110px;padding-top:1px}
+    .view-detail-val{font-size:14px;color:var(--text);flex:1;line-height:1.5}
+    /* Serial numbers list inside brand view */
+    .serial-list{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+    .serial-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;transition:border-color .15s}
+    .serial-row:hover{border-color:var(--border2)}
+    .serial-row.damaged{border-color:rgba(244,91,105,0.3);background:rgba(244,91,105,0.04)}
+    .serial-code{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;white-space:nowrap}
+    .serial-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .serial-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .serial-assignee{font-size:12px;color:var(--muted2)}
+    .serial-status{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+    .serial-status.working{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.2)}
+    .serial-status.damaged{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.2)}
+    .serial-status.assigned{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.2)}
+    .serial-deploy-date{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap}
+    /* Receipt upload zone */
+    .receipt-zone{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--border2);border-radius:10px;padding:12px 16px;cursor:pointer;background:transparent;transition:border-color .15s,background .15s;width:100%}
+    .receipt-zone:hover{border-color:var(--blue);background:var(--blue-dim)}
+    .receipt-zone-icon{width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);display:grid;place-items:center;flex-shrink:0;color:var(--muted2)}
+    .receipt-zone:hover .receipt-zone-icon{border-color:rgba(41,182,232,.3);color:var(--blue)}
+    .receipt-zone-text{display:flex;flex-direction:column;gap:2px}
+    .receipt-zone-primary{font-size:13px;font-weight:500;color:var(--text)}
+    .receipt-zone-secondary{font-size:11px;color:var(--muted)}
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)}
+    .toast.success{border-color:var(--green);color:var(--green)}
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1 id="page-title">Assets</h1>
+      <div class="topbar-sub" id="page-sub">All inventory assets</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="openModal()">+ Add asset</button>
+</div>
+  </div>
+  <div class="content">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" id="search" placeholder="Search name or serial number..." oninput="filterTable()" />
+      </div>
+      <select id="filter-category" class="filter-select" onchange="onCategoryFilterChange()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="filter-subcat" class="filter-select" onchange="applyFilters()">
+        <option value="">All Types</option>
+      </select>
+      <select id="filter-assign" onchange="applyFilters()" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 14px;outline:none;cursor:pointer;">
+        <option value="">All Assets</option>
+        <option value="assigned">Deployed</option>
+        <option value="unassigned">Not Deployed</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th id="col-type-header">Category</th>
+              <th id="col-name-header">Name</th>
+              <th>Brand / Model</th>
+              <th id="col-serial-header">Serial No.</th>
+              <th>Supplier</th>
+              <th style="text-align:center;">Qty</th>
+              <th>Assignees</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-table">
+            <tr><td colspan="8"><div class="empty-state"><p>Loading...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add Asset</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <form id="product-form" onsubmit="submitForm(event)" autocomplete="off">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="item-name">Description *</label>
+            <input id="item-name" type="text" name="name" placeholder="e.g. Dell Laptop" autocomplete="off" required />
+          </div>
+          <div class="form-group">
+            <label for="item-sku">Serial Number *</label>
+            <input id="item-sku" type="text" name="sku" placeholder="e.g. SN-001234" autocomplete="off" required />
+          </div>
+          <div class="form-group">
+            <label for="item-brand">Brand / Model</label>
+            <input id="item-brand" type="text" name="brand_model" placeholder="e.g. Dell XPS 15" autocomplete="off" />
+          </div>
+          <div class="form-group" id="qty-group">
+            <label for="item-qty">Quantity</label>
+            <input id="item-qty" type="number" name="quantity" min="0" value="1" autocomplete="off" />
+          </div>
+          <div class="form-group" id="cat-group">
+            <label id="cat-label" for="item-category">Category</label>
+            <select id="item-category" name="category_id">
+              <option value="">-- None --</option>
+            </select>
+          </div>
+          <div class="form-group" id="supplier-group">
+            <label for="item-supplier">Supplier</label>
+            <select id="item-supplier" name="supplier_id">
+              <option value="">-- None --</option>
+            </select>
+          </div>
+          <div class="form-group" id="location-group">
+            <label for="item-location">Location</label>
+            <select id="item-location" name="location_id">
+              <option value="">-- None --</option>
+            </select>
+          </div>
+          <div class="form-group" id="subcat-group" style="display:none;">
+            <label for="subcategory-select">Subcategory</label>
+            <select id="subcategory-select">
+              <option value="">-- Select subcategory --</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="item-desc">Description</label>
+            <textarea id="item-desc" name="description" placeholder="Optional notes..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submit-btn">Save Asset</button>
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Group Edit Modal -->
+<div class="modal-overlay" id="group-modal">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h3 id="group-modal-title">Edit Asset Group</h3>
+      <button class="modal-close" onclick="closeGroupModal()">&times;</button>
+    </div>
+    <div class="form-body" style="padding-bottom:0;">
+      <!-- Shared fields -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;">Shared Fields (applied to all units)</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ge-name">Name *</label>
+            <input id="ge-name" type="text" placeholder="Asset name" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="ge-brand">Brand / Model</label>
+            <input id="ge-brand" type="text" placeholder="e.g. Sony WH-1000XM5" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="ge-category">Category</label>
+            <select id="ge-category"><option value="">-- None --</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ge-supplier">Supplier</label>
+            <select id="ge-supplier"><option value="">-- None --</option></select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="ge-desc">Description</label>
+            <textarea id="ge-desc" placeholder="Optional notes..." style="min-height:60px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <!-- Per-unit serial numbers -->
+      <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:0;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">Individual Units &amp; Serial Numbers</div>
+        <div id="ge-serials" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:0;">
+      <button class="btn btn-primary" id="ge-save-btn" onclick="saveGroupEdit()">Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeGroupModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div class="modal-overlay" id="image-modal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="image-modal-title">Asset Details</h3>
+      <button class="modal-close" onclick="closeImageModal()">&times;</button>
+    </div>
+
+    <!-- Receipt / PO image section -->
+    <div id="receipt-section" style="padding:16px 24px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);">Receipt / PO</span>
+        </div>
+        <span id="receipt-uploaded-chip" style="display:none;font-size:10px;font-weight:600;color:var(--green);background:var(--green-dim);border:1px solid rgba(62,207,142,.2);border-radius:20px;padding:2px 8px;">? Uploaded</span>
+      </div>
+
+      <!-- Shows uploaded receipt -->
+      <div id="receipt-preview-wrap" style="display:none;border-radius:10px;overflow:hidden;border:1px solid var(--border2);margin-bottom:0;position:relative;">
+        <img id="receipt-img" src="" alt="Receipt" style="width:100%;max-height:200px;object-fit:cover;display:block;" />
+        <div style="display:flex;justify-content:flex-end;padding:8px 10px;background:rgba(10,14,26,0.7);position:absolute;bottom:0;left:0;right:0;">
+          <button onclick="_removeReceipt()" style="background:rgba(244,91,105,0.85);border:none;color:#fff;font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload zone (shown when no receipt) -->
+      <label id="receipt-upload-zone" for="receipt-file-input" class="receipt-zone">
+        <div class="receipt-zone-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="receipt-zone-text">
+          <span class="receipt-zone-primary">Upload receipt or purchase order</span>
+          <span class="receipt-zone-secondary">JPG, PNG, WEBP � max 5 MB</span>
+        </div>
+      </label>
+      <input id="receipt-file-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="_onReceiptFileChosen(this)" />
+      <div id="receipt-uploading" style="display:none;font-size:12px;color:var(--blue);text-align:center;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        Uploading�
+      </div>
+    </div>
+
+    <div style="margin:14px 24px 0;border-top:1px solid var(--border);"></div>
+
+    <div style="padding:12px 24px 20px;">
+      <div class="view-detail-table">
+        <!-- Single-asset serial row (shown in non-grouped mode) -->
+        <div class="view-detail-row" id="view-serial-row">
+          <div class="view-detail-key">Serial No.</div>
+          <div class="view-detail-val" id="view-sku"></div>
+        </div>
+        <!-- Actions row � deploy + report buttons -->
+        <div class="view-detail-row" id="view-actions-row">
+          <div class="view-detail-key">Actions</div>
+          <div class="view-detail-val" id="view-actions"></div>
+        </div>
+        <!-- Multi-serial list (shown in grouped/subcategory mode) -->
+        <div class="view-detail-row" id="view-serials-row" style="display:none;flex-direction:column;align-items:flex-start;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);">Serial Numbers</span>
+          </div>
+          <div id="view-serials-list" class="serial-list" style="width:100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Damage Modal -->
+<div class="modal-overlay" id="damage-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3 id="damage-modal-title">Report Status</h3>
+      <button class="modal-close" onclick="closeDamageModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <form id="damage-form" onsubmit="submitDamageForm(event)">
+        <div class="form-grid">
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="damage-item-name">Asset</label>
+            <input type="text" id="damage-item-name" disabled />
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="damage-reported-by">Reported By *</label>
+            <input type="text" id="damage-reported-by" name="reported_by" placeholder="Your name" required />
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="damage-issue">Issue / Description *</label>
+            <textarea id="damage-issue" name="issue" placeholder="Describe the damage..." required></textarea>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="damage-status">Status</label>
+            <select id="damage-status" name="status" onchange="onDmgStatusChange()">
+              <option value="damaged">Damaged</option>
+              <option value="resolved">Resolved</option>
+              <option value="disposed">Disposed</option>
+              <option value="donated">For Donation</option>
+            </select>
+          </div>
+          <div class="form-group" id="dmg-disposal-group" style="grid-column:1/-1;display:none;">
+            <label for="dmg-disposal-reason-items">Disposal Reason</label>
+            <textarea id="dmg-disposal-reason-items" name="disposal_reason" placeholder="Why is this asset being disposed?&hellip;"></textarea>
+          </div>
+          <div class="form-group" id="dmg-donated-group" style="grid-column:1/-1;display:none;">
+            <label for="dmg-donated-to-items">Donated To *</label>
+            <input id="dmg-donated-to-items" type="text" name="donated_to" placeholder="e.g. Local School, Community Center&hellip;" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Report</button>
+          <button type="button" class="btn btn-ghost" onclick="closeDamageModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Deploy Modal -->
+<div class="modal-overlay" id="deploy-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3 id="deploy-modal-title">Deploy Asset</h3>
+      <button class="modal-close" onclick="closeDeployModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Asset</label>
+          <input type="text" id="deploy-item-name" disabled />
+        </div>
+        <div class="form-group" style="grid-column:1/-1;position:relative;">
+          <label for="deploy-employee-search">Employee *</label>
+          <input type="text" id="deploy-employee-search" placeholder="Search name�" autocomplete="off"
+                 oninput="filterEmployeeSuggestions()" onkeydown="onEmployeeSearchKey(event)" />
+          <div id="deploy-employee-suggestions" style="
+            display:none;position:absolute;top:100%;left:0;right:0;z-index:300;
+            background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);
+            max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);margin-top:2px;
+          "></div>
+          <input type="hidden" id="deploy-employee" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label for="deploy-due">Due Back (optional)</label>
+          <input type="date" id="deploy-due" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label for="deploy-notes">Notes (optional)</label>
+          <textarea id="deploy-notes" name="notes" placeholder="Any notes�" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="deploy-submit-btn" onclick="submitDeployModal()">&#128640; Deploy</button>
+        <button type="button" class="btn btn-ghost" onclick="closeDeployModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script src="js/approval_flow.js?v=2"></script>
+<script>
+(async () => {
+  const user = await auth.requireAuth();
+  if (!user) return;
+  auth.renderUserInfo();
+  
+  // Adapt topbar button label for staff
+  if (ApprovalFlow.isStaff()) {
+    const addBtn = document.querySelector('.topbar-actions .btn-primary');
+    if (addBtn) addBtn.textContent = '+ Request Asset';
+  }
+  loadItems();
+})();
+
+let allItems = [], allDamages = [], allCategories = [], allAssignments = [];
+let editingId = null, editingDamageId = null;
+let isParentCat = false, childCatIds = [];
+let isLeafSubcat = false; // true when viewing a leaf subcategory (e.g. "Computers")
+
+const urlParams   = new URLSearchParams(window.location.search);
+const filterCatId = urlParams.get('category_id') ? parseInt(urlParams.get('category_id')) : null;
+
+function publicUrl(path) {
+  const parts = window.location.pathname.split('/');
+  const pi = parts.lastIndexOf('public');
+  const base = pi !== -1 ? window.location.origin + parts.slice(0, pi + 1).join('/') : window.location.origin;
+  return base + '/' + path;
+}
+
+const avatarColors = [
+  'linear-gradient(135deg,#4f8ef7,#7b5bf7)',
+  'linear-gradient(135deg,#3ecf8e,#4f8ef7)',
+  'linear-gradient(135deg,#f5a623,#f45b69)',
+  'linear-gradient(135deg,#9b73f7,#4f8ef7)',
+  'linear-gradient(135deg,#3ecf8e,#9b73f7)',
+];
+function avatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < (name||'').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+  return avatarColors[h % avatarColors.length];
+}
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+/** Format deployment date from assigned_at. Returns '' if not deployed. */
+function deployedAge(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** Days since assigned_at. Returns '' if not deployed. */
+function deployedDays(dateStr) {
+  if (!dateStr) return '';
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (days < 0)  return '< 1 day';
+  if (days === 0) return '< 1 day';
+  return days + (days === 1 ? ' day' : ' days');
+}
+
+async function loadItems() {
+  try {
+    const [itemsRes, dmgRes, catRes, assignRes] = await Promise.all([
+      api.getProducts(), api.getDamages(), api.getCategories(), api.getAssignments()
+    ]);
+    allItems       = itemsRes.data;
+    allDamages     = dmgRes.data.filter(d => d.status !== 'resolved');
+    allCategories  = catRes.data;
+    allAssignments = (assignRes.data || []).filter(a => a.status === 'active');
+
+    // Apply location filter from dashboard context
+    const locId = localStorage.getItem('emp_location_id');
+    if (locId) {
+      allItems = allItems.filter(p => String(p.location_id) === locId);
+      showLocationBadge(localStorage.getItem('emp_location_name') || 'Selected Location');
+    } else {
+      const badge = document.getElementById('ctx-loc-badge');
+      if (badge) badge.remove();
+    }
+
+    if (filterCatId) {
+      const thisCat = allCategories.find(c => c.id === filterCatId);
+      const kids    = allCategories.filter(c => c.parent_id == filterCatId);
+      isParentCat  = kids.length > 0;
+      // Grouped/brand view applies to ALL category pages (any filterCatId)
+      isLeafSubcat = !isParentCat; // true for any non-parent category
+      childCatIds  = kids.map(c => c.id);
+      if (thisCat) {
+        document.getElementById('page-title').textContent = thisCat.name;
+        document.getElementById('page-sub').textContent   = 'Assets in ' + thisCat.name;
+      }
+      if (isParentCat) {
+        const subSel = document.getElementById('filter-subcat');
+        subSel.style.display = '';
+        subSel.innerHTML = '<option value="">All Types</option>' +
+          kids.map(k => '<option value="' + k.id + '">' + esc(k.name) + '</option>').join('');
+      }
+      document.getElementById('col-type-header').textContent = 'Name';
+      document.getElementById('col-name-header').style.display = 'none';
+      // Hide Serial No. column on all category pages
+      document.getElementById('col-serial-header').style.display = 'none';
+    } else {
+      const parents  = allCategories.filter(c => !c.parent_id);
+      const children = allCategories.filter(c =>  c.parent_id);
+      const catSel   = document.getElementById('filter-category');
+      catSel.style.display = '';
+      let html = '<option value="">All Categories</option>';
+      parents.forEach(p => {
+        const kids = children.filter(c => c.parent_id == p.id);
+        if (kids.length) {
+          html += '<optgroup label="' + esc(p.name) + '">';
+          kids.forEach(k => { html += '<option value="' + k.id + '">' + esc(k.name) + '</option>'; });
+          html += '</optgroup>';
+        } else {
+          html += '<option value="' + p.id + '">' + esc(p.name) + '</option>';
+        }
+      });
+      catSel.innerHTML = html;
+    }
+    applyFilters();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function getBaseData() {
+  if (!filterCatId) return allItems;
+  if (isParentCat)  return allItems.filter(p => childCatIds.includes(p.category_id));
+  return allItems.filter(p => p.category_id === filterCatId);
+}
+
+function filterTable() { applyFilters(); }
+
+function onCategoryFilterChange() {
+  const catId  = parseInt(document.getElementById('filter-category').value) || null;
+  const subSel = document.getElementById('filter-subcat');
+  if (catId) {
+    const kids = allCategories.filter(c => c.parent_id == catId);
+    if (kids.length) {
+      subSel.style.display = '';
+      subSel.innerHTML = '<option value="">All Types</option>' +
+        kids.map(k => '<option value="' + k.id + '">' + esc(k.name) + '</option>').join('');
+    } else {
+      subSel.style.display = 'none';
+      subSel.value = '';
+    }
+  } else {
+    subSel.style.display = 'none';
+    subSel.value = '';
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const q           = document.getElementById('search').value.toLowerCase();
+  const subCat      = parseInt(document.getElementById('filter-subcat').value) || null;
+  const catFilter   = parseInt(document.getElementById('filter-category').value) || null;
+  const assignFilter = document.getElementById('filter-assign').value; // '' | 'assigned' | 'unassigned'
+  let data = getBaseData();
+  if (q)      data = data.filter(p => p.name.toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q) || (p.serial_number||'').toLowerCase().includes(q));
+  if (subCat) data = data.filter(p => p.category_id === subCat);
+  if (catFilter && !subCat) {
+    const kids = allCategories.filter(c => c.parent_id == catFilter).map(c => c.id);
+    data = kids.length ? data.filter(p => kids.includes(p.category_id)) : data.filter(p => p.category_id === catFilter);
+  }
+  // Assignment filter � applied at the individual unit level, then groups are rebuilt
+  if (assignFilter === 'assigned') {
+    data = data.filter(p => allAssignments.find(a => a.product_id === p.id));
+  } else if (assignFilter === 'unassigned') {
+    data = data.filter(p => !allAssignments.find(a => a.product_id === p.id));
+  }
+  renderGroupedTable(data);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('product-table');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#128246;</div><p>No assets found</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(p => {
+    const damage     = allDamages.find(d => d.product_id === p.id);
+    const isDamaged  = !!damage;
+    const assignment = allAssignments.find(a => a.product_id === p.id);
+    const assignee   = assignment ? (assignment.assignee_name || '') : null;
+
+    const catIcon = isDamaged
+      ? '<div class="cat-icon-box damaged">&#9888;&#65039;</div>'
+      : '<div class="cat-icon-box">&#128246;</div>';
+
+    const catNameHtml = filterCatId
+      ? '<span class="cat-name-text' + (isDamaged ? ' damaged' : '') + '">' + esc(p.name) + '</span>'
+      : '<span class="cat-name-text' + (isDamaged ? ' damaged' : '') + '">' + esc(p.category_name || '--') + '</span>';
+
+    const nameCell = !filterCatId
+      ? '<td><div class="item-name">' + esc(p.name) + '</div>' + (isDamaged ? '<div class="damage-badge">&#9888; not working</div>' : '') + '</td>'
+      : '';
+
+    const supplierHtml = p.supplier_name
+      ? '<span class="supplier-cell" title="' + esc(p.supplier_name) + '">' + esc(p.supplier_name) + '</span>'
+      : '<span style="color:var(--muted);font-size:13px;">--</span>';
+
+    const assignedHtml = assignee
+      ? '<div class="assignee-cell"><div class="assignee-avatar" style="background:' + avatarColor(assignee) + '">' + initials(assignee) + '</div><span class="assignee-name">' + esc(assignee) + '</span></div>'
+      : '<span class="unassigned-pill">-- Not Deployed</span>';
+
+    const age    = assignment ? deployedAge(assignment.assigned_at) : '';
+    const ageHtml = age
+      ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + age + '</span>'
+      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+
+    const days    = assignment ? deployedDays(assignment.assigned_at) : '';
+    const daysHtml = days
+      ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + days + '</span>'
+      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+
+    return '<tr class="' + (isDamaged ? 'row-damaged' : '') + '">' +
+      '<td><div class="cat-cell">' + catIcon + '<div>' + catNameHtml + (isDamaged && filterCatId ? '<div class="damage-badge">&#9888; not working</div>' : '') + '</div></div></td>' +
+      nameCell +
+      '<td style="font-size:13px;color:var(--muted2);">' + esc(p.brand_model || '--') + '</td>' +
+      '<td><span class="sku-chip' + (isDamaged ? ' damaged' : '') + '">' + esc(p.sku) + '</span></td>' +
+      '<td>' + supplierHtml + '</td>' +
+      '<td style="text-align:center;"><span class="qty-pill">' + (p.quantity ?? 0) + '</span></td>' +
+      '<td>' + assignedHtml + '</td>' +
+      '<td><div class="actions">' +
+        (!ApprovalFlow.isStaff() ? '<button class="btn btn-ghost btn-sm" data-edit="' + p.id + '">Edit</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" data-view="' + p.id + '">View</button>' +
+        (!ApprovalFlow.isStaff() && p.asset_status === 'available' ? '<button class="btn btn-primary btn-sm" data-deploy="' + p.id + '">&#128640; Deploy</button>' : '') +
+        (ApprovalFlow.isStaff() && p.asset_status === 'available'  ? '<button class="btn btn-primary btn-sm" data-deploy="' + p.id + '">&#128640; Request Deployment</button>' : '') +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', function() { openModal(parseInt(this.dataset.edit)); }));
+  tbody.querySelectorAll('[data-view]').forEach(btn => btn.addEventListener('click', function() { viewItem(parseInt(this.dataset.view)); }));
+  tbody.querySelectorAll('[data-deploy]').forEach(btn => btn.addEventListener('click', function() { openDeployModal(parseInt(this.dataset.deploy)); }));
+}
+
+// -- Grouped view � groups assets by name, qty = count of units --
+function renderGroupedTable(data) {
+  const tbody = document.getElementById('product-table');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#128246;</div><p>No assets found</p></div></td></tr>';
+    return;
+  }
+
+  // Group by name (case-insensitive)
+  const groups = new Map();
+  data.forEach(p => {
+    const key = p.name.trim().toLowerCase();
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  });
+
+  // Update column headers for grouped view
+  document.getElementById('col-type-header').textContent    = filterCatId ? 'Name' : 'Category';
+  const nameHeader = document.getElementById('col-name-header');
+  if (nameHeader) nameHeader.style.display = filterCatId ? 'none' : '';
+  const serialHeader = document.getElementById('col-serial-header');
+  if (serialHeader) serialHeader.style.display = 'none';
+
+  const rows = [];
+  groups.forEach((items) => {
+    const rep        = items[0];
+    const anyDamaged = items.some(p => allDamages.find(d => d.product_id === p.id));
+    const totalQty   = items.length;
+
+    // Build assignee chips � collect unique assignees across all units in the group
+    const assigneeMap = new Map();
+    items.forEach(p => {
+      const a = allAssignments.find(x => x.product_id === p.id);
+      if (a && a.assignee_name) {
+        if (!assigneeMap.has(a.assignee_name)) assigneeMap.set(a.assignee_name, 0);
+        assigneeMap.set(a.assignee_name, assigneeMap.get(a.assignee_name) + 1);
+      }
+    });
+    const assignedCount   = items.filter(p => allAssignments.find(x => x.product_id === p.id)).length;
+    const unassignedCount = totalQty - assignedCount;
+
+    let assigneeHtml = '';
+    if (assigneeMap.size === 0) {
+      assigneeHtml = '<span class="unassigned-pill">&#8212; Not Deployed</span>';
+    } else {
+      const chips = [];
+      let shown = 0;
+      assigneeMap.forEach((count, name) => {
+        if (shown < 3) {
+          const color = avatarColor(name);
+          chips.push(
+            '<span class="assignee-chip">' +
+              '<span class="chip-av" style="background:' + color + '">' + initials(name) + '</span>' +
+              '<span class="chip-name">' + esc(name) + (count > 1 ? ' &times;' + count : '') + '</span>' +
+            '</span>'
+          );
+          shown++;
+        }
+      });
+      if (assigneeMap.size > 3) {
+        chips.push('<span class="more-chip">+' + (assigneeMap.size - 3) + ' more</span>');
+      }
+      if (unassignedCount > 0) {
+        chips.push('<span class="more-chip" style="color:var(--muted);">' + unassignedCount + ' free</span>');
+      }
+      assigneeHtml = '<div class="assignee-chips">' + chips.join('') + '</div>';
+    }
+
+    const catIcon = anyDamaged
+      ? '<div class="cat-icon-box damaged">&#9888;&#65039;</div>'
+      : '<div class="cat-icon-box">&#128246;</div>';
+
+    const nameHtml = '<span class="cat-name-text' + (anyDamaged ? ' damaged' : '') + '">' + esc(rep.name) + '</span>' +
+      (anyDamaged ? '<div class="damage-badge">&#9888; has damage</div>' : '');
+
+    const catCell = filterCatId
+      ? '<td><div class="cat-cell">' + catIcon + '<div>' + nameHtml + '</div></div></td>'
+      : '<td><div class="cat-cell">' + catIcon + '<div>' +
+          '<span class="cat-name-text">' + esc(rep.category_name || '--') + '</span>' +
+        '</div></div></td>' +
+        '<td><div class="item-name">' + esc(rep.name) + '</div>' + (anyDamaged ? '<div class="damage-badge">&#9888; has damage</div>' : '') + '</td>';
+
+    const supplierHtml = rep.supplier_name
+      ? '<span class="supplier-cell" title="' + esc(rep.supplier_name) + '">' + esc(rep.supplier_name) + '</span>'
+      : '<span style="color:var(--muted);font-size:13px;">--</span>';
+
+    const idsJson = JSON.stringify(items.map(p => p.id));
+
+    // Age = oldest assigned_at across all deployed units in the group
+    let oldestAssigned = null;
+    items.forEach(p => {
+      const a = allAssignments.find(x => x.product_id === p.id);
+      if (a && a.assigned_at) {
+        if (!oldestAssigned || new Date(a.assigned_at) < new Date(oldestAssigned)) {
+          oldestAssigned = a.assigned_at;
+        }
+      }
+    });
+    const groupAge    = oldestAssigned ? deployedAge(oldestAssigned) : '';
+    const groupAgeHtml = groupAge
+      ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + groupAge + '</span>'
+      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+
+    const groupDays    = oldestAssigned ? deployedDays(oldestAssigned) : '';
+    const groupDaysHtml = groupDays
+      ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + groupDays + '</span>'
+      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+
+    rows.push(
+      '<tr class="' + (anyDamaged ? 'row-damaged' : '') + '">' +
+        catCell +
+        '<td style="font-size:13px;color:var(--muted2);">' + esc(rep.brand_model || '--') + '</td>' +
+        '<td style="display:none;"></td>' +
+        '<td>' + supplierHtml + '</td>' +
+        '<td style="text-align:center;"><span class="qty-pill">' + totalQty + '</span></td>' +
+        '<td>' + assigneeHtml + '</td>' +
+        '<td><div class="actions">' +
+          '<button class="btn btn-ghost btn-sm" data-view-group=\'' + idsJson + '\'>View</button>' +
+          (!ApprovalFlow.isStaff() ? '<button class="btn btn-ghost btn-sm" data-edit-group=\'' + idsJson + '\' data-group-name="' + esc(rep.name) + '">Edit</button>' : '') +
+          (!ApprovalFlow.isStaff() && unassignedCount > 0 ? '<button class="btn btn-primary btn-sm" data-deploy-group=\'' + idsJson + '\'>&#128640; Deploy</button>' : '') +
+          (ApprovalFlow.isStaff() && unassignedCount > 0 ? '<button class="btn btn-primary btn-sm" data-deploy-group=\'' + idsJson + '\'>&#128640; Request Deployment</button>' : '') +
+        '</div></td>' +
+      '</tr>'
+    );
+  });
+
+  tbody.innerHTML = rows.join('');
+
+  tbody.querySelectorAll('[data-view-group]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      viewGroupedItems(JSON.parse(this.dataset.viewGroup));
+    });
+  });
+  tbody.querySelectorAll('[data-edit-group]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      openGroupModal(JSON.parse(this.dataset.editGroup), this.dataset.groupName);
+    });
+  });
+  tbody.querySelectorAll('[data-deploy-group]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Open the serial view so the user can pick which unit to deploy
+      viewGroupedItems(JSON.parse(this.dataset.deployGroup));
+    });
+  });
+}
+
+async function openModal(id = null) {
+  editingId = id;
+  const form = document.getElementById('product-form');
+  form.reset();
+  const isStaff = ApprovalFlow.isStaff();
+  if (id) {
+    document.getElementById('modal-title').textContent = isStaff ? 'Request Asset Edit' : 'Edit Asset';
+  } else {
+    document.getElementById('modal-title').textContent = isStaff ? 'Request New Asset' : 'Add Asset';
+  }
+  document.getElementById('submit-btn').textContent = isStaff ? 'Submit Request' : (id ? 'Save Asset' : 'Save Asset');
+  await populateDropdowns();
+  if (id) {
+    try {
+      const res = await api.getProduct(id);
+      const p   = res.data;
+      form.name.value        = p.name;
+      form.sku.value         = p.sku;
+      form.quantity.value    = p.quantity;
+      form.description.value = p.description || '';
+      form.brand_model.value = p.brand_model || '';
+      form.category_id.value = p.category_id || '';
+      const supSel = document.getElementById('item-supplier');
+      if (supSel) supSel.value = p.supplier_id || '';
+      const locSel = document.getElementById('item-location');
+      if (locSel) locSel.value = p.location_id || '';
+      if (isParentCat) document.getElementById('subcategory-select').value = p.category_id || '';
+    } catch (e) { showToast(e.message, 'error'); return; }
+  }
+  document.getElementById('modal').classList.add('open');
+}
+
+async function populateDropdowns() {
+  const cats     = await api.getCategories();
+  const catSel   = document.querySelector('select[name="category_id"]');
+  const parents  = cats.data.filter(c => !c.parent_id);
+  const children = cats.data.filter(c =>  c.parent_id);
+
+  if (isParentCat && filterCatId) {
+    const thisCat = cats.data.find(c => c.id === filterCatId);
+    const kids    = children.filter(c => c.parent_id == filterCatId);
+    catSel.innerHTML = '<option value="' + filterCatId + '" selected>' + esc(thisCat ? thisCat.name : '') + '</option>';
+    catSel.disabled  = true;
+    document.getElementById('subcat-group').style.display = '';
+    document.getElementById('subcategory-select').innerHTML = '<option value="">-- Select subcategory --</option>' +
+      kids.map(k => '<option value="' + k.id + '">' + esc(k.name) + '</option>').join('');
+  } else {
+    catSel.disabled = false;
+    document.getElementById('subcat-group').style.display = 'none';
+    let html = '<option value="">-- None --</option>';
+    parents.forEach(p => {
+      const kids = children.filter(c => c.parent_id == p.id);
+      if (kids.length) {
+        html += '<optgroup label="' + esc(p.name) + '">';
+        kids.forEach(k => { html += '<option value="' + k.id + '">' + esc(k.name) + '</option>'; });
+        html += '</optgroup>';
+      } else {
+        html += '<option value="' + p.id + '">' + esc(p.name) + '</option>';
+      }
+    });
+    catSel.innerHTML = html;
+    if (filterCatId) catSel.value = filterCatId;
+  }
+
+  try {
+    const supRes = await api.getSuppliers();
+    const supSel = document.getElementById('item-supplier');
+    if (supSel) {
+      supSel.innerHTML = '<option value="">-- None --</option>' +
+        (supRes.data || []).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('');
+    }
+  } catch (_) {}
+
+  try {
+    const locRes = await api.getLocations();
+    const locSel = document.getElementById('item-location');
+    if (locSel) {
+      locSel.innerHTML = '<option value="">-- None --</option>' +
+        (locRes.data || []).map(l => '<option value="' + l.id + '">' + esc(l.name) + '</option>').join('');
+    }
+  } catch (_) {}
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingId = null;
+}
+
+async function submitForm(e) {
+  e.preventDefault();
+  const form  = e.target;
+  const catId = isParentCat ? document.getElementById('subcategory-select').value : form.category_id.value;
+  if (isParentCat && !catId) { showToast('Please select a subcategory', 'error'); return; }
+  const fd = new FormData();
+  fd.append('name',        form.name.value.trim());
+  fd.append('sku',         form.sku.value.trim());
+  fd.append('quantity',    form.quantity.value);
+  fd.append('brand_model', form.brand_model.value.trim());
+  fd.append('description', form.description.value.trim());
+  fd.append('category_id', catId || '');
+  fd.append('supplier_id', document.getElementById('item-supplier') ? document.getElementById('item-supplier').value : '');
+  fd.append('location_id', document.getElementById('item-location') ? document.getElementById('item-location').value : '');
+  try {
+    // -- Approval flow for staff ------------------------------------------
+    if (ApprovalFlow.isStaff()) {
+      // Convert FormData to plain object for the payload (images excluded)
+      const payload = {};
+      for (const [k, v] of fd.entries()) { if (k !== 'image') payload[k] = v; }
+      const flow = await ApprovalFlow.submit({
+        action_type:   editingId ? 'update' : 'create',
+        resource_type: 'Asset',
+        resource_id:   editingId || null,
+        resource_name: form.name.value.trim(),
+        payload,
+        notes: editingId ? 'Edit asset request' : 'New asset request',
+      });
+      if (flow.queued) { closeModal(); return; }
+    }
+    // -- Admin / direct execute -------------------------------------------
+    if (editingId) {
+      await api.updateProduct(editingId, fd);
+      showToast('Asset updated', 'success');
+    } else {
+      await api.createProduct(fd);
+      showToast('Asset created', 'success');
+    }
+    closeModal();
+    loadItems();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function viewItem(id) {
+  const p = allItems.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('image-modal-title').textContent = p.name;
+
+  // Wire receipt/PO image section for this single product
+  _initReceiptSection(p.id, p.image_path);
+
+  // Show single serial row, hide multi-serial row
+  document.getElementById('view-serial-row').style.display  = '';
+  document.getElementById('view-serials-row').style.display = 'none';
+  document.getElementById('view-actions-row').style.display = '';
+
+  document.getElementById('view-sku').textContent = p.sku || '--';
+
+  // Actions: deploy + report buttons
+  const damage     = allDamages.find(d => d.product_id === p.id);
+  const isStaff    = ApprovalFlow.isStaff();
+  const assignment = allAssignments.find(a => a.product_id === p.id);
+
+  let deployHtml = '';
+  if (p.asset_status === 'available') {
+    const deployLabel = isStaff ? '&#128640; Request Deployment' : '&#128640; Deploy';
+    deployHtml = `<button class="btn btn-primary btn-sm" onclick="closeImageModal();openDeployModal(${p.id})">${deployLabel}</button>`;
+  } else if (p.asset_status === 'assigned' && assignment) {
+    deployHtml = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(41,182,232,0.25);border-radius:20px;padding:3px 10px;">&#128100; Deployed to ${esc(assignment.assignee_name)}</span>`;
+  }
+
+  const dmgHtml = damage
+    ? `<button class="btn btn-danger btn-sm" onclick="closeImageModal();openDamageModal(${p.id})">&#9888; Edit Status Report</button>`
+    : `<button class="btn btn-amber btn-sm" onclick="closeImageModal();openDamageModal(${p.id})">&#9888; Report Status</button>`;
+
+  const editHtml = !isStaff
+    ? `<button class="btn btn-ghost btn-sm" onclick="closeImageModal();openModal(${p.id})">&#9998; Edit</button>`
+    : '';
+
+  document.getElementById('view-actions').innerHTML =
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      deployHtml + dmgHtml + editHtml +
+    '</div>';
+
+  document.getElementById('image-modal').classList.add('open');
+}
+
+// View all serial numbers for a grouped brand (leaf subcategory mode)
+function viewGroupedItems(ids) {
+  const items = ids.map(id => allItems.find(x => x.id === id)).filter(Boolean);
+  if (!items.length) return;
+  const rep = items[0];
+
+  document.getElementById('image-modal-title').textContent = rep.name;
+
+  // Receipt section � use the representative product's image_path
+  _initReceiptSection(rep.id, rep.image_path);
+
+  // Hide single serial row, show multi-serial list
+  document.getElementById('view-serial-row').style.display  = 'none';
+  document.getElementById('view-serials-row').style.display = '';
+  document.getElementById('view-actions-row').style.display = 'none';
+
+  // Build serial number list ? one row per physical unit
+  const list = document.getElementById('view-serials-list');
+  const isStaff = ApprovalFlow.isStaff();
+  const deployBtnLabel = isStaff ? '&#128640; Request' : '&#128640; Deploy';
+  list.innerHTML = items.map(p => {
+    const damage     = allDamages.find(d => d.product_id === p.id);
+    const assignment = allAssignments.find(a => a.product_id === p.id);
+    const assignee   = assignment ? assignment.assignee_name : null;
+    const isDamaged  = !!damage;
+
+    let statusHtml;
+    if (isDamaged) {
+      statusHtml = '<span class="serial-status damaged">&#9888; Damaged</span>';
+    } else if (assignee) {
+      statusHtml = '<span class="serial-status assigned">&#128100; ' + esc(assignee) + '</span>';
+    } else {
+      statusHtml = '<span class="serial-status working">&#10003; Available</span>';
+    }
+
+    const deployDate = assignment
+      ? '<span style="font-size:11px;color:var(--muted2);font-family:\'DM Mono\',monospace;white-space:nowrap;">&#128197; ' +
+        new Date(assignment.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) +
+        '</span>'
+      : '';
+
+    const deployDays = assignment
+      ? (() => {
+          const d = Math.floor((Date.now() - new Date(assignment.assigned_at).getTime()) / 86400000);
+          return '<span style="font-size:11px;color:var(--muted2);white-space:nowrap;">' + (d <= 0 ? '< 1 day' : d + (d === 1 ? ' day' : ' days')) + '</span>';
+        })()
+      : '';
+
+    return '<div class="serial-row' + (isDamaged ? ' damaged' : '') + '">' +
+      '<span class="serial-code">' + esc(p.serial_number || p.sku) + '</span>' +
+      '<div class="serial-info">' +
+        statusHtml +
+        (assignee
+          ? '<span style="font-size:11px;color:var(--muted2);font-family:\'DM Mono\',monospace;">' + deployDate.replace(/<[^>]+>/g,'').trim() + ' � ' + deployDays.replace(/<[^>]+>/g,'').trim() + '</span>'
+          : '') +
+      '</div>' +
+      '<div class="serial-meta">' +
+        (!isDamaged && !assignee
+          ? '<button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:11px;" data-deploy-from-view="' + p.id + '">' + deployBtnLabel + '</button>'
+          : '') +
+        (isDamaged
+          ? '<button class="btn btn-danger btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">? Edit Status</button>'
+          : '<button class="btn btn-amber btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">Report</button>') +
+        (!isStaff ? '<button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;" data-edit-from-view="' + p.id + '">Edit</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Wire edit buttons inside the serial list
+  list.querySelectorAll('[data-edit-from-view]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeImageModal();
+      openModal(parseInt(this.dataset.editFromView));
+    });
+  });
+
+  // Wire deploy buttons inside the serial list
+  list.querySelectorAll('[data-deploy-from-view]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeImageModal();
+      openDeployModal(parseInt(this.dataset.deployFromView));
+    });
+  });
+
+  // Wire damage buttons inside the serial list
+  list.querySelectorAll('[data-dmg-from-view]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      closeImageModal();
+      openDamageModal(parseInt(this.dataset.dmgFromView));
+    });
+  });
+
+  document.getElementById('image-modal').classList.add('open');
+}
+
+/* ------------------------------------------
+   RECEIPT / PO IMAGE UPLOAD
+------------------------------------------ */
+let _currentReceiptProductId = null;
+
+function _initReceiptSection(productId, imagePath) {
+  _currentReceiptProductId = productId;
+
+  const previewWrap  = document.getElementById('receipt-preview-wrap');
+  const receiptImg   = document.getElementById('receipt-img');
+  const uploadZone   = document.getElementById('receipt-upload-zone');
+  const fileInput    = document.getElementById('receipt-file-input');
+  const uploading    = document.getElementById('receipt-uploading');
+  const chip         = document.getElementById('receipt-uploaded-chip');
+
+  fileInput.value = '';
+  uploading.style.display = 'none';
+
+  if (imagePath) {
+    receiptImg.src             = publicUrl(imagePath);
+    previewWrap.style.display  = '';
+    uploadZone.style.display   = 'none';
+    chip.style.display         = '';
+  } else {
+    previewWrap.style.display  = 'none';
+    uploadZone.style.display   = '';
+    chip.style.display         = 'none';
+  }
+}
+
+async function _onReceiptFileChosen(input) {
+  const file = input.files[0];
+  if (!file || !_currentReceiptProductId) return;
+
+  const uploadZone  = document.getElementById('receipt-upload-zone');
+  const uploading   = document.getElementById('receipt-uploading');
+  const previewWrap = document.getElementById('receipt-preview-wrap');
+  const receiptImg  = document.getElementById('receipt-img');
+
+  uploadZone.style.display  = 'none';
+  uploading.style.display   = '';
+
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('_method', 'PUT');
+    const res = await api.updateProduct(_currentReceiptProductId, fd);
+    const newPath = res.data?.image_path;
+
+    // Update local cache so re-opening doesn't flash the old state
+    const cached = allItems.find(x => x.id === _currentReceiptProductId);
+    if (cached) cached.image_path = newPath;
+
+    receiptImg.src            = publicUrl(newPath);
+    previewWrap.style.display = '';
+    document.getElementById('receipt-upload-zone').style.display   = 'none';
+    document.getElementById('receipt-uploaded-chip').style.display = '';
+    showToast('Receipt uploaded', 'success');
+  } catch (e) {
+    uploadZone.style.display = '';
+    showToast('Upload failed: ' + e.message, 'error');
+  } finally {
+    uploading.style.display = 'none';
+    input.value = '';
+  }
+}
+
+async function _removeReceipt() {
+  if (!_currentReceiptProductId) return;
+  if (!confirm('Remove the receipt image for this asset?')) return;
+
+  try {
+    await api.updateProduct(_currentReceiptProductId, { image_path: '' });
+    const cached = allItems.find(x => x.id === _currentReceiptProductId);
+    if (cached) cached.image_path = null;
+
+    document.getElementById('receipt-preview-wrap').style.display   = 'none';
+    document.getElementById('receipt-upload-zone').style.display    = '';
+    document.getElementById('receipt-uploaded-chip').style.display  = 'none';
+    showToast('Receipt removed', 'success');
+  } catch (e) {
+    showToast('Could not remove receipt: ' + e.message, 'error');
+  }
+}
+
+function closeImageModal() { document.getElementById('image-modal').classList.remove('open'); }
+
+async function openDamageModal(productId) {
+  const p      = allItems.find(x => x.id === productId);
+  const damage = allDamages.find(d => d.product_id === productId);
+  editingDamageId = damage ? damage.id : null;
+  const form = document.getElementById('damage-form');
+  form.reset();
+  document.getElementById('damage-modal-title').textContent = damage ? 'Edit Status Report' : 'Report Status';
+  document.getElementById('damage-item-name').value = p ? (p.name + ' (' + p.sku + ')') : '';
+  form.dataset.productId = productId;
+  // Reset conditional fields
+  document.getElementById('dmg-disposal-group').style.display = 'none';
+  document.getElementById('dmg-donated-group').style.display  = 'none';
+  if (damage) {
+    form.reported_by.value = damage.reported_by;
+    form.issue.value       = damage.issue;
+    form.status.value      = damage.status;
+    if (damage.disposal_reason) {
+      form.disposal_reason.value = damage.disposal_reason;
+      document.getElementById('dmg-disposal-group').style.display = '';
+    }
+    if (damage.donated_to) {
+      form.donated_to.value = damage.donated_to;
+      document.getElementById('dmg-donated-group').style.display = '';
+    }
+  }
+  document.getElementById('damage-modal').classList.add('open');
+}
+
+function closeDamageModal() {
+  document.getElementById('damage-modal').classList.remove('open');
+  editingDamageId = null;
+}
+
+/* ------------------------------------------
+   DEPLOY MODAL
+------------------------------------------ */
+let deployProductId = null;
+let allEmployeesCache = [];
+
+function filterEmployeeSuggestions() {
+  const q      = (document.getElementById('deploy-employee-search').value || '').toLowerCase().trim();
+  const box    = document.getElementById('deploy-employee-suggestions');
+  const hidden = document.getElementById('deploy-employee');
+  hidden.value = '';
+  if (!q) { box.style.display = 'none'; return; }
+  const matches = allEmployeesCache.filter(e => (e.name || '').toLowerCase().includes(q)).slice(0, 10);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.innerHTML = matches.map(e => {
+    const sub = [e.seat_number ? 'Seat ' + e.seat_number : '', e.station || '', e.location_name || ''].filter(Boolean).join(' � ');
+    return `<div data-name="${esc(e.name)}"
+      style="padding:10px 14px;cursor:pointer;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);transition:background .1s;"
+      onmousedown="selectEmployeeSuggestion('${esc(e.name).replace(/'/g,"&#39;")}')"
+      onmouseover="this.style.background='var(--bg2)'"
+      onmouseout="this.style.background=''"
+    >${esc(e.name)}${sub ? ' <span style="color:var(--muted);font-size:11px;">� ' + esc(sub) + '</span>' : ''}</div>`;
+  }).join('');
+  box.style.display = '';
+}
+
+function selectEmployeeSuggestion(name) {
+  document.getElementById('deploy-employee-search').value = name;
+  document.getElementById('deploy-employee').value        = name;
+  document.getElementById('deploy-employee-suggestions').style.display = 'none';
+}
+
+function onEmployeeSearchKey(e) {
+  if (e.key === 'Escape') document.getElementById('deploy-employee-suggestions').style.display = 'none';
+}
+
+async function openDeployModal(productId) {
+  const p = allItems.find(x => x.id === productId);
+  if (!p) return;
+  deployProductId = productId;
+
+  const isStaff = ApprovalFlow.isStaff();
+  document.getElementById('deploy-modal-title').textContent = isStaff ? 'Request Asset Deployment' : 'Deploy Asset';
+  document.getElementById('deploy-submit-btn').innerHTML    = isStaff ? '&#128640; Submit Request' : '&#128640; Deploy';
+
+  document.getElementById('deploy-item-name').value       = p.name + ' (' + (p.serial_number || p.sku || '') + ')';
+  document.getElementById('deploy-employee-search').value = '';
+  document.getElementById('deploy-employee').value        = '';
+  document.getElementById('deploy-employee-suggestions').style.display = 'none';
+  document.getElementById('deploy-due').value             = '';
+  document.getElementById('deploy-notes').value           = '';
+
+  try {
+    if (!allEmployeesCache.length) {
+      const res = await api.getEmployees();
+      allEmployeesCache = res.data || [];
+    }
+  } catch (e) { showToast('Could not load employees: ' + e.message, 'error'); return; }
+
+  document.getElementById('deploy-modal').classList.add('open');
+  setTimeout(() => document.getElementById('deploy-employee-search').focus(), 100);
+}
+
+function closeDeployModal() {
+  document.getElementById('deploy-modal').classList.remove('open');
+  document.getElementById('deploy-employee-suggestions').style.display = 'none';
+  deployProductId = null;
+  allEmployeesCache = [];
+}
+
+async function submitDeployModal() {
+  const empName = document.getElementById('deploy-employee').value.trim();
+  const due     = document.getElementById('deploy-due').value;
+  const notes   = document.getElementById('deploy-notes').value.trim();
+
+  if (!empName) { showToast('Please select an employee', 'error'); return; }
+  if (!deployProductId) return;
+
+  const emp        = allEmployeesCache.find(e => e.name === empName);
+  const assignedBy = auth.currentUser?.name || 'Admin';
+  const asset      = allItems.find(x => x.id === deployProductId);
+  const payload    = {
+    product_id:    deployProductId,
+    assignee_name: empName,
+    assigned_by:   assignedBy,
+    due_back:      due || null,
+    location_id:   emp?.location_id || null,
+    notes:         notes || (emp?.station ? 'Station: ' + emp.station : null),
+  };
+
+  try {
+    // -- Approval flow for staff ------------------------------------------
+    if (ApprovalFlow.isStaff()) {
+      const flow = await ApprovalFlow.submit({
+        action_type:   'create',
+        resource_type: 'Assignment',
+        resource_id:   null,
+        resource_name: (asset?.name || 'Asset') + ' ? ' + empName,
+        payload,
+        notes: 'Deploy asset to ' + empName,
+      });
+      if (flow.queued) { closeDeployModal(); return; }
+    }
+    // -- Admin / direct execute -------------------------------------------
+    await api.createAssignment(payload);
+    try { localStorage.setItem('emp_dashboard_refresh', Date.now()); } catch(_) {}
+    showToast('Asset deployed to ' + empName, 'success');
+    closeDeployModal();
+    loadItems();
+  } catch (e) {
+    showToast(e.message.includes('cannot be checked out') ? 'This asset is already deployed or under repair.' : e.message, 'error');
+  }
+}
+
+function onDmgStatusChange() {
+  const s = document.getElementById('damage-status').value;
+  document.getElementById('dmg-disposal-group').style.display = s === 'disposed' ? '' : 'none';
+  document.getElementById('dmg-donated-group').style.display  = s === 'donated'  ? '' : 'none';
+}
+
+async function submitDamageForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    product_id:      form.dataset.productId,
+    reported_by:     form.reported_by.value.trim(),
+    issue:           form.issue.value.trim(),
+    status:          form.status.value,
+    disposal_reason: form.disposal_reason ? form.disposal_reason.value.trim() : '',
+    donated_to:      form.donated_to      ? form.donated_to.value.trim()      : '',
+  };
+  const asset = allItems.find(x => String(x.id) === String(data.product_id));
+  try {
+    // -- Approval flow for staff ------------------------------------------
+    if (ApprovalFlow.isStaff()) {
+      const flow = await ApprovalFlow.submit({
+        action_type:   editingDamageId ? 'update' : 'create',
+        resource_type: 'Damage',
+        resource_id:   editingDamageId || null,
+        resource_name: asset?.name || ('Product #' + data.product_id),
+        payload:       data,
+        notes:         'Status report: ' + data.status,
+      });
+      if (flow.queued) { closeDamageModal(); return; }
+    }
+    // -- Admin / direct execute -------------------------------------------
+    if (editingDamageId) {
+      await api.updateDamage(editingDamageId, data);
+      showToast('Damage report updated', 'success');
+    } else {
+      await api.createDamage(data);
+      showToast('Damage reported', 'success');
+    }
+    closeDamageModal();
+    loadItems();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('deploy-employee-suggestions').style.display = 'none';
+  }
+});
+// Close suggestion dropdown on blur
+document.addEventListener('click', e => {
+  const box = document.getElementById('deploy-employee-suggestions');
+  const inp = document.getElementById('deploy-employee-search');
+  if (box && inp && !box.contains(e.target) && e.target !== inp) {
+    box.style.display = 'none';
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ------------------------------------------
+   GROUP EDIT MODAL
+------------------------------------------ */
+let groupEditIds = [];   // product IDs in the current group
+
+async function openGroupModal(ids, groupName) {
+  groupEditIds = ids;
+  const items  = ids.map(id => allItems.find(x => x.id === id)).filter(Boolean);
+  if (!items.length) return;
+  const rep = items[0];
+
+  document.getElementById('group-modal-title').textContent = 'Edit � ' + rep.name;
+
+  // Populate shared fields from representative
+  document.getElementById('ge-name').value  = rep.name || '';
+  document.getElementById('ge-brand').value = rep.brand_model || '';
+  document.getElementById('ge-desc').value  = rep.description || '';
+
+  // Populate category & supplier dropdowns
+  try {
+    const [catRes, supRes] = await Promise.all([api.getCategories(), api.getSuppliers()]);
+    const cats     = catRes.data || [];
+    const parents  = cats.filter(c => !c.parent_id);
+    const children = cats.filter(c =>  c.parent_id);
+    let catHtml = '<option value="">-- None --</option>';
+    parents.forEach(p => {
+      const kids = children.filter(c => c.parent_id == p.id);
+      if (kids.length) {
+        catHtml += '<optgroup label="' + esc(p.name) + '">';
+        kids.forEach(k => { catHtml += '<option value="' + k.id + '">' + esc(k.name) + '</option>'; });
+        catHtml += '</optgroup>';
+      } else {
+        catHtml += '<option value="' + p.id + '">' + esc(p.name) + '</option>';
+      }
+    });
+    document.getElementById('ge-category').innerHTML = catHtml;
+    document.getElementById('ge-category').value     = rep.category_id || '';
+
+    const supHtml = '<option value="">-- None --</option>' +
+      (supRes.data || []).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('');
+    document.getElementById('ge-supplier').innerHTML = supHtml;
+    document.getElementById('ge-supplier').value     = rep.supplier_id || '';
+  } catch (_) {}
+
+  // Build per-unit serial rows
+  const serialsDiv = document.getElementById('ge-serials');
+  serialsDiv.innerHTML = items.map((p, u) => {
+    const damage     = allDamages.find(d => d.product_id === p.id);
+    const assignment = allAssignments.find(a => a.product_id === p.id);
+    const assignee   = assignment ? assignment.assignee_name : null;
+    const isDamaged  = !!damage;
+
+    let statusBadge = '';
+    if (isDamaged)      statusBadge = '<span class="serial-status damaged">&#9888; Damaged</span>';
+    else if (assignee)  statusBadge = '<span class="serial-status assigned">&#128100; ' + esc(assignee) + '</span>';
+    else                statusBadge = '<span class="serial-status working">&#10003; Available</span>';
+
+    return `<div style="display:grid;grid-template-columns:36px 1fr 180px auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:center;background:var(--bg3);border-radius:6px;padding:3px 0;">#${u+1}</div>
+      <div>
+        <div style="font-size:12px;color:var(--muted2);">Current: <span style="font-family:'DM Mono',monospace;color:var(--blue);">${esc(p.serial_number || p.sku || '--')}</span></div>
+      </div>
+      <input
+        class="ge-serial-input"
+        type="text"
+        value="${esc(p.serial_number || p.sku || '')}"
+        placeholder="Serial number"
+        data-product-id="${p.id}"
+        data-original="${esc(p.serial_number || p.sku || '')}"
+        style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:border-color .15s;"
+        autocomplete="off"
+      />
+      <div>${statusBadge}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('group-modal').classList.add('open');
+}
+
+function closeGroupModal() {
+  document.getElementById('group-modal').classList.remove('open');
+  groupEditIds = [];
+}
+
+async function saveGroupEdit() {
+  const name     = document.getElementById('ge-name').value.trim();
+  const brand    = document.getElementById('ge-brand').value.trim();
+  const catId    = document.getElementById('ge-category').value;
+  const supId    = document.getElementById('ge-supplier').value;
+  const desc     = document.getElementById('ge-desc').value.trim();
+
+  if (!name) { showToast('Name is required', 'error'); return; }
+
+  const btn = document.getElementById('ge-save-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Saving\u2026';
+
+  // Collect serial inputs
+  const serialInputs = document.querySelectorAll('.ge-serial-input');
+
+  // Check for duplicate serials
+  const seen = new Set();
+  let hasDupe = false;
+  serialInputs.forEach(inp => {
+    const v = inp.value.trim().toLowerCase();
+    if (v && seen.has(v)) { hasDupe = true; inp.style.borderColor = 'var(--red)'; }
+    else { inp.style.borderColor = ''; }
+    if (v) seen.add(v);
+  });
+  if (hasDupe) {
+    showToast('Duplicate serial numbers detected', 'error');
+    btn.disabled    = false;
+    btn.textContent = 'Save Changes';
+    return;
+  }
+
+  try {
+    // Update shared fields on all units
+    const sharedPayload = { name, brand_model: brand, category_id: catId, supplier_id: supId, description: desc };
+    await Promise.all(groupEditIds.map(id => api.updateProduct(id, sharedPayload)));
+
+    // Update serial numbers individually where changed
+    const serialPromises = [];
+    serialInputs.forEach(inp => {
+      const productId = parseInt(inp.dataset.productId);
+      const newVal    = inp.value.trim();
+      const oldVal    = inp.dataset.original;
+      if (newVal !== oldVal) {
+        serialPromises.push(api.updateProduct(productId, { serial_number: newVal, sku: newVal }));
+      }
+    });
+    if (serialPromises.length) await Promise.all(serialPromises);
+
+    showToast('Asset group updated', 'success');
+    closeGroupModal();
+    loadItems();
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Save Changes';
+  }
+}
+</script>
+</body>
+</html>
+

@@ -1,0 +1,621 @@
+/*
+ * theme.css — Light / Dark mode.
+ * theme.js sets [data-theme] on <html> before first paint.
+ *
+ * PALETTE:
+ *   Dark  — sidebar: #0f2057 (deep navy)  |  content: #0d0f14 (near-black)
+ *   Light — sidebar: #1a3a8a (blue)        |  content: #ffffff (white)
+ */
+
+/* ── Smooth transition on every element ─────────────────────────────── */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LIGHT MODE
+   ══════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] { color-scheme: light; }
+
+html[data-theme="light"] {
+  --bg:         #f4f6fb !important;
+  --bg2:        #ffffff !important;
+  --bg3:        #eaecf4 !important;
+  --border:     rgba(0,0,0,0.08) !important;
+  --border2:    rgba(0,0,0,0.13) !important;
+  --text:       #0f172a !important;
+  --muted:      #64748b !important;
+  --muted2:     #334155 !important;
+  --blue:       #2563eb !important;
+  --blue-dim:   rgba(37,99,235,0.10) !important;
+  --green:      #16a34a !important;
+  --green-dim:  rgba(22,163,74,0.10) !important;
+  --red:        #dc2626 !important;
+  --red-dim:    rgba(220,38,38,0.10) !important;
+  --amber:      #d97706 !important;
+  --amber-dim:  rgba(217,119,6,0.10) !important;
+  --purple:     #7c3aed !important;
+  --purple-dim: rgba(124,58,237,0.10) !important;
+}
+
+/* ── Body & layout ── */
+[data-theme="light"] body  { background: #f4f6fb !important; color: #0f172a !important; }
+[data-theme="light"] .main { background: #f4f6fb !important; }
+
+/* ── Topbar ── */
+[data-theme="light"] .topbar      { background: #ffffff !important; border-bottom: 1px solid rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .topbar h1   { color: #1e40af !important; }
+[data-theme="light"] .topbar-title { color: #1e40af !important; }
+[data-theme="light"] .topbar-sub,
+[data-theme="light"] .topbar-date { color: #64748b !important; }
+
+/* ── Cards ── */
+[data-theme="light"] .card,
+[data-theme="light"] .stat-card   { background: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .stat-sub,
+[data-theme="light"] .stat-label  { color: #64748b !important; }
+[data-theme="light"] .stat-value  { color: #1e40af !important; }
+/* Section / card headings */
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3,
+[data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6 { color: #1e40af !important; }
+[data-theme="light"] .section-title   { color: #1e40af !important; }
+[data-theme="light"] .card-title      { color: #1e40af !important; }
+[data-theme="light"] .detail-name     { color: #1e40af !important; }
+[data-theme="light"] .panel-header h2 { color: #1e40af !important; }
+
+/* ── Tables ── */
+[data-theme="light"] table        { background: #ffffff !important; }
+[data-theme="light"] thead th     { background: rgba(0,0,0,0.03) !important; color: #64748b !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] tbody td     { color: #0f172a !important; border-bottom-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] tbody tr:hover td { background: rgba(0,0,0,0.025) !important; }
+[data-theme="light"] tbody tr.row-damaged:hover  td { background: rgba(220,38,38,0.04) !important; }
+[data-theme="light"] tbody tr.row-disposed:hover td { background: rgba(124,58,237,0.04) !important; }
+
+/* ── Inputs ── */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea      { background: #ffffff !important; color: #0f172a !important; border-color: rgba(0,0,0,0.13) !important; color-scheme: light; }
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #94a3b8 !important; }
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus { border-color: #2563eb !important; }
+[data-theme="light"] select option { background: #ffffff !important; color: #0f172a !important; }
+
+/* ── Filter bar ── */
+[data-theme="light"] .filter-bar  { background: #ffffff !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .filter-bar input,
+[data-theme="light"] .filter-bar select { background: #eaecf4 !important; }
+[data-theme="light"] .toolbar input { background: #ffffff !important; }
+
+/* ── Buttons ── */
+[data-theme="light"] .btn         { color: #334155 !important; border-color: rgba(0,0,0,0.13) !important; background: transparent !important; }
+[data-theme="light"] .btn:hover   { background: rgba(0,0,0,0.05) !important; color: #0f172a !important; }
+[data-theme="light"] .btn-primary { background: #2563eb !important; color: #fff !important; border-color: #2563eb !important; }
+[data-theme="light"] .btn-primary:hover { background: #1d4ed8 !important; }
+[data-theme="light"] .btn-ghost   { background: transparent !important; color: #334155 !important; }
+[data-theme="light"] .btn-ghost:hover { background: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .btn-danger  { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; }
+[data-theme="light"] .btn-amber   { background: rgba(217,119,6,0.10) !important; color: #d97706 !important; }
+[data-theme="light"] .btn-warn    { background: rgba(217,119,6,0.10) !important; color: #d97706 !important; border-color: rgba(217,119,6,0.25) !important; }
+[data-theme="light"] .btn-success { background: rgba(22,163,74,0.10) !important; color: #16a34a !important; }
+
+/* ── Modals ── */
+[data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.45) !important; }
+[data-theme="light"] .modal          { background: #ffffff !important; border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .modal-header   { border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .modal-header h3 { color: #0f172a !important; }
+[data-theme="light"] .modal-close    { background: #eaecf4 !important; border-color: rgba(0,0,0,0.10) !important; color: #334155 !important; }
+[data-theme="light"] .form-body      { background: #ffffff !important; }
+[data-theme="light"] .form-actions   { border-top-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .form-group label { color: #334155 !important; }
+[data-theme="light"] .modal-form-body { background: #ffffff !important; }
+[data-theme="light"] .modal-actions  { border-top-color: rgba(0,0,0,0.08) !important; }
+
+/* ── SIDEBAR — blue in light mode ── */
+[data-theme="light"] .sidebar             { background: #1e40af !important; border-right: none !important; }
+[data-theme="light"] .sidebar-brand       { border-bottom-color: rgba(255,255,255,0.12) !important; }
+[data-theme="light"] .sidebar .brand-empire { color: #ffffff !important; -webkit-text-stroke: 0.5px #ffffff !important; }
+[data-theme="light"] .sidebar .brand-one   { color: #29b6e8 !important; -webkit-text-stroke: 0.5px #29b6e8 !important; }
+[data-theme="light"] .nav-section         { color: rgba(255,255,255,0.45) !important; }
+[data-theme="light"] .nav-item            { color: rgba(255,255,255,0.80) !important; background: none !important; }
+[data-theme="light"] .nav-item:hover      { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
+[data-theme="light"] .nav-item.active     { background: rgba(255,255,255,0.20) !important; color: #ffffff !important; }
+[data-theme="light"] .folder-arrow        { color: rgba(255,255,255,0.45) !important; }
+[data-theme="light"] .sidebar-footer      { border-top-color: rgba(255,255,255,0.12) !important; }
+[data-theme="light"] .user-name           { color: #ffffff !important; }
+[data-theme="light"] .user-role           { color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .logout-btn          { color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .logout-btn:hover    { background: rgba(244,91,105,0.25) !important; color: #ffffff !important; }
+[data-theme="light"] .theme-toggle-btn    { color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .theme-toggle-btn:hover { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
+[data-theme="light"] .nav-badge           { background: #29b6e8 !important; color: #fff !important; }
+[data-theme="light"] .sidebar-folder-body { background: rgba(0,0,0,0.15) !important; }
+[data-theme="light"] .nav-dot             { background: rgba(255,255,255,0.45) !important; }
+[data-theme="light"] .nav-item.active .nav-dot { background: #ffffff !important; }
+[data-theme="light"] .avatar              { background: linear-gradient(135deg, #29b6e8, #1e3a8a) !important; }
+
+/* ── Badges ── */
+[data-theme="light"] .badge-admin          { background: rgba(37,99,235,0.12) !important; color: #1d4ed8 !important; }
+[data-theme="light"] .badge-staff          { background: rgba(22,163,74,0.12) !important; color: #15803d !important; }
+[data-theme="light"] .badge-viewer         { background: rgba(217,119,6,0.12) !important; color: #b45309 !important; }
+[data-theme="light"] .badge-pending        { background: rgba(217,119,6,0.12) !important; color: #b45309 !important; }
+[data-theme="light"] .badge-pending-receive { background: rgba(37,99,235,0.10) !important; color: #1d4ed8 !important; }
+[data-theme="light"] .badge-received       { background: rgba(22,163,74,0.10) !important; color: #15803d !important; }
+[data-theme="light"] .badge-cancelled      { background: rgba(220,38,38,0.10) !important; color: #b91c1c !important; }
+
+/* ── Status badges ── */
+[data-theme="light"] .status-damaged  { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; }
+[data-theme="light"] .status-resolved { background: rgba(22,163,74,0.10) !important; color: #16a34a !important; }
+[data-theme="light"] .status-disposed { background: rgba(124,58,237,0.10) !important; color: #7c3aed !important; }
+[data-theme="light"] .badge-working   { background: rgba(22,163,74,0.10) !important; color: #16a34a !important; border-color: rgba(22,163,74,0.25) !important; }
+[data-theme="light"] .badge-damaged   { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; border-color: rgba(220,38,38,0.25) !important; }
+[data-theme="light"] .badge-repair    { background: rgba(217,119,6,0.10) !important; color: #d97706 !important; border-color: rgba(217,119,6,0.25) !important; }
+
+/* ── Chips & mono ── */
+[data-theme="light"] .sku-chip,
+[data-theme="light"] .sku-code,
+[data-theme="light"] .mono         { background: #eaecf4 !important; color: #334155 !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .po-num       { background: rgba(37,99,235,0.10) !important; color: #2563eb !important; }
+[data-theme="light"] .qty-pill     { background: #eaecf4 !important; color: #334155 !important; border-color: rgba(0,0,0,0.10) !important; }
+
+/* ── Tabs ── */
+[data-theme="light"] .tabs          { border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .tab-btn       { color: #64748b !important; }
+[data-theme="light"] .tab-btn:hover { color: #0f172a !important; }
+[data-theme="light"] .tab-btn.active { color: #0f172a !important; border-bottom-color: #2563eb !important; }
+[data-theme="light"] .tab-badge     { background: rgba(220,38,38,0.12) !important; color: #dc2626 !important; }
+[data-theme="light"] .tab-badge.amber  { background: rgba(217,119,6,0.12) !important; color: #d97706 !important; }
+[data-theme="light"] .tab-badge.green  { background: rgba(22,163,74,0.12) !important; color: #16a34a !important; }
+[data-theme="light"] .tab-badge.purple { background: rgba(124,58,237,0.12) !important; color: #7c3aed !important; }
+[data-theme="light"] .tab-badge.blue   { background: rgba(37,99,235,0.12) !important; color: #2563eb !important; }
+
+/* ── Toasts ── */
+[data-theme="light"] .toast         { background: #ffffff !important; border-color: rgba(0,0,0,0.12) !important; color: #0f172a !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important; }
+[data-theme="light"] .toast.error   { border-color: #dc2626 !important; color: #dc2626 !important; }
+[data-theme="light"] .toast.success { border-color: #16a34a !important; color: #16a34a !important; }
+
+/* ── Empty states ── */
+[data-theme="light"] .empty-state   { color: #94a3b8 !important; }
+
+/* ── Assignee panel ── */
+[data-theme="light"] .assignee-panel       { background: #ffffff !important; border-right-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .panel-header         { border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .assignee-item:hover  { background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .assignee-item.active { background: rgba(37,99,235,0.10) !important; }
+[data-theme="light"] .assignee-name        { color: #0f172a !important; }
+[data-theme="light"] .assignee-station     { color: #64748b !important; }
+[data-theme="light"] .assignee-badge       { background: #eaecf4 !important; border-color: rgba(0,0,0,0.10) !important; color: #334155 !important; }
+[data-theme="light"] .panel-footer         { border-top-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .btn-add-assignee     { background: rgba(37,99,235,0.08) !important; color: #2563eb !important; border-color: rgba(37,99,235,0.20) !important; }
+[data-theme="light"] .detail-panel         { background: #f4f6fb !important; }
+[data-theme="light"] .asset-row            { background: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .asset-row:hover      { border-color: rgba(0,0,0,0.14) !important; }
+[data-theme="light"] .asset-icon           { background: #eaecf4 !important; border-color: rgba(0,0,0,0.08) !important; color: #64748b !important; }
+[data-theme="light"] .asset-name           { color: #0f172a !important; }
+[data-theme="light"] .asset-sku            { color: #2563eb !important; }
+[data-theme="light"] .asset-category       { color: #64748b !important; }
+[data-theme="light"] .detail-name          { color: #0f172a !important; }
+[data-theme="light"] .detail-station       { color: #64748b !important; }
+[data-theme="light"] .section-title        { color: #0f172a !important; }
+
+/* ── PO / Suppliers ── */
+[data-theme="light"] .po-card              { background: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .po-card.expanded     { border-color: #2563eb !important; }
+[data-theme="light"] .po-card-header:hover { background: rgba(0,0,0,0.02) !important; }
+[data-theme="light"] .po-supplier          { color: #0f172a !important; }
+[data-theme="light"] .po-meta              { color: #64748b !important; }
+[data-theme="light"] .po-amount            { color: #0f172a !important; }
+[data-theme="light"] .po-receive-footer    { background: rgba(22,163,74,0.04) !important; border-top-color: rgba(22,163,74,0.12) !important; }
+[data-theme="light"] .item-group           { border-bottom-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .item-group-header    { background: rgba(0,0,0,0.02) !important; }
+[data-theme="light"] .item-group-name      { color: #0f172a !important; }
+[data-theme="light"] .unit-index           { background: #eaecf4 !important; color: #64748b !important; }
+[data-theme="light"] .serial-input         { background: #eaecf4 !important; border-color: rgba(0,0,0,0.13) !important; color: #0f172a !important; }
+[data-theme="light"] .serial-input.filled  { background: rgba(22,163,74,0.06) !important; }
+[data-theme="light"] .serial-edit-input    { background: #eaecf4 !important; color: #0f172a !important; }
+[data-theme="light"] .po-drawer            { background: #ffffff !important; border-left-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .po-drawer-header     { border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .po-drawer-body       { background: #ffffff !important; }
+[data-theme="light"] .po-card-num          { color: #2563eb !important; background: rgba(37,99,235,0.10) !important; }
+[data-theme="light"] .po-badge.draft       { background: rgba(107,114,128,0.12) !important; color: #374151 !important; }
+[data-theme="light"] .po-badge.sent        { background: rgba(37,99,235,0.10) !important; color: #2563eb !important; }
+[data-theme="light"] .po-badge.received    { background: rgba(22,163,74,0.10) !important; color: #16a34a !important; }
+[data-theme="light"] .po-badge.cancelled   { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; }
+
+/* ── Category cards ── */
+[data-theme="light"] .cat-grid-card        { background: #eaecf4 !important; border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .cat-grid-card:hover  { border-color: #2563eb !important; }
+[data-theme="light"] .cat-icon-wrap        { background: rgba(37,99,235,0.10) !important; }
+
+/* ── Login page ── */
+[data-theme="light"] .wrap                 { background: transparent !important; }
+[data-theme="light"] .tab-bar              { background: #eaecf4 !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .tab-btn.active       { background: #ffffff !important; color: #0f172a !important; }
+[data-theme="light"] .role-card            { background: #eaecf4 !important; border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .role-card.selected   { background: rgba(37,99,235,0.10) !important; border-color: #2563eb !important; }
+[data-theme="light"] .role-card .role-name { color: #0f172a !important; }
+[data-theme="light"] .role-card .role-desc { color: #64748b !important; }
+[data-theme="light"] .brand-empire-login   { color: #1a3a8a !important; }
+
+/* ── Settings ── */
+[data-theme="light"] .settings-card        { background: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .settings-card-header { border-bottom-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .settings-row         { border-bottom-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .settings-row-label   { color: #0f172a !important; }
+[data-theme="light"] .settings-row-desc    { color: #64748b !important; }
+[data-theme="light"] .theme-option         { background: #eaecf4 !important; border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .theme-option:hover   { border-color: #2563eb !important; }
+[data-theme="light"] .theme-option.selected { background: rgba(37,99,235,0.10) !important; border-color: #2563eb !important; }
+[data-theme="light"] .theme-name           { color: #0f172a !important; }
+[data-theme="light"] .theme-option.selected .theme-name { color: #2563eb !important; }
+
+/* ── Assignee chips ── */
+[data-theme="light"] .assignee-chip { background: rgba(37,99,235,0.10) !important; border-color: rgba(37,99,235,0.20) !important; color: #2563eb !important; }
+[data-theme="light"] .more-chip     { background: #eaecf4 !important; border-color: rgba(0,0,0,0.10) !important; color: #64748b !important; }
+
+/* ── Serial modal ── */
+[data-theme="light"] #serial-modal > div { background: #ffffff !important; border-color: rgba(0,0,0,0.12) !important; }
+
+/* ── Scrollbars ── */
+[data-theme="light"] ::-webkit-scrollbar-track { background: #f4f6fb; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 4px; }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.28); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   NOTIFICATION BELL + BADGE
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Wrapper */
+.notif-bell-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* Bell button — badge is a child of this button */
+.notif-bell {
+  position: relative;
+  background: #0f1729;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  padding: 8px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+  color: #9aa0b2;
+  outline: none;
+  overflow: visible;
+}
+.notif-bell:hover { background: #162040; color: #e8eaf0; }
+.notif-bell-icon { display: block; flex-shrink: 0; }
+
+[data-theme="light"] .notif-bell {
+  background: #eef2ff !important;
+  border-color: rgba(0,0,0,.14) !important;
+  color: #334155 !important;
+}
+[data-theme="light"] .notif-bell:hover { background: #e2e8f0 !important; }
+
+/* Red count badge — floats outside the top-right corner of the bell */
+.notif-dot {
+  display:         none;
+  position:        absolute;
+  top:             -8px;
+  right:           -8px;
+  min-width:       18px;
+  height:          18px;
+  background:      #e8192c;
+  border-radius:   999px;
+  border:          2.5px solid #0a0e1a;
+  font-size:       10px;
+  font-weight:     800;
+  font-family:     'DM Sans', sans-serif;
+  color:           #fff;
+  align-items:     center;
+  justify-content: center;
+  padding:         0 4px;
+  line-height:     1;
+  pointer-events:  none;
+  box-sizing:      border-box;
+  letter-spacing:  -0.3px;
+  box-shadow:      0 2px 8px rgba(232,25,44,.6);
+  z-index:         10;
+  white-space:     nowrap;
+}
+
+.notif-dot.has-notif {
+  display: inline-flex !important;
+}
+
+[data-theme="light"] .notif-dot { border-color: #f0f4ff !important; }
+
+.topbar-actions { overflow: visible; }
+
+.loc-badge {
+  font-size: 12px;
+  color: var(--blue, #29b6e8);
+  background: var(--blue-dim, rgba(41,182,232,0.12));
+  border: 1px solid rgba(41,182,232,0.25);
+  border-radius: var(--radius-sm, 8px);
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TOPBAR — canonical rules applied to every page
+   ══════════════════════════════════════════════════════════════════════ */
+.topbar {
+  padding: 36px 48px 0;
+  display: flex;
+  align-items: center;          /* vertically centre left title + right actions */
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.topbar h1,
+.topbar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text, #e8eaf0);
+}
+.topbar-sub,
+.topbar-date {
+  font-size: 14px;
+  color: var(--muted, #6b7080);
+  margin-top: 4px;
+}
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+/* Left section wrapper used by pages with a sub-line */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+[data-theme="light"] .topbar h1,
+[data-theme="light"] .topbar-title { color: #1e40af !important; }
+[data-theme="light"] .topbar-sub,
+[data-theme="light"] .topbar-date  { color: #64748b !important; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   GLOBAL ANIMATIONS & KEYFRAMES
+   Applied to all pages via theme.css — no need to redeclare per page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Page entrance ──────────────────────────────────────────────────── */
+
+/* Every main content area fades + slides up on load */
+.main,
+.page,
+.content,
+.wrap {
+  animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Staggered stat cards */
+.stat-card:nth-child(1) { animation: slideUp 0.35s 0.05s cubic-bezier(0.22,1,0.36,1) both; }
+.stat-card:nth-child(2) { animation: slideUp 0.35s 0.10s cubic-bezier(0.22,1,0.36,1) both; }
+.stat-card:nth-child(3) { animation: slideUp 0.35s 0.15s cubic-bezier(0.22,1,0.36,1) both; }
+.stat-card:nth-child(4) { animation: slideUp 0.35s 0.20s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ── Card hover lift ────────────────────────────────────────────────── */
+
+.stat-card,
+.chart-card,
+.cat-card,
+.cat-grid-card,
+.po-card,
+.settings-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+              border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.28);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+
+.cat-card:hover,
+.cat-grid-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.26);
+  border-color: var(--blue);
+}
+
+[data-theme="light"] .stat-card:hover {
+  box-shadow: 0 10px 32px rgba(37,99,235,0.14);
+  border-color: rgba(37,99,235,0.30);
+}
+[data-theme="light"] .chart-card:hover {
+  box-shadow: 0 8px 24px rgba(37,99,235,0.10);
+}
+
+/* ── Card entrance (main page cards) ───────────────────────────────── */
+
+.card {
+  animation: slideUp 0.3s 0.15s cubic-bezier(0.22,1,0.36,1) both;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Button interactions ────────────────────────────────────────────── */
+
+.btn {
+  transition: background 0.15s ease, color 0.15s ease,
+              border-color 0.15s ease, transform 0.1s ease,
+              box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(41,182,232,0.35);
+}
+[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(37,99,235,0.30);
+}
+
+/* ── Input focus transitions ────────────────────────────────────────── */
+
+input, select, textarea {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.2s ease, color 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(41,182,232,0.15);
+}
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+/* ── Table row transition ───────────────────────────────────────────── */
+
+tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+/* ── Modal animations ───────────────────────────────────────────────── */
+
+/* All modal overlays and their content boxes use these by default */
+.modal-overlay.open .modal,
+.modal-overlay.open > div {
+  animation: modalIn 0.22s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Toast slide-up ─────────────────────────────────────────────────── */
+
+.toast {
+  animation: slideUp 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Nav item transitions ───────────────────────────────────────────── */
+
+.nav-item {
+  transition: background 0.15s ease, color 0.15s ease,
+              padding-left 0.15s ease;
+}
+
+/* ── Sidebar brand hover ────────────────────────────────────────────── */
+
+.brand-wordmark {
+  transition: opacity 0.15s ease;
+}
+.brand-wordmark:hover {
+  opacity: 0.85;
+}
+
+/* ── Notification dot pop-in ────────────────────────────────────────── */
+
+.notif-dot.has-notif {
+  animation: slideDown 0.2s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Skeleton / loading shimmer ─────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  border-radius: 6px;
+}
+[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.05) 25%,
+    rgba(0,0,0,0.10) 50%,
+    rgba(0,0,0,0.05) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ── Pill / badge hover ─────────────────────────────────────────────── */
+
+.pill {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* ── Spin utility (reusable for any loading spinner) ────────────────── */
+
+.spin {
+  animation: spin 0.75s linear infinite;
+}
+
+/* ── Reduced motion: respect user preference ────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .main, .page, .content, .wrap,
+  .stat-card, .card,
+  .toast, .modal-overlay.open .modal,
+  .modal-overlay.open > div,
+  .notif-dot.has-notif {
+    animation: none !important;
+  }
+  .stat-card:hover, .chart-card:hover,
+  .cat-card:hover, .cat-grid-card:hover {
+    transform: none !important;
+  }
+}

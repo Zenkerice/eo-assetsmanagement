@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="js/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --bg2:       #0f1729;
+      --bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);
+      --border2:   rgba(255,255,255,0.12);
+      --text:      #e8eaf0;
+      --muted:     #6b7080;
+      --muted2:    #9aa0b2;
+      --blue:      #29b6e8;
+      --blue-dim:  rgba(41,182,232,0.12);
+      --green:     #3ecf8e;
+      --green-dim: rgba(62,207,142,0.12);
+      --red:       #f45b69;
+      --red-dim:   rgba(244,91,105,0.12);
+      --amber:     #f5a623;
+      --amber-dim: rgba(245,166,35,0.12);
+      --purple:    #9b73f7;
+      --sidebar-w: 260px;
+      --radius:    14px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 16px;
+    }
+
+    .sidebar { width: var(--sidebar-w); }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; border: none; text-decoration: none;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: #6b9ef8; }
+    .btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border2); }
+    .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+    /* -- Period buttons (shared by all charts) -- */
+    .period-btn { background: transparent; color: var(--muted2); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 6px 13px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .period-btn:hover { background: var(--bg3); color: var(--text); }
+    .period-btn.active { background: var(--bg3); border-color: var(--blue); color: var(--blue); }
+    /* Period summary line */
+    .period-summary { font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 18px; }
+    .period-summary strong { color: var(--text); font-weight: 600; }
+    /* Custom datetime row */
+    .custom-range { display: none; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .custom-range.visible { display: flex; }
+    .custom-range input[type=datetime-local] { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 10px; outline: none; cursor: pointer; transition: border-color .15s; color-scheme: dark; }
+    .custom-range input[type=datetime-local]:focus { border-color: var(--blue); }
+    .custom-sep { font-size: 12px; color: var(--muted); }
+
+    .content { padding: 32px 48px 56px; flex: 1; }
+
+    /* -- Stat Cards ------------------------------- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: var(--radius); padding: 28px 28px 22px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .stat-card.blue::before  { background: var(--blue); }
+    .stat-card.green::before { background: var(--green); }
+    .stat-card.red::before   { background: var(--red); }
+    .stat-card.amber::before { background: var(--amber); }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 20px; margin-bottom: 14px;
+    }
+    .blue  .stat-icon { background: var(--blue-dim); }
+    .green .stat-icon { background: var(--green-dim); }
+    .red   .stat-icon { background: var(--red-dim); }
+    .amber .stat-icon { background: var(--amber-dim); }
+    .stat-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800;
+      line-height: 1; letter-spacing: -1px; margin-bottom: 6px;
+    }
+    .blue  .stat-value { color: var(--blue); }
+    .green .stat-value { color: var(--green); }
+    .red   .stat-value { color: var(--red); }
+    .amber .stat-value { color: var(--amber); }
+    .stat-sub { font-size: 13px; color: var(--muted); }
+
+    /* -- Section heading -------------------------- */
+    .section-heading {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-heading h2 {
+      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    }
+
+    /* -- Chart grid ------------------------------- */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .chart-card {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: var(--radius); padding: 24px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    }
+    .chart-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .chart-card-header h3 {
+      font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+      color: var(--text);
+    }
+    .chart-card-header span {
+      font-size: 12px; color: var(--muted);
+    }
+    .chart-wrap {
+      position: relative;
+    }
+    .chart-wrap.doughnut { max-width: 220px; margin: 0 auto; }
+    .chart-legend {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 18px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--muted2);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .legend-val { margin-left: auto; font-weight: 600; color: var(--text); font-size: 13px; }
+
+    /* -- Category mini-cards ---------------------- */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .cat-card {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: var(--radius); padding: 18px;
+      text-decoration: none; display: block;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .cat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+
+    /* -- Toast ------------------------------------ */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 10px; z-index: 999;
+    }
+    .toast {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 12px 18px;
+      font-size: 13px; color: var(--text);
+      animation: slideUp 0.25s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.error { border-color: var(--red); color: var(--red); }
+
+  </style>
+</head>
+<body>
+
+<aside class="sidebar"></aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1 style="color: #0096C7;">Dashboard</h1>
+      <div class="topbar-date" id="date-display"></div>
+    </div>
+    <div class="topbar-actions">
+      <select id="filter-location" onchange="onLocationChange()" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 14px;outline:none;cursor:pointer;">
+        <option value="">All Locations</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">&#8635; Refresh</button>
+</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon">&#128246;</div>
+        <div class="stat-label">Total Assets</div>
+        <div class="stat-value" id="stat-products">&ndash;</div>
+        <div class="stat-sub">in inventory</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">&#127991;</div>
+        <div class="stat-label">Categories</div>
+        <div class="stat-value" id="stat-categories">&ndash;</div>
+        <div class="stat-sub">product groups</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">&#9989;</div>
+        <div class="stat-label">Available</div>
+        <div class="stat-value" id="stat-assigned">&ndash;</div>
+        <div class="stat-sub">ready to deploy</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">&#9888;</div>
+        <div class="stat-label">Open Issues</div>
+        <div class="stat-value" id="stat-damages">&ndash;</div>
+        <div class="stat-sub">damage reports</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="section-heading">
+      <h2>Reports &amp; Analytics</h2>
+    </div>
+
+    <!-- ROW 1: Asset Status (doughnut) + Category Overview (replaces Assets by Category bar) -->
+    <div class="chart-grid">
+
+      <!-- Doughnut: Asset Status -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h3>Asset Status</h3>
+          <span>by count</span>
+        </div>
+        <div class="chart-wrap doughnut">
+          <canvas id="chart-status" height="220"></canvas>
+        </div>
+        <div class="chart-legend" id="legend-status"></div>
+      </div>
+
+      <!-- Category Overview: Stock In vs Deployed (moved up, replaces old bar chart) -->
+      <div class="chart-card" style="grid-column: span 2;">
+        <div class="chart-card-header">
+          <h3 id="cat-chart-title">Stock In vs Deployed</h3>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted2);">
+              <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:3px;background:#29b6e8;display:inline-block;"></span>Stock In</span>
+              <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:3px;background:#3ecf8e;display:inline-block;"></span>Deployed</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm period-btn active" id="cat-range-1day"   onclick="setCatRange('1day')">Last 1 day</button>
+              <button class="btn btn-sm period-btn"        id="cat-range-2days"  onclick="setCatRange('2days')">Last 2 days</button>
+              <button class="btn btn-sm period-btn"        id="cat-range-week"   onclick="setCatRange('week')">Last 7 days</button>
+              <button class="btn btn-sm period-btn"        id="cat-range-month"  onclick="setCatRange('month')">Last 30 days</button>
+              <button class="btn btn-sm period-btn"        id="cat-range-custom" onclick="setCatRange('custom')">Custom</button>
+            </div>
+          </div>
+        </div>
+        <div class="custom-range" id="cat-custom-range">
+          <span class="custom-sep">From</span>
+          <input type="datetime-local" id="cat-from" onchange="setCatRange('custom')" />
+          <span class="custom-sep">to</span>
+          <input type="datetime-local" id="cat-to" onchange="setCatRange('custom')" />
+        </div>
+        <div class="period-summary" id="cat-period-summary"></div>
+        <div class="chart-wrap">
+          <canvas id="chart-cat-overview" height="220"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2: Deployed Assets + Stock Received side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
+
+      <!-- Deployed Assets -->
+      <div>
+        <div class="section-heading" style="margin-top:8px;">
+          <h2>Deployed Assets</h2>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3 id="deploy-chart-title">Deployments</h3>
+            <span id="deploy-chart-total" style="font-weight:600;color:var(--blue);">0 total</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="period-btn active" id="range-1day"   onclick="setDeployRange('1day')">Last 1 day</button>
+            <button class="period-btn"        id="range-2days"  onclick="setDeployRange('2days')">Last 2 days</button>
+            <button class="period-btn"        id="range-week"   onclick="setDeployRange('week')">Last 7 days</button>
+            <button class="period-btn"        id="range-month"  onclick="setDeployRange('month')">Last 30 days</button>
+            <button class="period-btn"        id="range-custom" onclick="setDeployRange('custom')">Custom</button>
+          </div>
+          <div class="custom-range" id="deploy-custom-range">
+            <span class="custom-sep">From</span>
+            <input type="datetime-local" id="deploy-from" onchange="setDeployRange('custom')" />
+            <span class="custom-sep">to</span>
+            <input type="datetime-local" id="deploy-to" onchange="setDeployRange('custom')" />
+          </div>
+          <div class="period-summary" id="deploy-period-summary"></div>
+          <div class="chart-wrap">
+            <canvas id="chart-deployed" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock Received -->
+      <div>
+        <div class="section-heading" style="margin-top:8px;">
+          <h2>Stock Received</h2>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3 id="stock-chart-title">Stock Received</h3>
+            <span id="stock-chart-total" style="font-weight:600;color:var(--green);">0 units</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="period-btn active" id="stock-range-1day"   onclick="setStockRange('1day')">Last 1 day</button>
+            <button class="period-btn"        id="stock-range-2days"  onclick="setStockRange('2days')">Last 2 days</button>
+            <button class="period-btn"        id="stock-range-week"   onclick="setStockRange('week')">Last 7 days</button>
+            <button class="period-btn"        id="stock-range-month"  onclick="setStockRange('month')">Last 30 days</button>
+            <button class="period-btn"        id="stock-range-custom" onclick="setStockRange('custom')">Custom</button>
+          </div>
+          <div class="custom-range" id="stock-custom-range">
+            <span class="custom-sep">From</span>
+            <input type="datetime-local" id="stock-from" onchange="setStockRange('custom')" />
+            <span class="custom-sep">to</span>
+            <input type="datetime-local" id="stock-to" onchange="setStockRange('custom')" />
+          </div>
+          <div class="period-summary" id="stock-period-summary"></div>
+          <div class="chart-wrap">
+            <canvas id="chart-stock" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Category mini-cards -->
+    <div class="section-heading">
+      <h2>Assets by Category</h2>
+      <a href="categories.html" class="btn btn-ghost btn-sm">Manage &#8594;</a>
+    </div>
+    <div class="cat-grid" id="cat-grid">
+      <div style="color:var(--muted);font-size:13px;">Loading&hellip;</div>
+    </div>
+
+    <!-- -- Asset Age ----------------------------------------------- -->
+    <div class="section-heading" style="margin-top:8px;">
+      <h2>Asset Age</h2>
+    </div>
+
+    <!-- Donut LEFT + (flow strip + stat cards) RIGHT -->
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;margin-bottom:32px;align-items:start;">
+
+      <!-- Left: By age group donut -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h3>&#x1F504; By age group</h3>
+          <span>by count</span>
+        </div>
+        <div class="chart-wrap doughnut">
+          <canvas id="chart-age-donut" height="220"></canvas>
+        </div>
+        <div class="chart-legend" id="legend-age"></div>
+      </div>
+
+      <!-- Right: age flow strip stacked above stat cards -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Age flow strip -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" id="age-flow-strip">
+          <div class="chart-card" style="padding:16px 18px 12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">New</div>
+            <div id="age-flow-new" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#3ecf8e;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">&lt; 1 yr</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-new" style="height:100%;border-radius:4px;background:#3ecf8e;width:0%;transition:width .6s ease;"></div></div>
+          </div>
+          <div class="chart-card" style="padding:16px 18px 12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Active</div>
+            <div id="age-flow-active" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#29b6e8;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">1&ndash;3 yrs</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-active" style="height:100%;border-radius:4px;background:#29b6e8;width:0%;transition:width .6s ease;"></div></div>
+          </div>
+          <div class="chart-card" style="padding:16px 18px 12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Aging</div>
+            <div id="age-flow-aging" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f5a623;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">3&ndash;5 yrs</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-aging" style="height:100%;border-radius:4px;background:#f5a623;width:0%;transition:width .6s ease;"></div></div>
+          </div>
+          <div class="chart-card" style="padding:16px 18px 12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Old</div>
+            <div id="age-flow-old" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f97316;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">5&ndash;7 yrs</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-old" style="height:100%;border-radius:4px;background:#f97316;width:0%;transition:width .6s ease;"></div></div>
+          </div>
+          <div class="chart-card" style="padding:16px 18px 12px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">End of Life</div>
+            <div id="age-flow-eol" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f45b69;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">7+ yrs</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-eol" style="height:100%;border-radius:4px;background:#f45b69;width:0%;transition:width .6s ease;"></div></div>
+          </div>
+        </div>
+
+        <!-- Age summary stat cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div class="stat-card blue" style="padding:20px 22px 16px;">
+            <div class="stat-label">Total Assets</div>
+            <div class="stat-value" id="age-stat-total" style="font-size:36px;">&ndash;</div>
+            <div class="stat-sub" id="age-stat-total-sub">all deployed</div>
+          </div>
+          <div class="stat-card amber" style="padding:20px 22px 16px;">
+            <div class="stat-label">Avg. Age</div>
+            <div class="stat-value" id="age-stat-avg" style="font-size:36px;">&ndash;</div>
+            <div class="stat-sub">across all assets</div>
+          </div>
+          <div class="stat-card red" style="padding:20px 22px 16px;">
+            <div class="stat-label">End of Life</div>
+            <div class="stat-value" id="age-stat-eol" style="font-size:36px;">&ndash;</div>
+            <div class="stat-sub">need replacement</div>
+          </div>
+          <div class="stat-card amber" style="padding:20px 22px 16px;">
+            <div class="stat-label">Needs Repair</div>
+            <div class="stat-value" id="age-stat-repair" style="font-size:36px;">&ndash;</div>
+            <div class="stat-sub">flagged assets</div>
+          </div>
+        </div>
+
+      </div><!-- /right column -->
+    </div><!-- /age grid -->
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+  // -- Chart.js global defaults ----------------------------------------------
+  Chart.defaults.color          = '#6b7080';
+  Chart.defaults.borderColor    = 'rgba(255,255,255,0.07)';
+  Chart.defaults.font.family    = "'DM Sans', sans-serif";
+  Chart.defaults.plugins.legend.display = false;
+
+  let chartStatus     = null;
+  let chartCategories = null;
+  let chartDeployed   = null;
+  let chartStock      = null;
+  let chartCatOverview = null;
+  let currentDeployRange = '1day';
+  let currentStockRange  = '1day';
+  let currentCatRange    = '1day';
+
+  /* -- Shared period helpers -- */
+  function periodToDays(p) {
+    return { '1day': 1, '2days': 2, 'week': 7, 'month': 30 }[p] ?? 1;
+  }
+
+  function toLocalDT(date) {
+    const pad = n => String(n).padStart(2, '0');
+    return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()) +
+           'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+  }
+
+  function fmtDT(date) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
+           date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function setPeriodButtons(prefix, active) {
+    ['1day','2days','week','month','custom'].forEach(p => {
+      const el = document.getElementById(prefix + p);
+      if (el) el.classList.toggle('active', p === active);
+    });
+  }
+
+  function showCustomRange(rowId, fromId, toId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.classList.add('visible');
+    const now   = new Date();
+    const prior = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const fEl = document.getElementById(fromId);
+    const tEl = document.getElementById(toId);
+    if (fEl && !fEl.value) fEl.value = toLocalDT(prior);
+    if (tEl && !tEl.value) tEl.value = toLocalDT(now);
+  }
+
+  function hideCustomRange(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) row.classList.remove('visible');
+  }
+
+  function updateSummary(summaryId, total, range, fromId, toId, unit) {
+    const el = document.getElementById(summaryId);
+    if (!el) return;
+    if (!range) { el.textContent = ''; return; }
+
+    let fromDate, toDate = new Date();
+    if (range === 'custom') {
+      const fv = document.getElementById(fromId)?.value;
+      const tv = document.getElementById(toId)?.value;
+      if (!fv || !tv) { el.textContent = ''; return; }
+      fromDate = new Date(fv);
+      toDate   = new Date(tv);
+    } else {
+      fromDate = new Date(toDate.getTime() - periodToDays(range) * 24 * 60 * 60 * 1000);
+    }
+    el.innerHTML = 'Showing <strong>' + total + ' ' + unit + (total !== 1 ? 's' : '') + '</strong>' +
+      ' from <strong>' + fmtDT(fromDate) + '</strong>' +
+      ' to <strong>'   + fmtDT(toDate)   + '</strong>';
+  }
+
+  // -- Auth guard ------------------------------------------------------------
+  auth.initPage({ onReady: (user) => {
+    if (auth.isRequestUser()) {
+      window.location.href = 'requests.html';
+      return;
+    }
+    loadDashboard();
+  }});
+
+  document.getElementById('date-display').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // -- Location context ------------------------------------------------------
+  function onLocationChange() {
+    const sel = document.getElementById('filter-location');
+    const val = sel ? sel.value : '';
+    if (val) {
+      localStorage.setItem('emp_location_id', val);
+      localStorage.setItem('emp_location_name', sel.options[sel.selectedIndex].text);
+    } else {
+      localStorage.removeItem('emp_location_id');
+      localStorage.removeItem('emp_location_name');
+    }
+    loadDashboard();
+  }
+
+  // -- Main load -------------------------------------------------------------
+  async function loadDashboard() {
+    try {
+      const [products, categories, damages, locations] = await Promise.all([
+        api.getProducts(),
+        api.getCategories(),
+        api.getDamages(),
+        api.getLocations(),
+      ]);
+
+      // Populate location filter (only on first load)
+      const locSel = document.getElementById('filter-location');
+      if (locSel && locSel.options.length <= 1) {
+        (locations.data || []).forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.textContent = l.name;
+          locSel.appendChild(opt);
+        });
+        // Restore saved location
+        const saved = localStorage.getItem('emp_location_id');
+        if (saved) locSel.value = saved;
+      } else {
+        // Re-sync dropdown with localStorage on every reload
+        const saved = localStorage.getItem('emp_location_id');
+        if (locSel) locSel.value = saved || '';
+      }
+
+      // Always read location from localStorage � never rely solely on dropdown.value
+      const selectedLoc = localStorage.getItem('emp_location_id') || '';
+      const filteredProducts = selectedLoc
+        ? products.data.filter(p => String(p.location_id) === selectedLoc)
+        : products.data;
+
+      // Filter damages to the selected location's products
+      const filteredProductIds = new Set(filteredProducts.map(p => p.id));
+      const filteredDamages    = selectedLoc
+        ? damages.data.filter(d => filteredProductIds.has(d.product_id))
+        : damages.data;
+      const openIssues = filteredDamages.filter(d => d.status === 'damaged').length;
+
+      // Count asset statuses from filtered product data
+      const statusCounts = { available: 0, assigned: 0, damaged: 0, under_repair: 0 };
+      filteredProducts.forEach(p => {
+        const s = p.asset_status || 'available';
+        if (s in statusCounts) statusCounts[s]++;
+        else statusCounts.available++;
+      });
+      // Merge under_repair into damaged for display
+      statusCounts.damaged += statusCounts.under_repair;
+
+      // Count active categories (those with at least 1 filtered product)
+      const activeCatIds = new Set(filteredProducts.map(p => p.category_id).filter(Boolean));
+      const activeCatCount = selectedLoc ? activeCatIds.size : categories.data.length;
+
+      animateCount('stat-products',   filteredProducts.length);
+      animateCount('stat-categories', activeCatCount);
+      animateCount('stat-assigned',   statusCounts.available);
+      animateCount('stat-damages',    openIssues);
+
+      const badge = document.getElementById('nav-badge');
+      if (badge) badge.textContent = openIssues || '';
+
+      // -- Count per category (filtered) -------------------------------------
+      const catCounts = {};
+      filteredProducts.forEach(p => {
+        if (p.category_id) catCounts[p.category_id] = (catCounts[p.category_id] || 0) + 1;
+      });
+
+      renderStatusChart(statusCounts);
+      renderCatCards(categories.data, catCounts);
+      renderAgeSection(filteredProducts, filteredDamages);
+      loadCatOverviewChart(currentCatRange);
+      loadDeployedChart(currentDeployRange);
+      loadStockChart(currentStockRange);
+
+    } catch (e) {
+      showToast('Failed to load dashboard: ' + e.message, 'error');
+    }
+  }
+
+  // -- Chart: Asset Status (Doughnut) ----------------------------------------
+  function renderStatusChart(counts) {
+    const labels = ['Available', 'Deployed', 'Damaged / Under Repair'];
+    const data   = [counts.available, counts.assigned, counts.damaged];
+    const colors = ['#3ecf8e', '#29b6e8', '#f45b69'];
+
+    if (chartStatus) chartStatus.destroy();
+    chartStatus = new Chart(document.getElementById('chart-status'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: colors,
+          borderColor:     colors.map(c => c + '33'),
+          borderWidth:     2,
+          hoverOffset:     6,
+        }]
+      },
+      options: {
+        cutout: '68%',
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${ctx.parsed}`
+            }
+          }
+        }
+      }
+    });
+
+    // Custom legend
+    const legend = document.getElementById('legend-status');
+    legend.innerHTML = labels.map((l, i) => `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${colors[i]}"></span>
+        <span>${l}</span>
+        <span class="legend-val">${data[i]}</span>
+      </div>`).join('');
+  }
+
+  // -- Category mini-cards ---------------------------------------------------
+  function renderCatCards(cats, catCounts) {
+    const catGrid = document.getElementById('cat-grid');
+    const colors  = ['blue','green','amber','red'];
+    const icons = ['&#128246;','&#128421;','&#127991;','&#9000;','&#128433;','&#127911;','&#128221;','&#128295;'];
+    const colorVars = {
+      blue:  ['var(--blue)',  'var(--blue-dim)'],
+      green: ['var(--green)', 'var(--green-dim)'],
+      amber: ['var(--amber)', 'var(--amber-dim)'],
+      red:   ['var(--red)',   'var(--red-dim)'],
+    };
+
+    if (!cats.length) {
+      catGrid.innerHTML = '<div style="color:var(--muted);font-size:13px;">No categories yet.</div>';
+      return;
+    }
+
+    catGrid.innerHTML = cats.map((c, i) => {
+      const color = colors[i % colors.length];
+      const [cv, dv] = colorVars[color];
+      const icon  = icons[i % icons.length];
+      const count = catCounts[c.id] || 0;
+      return `
+        <a href="items.html?category_id=${c.id}" class="cat-card" style="--hover-color:${cv};"
+           onmouseover="this.style.borderColor='${cv}'"
+           onmouseout="this.style.borderColor=''">
+          <div style="width:36px;height:36px;border-radius:10px;background:${dv};display:grid;place-items:center;font-size:17px;margin-bottom:12px;">${icon}</div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${esc(c.name)}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:${cv};line-height:1;">${count}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">${count === 1 ? 'asset' : 'assets'}</div>
+        </a>`;
+    }).join('');
+  }
+
+  // -- Animated counter ------------------------------------------------------
+  function animateCount(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const duration = 600;
+    const start = performance.now();
+    function tick(now) {
+      const t    = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * ease);
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // -- Deployed Assets Chart -------------------------------------------------
+  async function loadDeployedChart(range) {
+    currentDeployRange = range;
+    setPeriodButtons('range-', range);
+
+    if (range === 'custom') {
+      showCustomRange('deploy-custom-range', 'deploy-from', 'deploy-to');
+      const fv = document.getElementById('deploy-from')?.value;
+      const tv = document.getElementById('deploy-to')?.value;
+      if (!fv || !tv) return; // wait for user to pick dates
+    } else {
+      hideCustomRange('deploy-custom-range');
+    }
+
+    const days = periodToDays(range);
+    document.getElementById('deploy-chart-title').textContent =
+      range === 'custom' ? 'Deployments \u2014 Custom Range'
+      : 'Deployments \u2014 Last ' + (range === '1day' ? '1 Day' : range === '2days' ? '2 Days' : range === 'week' ? '7 Days' : '30 Days');
+
+    try {
+      const locId = localStorage.getItem('emp_location_id') || null;
+      const res   = await api.getDailyAssignments(days, locId);
+      const data  = res.data || [];
+
+      let labels = [], values = [];
+      data.forEach(d => {
+        const dt    = new Date(d.day + 'T00:00:00');
+        const label = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        labels.push(label);
+        values.push(d.count);
+      });
+
+      const total = values.reduce((a, b) => a + b, 0);
+      document.getElementById('deploy-chart-total').textContent = total + ' total';
+      updateSummary('deploy-period-summary', total, range, 'deploy-from', 'deploy-to', 'deployment');
+
+      if (chartDeployed) chartDeployed.destroy();
+      chartDeployed = new Chart(document.getElementById('chart-deployed'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Deployments',
+            data: values,
+            borderColor: '#29b6e8',
+            backgroundColor: 'rgba(41,182,232,0.10)',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#29b6e8',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.35,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' deployment' + (ctx.parsed.y !== 1 ? 's' : '') } }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7080', font: { size: 11 }, maxRotation: 45 } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7080', font: { size: 11 }, stepSize: 1, precision: 0 } }
+          }
+        }
+      });
+    } catch(e) { console.warn('Could not load deployed chart:', e.message); }
+  }
+
+  // -- Chart: Category Overview (Stock In vs Deployed) ---------------------
+  async function loadCatOverviewChart(range) {
+    currentCatRange = range;
+    setPeriodButtons('cat-range-', range);
+
+    if (range === 'custom') {
+      showCustomRange('cat-custom-range', 'cat-from', 'cat-to');
+      const fv = document.getElementById('cat-from')?.value;
+      const tv = document.getElementById('cat-to')?.value;
+      if (!fv || !tv) return;
+    } else {
+      hideCustomRange('cat-custom-range');
+    }
+
+    const days = periodToDays(range);
+    document.getElementById('cat-chart-title').textContent =
+      range === 'custom' ? 'Stock In vs Deployed \u2014 Custom Range'
+      : 'Stock In vs Deployed \u2014 Last ' + (range === '1day' ? '1 Day' : range === '2days' ? '2 Days' : range === 'week' ? '7 Days' : '30 Days');
+
+    try {
+      const locId = localStorage.getItem('emp_location_id') || null;
+      const [stockRes, deployRes] = await Promise.all([
+        api.getStockReceivedByCategory(days, locId),
+        api.getDeployedByCategory(days, locId),
+      ]);
+
+      const stockRows  = stockRes.data  || [];
+      const deployRows = deployRes.data || [];
+
+      // Build a unified category label set
+      const catMap = {};
+      stockRows.forEach(r  => { if (r.category_name) catMap[r.category_name] = true; });
+      deployRows.forEach(r => { if (r.category_name) catMap[r.category_name] = true; });
+      const labels = Object.keys(catMap).sort();
+
+      if (!labels.length) {
+        if (chartCatOverview) { chartCatOverview.destroy(); chartCatOverview = null; }
+        document.getElementById('cat-period-summary').textContent = '';
+        return;
+      }
+
+      const stockData  = labels.map(l => {
+        const r = stockRows.find(x => x.category_name === l);
+        return r ? parseInt(r.count) : 0;
+      });
+      const deployData = labels.map(l => {
+        const r = deployRows.find(x => x.category_name === l);
+        return r ? parseInt(r.count) : 0;
+      });
+
+      const totalAll = stockData.reduce((a,b)=>a+b,0) + deployData.reduce((a,b)=>a+b,0);
+      updateSummary('cat-period-summary', totalAll, range, 'cat-from', 'cat-to', 'record');
+
+      if (chartCatOverview) chartCatOverview.destroy();
+      chartCatOverview = new Chart(document.getElementById('chart-cat-overview'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Stock In',
+              data: stockData,
+              backgroundColor: 'rgba(41,182,232,0.25)',
+              borderColor: '#29b6e8',
+              borderWidth: 2,
+              borderRadius: 5,
+              borderSkipped: false,
+            },
+            {
+              label: 'Deployed',
+              data: deployData,
+              backgroundColor: 'rgba(62,207,142,0.25)',
+              borderColor: '#3ecf8e',
+              borderWidth: 2,
+              borderRadius: 5,
+              borderSkipped: false,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#6b7080', font: { size: 11 } }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#6b7080', font: { size: 11 }, stepSize: 1, precision: 0 }
+            }
+          }
+        }
+      });
+    } catch(e) {
+      console.warn('Could not load category overview chart:', e.message);
+    }
+  }
+
+  function setCatRange(range) {
+    loadCatOverviewChart(range);
+  }
+
+  function setDeployRange(range) {
+    loadDeployedChart(range);
+  }
+
+  // -- Stock Received Chart --------------------------------------------------
+  async function loadStockChart(range) {
+    currentStockRange = range;
+    setPeriodButtons('stock-range-', range);
+
+    if (range === 'custom') {
+      showCustomRange('stock-custom-range', 'stock-from', 'stock-to');
+      const fv = document.getElementById('stock-from')?.value;
+      const tv = document.getElementById('stock-to')?.value;
+      if (!fv || !tv) return;
+    } else {
+      hideCustomRange('stock-custom-range');
+    }
+
+    const days = periodToDays(range);
+    document.getElementById('stock-chart-title').textContent =
+      range === 'custom' ? 'Stock Received \u2014 Custom Range'
+      : 'Stock Received \u2014 Last ' + (range === '1day' ? '1 Day' : range === '2days' ? '2 Days' : range === 'week' ? '7 Days' : '30 Days');
+
+    try {
+      const locId = localStorage.getItem('emp_location_id') || null;
+      const res   = await api.getStockReceived(days, locId);
+      const data  = res.data || [];
+
+      let labels = [], values = [];
+      data.forEach(d => {
+        const dt    = new Date(d.day + 'T00:00:00');
+        const label = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        labels.push(label);
+        values.push(d.count);
+      });
+
+      const total = values.reduce((a, b) => a + b, 0);
+      document.getElementById('stock-chart-total').textContent = total + ' unit' + (total !== 1 ? 's' : '');
+      updateSummary('stock-period-summary', total, range, 'stock-from', 'stock-to', 'unit');
+
+      if (chartStock) chartStock.destroy();
+      chartStock = new Chart(document.getElementById('chart-stock'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Units Received',
+            data: values,
+            backgroundColor: 'rgba(62,207,142,0.25)',
+            borderColor: '#3ecf8e',
+            borderWidth: 2,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ' ' + ctx.parsed.y + ' unit' + (ctx.parsed.y !== 1 ? 's' : '') + ' received'
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#6b7080', font: { size: 11 }, maxRotation: 45 }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#6b7080', font: { size: 11 }, stepSize: 1, precision: 0 }
+            }
+          }
+        }
+      });
+    } catch(e) {
+      console.warn('Could not load stock chart:', e.message);
+    }
+  }
+
+  function setStockRange(range) {
+    loadStockChart(range);
+  }
+
+  // -- Asset Age section ----------------------------------------------------
+  let chartAgeDonut = null;
+
+  function ageYears(dateStr) {
+    if (!dateStr) return 0;
+    const ms = Date.now() - new Date(dateStr).getTime();
+    return ms < 0 ? 0 : ms / (1000 * 60 * 60 * 24 * 365.25);
+  }
+
+  function fmtAvgAge(yrs) {
+    if (yrs < 1) {
+      const m = Math.round(yrs * 12);
+      return (m <= 1 ? '1' : m) + ' <span style="font-size:18px;font-weight:600;">mo' + (m === 1 ? '' : 's') + '</span>';
+    }
+    return yrs.toFixed(1) + ' <span style="font-size:18px;font-weight:600;">yrs</span>';
+  }
+
+  function ageStage(yrs) {
+    if (yrs < 1)  return 'new';
+    if (yrs < 3)  return 'active';
+    if (yrs < 5)  return 'aging';
+    if (yrs < 7)  return 'old';
+    return 'eol';
+  }
+
+  function renderAgeSection(products, damages) {
+    const total = products.length;
+    const ages  = products.map(p => ageYears(p.created_at));
+    const avg   = total > 0 ? ages.reduce((a, b) => a + b, 0) / total : 0;
+    const eolCount = ages.filter(a => a >= 7).length;
+    const openDmgIds = new Set(damages.filter(d => d.status === 'damaged').map(d => d.product_id));
+    const repairCount = products.filter(p => openDmgIds.has(p.id)).length;
+
+    // Stat cards
+    document.getElementById('age-stat-total').textContent    = total;
+    document.getElementById('age-stat-total-sub').textContent = total === 1 ? '1 asset total' : total + ' assets total';
+    document.getElementById('age-stat-avg').innerHTML  = fmtAvgAge(avg);
+    document.getElementById('age-stat-eol').textContent    = eolCount;
+    document.getElementById('age-stat-repair').textContent = repairCount;
+
+    // Flow strip
+    const counts = { new:0, active:0, aging:0, old:0, eol:0 };
+    products.forEach(p => { counts[ageStage(ageYears(p.created_at))]++; });
+    const t = total || 1;
+    ['new','active','aging','old','eol'].forEach(s => {
+      const el = document.getElementById('age-flow-' + s);
+      const bar = document.getElementById('age-bar-' + s);
+      if (el)  el.textContent = counts[s];
+      if (bar) setTimeout(() => { bar.style.width = Math.round((counts[s] / t) * 100) + '%'; }, 50);
+    });
+
+    // Donut chart
+    const labels = ['New','Active','Aging','Old','End of Life'];
+    const data   = [counts.new, counts.active, counts.aging, counts.old, counts.eol];
+    const colors = ['#3ecf8e','#29b6e8','#f5a623','#f97316','#f45b69'];
+    if (chartAgeDonut) chartAgeDonut.destroy();
+    chartAgeDonut = new Chart(document.getElementById('chart-age-donut'), {
+      type: 'doughnut',
+      data: {
+        labels: labels.map((l, i) => l + ' ' + data[i]),
+        datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }],
+      },
+      options: {
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed } },
+        },
+      },
+    });
+
+    // Custom legend matching Asset Status style
+    const legend = document.getElementById('legend-age');
+    if (legend) {
+      legend.innerHTML = labels.map((l, i) => `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${colors[i]}"></span>
+          <span>${l}</span>
+          <span class="legend-val">${data[i]}</span>
+        </div>`).join('');
+    }
+  }
+
+  // -- Auto-refresh when employees page deploys/undeploys an asset ----------
+  window.addEventListener('storage', e => {
+    if (e.key === 'emp_dashboard_refresh') {
+      // Reload just the charts (not the full dashboard stats) for a lightweight refresh
+      loadCatOverviewChart(currentCatRange);
+      loadDeployedChart(currentDeployRange);
+      loadStockChart(currentStockRange);
+      loadDashboard(); // also refresh stat cards
+    }
+  });
+</script>
+</body>
+</html>

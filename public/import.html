@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import &mdash; EmpireOne</title>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+    /* -- Topbar -- */
+    .back-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;font-size:18px;transition:all .15s;text-decoration:none;flex-shrink:0}
+    .back-btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-template{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .btn-template:hover{background:var(--bg3);color:var(--text)}
+
+    /* -- Content -- */
+    .content{padding:28px 48px 56px;display:flex;justify-content:center}
+    .wizard-wrap{width:100%;max-width:760px;display:flex;flex-direction:column;gap:0}
+
+    /* -- Steps -- */
+    .steps-bar{display:flex;align-items:center;padding:0 0 28px;gap:0}
+    .step-item{display:flex;align-items:center;gap:10px;flex:1}
+    .step-circle{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;flex-shrink:0;border:2px solid var(--border2);color:var(--muted);background:var(--bg2);transition:all .25s}
+    .step-item.active .step-circle{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 4px var(--blue-dim)}
+    .step-item.done .step-circle{background:var(--green);border-color:var(--green);color:#fff}
+    .step-text{display:flex;flex-direction:column}
+    .step-label{font-size:13px;font-weight:600;color:var(--muted);transition:color .2s}
+    .step-item.active .step-label{color:var(--text)}
+    .step-item.done .step-label{color:var(--green)}
+    .step-sub{font-size:11px;color:var(--muted);margin-top:1px}
+    .step-connector{flex:1;height:2px;background:var(--border2);margin:0 16px;border-radius:1px;transition:background .3s;max-width:100px}
+    .step-connector.done{background:var(--green)}
+
+    /* -- Wizard card -- */
+    .wizard-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+
+    /* -- Panel body -- */
+    .panel-body{padding:32px}
+
+    /* -- Type selector -- */
+    .type-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+    .type-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 20px;border-radius:var(--radius-sm);border:2px solid var(--border2);background:var(--bg3);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s}
+    .type-btn:hover{border-color:var(--blue);color:var(--text)}
+    .type-btn.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue)}
+    .type-btn .type-icon{font-size:20px}
+
+    /* -- Drop zone -- */
+    .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:56px 32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--blue);background:var(--blue-dim)}
+    .drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .dz-icon{font-size:44px;margin-bottom:16px;display:block;opacity:.5}
+    .dz-title{font-size:17px;font-weight:600;margin-bottom:6px}
+    .dz-sub{font-size:13px;color:var(--muted)}
+    .dz-formats{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px}
+    .dz-format{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted2);font-family:'DM Mono',monospace}
+
+    /* -- File chosen -- */
+    .file-chosen{display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--green-dim);border-radius:var(--radius-sm);padding:14px 18px;margin-top:14px}
+    .file-icon{font-size:26px;flex-shrink:0}
+    .file-info-text{flex:1;min-width:0}
+    .file-name{font-size:14px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .file-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .file-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;flex-shrink:0}
+    .file-remove:hover{color:var(--red)}
+
+    /* -- Map table -- */
+    .map-section-title{font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6}
+    .map-table-wrap{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+    .map-table{width:100%;border-collapse:collapse}
+    .map-table th{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:11px 16px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)}
+    .map-table td{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+    .map-table tr:last-child td{border-bottom:none}
+    .map-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .col-file{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600}
+    .col-sample{font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .map-select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;width:100%;cursor:pointer;transition:border-color .15s}
+    .map-select:focus{border-color:var(--blue)}
+    .map-select option{background:var(--bg3)}
+
+    /* -- Review -- */
+    .review-header{margin-bottom:16px}
+    .review-header p{font-size:14px;color:var(--muted2);line-height:1.6}
+    .review-wrap{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:340px;overflow-y:auto}
+    .review-table{width:100%;border-collapse:collapse;font-size:12px}
+    .review-table th{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+    .review-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+    .review-table tr:last-child td{border-bottom:none}
+    .review-table tr.row-error td{background:rgba(244,91,105,0.06)}
+    .review-table tr.row-ok:hover td{background:rgba(62,207,142,0.04)}
+    .row-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+    .row-status.ok{background:var(--green-dim);color:var(--green)}
+    .row-status.error{background:var(--red-dim);color:var(--red)}
+    .review-summary{display:flex;gap:20px;padding:14px 16px;background:rgba(255,255,255,0.02);border-top:1px solid var(--border);font-size:13px;flex-wrap:wrap}
+
+    /* -- Progress -- */
+    .import-progress{background:var(--bg3);border-radius:6px;height:6px;overflow:hidden;margin:14px 0 4px}
+    .import-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:6px;transition:width .3s ease;width:0%}
+
+    /* -- Footer -- */
+    .wizard-footer{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-top:1px solid var(--border);background:rgba(255,255,255,0.01)}
+
+    /* -- Buttons -- */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);white-space:nowrap}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover{background:#6b9ef8}
+    .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+
+    /* -- Toast -- */
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)} .toast.success{border-color:var(--green);color:var(--green)}
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      
+      <div>
+        <h1>Data &amp; Integration</h1>
+        <div class="topbar-sub" id="import-sub">Bulk import assets or categories via CSV or Excel</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-template" id="btn-template" onclick="downloadTemplate()">
+        &#8595; Download template &#8599;
+      </button>
+</div>
+  </div>
+
+  <div class="content">
+    <div class="wizard-wrap">
+
+      <!-- Steps bar -->
+      <div class="steps-bar">
+        <div class="step-item active" id="step-1">
+          <div class="step-circle">1</div>
+          <div class="step-text">
+            <span class="step-label">Upload file</span>
+            <span class="step-sub">Choose your spreadsheet</span>
+          </div>
+        </div>
+        <div class="step-connector" id="line-1"></div>
+        <div class="step-item" id="step-2">
+          <div class="step-circle">2</div>
+          <div class="step-text">
+            <span class="step-label">Map columns</span>
+            <span class="step-sub">Match to system fields</span>
+          </div>
+        </div>
+        <div class="step-connector" id="line-2"></div>
+        <div class="step-item" id="step-3">
+          <div class="step-circle">3</div>
+          <div class="step-text">
+            <span class="step-label">Review &amp; import</span>
+            <span class="step-sub">Confirm and run</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wizard card -->
+      <div class="wizard-card">
+
+        <!-- Panel 1: Upload -->
+        <div id="panel-1" class="panel-body">
+          <div class="type-selector">
+            <button class="type-btn active" id="type-assets" onclick="setType('assets')">
+              <span class="type-icon">&#128246;</span> Assets
+            </button>
+            <button class="type-btn" id="type-categories" onclick="setType('categories')">
+              <span class="type-icon">&#127991;</span> Categories
+            </button>
+          </div>
+          <div class="drop-zone" id="drop-zone"
+               ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"
+               onclick="document.getElementById('file-input').click()">
+            <input type="file" id="file-input" accept=".csv,.xlsx,.xls" onchange="onFileSelect(event)" />
+            <span class="dz-icon">&#9729;</span>
+            <div class="dz-title">Drop your file here, or click to browse</div>
+            <div class="dz-sub">Supports .csv, .xlsx, .xls &mdash; max 10 MB</div>
+            <div class="dz-formats">
+              <span class="dz-format">.csv</span>
+              <span class="dz-format">.xlsx</span>
+              <span class="dz-format">.xls</span>
+            </div>
+          </div>
+          <div id="file-info"></div>
+        </div>
+
+        <!-- Panel 2: Map columns -->
+        <div id="panel-2" style="display:none;" class="panel-body">
+          <p class="map-section-title">
+            Match your file&rsquo;s columns to the system fields below.<br>
+            Required fields are marked with <span style="color:var(--red);font-weight:700;">*</span> &mdash; rows missing them will be skipped.
+          </p>
+          <div class="map-table-wrap">
+            <table class="map-table">
+              <thead>
+                <tr>
+                  <th>Your column</th>
+                  <th>Sample data</th>
+                  <th>Maps to field</th>
+                </tr>
+              </thead>
+              <tbody id="map-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel 3: Review -->
+        <div id="panel-3" style="display:none;" class="panel-body">
+          <div class="review-header">
+            <p id="review-desc"></p>
+            <div class="import-progress" id="import-progress" style="display:none;">
+              <div class="import-progress-bar" id="import-bar"></div>
+            </div>
+          </div>
+          <div class="review-wrap">
+            <table class="review-table">
+              <thead id="review-thead"></thead>
+              <tbody id="review-tbody"></tbody>
+            </table>
+          </div>
+          <div class="review-summary" id="review-summary"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="wizard-footer">
+          <button class="btn btn-ghost" id="btn-back" style="visibility:hidden;" onclick="goBack()">&#8592; Back</button>
+          <button class="btn btn-primary" id="btn-next" disabled onclick="goNext()">Continue &#8594;</button>
+        </div>
+
+      </div><!-- /wizard-card -->
+    </div><!-- /wizard-wrap -->
+  </div><!-- /content -->
+</div><!-- /main -->
+<div id="toast-container"></div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(async () => {
+  const user = await auth.requireAuth();
+  if (!user) return;
+  auth.renderUserInfo();
+
+  // Show active location context
+  const locName = localStorage.getItem('emp_location_name');
+  const sub = document.getElementById('import-sub');
+  if (sub && locName) {
+    sub.innerHTML = 'Bulk import assets or categories via CSV or Excel &nbsp;&bull;&nbsp; <span style="color:var(--blue);">' + String.fromCharCode(0x1F4CD) + ' ' + locName + '</span> &mdash; imported assets will be assigned to this location';
+  }
+})();
+
+let importType  = 'assets';
+let currentStep = 1;
+let parsedRows  = [];
+let fileHeaders = [];
+let columnMap   = {};
+let allCategories = [];
+let allSuppliers  = [];
+
+const FIELDS = {
+  assets: [
+    { key:'name',         label:'Name',         required:true  },
+    { key:'serial_number',label:'Serial Number', required:false },
+    { key:'brand_model',  label:'Brand / Model', required:false },
+    { key:'category',     label:'Category',      required:false },
+    { key:'supplier',     label:'Supplier',      required:false },
+    { key:'location',     label:'Location',      required:false },
+  ],
+  categories: [
+    { key:'name',        label:'Name',        required:true  },
+    { key:'description', label:'Description', required:false },
+  ],
+};
+
+/* -- Type toggle -- */
+function setType(t) {
+  importType = t;
+  document.getElementById('type-assets').classList.toggle('active',     t === 'assets');
+  document.getElementById('type-categories').classList.toggle('active', t === 'categories');
+  resetFile();
+}
+
+/* -- Template download -- */
+function downloadTemplate() {
+  const fields  = FIELDS[importType];
+  const header  = fields.map(f => f.label).join(',');
+  const example = importType === 'assets'
+    ? '"Dell Laptop","SN-001234","Dell XPS 15","Computers","Empire One","Dungganon"'
+    : '"Computers","Desktop and laptop computers"';
+  const csv  = header + '\n' + example;
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = importType + '_template.csv';
+  a.click();
+}
+
+/* -- File handling -- */
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function onDragLeave()  { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function onFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function resetFile() {
+  parsedRows = []; fileHeaders = []; columnMap = {};
+  document.getElementById('file-info').innerHTML = '';
+  const fi = document.getElementById('file-input');
+  if (fi) fi.value = '';
+  document.getElementById('btn-next').disabled = true;
+}
+
+function processFile(file) {
+  if (file.size > 10 * 1024 * 1024) { showToast('File exceeds 10 MB limit', 'error'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['csv','xlsx','xls'].includes(ext)) { showToast('Only .csv, .xlsx, .xls files are supported', 'error'); return; }
+
+  const reader = new FileReader();
+  if (ext === 'csv') {
+    reader.onload = (e) => {
+      try { parseCSV(e.target.result); showFileInfo(file); document.getElementById('btn-next').disabled = false; }
+      catch(err) { showToast('Failed to parse file: ' + err.message, 'error'); }
+    };
+    reader.readAsText(file);
+  } else {
+    reader.onload = (e) => {
+      try {
+        if (typeof XLSX === 'undefined') { showToast('SheetJS not loaded. Check your internet connection.', 'error'); return; }
+        const wb    = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const json  = XLSX.utils.sheet_to_json(sheet, { defval:'' });
+        if (!json.length) throw new Error('No data rows found');
+        fileHeaders = Object.keys(json[0]);
+        parsedRows  = json.map(row => { const r={}; fileHeaders.forEach(h=>{ r[h]=String(row[h]??''); }); return r; });
+        showFileInfo(file);
+        document.getElementById('btn-next').disabled = false;
+      } catch(err) { showToast('Failed to parse Excel: ' + err.message, 'error'); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error('File needs a header row and at least one data row');
+  fileHeaders = parseCSVLine(lines[0]);
+  parsedRows  = lines.slice(1).filter(l => l.trim()).map(l => {
+    const vals = parseCSVLine(l), row = {};
+    fileHeaders.forEach((h,i) => { row[h] = vals[i] || ''; });
+    return row;
+  });
+  if (!parsedRows.length) throw new Error('No data rows found');
+}
+
+function parseCSVLine(line) {
+  const result = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function showFileInfo(file) {
+  const size = file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : (file.size/1024).toFixed(1)+' KB';
+  document.getElementById('file-info').innerHTML = `
+    <div class="file-chosen">
+      <span class="file-icon">&#128196;</span>
+      <div class="file-info-text">
+        <div class="file-name">${esc(file.name)}</div>
+        <div class="file-meta">${parsedRows.length} rows &middot; ${size}</div>
+      </div>
+      <button class="file-remove" onclick="resetFile()" title="Remove">&times;</button>
+    </div>`;
+}
+
+/* -- Navigation -- */
+async function goNext() {
+  if (currentStep === 1) { await loadDropdowns(); buildColumnMap(); setStep(2); }
+  else if (currentStep === 2) { buildReview(); setStep(3); }
+  else if (currentStep === 3) { await runImport(); }
+}
+function goBack() {
+  if (currentStep === 2) setStep(1);
+  else if (currentStep === 3) setStep(2);
+}
+
+function setStep(n) {
+  currentStep = n;
+  [1,2,3].forEach(i => {
+    document.getElementById('panel-' + i).style.display = i === n ? '' : 'none';
+    const s = document.getElementById('step-' + i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    else if (i === n) s.classList.add('active');
+    if (i < 3) document.getElementById('line-' + i).classList.toggle('done', i < n);
+  });
+  document.getElementById('btn-back').style.visibility = n > 1 ? 'visible' : 'hidden';
+  const nb = document.getElementById('btn-next');
+  if (n === 1) { nb.innerHTML = 'Continue &#8594;'; nb.disabled = !parsedRows.length; }
+  if (n === 2) { nb.innerHTML = 'Continue &#8594;'; nb.disabled = false; }
+  if (n === 3) { nb.innerHTML = '&#10003; Import'; nb.disabled = false; }
+}
+
+/* -- Column mapping -- */
+let allLocations = [];
+async function loadDropdowns() {
+  try {
+    const [c, s, l] = await Promise.all([api.getCategories(), api.getSuppliers(), api.getLocations()]);
+    allCategories = c.data || [];
+    allSuppliers  = s.data || [];
+    allLocations  = l.data || [];
+  } catch(e) {}
+}
+
+function buildColumnMap() {
+  const fields = FIELDS[importType];
+  columnMap = {};
+  fileHeaders.forEach(h => {
+    const norm = h.toLowerCase().replace(/[\s_\-\/]+/g,'');
+    const match = fields.find(f => {
+      const fn = f.key.toLowerCase().replace(/[\s_\-\/]+/g,'');
+      const fl = f.label.toLowerCase().replace(/[\s_\-\/]+/g,'');
+      return fn === norm || fl === norm || fn.includes(norm) || norm.includes(fn);
+    });
+    columnMap[h] = match ? match.key : '';
+  });
+
+  document.getElementById('map-tbody').innerHTML = fileHeaders.map(h => {
+    const sample = parsedRows.slice(0,3).map(r => r[h]).filter(Boolean).join(', ');
+    const opts = '<option value="">-- Skip --</option>' +
+      fields.map(f => `<option value="${f.key}" ${columnMap[h]===f.key?'selected':''}>${f.label}${f.required?' *':''}</option>`).join('');
+    return `<tr>
+      <td class="col-file">${esc(h)}</td>
+      <td class="col-sample" title="${esc(sample)}">${esc(sample || '\u2014')}</td>
+      <td><select class="map-select" data-col="${esc(h)}" onchange="columnMap[this.dataset.col]=this.value">${opts}</select></td>
+    </tr>`;
+  }).join('');
+}
+
+/* -- Review -- */
+function buildReview() {
+  const fields   = FIELDS[importType];
+  const required = fields.filter(f => f.required).map(f => f.key);
+
+  const previewRows = parsedRows.map((row, i) => {
+    const mapped_row = {};
+    Object.entries(columnMap).forEach(([fc, sf]) => { if (sf) mapped_row[sf] = row[fc]; });
+    const missing = required.filter(k => !mapped_row[k] || !mapped_row[k].trim());
+    return { idx: i+1, data: mapped_row, errors: missing };
+  });
+
+  const ok   = previewRows.filter(r => !r.errors.length).length;
+  const errs = previewRows.filter(r =>  r.errors.length).length;
+
+  document.getElementById('review-desc').innerHTML =
+    `<strong>${previewRows.length}</strong> rows found &mdash; ` +
+    `<span style="color:var(--green);font-weight:600;">${ok} ready to import</span>` +
+    (errs ? `, <span style="color:var(--red);font-weight:600;">${errs} with errors (will be skipped)</span>` : '');
+
+  const shownFields = fields.filter(f => Object.values(columnMap).includes(f.key));
+  document.getElementById('review-thead').innerHTML = '<tr><th>#</th>' +
+    shownFields.map(f => `<th>${f.label}</th>`).join('') + '<th>Status</th></tr>';
+
+  document.getElementById('review-tbody').innerHTML = previewRows.slice(0,200).map(r => {
+    const cls    = r.errors.length ? 'row-error' : 'row-ok';
+    const status = r.errors.length
+      ? `<span class="row-status error">Missing: ${r.errors.join(', ')}</span>`
+      : `<span class="row-status ok">&#10003; Ready</span>`;
+    return `<tr class="${cls}"><td>${r.idx}</td>` +
+      shownFields.map(f => `<td>${esc(r.data[f.key] || '')}</td>`).join('') +
+      `<td>${status}</td></tr>`;
+  }).join('');
+
+  document.getElementById('review-summary').innerHTML =
+    `<span style="color:var(--green);">&#10003; ${ok} ready</span>` +
+    (errs ? `<span style="color:var(--red);">&#9888; ${errs} errors</span>` : '') +
+    `<span style="color:var(--muted);">Total: ${previewRows.length} rows</span>`;
+
+  window._importRows = previewRows;
+}
+
+/* -- Import -- */
+async function runImport() {
+  const rows = (window._importRows || []).filter(r => !r.errors.length);
+  if (!rows.length) { showToast('No valid rows to import', 'error'); return; }
+
+  const btn = document.getElementById('btn-next');
+  btn.disabled = true; btn.textContent = 'Importing\u2026';
+
+  const prog = document.getElementById('import-progress');
+  const bar  = document.getElementById('import-bar');
+  prog.style.display = '';
+
+  let done = 0, failed = 0;
+  for (const row of rows) {
+    try {
+      importType === 'assets' ? await importAsset(row.data) : await importCategory(row.data);
+      done++;
+    } catch(e) { failed++; }
+    bar.style.width = Math.round(((done + failed) / rows.length) * 100) + '%';
+  }
+
+  btn.innerHTML = '&#10003; Done';
+  showToast(`Imported ${done} ${importType}${failed ? ` (${failed} failed)` : ''}`, done > 0 ? 'success' : 'error');
+  document.getElementById('review-summary').innerHTML =
+    `<span style="color:var(--green);">&#10003; ${done} imported successfully</span>` +
+    (failed ? `<span style="color:var(--red);">&#9888; ${failed} failed</span>` : '');
+}
+
+async function importAsset(data) {
+  let catId = null, supId = null, locId = null;
+  if (data.category) { const c = allCategories.find(x => x.name.toLowerCase() === data.category.toLowerCase()); catId = c?.id || null; }
+  if (data.supplier) { const s = allSuppliers.find(x => x.name.toLowerCase() === data.supplier.toLowerCase()); supId = s?.id || null; }
+
+  // Resolve location: use the CSV's Location column first, then fall back to active location filter
+  if (data.location) {
+    const l = allLocations.find(x => x.name.toLowerCase() === data.location.toLowerCase());
+    locId = l?.id || null;
+  }
+  if (!locId) locId = localStorage.getItem('emp_location_id') || null;
+
+  // Generate a unique SKU � use serial if provided, otherwise auto-generate
+  const base = data.serial_number || data.sku || '';
+  const uniqueSuffix = Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const sku = base ? base + '-' + uniqueSuffix : 'IMP-' + uniqueSuffix;
+
+  await api.createProduct({
+    name:          data.name,
+    sku:           sku,
+    serial_number: data.serial_number || '',
+    brand_model:   data.brand_model   || '',
+    description:   data.description   || '',
+    category_id:   catId,
+    supplier_id:   supId,
+    location_id:   locId,
+    quantity:      1
+  });
+}
+
+async function importCategory(data) {
+  await api.createCategory({ name:data.name, description:data.description||'' });
+}
+
+</script>
+</body>
+</html>

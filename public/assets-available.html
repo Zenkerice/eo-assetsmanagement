@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Assets - EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0e1a;--bg2:#0f1729;--bg3:#162040;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:#29b6e8;--blue-dim:rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --radius:14px;--radius-sm:8px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+
+    /* ── Header ── */
+    .req-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 40px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50}
+    .req-brand{display:flex;align-items:baseline;gap:14px;text-decoration:none;flex-shrink:0}
+    .req-brand{display:flex;align-items:baseline;gap:14px;text-decoration:none;flex-shrink:0}
+    .req-brand .brand-empire{font-family:'DM Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-0.8px;color:#e8eaf0;-webkit-text-stroke:0.4px currentColor}
+    .req-brand .brand-one{font-family:'DM Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-0.8px;color:var(--blue);-webkit-text-stroke:0.4px var(--blue)}
+    .brand-wordmark{display:inline-flex;align-items:baseline;gap:0;text-decoration:none;flex-shrink:0}
+    html[data-theme="light"] .req-brand .brand-empire{color:#1e40af}
+    .brand-context-link{font-size:15px;color:var(--muted2);font-weight:500;padding-left:14px;border-left:1px solid var(--border2);cursor:pointer;background:none;border-top:none;border-bottom:none;border-right:none;font-family:'DM Sans',sans-serif;text-decoration:none;transition:color .15s}
+    .brand-context-link:hover{color:var(--blue)}
+    .brand-context-link.active{color:var(--text);font-weight:700;position:relative;}
+    .brand-context-link.active::after{content:'';position:absolute;bottom:-4px;left:14px;right:0;height:2px;border-radius:2px;background:var(--blue);}
+    html[data-theme="light"] .brand-context-link.active{color:#0f172a;}
+    .brand-context-link.active{color:var(--text)}
+    .req-header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .req-header-center{display:none}
+    .header-loc-select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;cursor:pointer;min-width:180px}
+    .header-loc-select:focus{border-color:var(--blue)}
+    .header-asset-count{display:none}
+    .req-theme-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-size:16px;cursor:pointer;padding:7px 10px;line-height:1;transition:background .15s,color .15s,transform .2s cubic-bezier(0.34,1.56,0.64,1);display:inline-flex;align-items:center;justify-content:center}
+    .req-theme-btn:hover{background:var(--bg2);color:var(--text);transform:rotate(20deg) scale(1.15)}
+    .req-theme-btn:active{transform:rotate(-10deg) scale(0.9)}
+    .user-chip{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:999px;padding:6px 14px 6px 6px}
+    .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#7b5bf7);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff}
+    .user-meta{display:flex;flex-direction:column;line-height:1.2}
+    .user-meta .name{font-size:13px;font-weight:600}
+    .user-meta .role{font-size:11px;color:var(--muted2)}
+
+    /* ── Buttons ── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);text-decoration:none;white-space:nowrap}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+
+    /* ── Page ── */
+    .page{max-width:1200px;margin:0 auto;padding:32px 40px 56px;position:relative;z-index:1}
+    .page-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}
+    .page-title{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+    .page-sub{font-size:14px;color:var(--muted2)}
+
+    /* ── Stats ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px 16px;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+    .stat-card.blue::before{background:var(--blue)}
+    .stat-card.green::before{background:var(--green)}
+    .stat-card.amber::before{background:var(--amber)}
+    .stat-card.purple::before{background:#9b73f7}
+    .stat-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .stat-value{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1}
+    .stat-card.blue .stat-value{color:var(--blue)}
+    .stat-card.green .stat-value{color:var(--green)}
+    .stat-card.amber .stat-value{color:var(--amber)}
+    .stat-card.purple .stat-value{color:#9b73f7}
+    .stat-sub{font-size:12px;color:var(--muted);margin-top:5px}
+
+    /* ── Card / Table ── */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-head{padding:18px 22px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+    .filter-bar{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+    .filter-bar input[type="text"]{flex:1;min-width:220px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none}
+    .filter-bar input:focus{border-color:var(--blue)}
+    .filter-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;cursor:pointer;white-space:nowrap}
+    .filter-bar select:focus{border-color:var(--blue)}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead th{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);white-space:nowrap}
+    tbody td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px;color:var(--text)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .sku-mono{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+    .pill.available{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+    .empty-state{text-align:center;padding:52px 20px;color:var(--muted)}
+
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    @media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.page,.req-header{padding-left:20px;padding-right:20px}}
+  </style>
+</head>
+<body>
+
+<header class="req-header">
+  <div class="req-brand">
+    <a href="assets-available.html" class="brand-wordmark"><span class="brand-empire">Empire</span><span class="brand-one">One</span></a>
+    <button class="brand-context-link" id="btn-asset-requests" type="button">Asset Requests</button>
+    <button class="brand-context-link active" type="button">All Assets</button>
+  </div>
+  <div class="req-header-right topbar-actions">
+    <button class="req-theme-btn" id="req-theme-btn" title="Toggle theme" onclick="_sidebarToggleTheme()">🌙</button>
+    <div class="user-chip">
+      <div class="user-avatar" id="user-avatar">U</div>
+      <div class="user-meta">
+        <span class="name" id="user-name">User</span>
+        <span class="role" id="user-role">TL</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="btn-signout">Sign out</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-top">
+    <div>
+      <h1 class="page-title">Available Assets</h1>
+      <div class="page-sub" id="page-sub">Loading…</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-label">Total Available</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-sub">across all locations</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">This Location</div>
+      <div class="stat-value" id="stat-location">0</div>
+      <div class="stat-sub">filtered by location</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Categories</div>
+      <div class="stat-value" id="stat-cats">0</div>
+      <div class="stat-sub">asset types</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Showing</div>
+      <div class="stat-value" id="stat-showing">0</div>
+      <div class="stat-sub">after filters</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Asset Inventory</div>
+    <div class="filter-bar">
+      <input type="text" id="search-input" placeholder="Search by name or serial number…" oninput="renderTable()" />
+      <select id="header-location-filter" onchange="onLocationChange()">
+        <option value="">All Locations</option>
+      </select>
+      <select id="filter-category" onchange="renderTable()">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Serial No.</th>
+            <th>Category</th>
+            <th>Brand / Model</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="assets-table">
+          <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container"></div>
+
+<script src="js/api.js?v=25"></script>
+<script src="js/auth.js?v=6"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=62"></script>
+<script>
+const roleLabels = { admin: 'System Manager', staff: 'HR · Staff', viewer: 'TL · Staff' };
+let allLocations  = [];
+let allCategories = [];
+let allProducts   = [];
+
+auth.initPage({
+  onReady: async (user) => {
+    if (!auth.isRequestUser()) {
+      window.location.href = auth.getLandingPage(user.role);
+      return;
+    }
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
+    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById('page-sub').textContent =
+      (roleLabels[user.role] || user.role) + ' · ' + user.name;
+    await loadData();
+    if (window.refreshNotifDot) refreshNotifDot();
+  }
+});
+
+async function loadData() {
+  try {
+    const [locRes, catRes, prodRes] = await Promise.all([
+      api.getLocations(),
+      api.getCategories(),
+      api.getProducts(),
+    ]);
+    allLocations  = locRes.data  || [];
+    allCategories = catRes.data  || [];
+    allProducts   = prodRes.data || [];
+
+    // Populate location header filter
+    const locSel = document.getElementById('header-location-filter');
+    locSel.innerHTML = '<option value="">All Locations</option>'
+      + allLocations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+
+    // Populate category filter (only cats that have available assets)
+    const availCatIds = new Set(
+      allProducts.filter(p => p.asset_status === 'available').map(p => p.category_id)
+    );
+    const catSel = document.getElementById('filter-category');
+    catSel.innerHTML = '<option value="">All Categories</option>'
+      + allCategories
+          .filter(c => availCatIds.has(c.id))
+          .map(c => `<option value="${c.id}">${esc(c.name)}</option>`)
+          .join('');
+
+    updateStats();
+    renderTable();
+  } catch (e) {
+    showToast('Failed to load assets: ' + e.message, 'error');
+  }
+}
+
+function getLocationId() {
+  return document.getElementById('header-location-filter').value;
+}
+
+function availableAssets() {
+  const locId = getLocationId();
+  return allProducts.filter(p => {
+    if (p.asset_status !== 'available') return false;
+    if (!locId) return true;
+    return String(p.location_id) === locId;
+  });
+}
+
+function onLocationChange() {
+  updateStats();
+  renderTable();
+}
+
+function updateStats() {
+  const totalAll  = allProducts.filter(p => p.asset_status === 'available').length;
+  const locFiltered = availableAssets().length;
+  const catCount  = new Set(availableAssets().map(p => p.category_id).filter(Boolean)).size;
+  document.getElementById('stat-total').textContent    = totalAll;
+  document.getElementById('stat-location').textContent = locFiltered;
+  document.getElementById('stat-cats').textContent     = catCount;
+  // stat-showing updated in renderTable
+}
+
+function renderTable() {
+  const q     = document.getElementById('search-input').value.trim().toLowerCase();
+  const catId = document.getElementById('filter-category').value;
+  let assets  = availableAssets();
+
+  if (catId) assets = assets.filter(p => String(p.category_id) === catId);
+  if (q)     assets = assets.filter(p =>
+    (p.name || '').toLowerCase().includes(q) ||
+    (p.sku  || '').toLowerCase().includes(q)
+  );
+
+  document.getElementById('stat-showing').textContent = assets.length;
+
+  const catMap = Object.fromEntries(allCategories.map(c => [c.id, c.name]));
+  const locMap = Object.fromEntries(allLocations.map(l => [l.id, l.name]));
+  const tbody  = document.getElementById('assets-table');
+
+  if (!assets.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No available assets found.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = assets.map(p => {
+    const cat = catMap[p.category_id] || 'Uncategorized';
+    const loc = locMap[p.location_id] || '—';
+    const brand = p.brand_model ? esc(p.brand_model) : '<span style="color:var(--muted)">—</span>';
+    return `<tr>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td><span class="sku-mono">${esc(p.sku || '—')}</span></td>
+      <td>${esc(cat)}</td>
+      <td>${brand}</td>
+      <td>${esc(loc)}</td>
+      <td><span class="pill available">Available</span></td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('btn-signout').addEventListener('click', () => _sidebarLogout());
+document.getElementById('btn-asset-requests').addEventListener('click', () => {
+  window.location.href = 'requests.html';
+});
+
+// Sync theme toggle icon
+function _syncReqThemeBtn() {
+  const btn = document.getElementById('req-theme-btn');
+  if (!btn || typeof theme === 'undefined') return;
+  const isDark = theme.current() === 'dark';
+  btn.textContent = isDark ? '🌙' : '☀️';
+  btn.title = isDark ? 'Switch to Light mode' : 'Switch to Dark mode';
+}
+document.addEventListener('themechange', _syncReqThemeBtn);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _syncReqThemeBtn);
+} else {
+  setTimeout(_syncReqThemeBtn, 0);
+}
+</script>
+</body>
+</html>

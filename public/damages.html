@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asset Status &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:        #0a0e1a;--bg2:       #0f1729;--bg3:       #162040;
+      --border:    rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:      #29b6e8;--blue-dim:  rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --radius:14px;--radius-sm:8px;--sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+    .content{padding:24px 48px 56px}
+    /* Stat cards */
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px 16px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+    .stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+    .stat-card.red::before{background:var(--red)} .stat-card.green::before{background:var(--green)}
+    .stat-card.amber::before{background:var(--amber)} .stat-card.purple::before{background:var(--purple)}
+    .stat-card.blue::before{background:var(--blue)}
+    .stat-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:18px;margin-bottom:12px}
+    .red .stat-icon{background:var(--red-dim)} .green .stat-icon{background:var(--green-dim)}
+    .amber .stat-icon{background:var(--amber-dim)} .purple .stat-icon{background:var(--purple-dim)}
+    .blue .stat-icon{background:var(--blue-dim)}
+    .stat-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+    .stat-value{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:4px}
+    .red .stat-value{color:var(--red)} .green .stat-value{color:var(--green)}
+    .amber .stat-value{color:var(--amber)} .purple .stat-value{color:var(--purple)}
+    .blue .stat-value{color:var(--blue)}
+    .status-donated{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,142,247,0.2)}
+    .tab-badge.blue{background:var(--blue-dim);color:var(--blue)}
+    tbody tr.row-donated:hover td{background:rgba(79,142,247,0.04)}
+    .stat-sub{font-size:12px;color:var(--muted)}
+    /* Tabs */
+    .tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border)}
+    .tab-btn{padding:12px 24px;border:none;background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:8px}
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{color:var(--text);border-bottom-color:var(--blue)}
+    .tab-badge{background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+    .tab-badge.amber{background:var(--amber-dim);color:var(--amber)}
+    .tab-badge.purple{background:var(--purple-dim);color:var(--purple)}
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);text-decoration:none;white-space:nowrap;background:transparent;color:var(--muted2)}
+    .btn:hover{background:var(--bg3);color:var(--text)}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover{background:#6b9ef8;border-color:#6b9ef8}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+    .btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,0.25)}
+    .btn-danger:hover{background:rgba(244,91,105,0.2)}
+    .btn-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
+    .btn-amber:hover{background:rgba(245,166,35,0.2)}
+    .btn-sm{padding:7px 13px;font-size:13px}
+    /* Card */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    /* Filter bar */
+    .filter-bar{display:flex;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+    .filter-bar input[type="text"],.filter-bar select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border-color .15s}
+    .filter-bar input[type="text"]{flex:1;min-width:200px}
+    .filter-bar input[type="text"]::placeholder{color:var(--muted)}
+    .filter-bar input[type="text"]:focus,.filter-bar select:focus{border-color:var(--blue)}
+    .filter-bar select{min-width:140px;cursor:pointer}
+    .filter-bar select option{background:var(--bg3)}
+    /* Table */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead th{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:12px 20px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)}
+    tbody td{padding:14px 20px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:14px;color:var(--text)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    tbody tr.row-damaged:hover td{background:rgba(244,91,105,0.04)}
+    tbody tr.row-disposed:hover td{background:rgba(155,115,247,0.04)}
+    .product-name{font-weight:500;color:var(--text)}
+    .sku-code{font-family:'DM Mono',monospace;font-size:12px;background:var(--bg3);color:var(--muted2);padding:2px 7px;border-radius:5px;border:1px solid var(--border);display:inline-block;margin-top:2px}
+    .issue-text{color:var(--muted2);font-size:13px;max-width:240px;white-space:pre-wrap;line-height:1.45}
+    .cat-text{color:var(--muted2);font-size:13px}
+    .reporter-text{color:var(--text);font-size:14px}
+    .date-chip{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap}
+    /* Status badges */
+    .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+    .status-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+    .status-damaged {background:var(--red-dim);  color:var(--red);  border:1px solid rgba(244,91,105,0.2)}
+    .status-resolved{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,0.2)}
+    .status-disposed{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(155,115,247,0.2)}
+    .actions{display:flex;gap:6px;align-items:center}
+    .empty-state{text-align:center;padding:52px 20px;color:var(--muted)}
+    .empty-state .empty-icon{font-size:28px;margin-bottom:10px}
+    .empty-state p{font-size:13px}
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .2s ease}
+
+    .modal::-webkit-scrollbar{width:4px} .modal::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--border)}
+    .modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+    .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
+    .modal-close:hover{color:var(--text);background:var(--border2)}
+    .form-body{padding:24px 26px;display:flex;flex-direction:column;gap:14px}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    .form-group label{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}
+    .form-group input,.form-group select,.form-group textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 13px;outline:none;transition:border-color .15s}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted)}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+    .form-group select{cursor:pointer} .form-group select option{background:var(--bg3)}
+    .form-group textarea{min-height:80px;resize:vertical;line-height:1.5}
+    .form-actions{display:flex;gap:10px;padding:18px 26px 24px;border-top:1px solid var(--border)}
+    /* Toast */
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
+    .toast.error{border-color:var(--red);color:var(--red)} .toast.success{border-color:var(--green);color:var(--green)}
+
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Asset Status</h1>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="openModal()">+ Report Status</button>
+</div>
+  </div>
+  <div class="content">
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card red">
+        <div class="stat-icon">&#9888;&#65039;</div>
+        <div class="stat-label">Damaged</div>
+        <div class="stat-value" id="stat-damaged">&mdash;</div>
+        <div class="stat-sub">unresolved issues</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">&#10003;</div>
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" id="stat-resolved">&mdash;</div>
+        <div class="stat-sub">fixed &amp; returned</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">&#128465;</div>
+        <div class="stat-label">Disposed</div>
+        <div class="stat-value" id="stat-disposed">&mdash;</div>
+        <div class="stat-sub">written off</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">&#128203;</div>
+        <div class="stat-label">Total Reports</div>
+        <div class="stat-value" id="stat-total">&mdash;</div>
+        <div class="stat-sub">all time</div>
+      </div>
+      <div class="stat-card blue" style="display:none;" id="stat-card-donated">
+        <div class="stat-icon">&#129505;</div>
+        <div class="stat-label">Donated</div>
+        <div class="stat-value" id="stat-donated">&mdash;</div>
+        <div class="stat-sub">given away</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-damaged-btn" onclick="switchTab('damaged')">
+        &#9888;&#65039; Damaged Assets
+        <span class="tab-badge" id="tab-damaged-count">0</span>
+      </button>
+      <button class="tab-btn" id="tab-disposed-btn" onclick="switchTab('disposed')">
+        &#128465; Disposed Assets
+        <span class="tab-badge purple" id="tab-disposed-count">0</span>
+      </button>
+      <button class="tab-btn" id="tab-donated-btn" onclick="switchTab('donated')">
+        &#129505; Donated Assets
+        <span class="tab-badge blue" id="tab-donated-count">0</span>
+      </button>
+    </div>
+
+    <!-- Damaged Assets Panel -->
+    <div id="panel-damaged">
+      <div class="card">
+        <div class="filter-bar">
+          <input type="text" id="search-damaged" placeholder="&#128269; Search by asset, reporter, or issue&hellip;" oninput="filterDamaged()" />
+          <select id="filter-cat-damaged" onchange="onCatChangeDamaged()">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filter-subcat-damaged" onchange="filterDamaged()" style="display:none;">
+            <option value="">All Types</option>
+          </select>
+          <select id="filter-loc-damaged" onchange="filterDamaged()">
+            <option value="">All Locations</option>
+          </select>
+          <select id="filter-status-damaged" onchange="filterDamaged()">
+            <option value="">All Statuses</option>
+            <option value="damaged">Damaged</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Issue</th>
+                <th>Reported By</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="damage-table">
+              <tr><td colspan="8"><div class="empty-state"><p>Loading&hellip;</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disposed Assets Panel -->
+    <div id="panel-disposed" style="display:none;">
+      <div class="card">
+        <div class="filter-bar">
+          <input type="text" id="search-disposed" placeholder="&#128269; Search by asset or reason&hellip;" oninput="filterDisposed()" />
+          <select id="filter-cat-disposed" onchange="filterDisposed()">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filter-loc-disposed" onchange="filterDisposed()">
+            <option value="">All Locations</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th><th>Category</th><th>Location</th><th>Original Issue</th>
+                <th>Disposal Reason</th><th>Reported By</th><th>Disposed On</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="disposed-table">
+              <tr><td colspan="8"><div class="empty-state"><p>Loading&hellip;</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donated Assets Panel -->
+    <div id="panel-donated" style="display:none;">
+      <div class="card">
+        <div class="filter-bar">
+          <input type="text" id="search-donated" placeholder="&#128269; Search by asset or recipient&hellip;" oninput="filterDonated()" />
+          <select id="filter-cat-donated" onchange="filterDonated()">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filter-loc-donated" onchange="filterDonated()">
+            <option value="">All Locations</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Original Issue</th>
+                <th>Donated To</th>
+                <th>Reported By</th>
+                <th>Donated On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="donated-table">
+              <tr><td colspan="8"><div class="empty-state"><p>Loading&hellip;</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Report / Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Report Status</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <form id="damage-form" onsubmit="submitForm(event)" style="display:contents;">
+        <div class="form-group">
+          <label for="dmg-product-id">Asset *</label>
+          <select id="dmg-product-id" name="product_id" required>
+            <option value="">&mdash; Select asset &mdash;</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dmg-reported-by">Reported By *</label>
+          <input id="dmg-reported-by" type="text" name="reported_by" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label for="dmg-issue">Issue / Description *</label>
+          <textarea id="dmg-issue" name="issue" placeholder="Describe the damage or issue in detail&hellip;" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="form-status">Status</label>
+          <select name="status" id="form-status" onchange="onStatusChange()">
+            <option value="damaged">Damaged</option>
+            <option value="resolved">Resolved</option>
+            <option value="disposed">Disposed</option>
+            <option value="donated">For Donation</option>
+          </select>
+        </div>
+        <div class="form-group" id="disposal-reason-group" style="display:none;">
+          <label for="dmg-disposal-reason">Disposal Reason</label>
+          <textarea id="dmg-disposal-reason" name="disposal_reason" placeholder="Why is this asset being disposed?&hellip;"></textarea>
+        </div>
+        <div class="form-group" id="donated-to-group" style="display:none;">
+          <label for="dmg-donated-to">Donated To *</label>
+          <input id="dmg-donated-to" type="text" name="donated_to" placeholder="e.g. Local School, Community Center&hellip;" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Report</button>
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Dispose Confirm Modal -->
+<div class="modal-overlay" id="dispose-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h3>Dispose Asset</h3>
+      <button class="modal-close" onclick="closeDisposeModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <p style="font-size:14px;color:var(--muted2);line-height:1.6;">
+        Mark <strong id="dispose-asset-name" style="color:var(--text);"></strong> as disposed.
+        This writes the asset off from inventory.
+      </p>
+      <div class="form-group">
+        <label>Disposal Reason</label>
+        <textarea id="dispose-reason" placeholder="e.g. Beyond repair, end of life&hellip;" style="min-height:80px;"></textarea>
+      </div>
+    </div>
+    <div class="form-actions" style="padding:16px 26px 22px;">
+      <button class="btn btn-danger" onclick="confirmDispose()">&#128465; Confirm Dispose</button>
+      <button class="btn btn-ghost" onclick="closeDisposeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Donate Modal -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h3>&#129505; Donate Asset</h3>
+      <button class="modal-close" onclick="closeDonateModal()">&times;</button>
+    </div>
+    <div class="form-body">
+      <p style="font-size:14px;color:var(--muted2);line-height:1.6;">
+        Donate <strong id="donate-asset-name" style="color:var(--text);"></strong> to an organization or individual. The asset will be removed from inventory.
+      </p>
+      <div class="form-group">
+        <label for="donate-to">Donated To *</label>
+        <input id="donate-to" type="text" placeholder="e.g. Local School, Community Center&hellip;" />
+      </div>
+    </div>
+    <div class="form-actions" style="padding:16px 26px 22px;">
+      <button class="btn btn-primary" onclick="confirmDonate()">&#129505; Confirm Donate</button>
+      <button class="btn btn-ghost" onclick="closeDonateModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/api.js?v=24"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/sidebar.js?v=61"></script>
+<script>
+(async () => {
+  const user = await auth.requireAuth();
+  if (!user) return;
+  auth.renderUserInfo();
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  loadDamages();
+})();
+
+let allDamages    = [];
+let allCategories = [];
+let allLocations  = [];
+let editingId     = null;
+let disposeId     = null;
+let currentTab    = 'damaged';
+
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now(), dur = 500;
+  (function tick(now) {
+    const t = Math.min((now - start) / dur, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  })(performance.now());
+}
+
+function statusBadge(s) {
+  const map = { damaged:'Damaged', resolved:'Resolved', disposed:'Disposed', donated:'For Donation' };
+  return `<span class="status-badge status-${s}"><span class="status-dot"></span>${map[s] || s}</span>`;
+}
+
+/* -- Load -- */
+async function loadDamages() {
+  try {
+    const [dmgRes, catRes, locRes] = await Promise.all([api.getDamages(), api.getCategories(), api.getLocations()]);
+    allDamages    = dmgRes.data;
+    allCategories = catRes.data;
+    allLocations  = locRes.data;
+
+    // Filter all data to selected location from dashboard context
+    const ctxLocId   = localStorage.getItem('emp_location_id');
+    const ctxLocName = localStorage.getItem('emp_location_name') || 'Selected Location';
+
+    if (ctxLocId) {
+      allDamages = allDamages.filter(d => String(d.location_id) === ctxLocId);
+
+      showLocationBadge(ctxLocName, {
+        title: 'Click to clear location filter',
+        onClick: () => {
+          localStorage.removeItem('emp_location_id');
+          localStorage.removeItem('emp_location_name');
+          window.location.reload();
+        },
+      });
+    }
+
+    const damaged  = allDamages.filter(d => d.status === 'damaged').length;
+    const resolved = allDamages.filter(d => d.status === 'resolved').length;
+    const disposed = allDamages.filter(d => d.status === 'disposed').length;
+    const donated  = allDamages.filter(d => d.status === 'donated').length;
+
+    animateCount('stat-damaged',  damaged);
+    animateCount('stat-resolved', resolved);
+    animateCount('stat-disposed', disposed);
+    animateCount('stat-total',    allDamages.length);
+
+    // Show donated stat card only if there are donations
+    if (donated > 0) {
+      document.getElementById('stat-card-donated').style.display = '';
+      animateCount('stat-donated', donated);
+    }
+
+    document.getElementById('tab-damaged-count').textContent  = damaged + resolved;
+    document.getElementById('tab-disposed-count').textContent = disposed;
+    document.getElementById('tab-donated-count').textContent  = donated;
+
+    buildCategoryDropdowns();
+    buildLocationDropdowns();
+    filterDamaged();
+    filterDisposed();
+    filterDonated();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Location dropdowns -- */
+function buildLocationDropdowns() {
+  // Only show locations that actually appear in damage records
+  const usedIds = new Set(allDamages.map(d => d.location_id).filter(Boolean));
+  const usedLocs = allLocations.filter(l => usedIds.has(l.id));
+
+  const opts = '<option value="">All Locations</option>' +
+    usedLocs.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+
+  ['filter-loc-damaged','filter-loc-disposed','filter-loc-donated'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+/* -- Category dropdowns -- */
+function buildCategoryDropdowns() {
+  const parents  = allCategories.filter(c => !c.parent_id);
+  const children = allCategories.filter(c =>  c.parent_id);
+
+  function buildOpts(selId) {
+    const sel = document.getElementById(selId);
+    const cur = sel.value;
+    let html = '<option value="">All Categories</option>';
+    parents.forEach(p => {
+      const kids = children.filter(c => c.parent_id == p.id);
+      if (kids.length) {
+        html += `<optgroup label="${esc(p.name)}">`;
+        kids.forEach(k => { html += `<option value="${k.id}">${esc(k.name)}</option>`; });
+        html += '</optgroup>';
+      } else {
+        html += `<option value="${p.id}">${esc(p.name)}</option>`;
+      }
+    });
+    sel.innerHTML = html;
+    sel.value = cur;
+  }
+
+  buildOpts('filter-cat-damaged');
+  buildOpts('filter-cat-disposed');
+  buildOpts('filter-cat-donated');
+}
+
+/* -- Tab switching -- */
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('panel-damaged').style.display  = tab === 'damaged'  ? '' : 'none';
+  document.getElementById('panel-disposed').style.display = tab === 'disposed' ? '' : 'none';
+  document.getElementById('panel-donated').style.display  = tab === 'donated'  ? '' : 'none';
+  document.getElementById('tab-damaged-btn').classList.toggle('active',  tab === 'damaged');
+  document.getElementById('tab-disposed-btn').classList.toggle('active', tab === 'disposed');
+  document.getElementById('tab-donated-btn').classList.toggle('active',  tab === 'donated');
+}
+
+/* -- Damaged tab -- */
+function onCatChangeDamaged() {
+  const catId  = parseInt(document.getElementById('filter-cat-damaged').value) || null;
+  const subSel = document.getElementById('filter-subcat-damaged');
+  if (catId) {
+    const kids = allCategories.filter(c => c.parent_id == catId);
+    if (kids.length) {
+      subSel.style.display = '';
+      subSel.innerHTML = '<option value="">All Types</option>' +
+        kids.map(k => `<option value="${k.id}">${esc(k.name)}</option>`).join('');
+    } else { subSel.style.display = 'none'; subSel.value = ''; }
+  } else { subSel.style.display = 'none'; subSel.value = ''; }
+  filterDamaged();
+}
+
+function filterDamaged() {
+  const q      = document.getElementById('search-damaged').value.toLowerCase();
+  const catId  = document.getElementById('filter-cat-damaged').value;
+  const subCat = document.getElementById('filter-subcat-damaged').value;
+  const locId  = document.getElementById('filter-loc-damaged').value;
+  const status = document.getElementById('filter-status-damaged').value;
+
+  const data = allDamages.filter(d => {
+    if (d.status === 'disposed') return false;
+    if (d.status === 'donated')  return false;
+    const matchText = !q || (d.product_name||'').toLowerCase().includes(q)
+                         || (d.reported_by||'').toLowerCase().includes(q)
+                         || (d.issue||'').toLowerCase().includes(q);
+    const matchCat  = subCat
+      ? String(d.category_id) === subCat
+      : !catId || String(d.category_id) === catId || (() => {
+          const kids = allCategories.filter(c => c.parent_id == catId).map(c => String(c.id));
+          return kids.includes(String(d.category_id));
+        })();
+    const matchLoc  = !locId || String(d.location_id) === locId;
+    const matchSt   = !status || d.status === status;
+    return matchText && matchCat && matchLoc && matchSt;
+  });
+  renderDamagedTable(data);
+}
+
+function renderDamagedTable(data) {
+  const tbody = document.getElementById('damage-table');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      <div class="empty-icon">&#10003;</div><p>No damage reports found</p>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(d => `
+    <tr class="row-damaged">
+      <td>
+        <div class="product-name">${esc(d.product_name)}</div>
+        <code class="sku-code">${esc(d.product_sku)}</code>
+      </td>
+      <td><span class="cat-text">${esc(d.category_name || '&mdash;')}</span></td>
+      <td><span class="cat-text">${esc(d.location_name || '&mdash;')}</span></td>
+      <td><div class="issue-text">${esc(d.issue)}</div></td>
+      <td><span class="reporter-text">${esc(d.reported_by)}</span></td>
+      <td>${statusBadge(d.status)}</td>
+      <td><span class="date-chip">${new Date(d.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="openModal(${d.id})">Edit</button>
+          <button class="btn btn-amber btn-sm" onclick="openDisposeModal(${d.id},'${esc(d.product_name)}')">&#128465; Dispose</button>
+          <button class="btn btn-sm" style="background:var(--blue-dim);color:var(--blue);border-color:rgba(79,142,247,0.25);" onclick="openDonateModal(${d.id},'${esc(d.product_name)}')">&#129505; Donate</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteDamage(${d.id})">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+/* -- Disposed tab -- */
+function filterDisposed() {
+  const q     = document.getElementById('search-disposed').value.toLowerCase();
+  const catId = document.getElementById('filter-cat-disposed').value;
+  const locId = document.getElementById('filter-loc-disposed').value;
+
+  const data = allDamages.filter(d => {
+    if (d.status !== 'disposed') return false;
+    const matchText = !q || (d.product_name||'').toLowerCase().includes(q)
+                         || (d.disposal_reason||'').toLowerCase().includes(q)
+                         || (d.reported_by||'').toLowerCase().includes(q);
+    const matchCat  = !catId || String(d.category_id) === catId || (() => {
+      const kids = allCategories.filter(c => c.parent_id == catId).map(c => String(c.id));
+      return kids.includes(String(d.category_id));
+    })();
+    const matchLoc  = !locId || String(d.location_id) === locId;
+    return matchText && matchCat && matchLoc;
+  });
+  renderDisposedTable(data);
+}
+
+function renderDisposedTable(data) {
+  const tbody = document.getElementById('disposed-table');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      <div class="empty-icon">&#128465;</div><p>No disposed assets</p>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(d => {
+    const disposedOn = d.disposed_at
+      ? new Date(d.disposed_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      : new Date(d.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `
+    <tr class="row-disposed">
+      <td>
+        <div class="product-name">${esc(d.product_name)}</div>
+        <code class="sku-code">${esc(d.product_sku)}</code>
+      </td>
+      <td><span class="cat-text">${esc(d.category_name || '&mdash;')}</span></td>
+      <td><span class="cat-text">${esc(d.location_name || '&mdash;')}</span></td>
+      <td><div class="issue-text">${esc(d.issue)}</div></td>
+      <td><div class="issue-text" style="color:var(--purple);">${esc(d.disposal_reason || '&mdash;')}</div></td>
+      <td><span class="reporter-text">${esc(d.reported_by)}</span></td>
+      <td><span class="date-chip">${disposedOn}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="restoreDamage(${d.id})">&#8635; Restore</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteDamage(${d.id})">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* -- Report / Edit Modal -- */
+function onStatusChange() {
+  const status = document.getElementById('form-status').value;
+  document.getElementById('disposal-reason-group').style.display = status === 'disposed' ? '' : 'none';
+  document.getElementById('donated-to-group').style.display      = status === 'donated'  ? '' : 'none';
+}
+
+async function openModal(id = null) {
+  editingId = id;
+  const form = document.getElementById('damage-form');
+  form.reset();
+  document.getElementById('modal-title').textContent = id ? 'Edit Report' : 'Report Status';
+  document.getElementById('disposal-reason-group').style.display = 'none';
+  document.getElementById('donated-to-group').style.display      = 'none';
+
+  const prodRes = await api.getProducts();
+  const prodSel = form.querySelector('select[name="product_id"]');
+  prodSel.innerHTML = '<option value="">&mdash; Select asset &mdash;</option>' +
+    prodRes.data.map(p => `<option value="${p.id}">${esc(p.name)} &mdash; ${esc(p.serial_number || p.sku)}</option>`).join('');
+
+  if (id) {
+    const d = allDamages.find(x => x.id === id);
+    if (d) {
+      form.product_id.value  = d.product_id;
+      form.reported_by.value = d.reported_by;
+      form.issue.value       = d.issue;
+      form.status.value      = d.status;
+      if (d.disposal_reason) {
+        form.disposal_reason.value = d.disposal_reason;
+        document.getElementById('disposal-reason-group').style.display = '';
+      }
+      if (d.donated_to) {
+        form.donated_to.value = d.donated_to;
+        document.getElementById('donated-to-group').style.display = '';
+      }
+    }
+  }
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingId = null;
+}
+
+async function submitForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    product_id:      form.product_id.value,
+    reported_by:     form.reported_by.value.trim(),
+    issue:           form.issue.value.trim(),
+    status:          form.status.value,
+    disposal_reason: form.disposal_reason ? form.disposal_reason.value.trim() : '',
+    donated_to:      form.donated_to      ? form.donated_to.value.trim()      : '',
+  };
+  try {
+    if (editingId) {
+      await api.updateDamage(editingId, data);
+      showToast('Report updated', 'success');
+    } else {
+      await api.createDamage(data);
+      showToast('Issue reported', 'success');
+    }
+    closeModal();
+    loadDamages();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Dispose Modal -- */
+function openDisposeModal(id, name) {
+  disposeId = id;
+  document.getElementById('dispose-asset-name').textContent = name;
+  document.getElementById('dispose-reason').value = '';
+  document.getElementById('dispose-modal').classList.add('open');
+}
+
+function closeDisposeModal() {
+  document.getElementById('dispose-modal').classList.remove('open');
+  disposeId = null;
+}
+
+async function confirmDispose() {
+  if (!disposeId) return;
+  const reason = document.getElementById('dispose-reason').value.trim();
+  try {
+    await api.updateDamage(disposeId, { status: 'disposed', disposal_reason: reason });
+    showToast('Asset marked as disposed', 'success');
+    closeDisposeModal();
+    loadDamages();
+    switchTab('disposed');
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Restore -- */
+async function restoreDamage(id) {
+  if (!confirm('Restore this asset back to Damaged status?')) return;
+  try {
+    await api.updateDamage(id, { status: 'damaged' });
+    showToast('Asset restored to damaged', 'success');
+    loadDamages();
+    switchTab('damaged');
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Delete -- */
+async function deleteDamage(id) {
+  if (!confirm('Permanently delete this report?')) return;
+  try {
+    await api.deleteDamage(id);
+    showToast('Report deleted', 'success');
+    loadDamages();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+/* -- Donated tab -- */
+function filterDonated() {
+  const q     = document.getElementById('search-donated').value.toLowerCase();
+  const catId = document.getElementById('filter-cat-donated').value;
+  const locId = document.getElementById('filter-loc-donated').value;
+  const data  = allDamages.filter(d => {
+    if (d.status !== 'donated') return false;
+    const matchText = !q || (d.product_name||'').toLowerCase().includes(q)
+                         || (d.donated_to||'').toLowerCase().includes(q)
+                         || (d.reported_by||'').toLowerCase().includes(q);
+    const matchCat  = !catId || String(d.category_id) === catId || (() => {
+      const kids = allCategories.filter(c => c.parent_id == catId).map(c => String(c.id));
+      return kids.includes(String(d.category_id));
+    })();
+    const matchLoc  = !locId || String(d.location_id) === locId;
+    return matchText && matchCat && matchLoc;
+  });
+  renderDonatedTable(data);
+}
+
+function renderDonatedTable(data) {
+  const tbody = document.getElementById('donated-table');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      <div class="empty-icon">&#129505;</div><p>No donated assets</p>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(d => {
+    const donatedOn = d.donated_at
+      ? new Date(d.donated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      : new Date(d.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `
+    <tr class="row-donated">
+      <td>
+        <div class="product-name">${esc(d.product_name)}</div>
+        <code class="sku-code">${esc(d.product_sku)}</code>
+      </td>
+      <td><span class="cat-text">${esc(d.category_name || '&mdash;')}</span></td>
+      <td><span class="cat-text">${esc(d.location_name || '&mdash;')}</span></td>
+      <td><div class="issue-text">${esc(d.issue)}</div></td>
+      <td><div class="issue-text" style="color:var(--blue);font-weight:500;">${esc(d.donated_to || '&mdash;')}</div></td>
+      <td><span class="reporter-text">${esc(d.reported_by)}</span></td>
+      <td><span class="date-chip">${donatedOn}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-danger btn-sm" onclick="deleteDamage(${d.id})">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* -- Donate Modal -- */
+let donateId = null;
+
+function openDonateModal(id, name) {
+  donateId = id;
+  document.getElementById('donate-asset-name').textContent = name;
+  document.getElementById('donate-to').value = '';
+  document.getElementById('donate-modal').classList.add('open');
+  setTimeout(() => document.getElementById('donate-to').focus(), 100);
+}
+
+function closeDonateModal() {
+  document.getElementById('donate-modal').classList.remove('open');
+  donateId = null;
+}
+
+async function confirmDonate() {
+  if (!donateId) return;
+  const donatedTo = document.getElementById('donate-to').value.trim();
+  if (!donatedTo) { showToast('Please enter who the asset is donated to', 'error'); return; }
+  try {
+    await api.updateDamage(donateId, { status: 'donated', donated_to: donatedTo });
+    showToast('Asset marked as donated', 'success');
+    closeDonateModal();
+    loadDamages();
+    switchTab('donated');
+  } catch (e) { showToast(e.message, 'error'); }
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+</script>
+</body>
+</html>
