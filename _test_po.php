@@ -8,10 +8,10 @@ try {
     if (strpos($col['Extra'], 'auto_increment') === false) {
         // Check if PK existshkhkhgit push
         $pk = $db->query("SHOW KEYS FROM transactions WHERE Key_name = 'PRIMARY'")->fetch();
-        // if (!$pk) {
-        //     $db->exec("ALTER TABLE transactions ADD PRIMARY KEY (id)");
-        //     file_put_contents('C:/xampp/htdocs/inventory/_fix_log.txt', "Added PK to transactions\n", FILE_APPEND);
-        // }
+        if (!$pk) {
+            $db->exec("ALTER TABLE transactions ADD PRIMARY KEY (id)");
+            file_put_contents('C:/xampp/htdocs/inventory/_fix_log.txt', "Added PK to transactions\n", FILE_APPEND);
+        }
         $nextAI = (int)$db->query("SELECT IFNULL(MAX(id),0)+1 FROM transactions")->fetchColumn();
         $db->exec("ALTER TABLE transactions MODIFY id INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT = $nextAI");
         file_put_contents('C:/xampp/htdocs/inventory/_fix_log.txt', "Fixed transactions AUTO_INCREMENT, next=$nextAI\n", FILE_APPEND);
