@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Approvals - EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -27,20 +27,25 @@
     .content{padding:28px 48px 56px;display:flex;flex-direction:column;gap:20px}
 
     /* stat cards */
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px 16px;position:relative;overflow:hidden}
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .stat-card{background:var(--bg2);border:2px solid var(--border2);border-radius:var(--radius);padding:28px 28px 22px;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s}
+    .stat-card:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.28)}
+    .stats-row .stat-card:nth-child(1){animation:slideUp 0.4s 0.04s cubic-bezier(0.16,1,0.3,1) both}
+    .stats-row .stat-card:nth-child(2){animation:slideUp 0.4s 0.08s cubic-bezier(0.16,1,0.3,1) both}
+    .stats-row .stat-card:nth-child(3){animation:slideUp 0.4s 0.12s cubic-bezier(0.16,1,0.3,1) both}
+    .stats-row .stat-card:nth-child(4){animation:slideUp 0.4s 0.16s cubic-bezier(0.16,1,0.3,1) both}
     .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
     .stat-card.amber::before{background:var(--amber)}
     .stat-card.green::before{background:var(--green)}
     .stat-card.red::before{background:var(--red)}
     .stat-card.blue::before{background:var(--blue)}
-    .stat-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-    .stat-value{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1}
+    .stat-label{font-size:12px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .stat-value{font-family:'Poppins',sans-serif;font-size:36px;font-weight:700;line-height:1}
     .stat-card.amber .stat-value{color:var(--amber)}
     .stat-card.green .stat-value{color:var(--green)}
     .stat-card.red   .stat-value{color:var(--red)}
     .stat-card.blue  .stat-value{color:var(--blue)}
-    .stat-sub{font-size:12px;color:var(--muted);margin-top:5px}
+    .stat-sub{font-size:13px;color:var(--muted);margin-top:5px}
 
     /* tabs */
     .tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
@@ -54,7 +59,8 @@
     .tab-badge.blue {background:var(--blue-dim);color:var(--blue)}
 
     /* card + table */
-    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease,border-color 0.2s ease}
+    .card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22)}
     .filter-bar{display:flex;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
     .filter-bar input[type="text"]{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 13px;outline:none}
     .filter-bar input:focus{border-color:var(--blue)}
@@ -95,7 +101,7 @@
     .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
 
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+    .modal-header h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700}
     .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
     .modal-close:hover{color:var(--text);background:var(--border2)}
     .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
@@ -125,7 +131,81 @@
     .form-group textarea:focus{border-color:var(--blue)}
     .modal-actions{display:flex;gap:10px;padding:16px 24px 20px;border-top:1px solid var(--border)}
 
-    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    /* -- Request Form Preview Modal --------------------------------------- */
+    .rf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:300;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;}
+    .rf-overlay.open{display:flex;}
+    .rf-modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:880px;max-height:calc(100vh - 24px);display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.8);animation:modalIn .2s ease;margin:auto;}
+    .rf-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;flex-shrink:0;}
+    .rf-modal-header h3{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px;}
+    .rf-modal-actions{display:flex;gap:8px;align-items:center;}
+    /* Status banner */
+    #rf-status-banner{flex-shrink:0;}
+    .rf-status-banner{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--radius-sm);margin:10px 22px 0;font-size:13px;font-weight:600;}
+    .rf-status-banner.pending{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.3);}
+    .rf-status-banner.approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.3);}
+    .rf-status-banner.rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.3);}
+    /* notes group */
+    #rf-review-notes-group{flex-shrink:0;}
+    /* scrollable form content */
+    #rf-form-content{flex:1;overflow-y:auto;background:#f4f6f9;padding:14px 20px 20px;}
+    /* form-wrapper inside modal � force all text black, no theme bleed */
+    .acc-form-wrap { background:#fff; color:#111 !important; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,.2); font-family:Arial,'DM Sans',sans-serif; font-size:11.5px; padding:18px 24px 22px; }
+    .acc-form-wrap * { color:#111 !important; }
+    .acc-info-grid { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:11px; }
+    .acc-info-grid td { border:1px solid #333; padding:5px 8px 4px; vertical-align:bottom; }
+    .acc-cell-label { font-size:9px; font-weight:600; display:block; margin-bottom:3px; color:#111; white-space:nowrap; }
+    .acc-cell-val { font-size:11px; color:#111; display:block; border-bottom:1px solid #888; padding:2px 0 2px; min-height:16px; }
+    .acc-asset-table { width:100%; border-collapse:collapse; font-size:10px; margin-bottom:12px; table-layout:fixed; }
+    .acc-asset-table th, .acc-asset-table td { border:1px solid #333; padding:4px 5px; vertical-align:middle; }
+    .acc-asset-table thead th { background:#f0f0f0; font-weight:700; font-size:9px; text-align:center; color:#111; line-height:1.3; word-break:normal; white-space:normal; }
+    .acc-asset-table thead th:first-child { text-align:left; }
+    .acc-asset-table tbody td { font-size:10px; line-height:1.35; }
+    .acc-asset-table tbody td:first-child { font-weight:600; background:#fafafa; white-space:nowrap; }
+    .acc-policy { font-size:9.5px; line-height:1.5; color:#111; margin-bottom:10px; }
+    .acc-policy-heading { font-weight:700; font-size:10px; margin-bottom:5px; }
+    .acc-policy ol { margin-left:16px; }
+    .acc-policy ol > li { font-weight:600; margin-bottom:2px; }
+    .acc-policy ol > li > ul { font-weight:400; margin-left:13px; margin-top:2px; list-style:disc; }
+    .acc-policy ol > li > ul > li { margin-bottom:1.5px; }
+    .acc-ack { font-size:9.5px; line-height:1.5; color:#111; margin-bottom:12px; }
+    .acc-ack-heading { font-weight:700; font-size:10px; margin-bottom:3px; }
+    .acc-sig-row { display:grid; grid-template-columns:1fr 1fr; gap:36px; margin-bottom:12px; }
+    .acc-sig-block { display:flex; flex-direction:column; align-items:center; }
+    .acc-sig-line { border-bottom:1.5px solid #111; height:38px; width:100%; margin-bottom:3px; }
+    .acc-sig-label { font-size:8.5px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:#111; text-align:center; }
+    .acc-disclaimer { font-size:7.5px; font-style:italic; color:#555; line-height:1.5; border-top:1px solid #ccc; padding-top:5px; }
+    /* Print */
+    @page { size:21.59cm 33.02cm; margin:0.6cm 0.85cm; }
+    @media print {
+      html,body { background:#fff !important; color:#111 !important; margin:0 !important; padding:0 !important; }
+      body>*:not(#acc-print-container) { display:none !important; }
+      #acc-print-container { display:block !important; background:#fff !important; }
+      .acc-form-wrap { box-shadow:none !important; border-radius:0 !important; padding:0.1cm 0.2cm !important; font-size:7.8pt !important; background:#fff !important; }
+      .acc-form-wrap * { color:#111 !important; }
+      .acc-info-grid { margin-bottom:0.2cm !important; font-size:7.2pt !important; }
+      .acc-info-grid td { padding:2px 5px 1px !important; border-color:#333 !important; }
+      .acc-cell-label { font-size:6.2pt !important; margin-bottom:1px !important; }
+      .acc-cell-val { font-size:7.2pt !important; min-height:12px !important; }
+      .acc-asset-table { font-size:6.8pt !important; margin-bottom:0.2cm !important; }
+      .acc-asset-table th, .acc-asset-table td { padding:2.5px 4px !important; line-height:1.3 !important; border-color:#333 !important; }
+      .acc-asset-table thead th { font-size:6.5pt !important; }
+      .acc-asset-table tbody td { font-size:6.8pt !important; white-space:normal !important; word-break:break-word !important; }
+      .acc-asset-table tbody td:first-child { font-weight:600 !important; background:#fafafa !important; white-space:normal !important; word-break:break-word !important; }
+      .acc-policy { font-size:6.6pt !important; line-height:1.42 !important; margin-bottom:0.16cm !important; }
+      .acc-policy-heading { font-size:7pt !important; font-weight:700 !important; margin-bottom:0.05cm !important; }
+      .acc-policy ol { margin-left:12px !important; }
+      .acc-policy ol > li { margin-bottom:1.5px !important; }
+      .acc-policy ol > li > ul { margin-left:10px !important; margin-top:1px !important; }
+      .acc-policy ol > li > ul > li { margin-bottom:1px !important; }
+      .acc-ack { font-size:6.6pt !important; line-height:1.42 !important; margin-bottom:0.18cm !important; }
+      .acc-ack-heading { font-size:7pt !important; font-weight:700 !important; margin-bottom:0.05cm !important; }
+      .acc-sig-row { display:grid !important; grid-template-columns:1fr 1fr !important; gap:2.5cm !important; margin-bottom:0.15cm !important; }
+      .acc-sig-block { display:flex !important; flex-direction:column !important; align-items:center !important; width:100% !important; }
+      .acc-sig-line { height:0.55cm !important; width:100% !important; border-bottom:1pt solid #111 !important; margin-bottom:2px !important; }
+      .acc-sig-label { font-size:6.5pt !important; letter-spacing:0.3px !important; }
+      .acc-disclaimer { font-size:6pt !important; padding-top:4px !important; line-height:1.38 !important; }
+      * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    }
     .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
     .toast.error{border-color:var(--red);color:var(--red)}
     .toast.success{border-color:var(--green);color:var(--green)}
@@ -150,22 +230,22 @@
     <div class="stats-row">
       <div class="stat-card amber">
         <div class="stat-label">Pending</div>
-        <div class="stat-value" id="stat-pending">�</div>
+        <div class="stat-value" id="stat-pending">&mdash;</div>
         <div class="stat-sub">awaiting review</div>
       </div>
       <div class="stat-card green">
         <div class="stat-label">Approved</div>
-        <div class="stat-value" id="stat-approved">�</div>
+        <div class="stat-value" id="stat-approved">&mdash;</div>
         <div class="stat-sub">actions applied</div>
       </div>
       <div class="stat-card red">
         <div class="stat-label">Rejected</div>
-        <div class="stat-value" id="stat-rejected">�</div>
+        <div class="stat-value" id="stat-rejected">&mdash;</div>
         <div class="stat-sub">requests declined</div>
       </div>
       <div class="stat-card blue">
         <div class="stat-label">Total</div>
-        <div class="stat-value" id="stat-total">�</div>
+        <div class="stat-value" id="stat-total">&mdash;</div>
         <div class="stat-sub">all requests</div>
       </div>
     </div>
@@ -173,22 +253,23 @@
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" id="tab-pending-btn" onclick="switchTab('pending')">
-        ? Pending <span class="tab-badge amber" id="tab-pending-count">0</span>
+        &#9203; Pending <span class="tab-badge amber" id="tab-pending-count">0</span>
       </button>
       <button class="tab-btn" id="tab-approved-btn" onclick="switchTab('approved')">
-        ? Approved <span class="tab-badge green" id="tab-approved-count">0</span>
+        &#10003; Approved <span class="tab-badge green" id="tab-approved-count">0</span>
       </button>
       <button class="tab-btn" id="tab-rejected-btn" onclick="switchTab('rejected')">
-        ? Rejected <span class="tab-badge red" id="tab-rejected-count">0</span>
+        &#10007; Rejected <span class="tab-badge red" id="tab-rejected-count">0</span>
       </button>
     </div>
 
     <!-- Table card -->
     <div class="card">
       <div class="filter-bar">
-        <input type="text" id="search-input" placeholder="&#128269; Search by staff, resource or notes�" oninput="renderTable()" />
+        <input type="text" id="search-input" placeholder="&#128269; Search by staff, resource or notes&hellip;" oninput="renderTable()" />
         <select id="filter-resource" onchange="renderTable()">
           <option value="">All Resources</option>
+          <option value="asset_request">Asset Requests</option>
           <option value="Asset">Assets</option>
           <option value="Assignment">Assignments</option>
           <option value="Damage">Damage Reports</option>
@@ -211,7 +292,7 @@
             </tr>
           </thead>
           <tbody id="approval-table">
-            <tr><td colspan="8"><div class="empty-state">Loading�</div></td></tr>
+            <tr><td colspan="8"><div class="empty-state">Loading&hellip;</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -231,12 +312,12 @@
       <div id="review-detail-rows"></div>
       <div class="form-group" id="review-notes-group">
         <label for="review-notes">Notes / Reason (optional)</label>
-        <textarea id="review-notes" placeholder="Add a note for the staff member�"></textarea>
+        <textarea id="review-notes" placeholder="Add a note for the staff member&hellip;"></textarea>
       </div>
     </div>
     <div class="modal-actions" id="review-modal-actions">
-      <button class="btn btn-success" id="btn-approve" onclick="submitReview('approved')">? Approve</button>
-      <button class="btn btn-danger"  id="btn-reject"  onclick="submitReview('rejected')">? Reject</button>
+      <button class="btn btn-success" id="btn-approve" onclick="submitReview('approved')">&#10003; Approve</button>
+      <button class="btn btn-danger"  id="btn-reject"  onclick="submitReview('rejected')">&#10007; Reject</button>
       <button class="btn btn-ghost"   onclick="closeReviewModal()">Cancel</button>
     </div>
   </div>
@@ -244,10 +325,35 @@
 
 <div id="toast-container"></div>
 
+<!-- Request Form Preview Modal -->
+<div class="rf-overlay" id="rf-modal">
+  <div class="rf-modal" id="rf-print-area">
+    <div class="rf-modal-header" id="rf-modal-header-bar">
+      <h3>Asset Accountability Form</h3>
+      <div class="rf-modal-actions">
+        <button class="btn btn-success" id="rf-approve-btn" onclick="submitReviewFromRf('approved')" style="display:none">&#10003; Approve</button>
+        <button class="btn btn-danger"  id="rf-reject-btn"  onclick="submitReviewFromRf('rejected')" style="display:none">&#10007; Reject</button>
+        <button class="btn btn-ghost" onclick="printRfForm()">&#128424; Print</button>
+        <button class="modal-close" onclick="closeRfModal()" style="margin-left:4px">&times;</button>
+      </div>
+    </div>
+    <div id="rf-status-banner"></div>
+    <div class="form-group" id="rf-review-notes-group" style="display:none;margin:0 24px 12px;">
+      <label for="rf-review-notes">Notes / Reason (optional)</label>
+      <textarea id="rf-review-notes" placeholder="Add a note for the staff member&hellip;"></textarea>
+    </div>
+    <!-- The accountability form rendered directly here -->
+    <div id="rf-form-content"></div>
+  </div>
+</div>
+
+<!-- Hidden print container � sits directly in body, filled just before window.print() -->
+<div id="acc-print-container" style="display:none;"></div>
+
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script>
 auth.initPage({ admin: true, onReady: () => loadApprovals() });
 
@@ -260,7 +366,7 @@ let _suppliersCache   = {};
 let _productsCache    = {};   // id ? name
 
 function fmtDate(s) {
-  if (!s) return '�';
+  if (!s) return '?';
   return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric',
     hour:'numeric', minute:'2-digit' });
 }
@@ -293,7 +399,7 @@ const _fieldLabels = {
 
 /* -- Render payload as a clean key-value table -- */
 
-// Fields to skip entirely � internal IDs or system fields not useful to humans
+// Fields to skip entirely ? internal IDs or system fields not useful to humans
 const _skipFields = new Set(['_method', 'image', 'image_path', 'po_id', 'po_item_id', 'updated_at', 'created_at']);
 
 // Status value ? color
@@ -373,7 +479,26 @@ async function loadApprovals() {
 
     updateCounts();
     renderTable();
-  } catch (e) { showToast(e.message, 'error'); }
+  } catch (e) {
+    document.getElementById('approval-table').innerHTML =
+      `<tr><td colspan="8"><div class="empty-state" style="color:var(--red)">Failed to load approvals: ${e.message}</div></td></tr>`;
+    showToast(e.message, 'error');
+  }
+}
+
+function animateCount(id, target, duration) {
+  duration = duration || 600;
+  var el = document.getElementById(id);
+  if (!el) return;
+  var start = performance.now();
+  function tick(now) {
+    var t = Math.min((now - start) / duration, 1);
+    var ease = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(target * ease);
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(tick);
 }
 
 function updateCounts() {
@@ -381,10 +506,10 @@ function updateCounts() {
   const approved = allRequests.filter(r => r.status === 'approved').length;
   const rejected = allRequests.filter(r => r.status === 'rejected').length;
 
-  document.getElementById('stat-pending').textContent  = pending;
-  document.getElementById('stat-approved').textContent = approved;
-  document.getElementById('stat-rejected').textContent = rejected;
-  document.getElementById('stat-total').textContent    = allRequests.length;
+  animateCount('stat-pending',  pending);
+  animateCount('stat-approved', approved);
+  animateCount('stat-rejected', rejected);
+  animateCount('stat-total',    allRequests.length);
 
   document.getElementById('tab-pending-count').textContent  = pending;
   document.getElementById('tab-approved-count').textContent = approved;
@@ -432,7 +557,7 @@ function renderTable() {
     }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)';
 
     const reviewedCell = currentTab !== 'pending'
-      ? `<td style="font-size:12px;color:var(--muted2)">${esc(r.reviewed_by || '�')}</td>`
+      ? `<td style="font-size:12px;color:var(--muted2)">${esc(r.reviewed_by || '—')}</td>`
       : `<td style="display:none;"></td>`;
 
     const retryBtn = r.status === 'approved' && r.resource_type === 'Assignment' && r.action_type === 'create'
@@ -440,13 +565,13 @@ function renderTable() {
       : '';
     const actions = r.status === 'pending'
       ? `<div class="actions">
-           <button class="btn btn-success btn-sm" onclick="openReviewModal(${r.id}, true)">? Approve</button>
-           <button class="btn btn-danger btn-sm"  onclick="openReviewModal(${r.id}, false)">? Reject</button>
+           <button class="btn btn-success btn-sm" onclick="openReviewModal(${r.id}, true)">&#10003; Approve</button>
+           <button class="btn btn-danger btn-sm"  onclick="openReviewModal(${r.id}, false)">&#10007; Reject</button>
            <button class="btn btn-ghost btn-sm"   onclick="openDetailModal(${r.id})">View</button>
          </div>`
       : `<div class="actions">${retryBtn}<button class="btn btn-ghost btn-sm" onclick="openDetailModal(${r.id})">View</button></div>`;
 
-    // Resource name � split "Asset ? Employee" style for assignments
+    // Resource name ? split "Asset ? Employee" style for assignments
     let resourceNameHtml = '';
     if (r.resource_name) {
       const arrow = r.resource_name.includes(' ? ');
@@ -470,7 +595,7 @@ function renderTable() {
         <span class="pill pill-resource">${esc(r.resource_type)}</span>
         ${resourceNameHtml}
       </td>
-      <td style="max-width:200px;font-size:12px;color:var(--muted2);">${esc(r.notes || '�')}</td>
+      <td style="max-width:200px;font-size:12px;color:var(--muted2);">${esc(r.notes || '?')}</td>
       <td style="font-size:12px;color:var(--muted2);white-space:nowrap">${fmtDate(r.created_at)}</td>
       ${reviewedCell}
       <td>${actions}</td>
@@ -480,9 +605,16 @@ function renderTable() {
 
 /* -- Review modal -- */
 function openReviewModal(id, approveMode) {
-  reviewingId = id;
   const r = allRequests.find(x => x.id === id);
   if (!r) return;
+
+  // asset_request ? use the Request Form preview with approve/reject controls
+  if (r.resource_type === 'asset_request') {
+    openRfModal(id, true, approveMode);
+    return;
+  }
+
+  reviewingId = id;
 
   document.getElementById('review-modal-title').textContent =
     approveMode ? '? Approve Request' : '? Reject Request';
@@ -500,7 +632,7 @@ function openReviewModal(id, approveMode) {
       <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
       <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${{ create:'background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)', update:'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)', delete:'background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)' }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)'};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
       <div class="detail-row"><div class="detail-key">Resource</div><div class="detail-val"><span class="pill pill-resource">${esc(r.resource_type)}</span>${r.resource_name ? ' <span style="font-size:13px;color:var(--muted2);">'+esc(r.resource_name)+'</span>' : ''}</div></div>
-      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '�')}</div></div>
+      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '?')}</div></div>
       <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val" style="color:var(--muted2);">${fmtDate(r.created_at)}</div></div>
     </div>
     <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Request Details</div>
@@ -513,6 +645,13 @@ function openReviewModal(id, approveMode) {
 function openDetailModal(id) {
   const r = allRequests.find(x => x.id === id);
   if (!r) return;
+
+  // asset_request ? use the Request Form preview
+  if (r.resource_type === 'asset_request') {
+    openRfModal(id, false);
+    return;
+  }
+
   reviewingId = id;
 
   document.getElementById('review-modal-title').textContent = 'Request Details';
@@ -535,7 +674,7 @@ function openDetailModal(id) {
       <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
       <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${{ create:'background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)', update:'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)', delete:'background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)' }[r.action_type] || 'background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)'};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
       <div class="detail-row"><div class="detail-key">Resource</div><div class="detail-val"><span class="pill pill-resource">${esc(r.resource_type)}</span>${r.resource_name ? ' <span style="font-size:13px;color:var(--muted2);">'+esc(r.resource_name)+'</span>' : ''}</div></div>
-      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '�')}</div></div>
+      <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '?')}</div></div>
       <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val" style="color:var(--muted2);">${fmtDate(r.created_at)}</div></div>
       ${reviewInfo}
     </div>
@@ -546,6 +685,241 @@ function openDetailModal(id) {
   document.getElementById('review-notes-group').style.display = 'none';
   document.getElementById('review-modal').classList.add('open');
 }
+
+/* -- Request Form Preview Modal -------------------------------------------- */
+
+function openRfModal(id, showActions, approveMode = true) {
+  const r = allRequests.find(x => x.id === id);
+  if (!r) return;
+  reviewingId = id;
+
+  const p = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
+
+  // Status banner
+  const bannerEl = document.getElementById('rf-status-banner');
+  const statusIcons  = { pending: '&#9203;', approved: '&#10003;', rejected: '&#10007;' };
+  const statusLabels = { pending: 'Pending Approval', approved: 'Approved', rejected: 'Rejected' };
+  bannerEl.className = `rf-status-banner ${r.status}`;
+  bannerEl.innerHTML = '<span>' + (statusIcons[r.status] || '') + '</span> '
+    + (statusLabels[r.status] || r.status)
+    + '<span style="margin-left:auto;font-size:12px;font-weight:400;opacity:.7">Submitted by '
+    + esc(r.requested_by) + ' &middot; ' + fmtDate(r.created_at) + '</span>';
+
+  // Approve / Reject buttons
+  const approveBtn = document.getElementById('rf-approve-btn');
+  const rejectBtn  = document.getElementById('rf-reject-btn');
+  const notesGroup = document.getElementById('rf-review-notes-group');
+  document.getElementById('rf-review-notes').value = '';
+  if (showActions && r.status === 'pending') {
+    approveBtn.style.display = approveMode  ? '' : 'none';
+    rejectBtn.style.display  = !approveMode ? '' : 'none';
+    notesGroup.style.display = '';
+  } else {
+    approveBtn.style.display = 'none';
+    rejectBtn.style.display  = 'none';
+    notesGroup.style.display = 'none';
+  }
+
+  // -- Build asset table rows --------------------------------------
+  const FIXED_TYPES = ['Laptop','Mobile Device','Headset','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+  const submittedAssets = Array.isArray(p.assets) ? p.assets : [];
+
+  const rows = FIXED_TYPES.map(typeLabel => {
+    const m = submittedAssets.find(a => {
+      const n = (a.name || a.category || '').toLowerCase();
+      const t = typeLabel.toLowerCase();
+      return n === t || n.includes(t.split(' ')[0]) || t.includes((n||'').split(' ')[0]);
+    });
+    return {
+      type:  m ? (m.name  || typeLabel) : typeLabel,
+      brand: m ? (m.brand || '')        : '',
+      sn:    m ? (m.tag   || m.serial_number || '') : '',
+      cond:  m ? (m.condition || '')    : '',
+      val:   m ? (m.value || '')        : '',
+      rem:   m ? (m.remarks || '')      : '',
+    };
+  });
+  // Extra assets beyond fixed 6
+  submittedAssets.forEach(a => {
+    const n = (a.name || a.category || '').toLowerCase();
+    const covered = FIXED_TYPES.some(t => {
+      const tl = t.toLowerCase();
+      return n === tl || n.includes(tl.split(' ')[0]) || tl.includes((n||'').split(' ')[0]);
+    });
+    if (!covered) rows.push({ type: a.name || a.category || '', brand: a.brand || '', sn: a.tag || a.serial_number || '', cond: a.condition || '', val: a.value || '', rem: a.remarks || '' });
+  });
+
+  const assetRowsHtml = rows.map(a => `
+    <tr>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;font-weight:600;background:#fafafa;white-space:normal;word-break:break-word;vertical-align:middle;color:#111;">${esc(a.type)}</td>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;vertical-align:middle;color:#111;overflow:hidden;">${esc(a.brand)}</td>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;vertical-align:middle;color:#111;overflow:hidden;">${esc(a.sn)}</td>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;vertical-align:middle;color:#111;overflow:hidden;">${esc(a.cond)}</td>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;vertical-align:middle;color:#111;overflow:hidden;">${esc(a.val)}</td>
+      <td style="border:1px solid #333;padding:5px 6px;font-size:10px;vertical-align:middle;color:#111;overflow:hidden;">${esc(a.rem)}</td>
+    </tr>`).join('');
+
+  // -- Date formatting ---------------------------------------------
+  const issueDate = (() => {
+    const raw = p.date_deployed || r.created_at;
+    if (!raw) return '';
+    const d = new Date(raw); if (isNaN(d)) return raw;
+    return String(d.getMonth()+1).padStart(2,'0') + ' / ' + String(d.getDate()).padStart(2,'0') + ' / ' + d.getFullYear();
+  })();
+
+  // -- Review note -------------------------------------------------
+  const reviewSection = r.reviewed_by
+    ? `<div style="margin-top:10px;padding:8px 12px;background:#fff8e1;border:1px solid #f5a623;border-radius:4px;font-size:10px;color:#7a5500;">
+        <strong>Review note by ${esc(r.reviewed_by)}:</strong> ${esc(r.review_notes || '--')}
+       </div>` : '';
+
+  // -- Render full accountability form -----------------------------
+  document.getElementById('rf-form-content').innerHTML = `
+  <div class="acc-form-wrap">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <img src="logo.png" alt="EmpireOne" style="height:52px;max-width:280px;object-fit:contain;">
+    </div>
+    <!-- Title -->
+    <div style="text-align:center;font-size:12px;font-weight:700;text-decoration:underline;text-transform:uppercase;letter-spacing:1.5px;color:#111;margin-bottom:12px;">
+      Asset Accountability Form
+    </div>
+    <!-- Employee info grid -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:11px;">
+      <tbody>
+        <tr>
+          <td style="width:55%;border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Complete Employee Name:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">${esc(p.assignee || r.requested_by || '')}</span>
+          </td>
+          <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Account/Program:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">${esc(p.account_program || '')}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Employee #:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">${esc(p.empid || '')}</span>
+          </td>
+          <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Date of Issue:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">${esc(issueDate)}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Hire date:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">&nbsp;</span>
+          </td>
+          <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+            <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;white-space:nowrap;">Location:</span>
+            <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">${esc(p.location || p.department || '')}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Asset table -->
+    <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:18%">
+        <col style="width:16%">
+        <col style="width:14%">
+        <col style="width:17%">
+        <col style="width:21%">
+        <col style="width:14%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th style="text-align:left;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Asset Type</th>
+          <th style="text-align:center;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Brand/Model</th>
+          <th style="text-align:center;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Serial<br>Number</th>
+          <th style="text-align:center;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Condition at<br>Issuance</th>
+          <th style="text-align:center;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Value at the Time<br>of Purchase</th>
+          <th style="text-align:center;border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;vertical-align:middle;line-height:1.3;overflow:hidden;">Remarks</th>
+        </tr>
+      </thead>
+      <tbody>${assetRowsHtml}</tbody>
+    </table>
+    <!-- Physical Security Policy -->
+    <div class="acc-policy">
+      <div class="acc-policy-heading">Physical Security Policy for Issued Assets</div>
+      <ol>
+        <li>Ownership and Use<ul><li>All assets remain the exclusive property of the company.</li><li>Assets are issued for business use only, unless otherwise authorized.</li><li>Employees must not transfer, sell, or lend assets to unauthorized persons.</li></ul></li>
+        <li>Care and Safekeeping<ul><li>Employees must exercise reasonable care to prevent damage, loss, or unauthorized access.</li><li>Assets must be stored securely when not in use (e.g., locked drawers, secure bags).</li><li>Food, liquids, and hazardous materials must be kept away from devices.</li></ul></li>
+        <li>Loss, Theft, or Damage<ul><li>Any incident of loss, theft, or damage must be reported immediately to HR/IT.</li><li>In cases of negligence, the employee may be held financially liable for repair or replacement costs, subject to labor law.</li><li>Normal wear and tear are exempt from liability.</li></ul></li>
+        <li>Access Control<ul><li>Employees must use company-approved authentication methods (passwords, biometrics, badges).</li><li>Sharing of login credentials or bypassing security controls is strictly prohibited.</li><li>Devices must be locked when unattended.</li><li>Unauthorized software installation or data transfer is prohibited.</li></ul></li>
+        <li>Reporting to IT<ul><li>Employees must promptly report to IT any hardware/software malfunction, security incident, or loss/theft/damage of assets.</li><li>IT will document and investigate reported issues, and employees must cooperate fully.</li></ul></li>
+        <li>Confidentiality<ul><li>Employees must maintain strict confidentiality of company data stored, accessed, or transmitted through issued assets.</li><li>Sensitive information must not be copied, transferred, or disclosed without proper authorization.</li><li>Any suspected data breach or unauthorized access must be reported immediately to IT.</li></ul></li>
+        <li>Return and Separation<ul><li>All assets must be returned in good condition upon resignation, termination, role change, or company request.</li><li>A Return &amp; Clearance Form will be completed during offboarding to confirm asset recovery.</li><li>The company reserves the right to inspect and audit assets at any time to ensure compliance with security and usage policies.</li><li>Employees must cooperate fully during inspections.</li></ul></li>
+      </ol>
+    </div>
+    <!-- Acknowledgment -->
+    <div class="acc-ack">
+      <div class="acc-ack-heading">Acknowledgment</div>
+      <p>I, the undersigned, acknowledge receipt of the above-listed company assets and agree to comply with the terms stated in this document, including the physical security policy. I understand that failure to comply may result in accountability measures under company policy and applicable labor regulations.</p>
+    </div>
+    <!-- Signatures -->
+    <div class="acc-sig-row">
+      <div class="acc-sig-block"><div class="acc-sig-line"></div><div class="acc-sig-label">Date</div></div>
+      <div class="acc-sig-block"><div class="acc-sig-line"></div><div class="acc-sig-label">Signature Over Printed Name</div></div>
+    </div>
+    <!-- Disclaimer -->
+    <div class="acc-disclaimer">
+      <strong>Disclaimer:</strong> This document and its contents are the property of <em>EmpireOne BPO Solutions, Inc.</em> and are intended for internal use only. Unauthorized reproduction, disclosure, or distribution of this material, in whole or in part, without prior written permission from the company is strictly prohibited.
+    </div>
+    ${reviewSection}
+  </div>`;
+
+  document.getElementById('rf-modal').classList.add('open');
+}
+
+function closeRfModal() {
+  document.getElementById('rf-modal').classList.remove('open');
+  reviewingId = null;
+}
+
+function printRfForm() {
+  const src = document.getElementById('rf-form-content');
+  const container = document.getElementById('acc-print-container');
+  if (!src || !container) { window.print(); return; }
+  // Copy the rendered form into the dedicated print container
+  container.innerHTML = src.innerHTML;
+  container.style.display = 'block';
+  // Small delay to let browser register the DOM change, then print
+  setTimeout(() => {
+    window.print();
+    // Clean up after print dialog closes
+    setTimeout(() => {
+      container.innerHTML = '';
+      container.style.display = 'none';
+    }, 500);
+  }, 80);
+}
+
+async function submitReviewFromRf(decision) {
+  if (!reviewingId) return;
+  const notes = document.getElementById('rf-review-notes').value.trim();
+  const approveBtn = document.getElementById('rf-approve-btn');
+  const rejectBtn  = document.getElementById('rf-reject-btn');
+  approveBtn.disabled = true;
+  rejectBtn.disabled  = true;
+  try {
+    await api.reviewApproval(reviewingId, { decision, review_notes: notes });
+    showToast(decision === 'approved' ? 'Request approved' : 'Request rejected',
+      decision === 'approved' ? 'success' : 'error');
+    closeRfModal();
+    await loadApprovals();
+    if (window.refreshSidebar) refreshSidebar();
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    approveBtn.disabled = false;
+    rejectBtn.disabled  = false;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 
 function closeReviewModal() {
   document.getElementById('review-modal').classList.remove('open');
@@ -592,8 +966,11 @@ async function submitReview(decision) {
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) closeReviewModal(); });
 });
+document.getElementById('rf-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('rf-modal')) closeRfModal();
+});
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeReviewModal();
+  if (e.key === 'Escape') { closeReviewModal(); closeRfModal(); }
 });
 
 // Init tab header

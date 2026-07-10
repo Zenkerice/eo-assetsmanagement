@@ -1,9 +1,15 @@
 <?php
-error_reporting(0);
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>false,'httponly'=>true,'samesite'=>'Lax']);
     session_start();
+    // Release session lock immediately for read-only requests so parallel
+    // API calls from the same browser tab don't block each other.
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        session_write_close();
+    }
 }
 
 require_once __DIR__ . '/controller/ProductController.php';
@@ -18,6 +24,7 @@ require_once __DIR__ . '/controller/LocationController.php';
 require_once __DIR__ . '/controller/ApprovalController.php';
 require_once __DIR__ . '/controller/NotificationController.php';
 require_once __DIR__ . '/controller/EmployeeController.php';
+require_once __DIR__ . '/controller/TeamStructureController.php';
 
 header('Content-Type: application/json');
 
@@ -117,6 +124,9 @@ try {
             (new ApprovalController())->handle($method, $id, $body, $query); break;
         case 'notifications':
             (new NotificationController())->handle($method, $id, $body, $query); break;
+        case 'team_structure':
+        case 'team-structure':
+            (new TeamStructureController())->handle($method, $id, $body, $query); break;
         default:
             http_response_code(404); echo json_encode(['error'=>"Resource '$resource' not found"]);
     }

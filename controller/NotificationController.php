@@ -21,7 +21,16 @@ class NotificationController extends BaseController {
         $userId = (int)($user['id']   ?? 0);
         $role   = $user['role']        ?? 'staff';
 
-        if (!$userId) { $this->respond(['error' => 'Not authenticated'], 401); return; }
+        if (!$userId) {
+            // Return empty result instead of 401 so the notification bell
+            // doesn't spam the console when the session is briefly unavailable.
+            if ($method === 'GET' && isset($query['unread'])) {
+                $this->respond(['success' => true, 'data' => ['count' => 0]]);
+            } else {
+                $this->respond(['success' => true, 'data' => []]);
+            }
+            return;
+        }
 
         try {
             // Count unread

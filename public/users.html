@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Users &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -33,11 +33,13 @@
     .btn-ghost:hover{background:var(--bg3);color:var(--text);}
     .btn-danger-ghost{background:transparent;color:var(--red);border:1px solid rgba(244,91,105,0.3);}
     .btn-danger-ghost:hover{background:var(--red-dim);}
+    .toggle input{outline:none !important;}
     .btn-sm{padding:7px 14px;font-size:13px;}
     /* Card */
-    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease,border-color 0.2s ease;}
+    .card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22);}
     .card-header{display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid var(--border);}
-    .card-header h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+    .card-header h2{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;}
     /* Table */
     .table-wrap{overflow-x:auto;}
     table{width:100%;border-collapse:collapse;}
@@ -47,28 +49,46 @@
     tbody tr:hover td{background:rgba(255,255,255,0.025);}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
-    .badge-admin  {background:var(--blue-dim);  color:var(--blue);}
-    .badge-staff  {background:var(--green-dim); color:var(--green);}
-    .badge-viewer {background:var(--amber-dim); color:var(--amber);}
+    .badge-admin  {background:var(--purple-dim);  color:var(--purple);}
+    .badge-manager{background:var(--blue-dim);    color:var(--blue);}
+    .badge-staff  {background:var(--amber-dim);   color:var(--amber);}
+    .badge-viewer {background:var(--green-dim);   color:var(--green);}
+    .badge-pending  {background:rgba(245,166,35,0.15); color:var(--amber); border:1px solid rgba(245,166,35,0.3);}
+    .badge-active   {background:var(--green-dim);       color:var(--green);  border:1px solid rgba(62,207,142,0.3);}
+    .badge-rejected {background:rgba(244,91,105,0.13);  color:var(--red);    border:1px solid rgba(244,91,105,0.3);}
+    .badge-suspended{background:rgba(155,115,247,0.15); color:#9b73f7;       border:1px solid rgba(155,115,247,0.3);}
+    .btn-approve {background:rgba(62,207,142,0.15);color:var(--green);border:1px solid rgba(62,207,142,0.3);padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;}
+    .btn-approve:hover{background:rgba(62,207,142,0.3);}
+    .btn-reject  {background:rgba(244,91,105,0.13);color:var(--red);border:1px solid rgba(244,91,105,0.3);padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;}
+    .btn-reject:hover{background:rgba(244,91,105,0.28);}
     .mono{font-family:'DM Mono',monospace;font-size:13px;background:var(--bg3);color:var(--muted2);padding:3px 8px;border-radius:6px;border:1px solid var(--border);}
     /* Modal */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:520px;padding:36px;box-shadow:0 24px 64px rgba(0,0,0,0.6);animation:slideUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:780px;padding:0;box-shadow:0 24px 64px rgba(0,0,0,0.6);animation:slideUp .2s ease;overflow:hidden;}
+    .modal.modal-sm{max-width:420px !important;}
 
-    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-    .modal-header h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;}
-    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:24px 32px;border-bottom:1px solid var(--border);}
+    .modal-header h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s;line-height:1;}
     .modal-close:hover{background:var(--bg3);color:var(--text);}
-    .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
-    .form-group label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
-    .form-group input,.form-group select{padding:12px 15px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+
+    /* Two-column form layout */
+    .modal-body{display:grid;grid-template-columns:1fr 1px 1fr;gap:0;}
+    .modal-col{padding:24px 32px;}
+    .modal-col-divider{background:var(--border);}
+    .modal-col-title{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+    .modal-col-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+    .form-group:last-child{margin-bottom:0;}
+    .form-group label{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);}
+    .form-group input,.form-group select{padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
     .form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
     .form-group select option{background:var(--bg3);}
-    .form-hint{font-size:13px;color:var(--muted);margin-top:2px;}
-    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:28px;}
-    /* Role description */
-    .role-desc-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--muted2);margin-top:6px;min-height:36px;}
+    .form-hint{font-size:12px;color:var(--muted);margin-top:1px;}
+    .role-desc-box{background:rgba(41,182,232,0.06);border:1px solid rgba(41,182,232,0.15);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--muted2);margin-top:4px;line-height:1.5;}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-start;padding:16px 32px;border-top:1px solid var(--border);background:rgba(255,255,255,0.015);}
     /* Toast */
     #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999;}
     .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:toastIn .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
@@ -94,21 +114,40 @@
     <div class="card">
       <div class="card-header">
         <h2>&#128101; All Users</h2>
-        <button class="btn btn-ghost btn-sm" onclick="loadUsers()">&#8635; Refresh</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="role-filter" onchange="loadUsers()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 12px;font-size:13px;outline:none;">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="staff">Staff</option>
+            <option value="viewer">Supervisor</option>
+          </select>
+          <select id="status-filter" onchange="loadUsers()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 12px;font-size:13px;outline:none;">
+            <option value="">All Users</option>
+            <option value="pending">Pending Approval</option>
+            <option value="active">Active</option>
+            <option value="rejected">Rejected</option>
+            <option value="suspended">Suspended</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadUsers()">&#8635; Refresh</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th>Emp. ID</th>
               <th>Name</th>
               <th>Username</th>
               <th>Role</th>
+              <th>Status</th>
+              <th>Position</th>
               <th>Created</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="users-tbody">
-            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>
           </tbody>
         </table>
       </div>
@@ -125,41 +164,103 @@
     </div>
     <form id="user-form" autocomplete="off">
       <input type="hidden" id="edit-id" />
-      <div class="form-group">
-        <label for="f-name">Full Name *</label>
-        <input type="text" id="f-name" placeholder="e.g. Juan dela Cruz" required />
+      <div class="modal-body">
+
+        <!-- LEFT: Personal Info -->
+        <div class="modal-col">
+          <div class="modal-col-title">Personal Info</div>
+          <div class="form-group">
+            <label for="f-name">Full Name *</label>
+            <input type="text" id="f-name" placeholder="e.g. Juan dela Cruz" required />
+          </div>
+          <div class="form-group">
+            <label for="f-employee-id">Employee ID</label>
+            <input type="text" id="f-employee-id" placeholder="e.g. EMP-00123" />
+          </div>
+          <div class="form-group">
+            <label for="f-email">Email</label>
+            <input type="email" id="f-email" placeholder="e.g. juan@empireone.com" />
+          </div>
+          <div class="form-group">
+            <label for="f-contact">Contact Number</label>
+            <input type="tel" id="f-contact" placeholder="e.g. 09171234567" />
+          </div>
+        </div>
+
+        <div class="modal-col-divider"></div>
+
+        <!-- RIGHT: Account & Access -->
+        <div class="modal-col">
+          <div class="modal-col-title">Account &amp; Access</div>
+          <div class="form-group">
+            <label for="f-username">Username *</label>
+            <input type="text" id="f-username" placeholder="e.g. juan" required />
+          </div>
+          <div class="form-group">
+            <label for="f-password">Password</label>
+            <input type="password" id="f-password" placeholder="Min. 6 characters" />
+            <span class="form-hint" id="pw-hint">Required for new users.</span>
+          </div>
+          <div class="form-group">
+            <label for="f-role">Role *</label>
+            <select id="f-role" onchange="updateRoleDesc(); updatePositionOptions();">
+              <option value="viewer">Supervisor</option>
+              <option value="staff">Staff</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+            <div class="role-desc-box" id="role-desc"></div>
+          </div>
+          <div class="form-group" id="modal-position-group">
+            <label for="f-position">Position</label>
+            <select id="f-position">
+              <option value="">-- Select position --</option>
+            </select>
+          </div>
+          <!-- Suspension toggle — only shown when editing an existing user -->
+          <div class="form-group" id="modal-suspend-group" style="display:none;">
+            <label style="display:flex;align-items:center;justify-content:space-between;">
+              <span>Account Suspended</span>
+              <label class="toggle" for="f-suspended" style="margin-left:10px;">
+                <input type="checkbox" id="f-suspended" style="outline:none;">
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+            </label>
+            <span class="form-hint">Suspended users cannot log in.</span>
+          </div>
+        </div>
+
       </div>
-      <div class="form-group">
-        <label for="f-username">Username *</label>
-        <input type="text" id="f-username" placeholder="e.g. juan" required />
-      </div>
-      <div class="form-group">
-        <label for="f-password">Password</label>
-        <input type="password" id="f-password" placeholder="Min. 6 characters" />
-        <span class="form-hint" id="pw-hint">Required for new users.</span>
-      </div>
-      <div class="form-group">
-        <label for="f-role">Role *</label>
-        <select id="f-role" onchange="updateRoleDesc()">
-          <option value="viewer">Team Leader (TL)</option>
-          <option value="staff">Human Resources (HR)</option>
-          <option value="admin">Admin</option>
-        </select>
-        <div class="role-desc-box" id="role-desc">Read-only access to inventory data.</div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <div class="modal-footer">
         <button type="submit" class="btn btn-primary" id="save-btn">Save User</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
       </div>
     </form>
   </div>
 </div>
 
+<!-- Delete User Modal -->
+<div class="modal-overlay" id="delete-user-modal">
+  <div class="modal modal-sm">
+    <div class="del-body-wrap">
+      <div class="del-icon">&#128465;</div>
+      <div class="del-title">Delete User?</div>
+      <div class="del-msg" id="delete-user-msg"></div>
+      <div class="del-actions">
+        <button class="btn btn-danger" id="delete-user-confirm-btn">Yes, delete</button>
+        <button class="btn btn-ghost" id="delete-user-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script>
 auth.initPage({ admin: true, onReady: () => loadUsers() });
 
@@ -168,11 +269,19 @@ function formatDate(str) {
   return new Date(str).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
 }
 
-const roleLabels = { admin: 'System Manager', staff: 'HR · Staff', viewer: 'TL · Staff' };
+const roleLabels = { admin: 'Admin', manager: 'Manager', staff: 'Staff', viewer: 'Supervisor' };
 const roleDescs = {
-  viewer: 'Read-only access to inventory data.',
-  staff:  'Can add and edit assets, suppliers, and reports.',
-  admin:  'Full control including user management and deletions.',
+  viewer: 'Supervisor: Monitor teams, quality checks & compliance tasks.',
+  staff:  'Staff: Submit requests, manage assignments & people tasks.',
+  manager: 'Manager: Oversee operations, approvals & department reporting.',
+  admin:  'Admin: Full system access, user management & configuration.',
+};
+
+const rolePositions = {
+  admin:   ['Operations Manager', 'Compliance Manager', 'IT Staff'],
+  manager: ['Accounting Manager', 'Facility Manager', 'Account Manager'],
+  viewer:  ['Team Leader', 'QA', 'Compliance Officer'],
+  staff:   ['HR', 'Talent Acquisition', 'Engagement'],
 };
 
 function updateRoleDesc() {
@@ -180,24 +289,51 @@ function updateRoleDesc() {
   document.getElementById('role-desc').textContent = roleDescs[role] || '';
 }
 
+function updatePositionOptions(currentValue = '') {
+  const role   = document.getElementById('f-role').value;
+  const select = document.getElementById('f-position');
+  const opts   = rolePositions[role] || [];
+  select.innerHTML = '<option value="">-- Select position --</option>' +
+    opts.map(p => `<option value="${p}"${p === currentValue ? ' selected' : ''}>${p}</option>`).join('');
+  if (currentValue && !opts.includes(currentValue)) {
+    // Preserve a custom value that doesn't match the preset list
+    select.innerHTML += `<option value="${esc(currentValue)}" selected>${esc(currentValue)}</option>`;
+  }
+}
+
 /* -- Load users -- */
 async function loadUsers() {
   const tbody = document.getElementById('users-tbody');
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>';
+  const filter     = document.getElementById('status-filter')?.value || '';
+  const roleFilter = document.getElementById('role-filter')?.value  || '';
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">Loading&hellip;</td></tr>';
   try {
-    const users     = await auth.getUsers();
+    let users = await auth.getUsers();
     const currentId = auth.currentUser?.id;
 
+    // Apply status filter
+    if (filter) users = users.filter(u => (u.status || 'active') === filter);
+    // Apply role filter
+    if (roleFilter) users = users.filter(u => u.role === roleFilter);
+
     if (!users.length) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>No users yet.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>${filter === 'pending' ? 'No pending accounts.' : 'No users found.'}</p></div></td></tr>`;
       return;
     }
 
-    tbody.innerHTML = users.map(u => `
-      <tr>
+    const statusLabel = { pending: 'Pending', active: 'Active', rejected: 'Rejected', suspended: 'Suspended' };
+
+    tbody.innerHTML = users.map(u => {
+      const status = u.status || 'active';
+      const isPending   = status === 'pending';
+      const isSuspended = status === 'suspended';
+      const rowStyle = isPending ? ' style="background:rgba(245,166,35,0.04);"' : isSuspended ? ' style="background:rgba(155,115,247,0.04);"' : '';
+      return `
+      <tr${rowStyle}>
+        <td style="color:var(--muted2);font-size:13px;font-family:'DM Mono',monospace;">${u.employee_id ? esc(u.employee_id) : '<span style="color:var(--muted);">&mdash;</span>'}</td>
         <td>
           <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7b5bf7);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
+            <div style="width:32px;height:32px;border-radius:50%;background:${isPending ? 'linear-gradient(135deg,#f5a623,#e07b00)' : isSuspended ? 'linear-gradient(135deg,#9b73f7,#6b3ff7)' : 'linear-gradient(135deg,#4f8ef7,#7b5bf7)'};display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
               ${esc(u.name.charAt(0).toUpperCase())}
             </div>
             <span style="font-weight:500;">${esc(u.name)}</span>
@@ -206,19 +342,42 @@ async function loadUsers() {
         </td>
         <td><span class="mono">${esc(u.username)}</span></td>
         <td><span class="badge badge-${u.role}">${esc(roleLabels[u.role] || u.role)}</span></td>
+        <td><span class="badge badge-${status}">${statusLabel[status] || status}</span></td>
+        <td style="color:var(--muted2);font-size:13px;">${u.position ? esc(u.position) : '<span style="color:var(--muted);">&mdash;</span>'}</td>
         <td style="color:var(--muted2);font-size:13px;">${formatDate(u.created_at)}</td>
         <td>
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            ${isPending ? `
+              <button class="btn-approve" onclick="approveUser(${u.id}, '${esc(u.name)}')">&#10003; Approve</button>
+              <button class="btn-reject"  onclick="rejectUser(${u.id}, '${esc(u.name)}')">&#10007; Reject</button>
+            ` : ''}
             <button class="btn btn-ghost btn-sm" onclick="openEdit(${u.id})">Edit</button>
             ${u.id !== currentId
               ? `<button class="btn btn-danger-ghost btn-sm" onclick="deleteUser(${u.id}, '${esc(u.name)}')">Delete</button>`
               : ''}
           </div>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   } catch (e) {
     showToast(e.message, 'error');
   }
+}
+
+async function approveUser(id, name) {
+  try {
+    await auth.approveUser(id);
+    showToast(`${name}'s account has been approved.`, 'success');
+    loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function rejectUser(id, name) {
+  try {
+    await auth.rejectUser(id);
+    showToast(`${name}'s account has been rejected.`, 'error');
+    loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
 }
 
 /* -- Modal -- */
@@ -232,7 +391,9 @@ function openModal() {
   document.getElementById('pw-hint').textContent = 'Required for new users.';
   document.getElementById('f-password').required = true;
   document.getElementById('f-role').value = 'viewer';
+  document.getElementById('modal-suspend-group').style.display = 'none';
   updateRoleDesc();
+  updatePositionOptions();
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => document.getElementById('f-name').focus(), 80);
 }
@@ -246,12 +407,20 @@ async function openEdit(id) {
     document.getElementById('modal-title').textContent = 'Edit User';
     document.getElementById('edit-id').value    = id;
     document.getElementById('f-name').value     = u.name;
+    document.getElementById('f-employee-id').value = u.employee_id || '';
     document.getElementById('f-username').value = u.username;
+    document.getElementById('f-email').value    = u.email || '';
+    document.getElementById('f-contact').value  = u.contact_number || '';
     document.getElementById('f-password').value = '';
     document.getElementById('f-role').value     = u.role;
     document.getElementById('pw-hint').textContent = 'Leave blank to keep current password.';
     document.getElementById('f-password').required = false;
     updateRoleDesc();
+    updatePositionOptions(u.position || '');
+    // Show and populate suspension toggle
+    const isSuspended = (u.status || 'active') === 'suspended';
+    document.getElementById('f-suspended').checked = isSuspended;
+    document.getElementById('modal-suspend-group').style.display = '';
     document.getElementById('modal-overlay').classList.add('open');
     setTimeout(() => document.getElementById('f-name').focus(), 80);
   } catch (e) { showToast(e.message, 'error'); }
@@ -273,12 +442,20 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
   btn.textContent = 'Saving\u2026';
 
   const payload = {
-    name:     document.getElementById('f-name').value.trim(),
-    username: document.getElementById('f-username').value.trim(),
-    role:     document.getElementById('f-role').value,
+    name:           document.getElementById('f-name').value.trim(),
+    employee_id:    document.getElementById('f-employee-id').value.trim() || null,
+    username:       document.getElementById('f-username').value.trim(),
+    role:           document.getElementById('f-role').value,
+    position:       document.getElementById('f-position').value || null,
+    email:          document.getElementById('f-email').value.trim() || null,
+    contact_number: document.getElementById('f-contact').value.trim() || null,
   };
   const pw = document.getElementById('f-password').value;
   if (pw) payload.password = pw;
+  // Only include status when editing an existing user
+  if (_editingId) {
+    payload.status = document.getElementById('f-suspended').checked ? 'suspended' : 'active';
+  }
 
   try {
     if (_editingId) {
@@ -299,14 +476,46 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
 });
 
 /* -- Delete -- */
-async function deleteUser(id, name) {
-  if (!confirm('Delete user "' + name + '"? This cannot be undone.')) return;
-  try {
-    await auth.deleteUser(id);
-    showToast('User deleted', 'success');
-    loadUsers();
-  } catch (e) { showToast(e.message, 'error'); }
+let _deleteUserId = null;
+let _deleteUserName = '';
+
+function deleteUser(id, name) {
+  _deleteUserId = id;
+  _deleteUserName = name;
+  document.getElementById('delete-user-msg').textContent =
+    'Delete "' + name + '"? This action cannot be undone.';
+  document.getElementById('delete-user-confirm-btn').disabled = false;
+  document.getElementById('delete-user-modal').classList.add('open');
 }
+
+function closeDeleteUserModal() {
+  _deleteUserId = null;
+  _deleteUserName = '';
+  document.getElementById('delete-user-modal').classList.remove('open');
+}
+
+async function confirmDeleteUser() {
+  if (!_deleteUserId) return;
+  const btn = document.getElementById('delete-user-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    await auth.deleteUser(_deleteUserId);
+    showToast('User deleted', 'success');
+    closeDeleteUserModal();
+    loadUsers();
+  } catch (e) {
+    showToast(e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Yes, delete';
+  }
+}
+
+document.getElementById('delete-user-confirm-btn').addEventListener('click', confirmDeleteUser);
+document.getElementById('delete-user-cancel-btn').addEventListener('click', closeDeleteUserModal);
+document.getElementById('delete-user-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteUserModal();
+});
 </script>
 </body>
 </html>

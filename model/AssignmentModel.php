@@ -31,23 +31,47 @@ class AssignmentModel {
     public function findActive(): array {
         $stmt = $this->db->query(
             'SELECT a.*,
-                    p.name        AS product_name,
-                    p.sku         AS product_sku,
-                    p.image_path  AS product_image,
+                    p.name          AS product_name,
+                    p.sku           AS product_sku,
+                    p.serial_number AS serial_number,
+                    p.image_path    AS product_image,
                     p.asset_status,
-                    c.name        AS category_name,
-                    l.name        AS location_name
+                    c.name          AS category_name,
+                    COALESCE(la.name, lp.name) AS location_name
              FROM assignments a
-             LEFT JOIN products   p ON a.product_id  = p.id
-             LEFT JOIN categories c ON p.category_id = c.id
-             LEFT JOIN locations  l ON a.location_id = l.id
+             LEFT JOIN products   p  ON a.product_id  = p.id
+             LEFT JOIN categories c  ON p.category_id = c.id
+             LEFT JOIN locations  la ON a.location_id = la.id
+             LEFT JOIN locations  lp ON p.location_id  = lp.id
              WHERE a.status = \'active\'
              ORDER BY a.assigned_at DESC'
         );
         return $stmt->fetchAll();
     }
 
-    /** Assignments for a specific product */
+    /** Assignments for a specific assignee name (active only) */
+    public function findByAssigneeName(string $name): array {
+        $stmt = $this->db->prepare(
+            'SELECT a.*,
+                    p.name        AS product_name,
+                    p.sku         AS product_sku,
+                    p.image_path  AS product_image,
+                    p.asset_status,
+                    p.serial_number,
+                    c.name        AS category_name,
+                    COALESCE(la.name, lp.name) AS location_name
+             FROM assignments a
+             LEFT JOIN products   p  ON a.product_id  = p.id
+             LEFT JOIN categories c  ON p.category_id = c.id
+             LEFT JOIN locations  la ON a.location_id = la.id
+             LEFT JOIN locations  lp ON p.location_id = lp.id
+             WHERE a.assignee_name = ? AND a.status = \'active\'
+             ORDER BY a.assigned_at DESC'
+        );
+        $stmt->execute([$name]);
+        return $stmt->fetchAll();
+    }
+
     public function findByProduct(int $productId): array {
         $stmt = $this->db->prepare(
             'SELECT a.*,

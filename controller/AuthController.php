@@ -10,14 +10,6 @@ class AuthController extends BaseController {
     }
 
     public function handle(string $method, ?int $id, array $body, string $sub = ''): void {
-        // POST /api/auth/login
-        // POST /api/auth/logout
-        // GET  /api/auth/me
-        // GET  /api/auth/users          (admin)
-        // POST /api/auth/users          (admin)
-        // PUT  /api/auth/users/{id}     (admin)
-        // DELETE /api/auth/users/{id}   (admin)
-
         match (true) {
             $sub === 'login'    && $method === 'POST'   => $this->login($body),
             $sub === 'logout'   && $method === 'POST'   => $this->logout(),
@@ -42,9 +34,16 @@ class AuthController extends BaseController {
             return;
         }
 
-        $user = $this->service->login($username, $password);
+        try {
+            $user = $this->service->login($username, $password);
+        } catch (RuntimeException $e) {
+            // Status-specific error (pending/rejected) — use 200 to avoid browser console noise
+            $this->respond(['success' => false, 'error' => $e->getMessage()], 200);
+            return;
+        }
+
         if (!$user) {
-            $this->respond(['success' => false, 'error' => 'Invalid username or password'], 401);
+            $this->respond(['success' => false, 'error' => 'Invalid username or password'], 200);
             return;
         }
 
@@ -95,14 +94,19 @@ class AuthController extends BaseController {
 
     private function updateUser(?int $id, array $body): void {
         $this->requireAdmin();
-        if (!$id) { $this->respond(['error' => 'ID required'], 400); return; }
-        $user = $this->service->update($id, $body);
+        if ($id === null) { $this->respond(['error' => 'ID required'], 400); return; }
+        // Status-only updates (approve/reject) use the dedicated updateStatus path
+        if (isset($body['status']) && count($body) === 1) {
+            $user = $this->service->updateStatus($id, $body['status']);
+        } else {
+            $user = $this->service->update($id, $body);
+        }
         $this->respond(['success' => true, 'data' => $user]);
     }
 
     private function deleteUser(?int $id): void {
         $this->requireAdmin();
-        if (!$id) { $this->respond(['error' => 'ID required'], 400); return; }
+        if ($id === null) { $this->respond(['error' => 'ID required'], 400); return; }
         $currentUserId = (int) ($_SESSION['user']['id'] ?? 0);
         $this->service->delete($id, $currentUserId);
         $this->respond(['success' => true, 'message' => 'User deleted']);

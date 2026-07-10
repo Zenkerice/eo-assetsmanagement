@@ -84,6 +84,7 @@ const api = {
   getAssignments:          ()       => request('GET',  'assignments'),
   getActiveAssignments:    ()       => request('GET',  'assignments?active=1'),
   getAssignmentsByProduct: (pid)    => request('GET',  `assignments?product_id=${pid}`),
+  getAssignmentsByAssignee:(name)   => request('GET',  `assignments?assignee=${encodeURIComponent(name)}`),
   getAssignmentStats:      ()       => request('GET',  'assignments?stats=1'),
   getRecentActivity:       (n = 10) => request('GET',  `assignments?recent=1&limit=${n}`),
   getDailyAssignments:     (days=7, locationId=null) => request('GET',  `assignments?daily=1&days=${days}${locationId ? '&location_id=' + locationId : ''}`),
@@ -118,6 +119,14 @@ const api = {
     fd.append('file', file);
     return request('POST', 'employees?action=import', fd);
   },
+
+  // ── Team Structure ────────────────────────────────────────────────────────
+  getTeamStructure:      ()              => request('GET',    'team_structure'),
+  getTeamByUser:         (userId)        => request('GET',    `team_structure?user_id=${userId}`),
+  getAssignedEmployeeIds:()              => request('GET',    'team_structure?unassigned=1'),
+  assignAgents:          (userId, empIds)=> request('POST',   'team_structure', { user_id: userId, employee_ids: empIds }),
+  unassignAgent:         (rowId)         => request('DELETE', `team_structure/${rowId}`),
+  clearUserTeam:         (userId)        => request('DELETE', `team_structure?user_id=${userId}`),
 
   async getAssignees() {
     // Fetch all assignments to keep the person list stable even when they have 0 active assets

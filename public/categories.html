@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Categories &ndash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -54,42 +54,56 @@
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      gap: 20px;
       margin-bottom: 24px;
     }
     .stat-card {
       background: var(--bg2);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border2);
       border-radius: var(--radius);
-      padding: 22px 24px 18px;
+      padding: 28px 28px 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
     }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .stat-card.blue::before   { background: var(--blue); }
+    .stat-card.green::before  { background: var(--green); }
+    .stat-card.amber::before  { background: var(--amber); }
+    .stat-card.purple::before { background: var(--purple); }
+    .stat-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+    .stat-grid .stat-card:nth-child(1) { animation: slideUp 0.4s 0.04s cubic-bezier(0.16,1,0.3,1) both; }
+    .stat-grid .stat-card:nth-child(2) { animation: slideUp 0.4s 0.08s cubic-bezier(0.16,1,0.3,1) both; }
+    .stat-grid .stat-card:nth-child(3) { animation: slideUp 0.4s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
+    .stat-grid .stat-card:nth-child(4) { animation: slideUp 0.4s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
     .stat-card-label {
       display: flex;
       align-items: center;
       gap: 7px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      color: var(--muted);
+      margin-bottom: 6px;
     }
     .stat-card-label .lbl-icon { font-size: 14px; }
     .stat-card-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 38px;
-      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
       line-height: 1;
       letter-spacing: -1px;
       margin-bottom: 6px;
     }
     .stat-card-sub { font-size: 13px; color: var(--muted); }
-    .stat-card.blue  .stat-card-label { color: var(--blue); }
-    .stat-card.green .stat-card-label { color: var(--green); }
-    .stat-card.amber .stat-card-label { color: var(--amber); }
-    .stat-card.purple .stat-card-label { color: var(--purple); }
-    .stat-card.blue  .stat-card-value { color: var(--blue); }
-    .stat-card.green .stat-card-value { color: var(--green); }
-    .stat-card.amber .stat-card-value { color: var(--amber); }
+    .stat-card.blue   .stat-card-value { color: var(--blue); }
+    .stat-card.green  .stat-card-value { color: var(--green); }
+    .stat-card.amber  .stat-card-value { color: var(--amber); }
     .stat-card.purple .stat-card-value { color: var(--purple); }
 
     /* -- Toolbar --------------------------------- */
@@ -185,7 +199,10 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.22); }
 
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
@@ -516,7 +533,20 @@
   </div>
 </div>
 
-<!-- Add / Edit Modal -->
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal modal-sm">
+    <div class="del-body-wrap">
+      <div class="del-icon">&#128465;</div>
+      <div class="del-title">Delete Category?</div>
+      <div class="del-msg" id="delete-cat-msg">Are you sure you want to delete <strong id="delete-cat-name"></strong>? This action cannot be undone.</div>
+      <div class="del-actions">
+        <button class="btn btn-danger" id="delete-confirm-btn" onclick="confirmDeleteCategory()">Yes, delete</button>
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header">
@@ -544,9 +574,9 @@
 
 <div id="toast-container"></div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script>
   auth.initPage({ onReady: () => loadCategories() });
 
@@ -555,6 +585,21 @@
   let catCounts     = {};   // { id: assetCount }
   let sortAsc       = true;
   let currentView   = 'list';
+
+  function animateCount(id, target, duration) {
+    duration = duration || 600;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var start = performance.now();
+    function tick(now) {
+      var t = Math.min((now - start) / duration, 1);
+      var ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * ease);
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
 
   function slugify(s) {
     return (s || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -600,9 +645,9 @@
       if (n > largestCount) { largestCount = n; largestCat = c; }
     });
 
-    document.getElementById('stat-total').textContent  = total;
-    document.getElementById('stat-assets').textContent = totalAssets;
-    document.getElementById('stat-empty').textContent  = emptyCats;
+    animateCount('stat-total',  total);
+    animateCount('stat-assets', totalAssets);
+    animateCount('stat-empty',  emptyCats);
 
     const largestEl    = document.getElementById('stat-largest');
     const largestSubEl = document.getElementById('stat-largest-sub');
@@ -610,7 +655,7 @@
       largestEl.textContent    = largestCat.name;
       largestSubEl.textContent = largestCount + ' asset' + (largestCount !== 1 ? 's' : '');
     } else {
-      largestEl.textContent    = '�';
+      largestEl.textContent    = '?';
       largestSubEl.textContent = '';
     }
 
@@ -707,6 +752,11 @@
                 data-name="${esc(c.name)}"
                 data-desc="${esc(c.description || '')}"
                 onclick="openModalFromBtn(this)">&#9998;</button>
+              <button class="btn btn-sm btn-icon btn-danger" title="${isEmpty ? 'Delete category' : 'Cannot delete � category has assets'}"
+                onclick="${isEmpty ? `deleteCategory(${c.id}, '${esc(c.name)}')` : ''}"
+                style="${isEmpty ? '' : 'opacity:0.25;cursor:not-allowed;pointer-events:none;'}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              </button>
             </div>
           </td>
         </tr>`;
@@ -777,15 +827,41 @@
     } catch (e) { showToast(e.message, 'error'); }
   }
 
-  async function deleteCategory(id) {
-    if (!confirm('Delete this category?')) return;
+  let _deleteCatId = null;
+
+  function deleteCategory(id, name) {
+    _deleteCatId = id;
+    document.getElementById('delete-cat-name').textContent = name;
+    document.getElementById('delete-modal').classList.add('open');
+  }
+
+  function closeDeleteModal() {
+    _deleteCatId = null;
+    document.getElementById('delete-modal').classList.remove('open');
+  }
+
+  async function confirmDeleteCategory() {
+    if (!_deleteCatId) return;
+    const btn = document.getElementById('delete-confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting�';
     try {
-      await api.deleteCategory(id);
+      await api.deleteCategory(_deleteCatId);
+      closeDeleteModal();
       showToast('Category deleted', 'success');
       loadCategories();
       refreshSidebar();
-    } catch (e) { showToast(e.message, 'error'); }
+    } catch (e) {
+      showToast(e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Yes, delete';
+    }
   }
+
+  // Close delete modal on backdrop click
+  document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
 
   function exportCSV() {
     if (!allCategories.length) { showToast('No data to export', 'error'); return; }

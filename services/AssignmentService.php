@@ -25,6 +25,10 @@ class AssignmentService {
         return $this->model->findByProduct($productId);
     }
 
+    public function getByAssigneeName(string $name): array {
+        return $this->model->findByAssigneeName($name);
+    }
+
     public function getById(int $id): array {
         $a = $this->model->findById($id);
         if (!$a) throw new RuntimeException("Assignment not found", 404);
@@ -32,14 +36,19 @@ class AssignmentService {
     }
 
     /** Check out an asset to an assignee */
-    public function create(array $data): array {
+    public function create(array $data, bool $skipAvailabilityCheck = false): array {
         Validator::required($data, ['product_id', 'assignee_name', 'assigned_by']);
 
-        $product = $this->productModel->findById((int)$data['product_id']);
+        $productId = (int)$data['product_id'];
+        if ($productId <= 0) {
+            throw new InvalidArgumentException("Invalid product_id", 400);
+        }
+
+        $product = $this->productModel->findById($productId);
         if (!$product) throw new RuntimeException("Asset not found", 404);
 
-        // Only available assets can be checked out
-        if ($product['asset_status'] !== 'available') {
+        // Only available assets can be checked out (skip if approval flow override)
+        if (!$skipAvailabilityCheck && $product['asset_status'] !== 'available') {
             throw new InvalidArgumentException(
                 "Asset is currently '{$product['asset_status']}' and cannot be checked out", 409
             );
@@ -53,9 +62,9 @@ class AssignmentService {
 
         $id = $this->model->create($data);
         // Update product status to 'assigned'
-        $this->productModel->update((int)$data['product_id'], ['asset_status' => 'assigned']);
+        $this->productModel->update($productId, ['asset_status' => 'assigned']);
         $a = $this->getById($id);
-        AuditLogService::log('assigned', 'Asset', (int)$data['product_id'], $product['name'],
+        AuditLogService::log('assigned', 'Asset', $productId, $product['name'],
             "Assigned to {$data['assignee_name']} by {$data['assigned_by']}");
         return $a;
     }
@@ -98,7 +107,8 @@ class AssignmentService {
     /** Delete an assignment record (admin only) */
     public function delete(int $id): void {
         $assignment = $this->getById($id);
-        // If still active, free the product
+        // If still active, free the product back to available
+        // (DamageService will override this to under_repair if condition was damaged)
         if ($assignment['status'] === 'active') {
             $this->productModel->update((int)$assignment['product_id'], ['asset_status' => 'available']);
         }

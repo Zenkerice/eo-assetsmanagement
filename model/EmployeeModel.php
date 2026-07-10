@@ -14,6 +14,7 @@ class EmployeeModel {
         $this->db->exec("
             CREATE TABLE IF NOT EXISTS `employees` (
               `id`          INT(11)      NOT NULL AUTO_INCREMENT,
+              `employee_id` VARCHAR(100) NOT NULL DEFAULT '',
               `name`        VARCHAR(150) NOT NULL,
               `station`     VARCHAR(150) NOT NULL DEFAULT '',
               `seat_number` VARCHAR(50)  NOT NULL DEFAULT '',
@@ -21,12 +22,17 @@ class EmployeeModel {
               `created_at`  DATETIME     NOT NULL DEFAULT current_timestamp(),
               `updated_at`  DATETIME     NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
               PRIMARY KEY (`id`),
-              KEY `idx_station`     (`station`),
-              KEY `idx_seat_number` (`seat_number`),
-              KEY `idx_location_id` (`location_id`)
+              KEY `idx_employee_id`  (`employee_id`),
+              KEY `idx_station`      (`station`),
+              KEY `idx_seat_number`  (`seat_number`),
+              KEY `idx_location_id`  (`location_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
-        // Add location_id column if the table already exists without it
+        // Add columns if the table already exists without them
+        try {
+            $this->db->exec("ALTER TABLE `employees` ADD COLUMN IF NOT EXISTS `employee_id` VARCHAR(100) NOT NULL DEFAULT '' AFTER `id`");
+            $this->db->exec("ALTER TABLE `employees` ADD KEY IF NOT EXISTS `idx_employee_id` (`employee_id`)");
+        } catch (\PDOException $e) { /* column already exists — ignore */ }
         try {
             $this->db->exec("ALTER TABLE `employees` ADD COLUMN IF NOT EXISTS `location_id` INT(11) DEFAULT NULL");
             $this->db->exec("ALTER TABLE `employees` ADD KEY IF NOT EXISTS `idx_location_id` (`location_id`)");
@@ -80,10 +86,11 @@ class EmployeeModel {
 
     public function create(array $data): int {
         $stmt = $this->db->prepare(
-            'INSERT INTO employees (name, station, seat_number, location_id)
-             VALUES (:name, :station, :seat_number, :location_id)'
+            'INSERT INTO employees (employee_id, name, station, seat_number, location_id)
+             VALUES (:employee_id, :name, :station, :seat_number, :location_id)'
         );
         $stmt->execute([
+            ':employee_id' => trim($data['employee_id'] ?? ''),
             ':name'        => trim($data['name']),
             ':station'     => trim($data['station']     ?? ''),
             ':seat_number' => trim($data['seat_number'] ?? ''),
@@ -95,7 +102,7 @@ class EmployeeModel {
     public function update(int $id, array $data): bool {
         $fields = [];
         $params = [];
-        foreach (['name', 'station', 'seat_number'] as $f) {
+        foreach (['employee_id', 'name', 'station', 'seat_number'] as $f) {
             if (array_key_exists($f, $data)) {
                 $fields[] = "$f = ?";
                 $params[] = trim($data[$f]);

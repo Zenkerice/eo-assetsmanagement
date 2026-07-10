@@ -70,6 +70,8 @@ const auth = {
   async logout() {
     await fetch(`${AUTH_BASE}/logout`, { method: 'POST', credentials: 'include' });
     this.currentUser = null;
+    // Clear sidebar cache so next login starts fresh
+    try { sessionStorage.removeItem('_sb_user'); sessionStorage.removeItem('_sb_cats'); } catch(_) {}
     this._redirectLogin();
   },
 
@@ -95,7 +97,9 @@ const auth = {
   },
 
   async updateUser(id, payload) {
-    const res  = await fetch(`${AUTH_BASE}/users/${id}`, {
+    const uid = parseInt(id, 10);
+    if (!uid) throw new Error('Invalid user ID');
+    const res  = await fetch(`${AUTH_BASE}/users/${uid}`, {
       method:      'PUT',
       credentials: 'include',
       headers:     { 'Content-Type': 'application/json' },
@@ -107,7 +111,9 @@ const auth = {
   },
 
   async deleteUser(id) {
-    const res  = await fetch(`${AUTH_BASE}/users/${id}`, {
+    const uid = parseInt(id, 10);
+    if (!uid) throw new Error('Invalid user ID');
+    const res  = await fetch(`${AUTH_BASE}/users/${uid}`, {
       method:      'DELETE',
       credentials: 'include',
     });
@@ -116,16 +122,29 @@ const auth = {
     return data;
   },
 
+  async approveUser(id) {
+    const uid = parseInt(id, 10);
+    if (!uid) throw new Error('Invalid user ID');
+    return this.updateUser(uid, { status: 'active' });
+  },
+
+  async rejectUser(id) {
+    const uid = parseInt(id, 10);
+    if (!uid) throw new Error('Invalid user ID');
+    return this.updateUser(uid, { status: 'rejected' });
+  },
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   isAdmin()  { return this.currentUser?.role === 'admin'; },
   isStaff()  { return this.currentUser?.role === 'staff'; },
   isViewer() { return this.currentUser?.role === 'viewer'; },
-  isRequestUser() { return this.isStaff() || this.isViewer(); },
+  isManager(){ return this.currentUser?.role === 'manager'; },
+  isRequestUser() { return this.isStaff() || this.isViewer() || this.isManager(); },
 
   /** Default landing page after login */
   getLandingPage(role) {
-    if (role === 'staff' || role === 'viewer') return 'requests.html';
+    if (role === 'staff' || role === 'viewer' || role === 'manager') return 'requests.html';
     return 'index.html';
   },
 
@@ -138,6 +157,16 @@ const auth = {
     return user;
   },
 
+  /** Returns the display label for a user's role/position.
+   *  Format: "Position (Role)" if position is set, otherwise just "Role".
+   *  e.g. "Team Leader (Supervisor)" or "Supervisor"
+   */
+  getRoleDisplay(user) {
+    const roleLabels = { admin: 'Admin', manager: 'Manager', staff: 'Staff', viewer: 'Supervisor' };
+    const roleLabel  = roleLabels[user.role] || user.role;
+    return user.position ? `${user.position} (${roleLabel})` : roleLabel;
+  },
+
   /** Render user info into sidebar footer elements if they exist. */
   renderUserInfo() {
     const user = this.currentUser;
@@ -145,9 +174,8 @@ const auth = {
     const nameEl   = document.querySelector('.user-name');
     const roleEl   = document.querySelector('.user-role');
     const avatarEl = document.querySelector('.avatar');
-    const roleLabels = { admin: 'System Manager', staff: 'HR', viewer: 'TL' };
     if (nameEl)   nameEl.textContent   = user.name;
-    if (roleEl)   roleEl.textContent   = roleLabels[user.role] || user.role;
+    if (roleEl)   roleEl.textContent   = this.getRoleDisplay(user);
     if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
   },
 

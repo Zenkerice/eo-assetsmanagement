@@ -51,6 +51,12 @@ class ProductService {
         $data['supplier_id']  = !empty($data['supplier_id'])  ? (int)$data['supplier_id']  : null;
         $data['location_id']  = !empty($data['location_id'])  ? (int)$data['location_id']  : null;
 
+        // Build brand_model from brand + model if not explicitly provided
+        if (empty($data['brand_model'])) {
+            $parts = array_filter([$data['brand'] ?? null, $data['model'] ?? null], fn($v) => $v !== null && $v !== '');
+            $data['brand_model'] = implode(' ', $parts) ?: null;
+        }
+
         if (!empty($data['image'])) {
             $data['image_path'] = $this->handleImageUpload($data['image']);
         }
@@ -82,14 +88,28 @@ class ProductService {
             $data['image_path'] = $this->handleImageUpload($data['image']);
         }
 
-        $allowed = ['name', 'sku', 'brand_model', 'description', 'category_id', 'supplier_id', 'location_id', 'quantity', 'image_path', 'asset_status', 'serial_number'];
+        $allowed = ['name', 'sku', 'brand_model', 'brand', 'model', 'description', 'category_id', 'supplier_id', 'supplier_name', 'location_id', 'quantity', 'image_path', 'asset_status', 'serial_number', 'assigned_employee', 'assigned_employee_id', 'purchase_date', 'deployed_date', 'po_id', 'po_item_id'];
         $fields  = array_intersect_key($data, array_flip($allowed));
 
         // Convert empty strings to null for nullable FK columns
-        foreach (['category_id', 'supplier_id', 'location_id'] as $fk) {
+        foreach (['category_id', 'supplier_id', 'location_id', 'po_id', 'po_item_id'] as $fk) {
             if (array_key_exists($fk, $fields)) {
                 $fields[$fk] = !empty($fields[$fk]) ? (int)$fields[$fk] : null;
             }
+        }
+        // Convert empty string to null for optional text/date columns
+        foreach (['purchase_date', 'deployed_date', 'assigned_employee', 'assigned_employee_id', 'supplier_name', 'brand', 'model'] as $col) {
+            if (array_key_exists($col, $fields) && $fields[$col] === '') {
+                $fields[$col] = null;
+            }
+        }
+
+        // Keep brand_model in sync with brand + model
+        if (array_key_exists('brand', $fields) || array_key_exists('model', $fields)) {
+            $currentBrand = $fields['brand'] ?? $existing['brand'] ?? null;
+            $currentModel = $fields['model'] ?? $existing['model'] ?? null;
+            $parts = array_filter([$currentBrand, $currentModel], fn($v) => $v !== null && $v !== '');
+            $fields['brand_model'] = implode(' ', $parts) ?: null;
         }
 
         // Clearing image_path — delete the physical file and set to null

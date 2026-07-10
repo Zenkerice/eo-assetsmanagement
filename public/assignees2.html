@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employees &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -27,7 +27,7 @@
     .assignee-panel { width:300px; flex-shrink:0; border-right:1px solid var(--border); display:flex; flex-direction:column; height:100vh; position:sticky; top:0; background:var(--bg2); }
     .panel-header { padding:22px 18px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
     .panel-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-    .panel-header h2 { font-family:"Syne",sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted2); }
+    .panel-header h2 { font-family:"Poppins",sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted2); }
     .panel-count { font-size:12px; color:var(--muted); margin-top:2px; }
     .station-filter { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text); font-family:"DM Sans",sans-serif; font-size:13px; padding:8px 12px; outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
     .station-filter:focus { border-color:var(--blue); }
@@ -72,13 +72,13 @@
     .detail-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; }
     .detail-header-left { display:flex; align-items:center; gap:18px; }
     .detail-avatar-lg { width:60px; height:60px; border-radius:50%; display:grid; place-items:center; font-size:20px; font-weight:700; color:#fff; flex-shrink:0; }
-    .detail-name { font-family:"Syne",sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+    .detail-name { font-family:"Poppins",sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.5px; }
     .detail-meta-row { display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap; }
     .detail-chip { display:inline-flex; align-items:center; gap:5px; background:var(--bg3); border:1px solid var(--border2); border-radius:20px; padding:3px 10px; font-size:12px; color:var(--muted2); }
     .detail-chip.blue { background:var(--blue-dim); border-color:rgba(41,182,232,0.25); color:var(--blue); }
     .detail-actions { display:flex; gap:8px; }
     .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-    .section-title { font-family:"Syne",sans-serif; font-size:15px; font-weight:700; }
+    .section-title { font-family:"Poppins",sans-serif; font-size:15px; font-weight:700; }
     .asset-row { display:flex; align-items:center; gap:12px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:13px 16px; margin-bottom:8px; transition:border-color .15s; }
     .asset-row:hover { border-color:var(--border2); }
     .asset-icon { width:40px; height:40px; border-radius:9px; background:var(--bg3); border:1px solid var(--border); display:grid; place-items:center; color:var(--muted2); flex-shrink:0; }
@@ -93,22 +93,16 @@
     .badge-repair  { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
     .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
     .empty-state .empty-icon { margin-bottom:12px; opacity:.4; }
-    .empty-state h3 { font-family:"Syne",sans-serif; font-size:18px; font-weight:700; color:var(--muted2); margin-bottom:6px; }
+    .empty-state h3 { font-family:"Poppins",sans-serif; font-size:18px; font-weight:700; color:var(--muted2); margin-bottom:6px; }
     .empty-state p { font-size:13px; line-height:1.6; }
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); z-index:200; align-items:center; justify-content:center; padding:20px; }
     .modal-overlay.open { display:flex; }
     .modal { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.6); animation:modalIn .2s ease; }
-    .modal-sm { max-width:420px; }
-    .del-body-wrap { padding:28px; text-align:center; }
-    .del-icon { width:52px; height:52px; background:var(--red-dim); border-radius:50%; display:grid; place-items:center; font-size:22px; margin:0 auto 14px; }
-    .del-title { font-family:"Syne",sans-serif; font-size:18px; font-weight:700; margin-bottom:8px; }
-    .del-msg { font-size:13px; color:var(--muted2); line-height:1.6; margin-bottom:22px; }
-    .del-actions { display:flex; gap:10px; justify-content:center; }
 
     .modal::-webkit-scrollbar { width:4px; }
     .modal::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
     .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); }
-    .modal-header h3 { font-family:"Syne",sans-serif; font-size:17px; font-weight:700; }
+    .modal-header h3 { font-family:"Poppins",sans-serif; font-size:17px; font-weight:700; }
     .modal-close { background:var(--bg3); border:1px solid var(--border2); color:var(--muted2); width:28px; height:28px; border-radius:6px; font-size:17px; cursor:pointer; display:grid; place-items:center; transition:all .15s; }
     .modal-close:hover { color:var(--text); background:var(--border2); }
     .modal-form-body { padding:22px 24px; display:flex; flex-direction:column; gap:14px; }
@@ -139,6 +133,128 @@
     .toast { background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:12px 18px; font-size:13px; color:var(--text); animation:slideUp .25s ease; box-shadow:0 8px 32px rgba(0,0,0,.4); max-width:320px; }
     .toast.error   { border-color:var(--red);   color:var(--red); }
     .toast.success { border-color:var(--green);  color:var(--green); }
+
+    /* ===================== ANIMATIONS ===================== */
+
+    /* Page-specific keyframes (modalIn, slideUp, shimmer are in theme.css) */
+    @keyframes fadeSlideIn {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes panelSlideIn {
+      from { opacity:0; transform:translateX(-24px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+    @keyframes detailFadeIn {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes assetRowIn {
+      from { opacity:0; transform:translateX(-12px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+    @keyframes badgePop {
+      0%   { transform:scale(1); }
+      40%  { transform:scale(1.3); }
+      100% { transform:scale(1); }
+    }
+    @keyframes ripple {
+      to { transform:scale(4); opacity:0; }
+    }
+
+    /* Panel entrance on page load */
+    .assignee-panel {
+      animation: panelSlideIn .4s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    .detail-panel {
+      animation: fadeSlideIn .45s .1s cubic-bezier(.22,.68,0,1.2) both;
+    }
+
+    /* Assignee list items — staggered via JS */
+    .assignee-item {
+      animation: fadeSlideIn .3s both;
+      transition: background .15s, transform .15s, box-shadow .15s;
+    }
+    .assignee-item:hover {
+      transform: translateX(3px);
+      box-shadow: -3px 0 0 var(--blue);
+    }
+    .assignee-item.active {
+      box-shadow: -3px 0 0 var(--blue);
+    }
+
+    /* Badge pop when count changes */
+    .assignee-badge {
+      transition: background .2s, border-color .2s, color .2s;
+    }
+    .assignee-badge.pop {
+      animation: badgePop .35s ease;
+    }
+
+    /* Detail content transition */
+    #detail-content.entering {
+      animation: detailFadeIn .35s cubic-bezier(.22,.68,0,1.2) both;
+    }
+
+    /* Asset rows — staggered via JS */
+    .asset-row {
+      animation: assetRowIn .3s both;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .asset-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    }
+
+    /* Modal entrance */
+    .modal {
+      animation: modalIn .25s cubic-bezier(.22,.68,0,1.2) both;
+    }
+
+    /* Button ripple */
+    .btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-ripple {
+      position: absolute;
+      border-radius: 50%;
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.35);
+      transform: scale(0);
+      animation: ripple .5s linear;
+      pointer-events: none;
+    }
+
+    /* Skeleton shimmer for loading state */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg3) 25%, rgba(255,255,255,0.05) 50%, var(--bg3) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    /* Empty state entrance */
+    .empty-state {
+      animation: fadeSlideIn .4s .15s both;
+    }
+
+    /* Filter selects */
+    .station-filter {
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .station-filter:focus {
+      box-shadow: 0 0 0 3px rgba(41,182,232,0.15);
+    }
+
+    /* Panel footer buttons */
+    .btn-add-assignee, .btn-import, .btn-export-tpl {
+      transition: background .15s, transform .12s, box-shadow .15s;
+    }
+    .btn-add-assignee:active, .btn-import:active, .btn-export-tpl:active {
+      transform: scale(0.97);
+    }
 
   </style>
 </head>
@@ -413,9 +529,9 @@
 
 <div id="toast-container"></div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script src="js/approval_flow.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
@@ -446,7 +562,7 @@ function avatarColor(name) {
   return colors[Math.abs(h) % colors.length];
 }
 function initials(name) {
-  return (name||'?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+  return (name||'').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
 }
 
 /* -- Load Page -- */
@@ -557,7 +673,8 @@ function renderAssigneeList() {
     </div>`;
   }).join('');
 
-  list.querySelectorAll('.assignee-item').forEach(el => {
+  list.querySelectorAll('.assignee-item').forEach((el, i) => {
+    el.style.animationDelay = (i * 40) + 'ms';
     el.addEventListener('click', () => selectEmployee(parseInt(el.dataset.id)));
   });
 }
@@ -579,6 +696,10 @@ function renderDetail(emp) {
   document.getElementById('empty-state').style.display = 'none';
   const content  = document.getElementById('detail-content');
   content.style.display = '';
+  // Trigger entrance animation on each render
+  content.classList.remove('entering');
+  void content.offsetWidth; // reflow to restart animation
+  content.classList.add('entering');
 
   const color    = avatarColor(emp.name);
   const ini      = initials(emp.name);
@@ -621,6 +742,11 @@ function renderDetail(emp) {
   document.getElementById('btn-edit-emp').addEventListener('click',    () => openEditModal(emp));
   document.getElementById('btn-delete-emp').addEventListener('click',  () => openDeleteEmployeeModal(emp.id, emp.name));
   document.getElementById('btn-assign-asset').addEventListener('click',() => openAssignModal(emp.name));
+
+  // Stagger asset rows entrance
+  content.querySelectorAll('.asset-row').forEach((row, i) => {
+    row.style.animationDelay = (i * 60) + 'ms';
+  });
 }
 
 function renderAssetRow(a) {
@@ -773,7 +899,7 @@ function openDeleteEmployeeModal(id, name) {
 
   if (assetCount > 0) {
     msg.textContent =
-      `Cannot delete "${name}" — they still have ${assetCount} deployed asset${assetCount !== 1 ? 's' : ''}. Undeploy all assets first.`;
+      `Cannot delete "${name}" � they still have ${assetCount} deployed asset${assetCount !== 1 ? 's' : ''}. Undeploy all assets first.`;
     btn.disabled = true;
   } else {
     msg.textContent =
@@ -1036,6 +1162,19 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+/* -- Button ripple effect -- */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn');
+  if (!btn) return;
+  const ripple = document.createElement('span');
+  ripple.className = 'btn-ripple';
+  const rect = btn.getBoundingClientRect();
+  ripple.style.left = (e.clientX - rect.left - 4) + 'px';
+  ripple.style.top  = (e.clientY - rect.top  - 4) + 'px';
+  btn.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
 });
 </script>
 </body>

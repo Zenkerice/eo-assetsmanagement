@@ -10,7 +10,8 @@ class ProductModel {
 
     public function findAll(): array {
         $stmt = $this->db->query(
-            'SELECT p.*, c.name AS category_name, s.name AS supplier_name,
+            'SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name,
                     l.name AS location_name
              FROM products p
              LEFT JOIN categories c ON p.category_id = c.id
@@ -23,7 +24,8 @@ class ProductModel {
 
     public function findById(int $id): array|false {
         $stmt = $this->db->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS supplier_name,
+            'SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name,
                     l.name AS location_name
              FROM products p
              LEFT JOIN categories c ON p.category_id = c.id
@@ -41,6 +43,12 @@ class ProductModel {
         return $stmt->fetch();
     }
 
+    public function findBySerial(string $serial): array|false {
+        $stmt = $this->db->prepare('SELECT * FROM products WHERE serial_number = ? LIMIT 1');
+        $stmt->execute([$serial]);
+        return $stmt->fetch() ?: false;
+    }
+
     public function findLowStock(int $threshold): array {
         $stmt = $this->db->prepare(
             'SELECT p.*, c.name AS category_name, s.name AS supplier_name
@@ -56,22 +64,29 @@ class ProductModel {
 
     public function create(array $data): int {
         $stmt = $this->db->prepare(
-            'INSERT INTO products (name, sku, brand_model, description, category_id, supplier_id, location_id, quantity, image_path, serial_number, po_id, po_item_id)
-             VALUES (:name, :sku, :brand_model, :description, :category_id, :supplier_id, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id)'
+            'INSERT INTO products (name, sku, brand_model, brand, model, description, category_id, supplier_id, supplier_name, location_id, quantity, image_path, serial_number, po_id, po_item_id, assigned_employee, assigned_employee_id, purchase_date, deployed_date)
+             VALUES (:name, :sku, :brand_model, :brand, :model, :description, :category_id, :supplier_id, :supplier_name, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id, :assigned_employee, :assigned_employee_id, :purchase_date, :deployed_date)'
         );
         $stmt->execute([
-            ':name'          => $data['name'],
-            ':sku'           => $data['sku'],
-            ':brand_model'   => $data['brand_model'] ?? null,
-            ':description'   => $data['description'] ?? '',
-            ':category_id'   => !empty($data['category_id'])  ? (int)$data['category_id']  : null,
-            ':supplier_id'   => !empty($data['supplier_id'])   ? (int)$data['supplier_id']   : null,
-            ':location_id'   => !empty($data['location_id'])   ? (int)$data['location_id']   : null,
-            ':quantity'      => $data['quantity'] ?? 1,
-            ':image_path'    => $data['image_path'] ?? null,
-            ':serial_number' => $data['serial_number'] ?? null,
-            ':po_id'         => !empty($data['po_id'])         ? (int)$data['po_id']         : null,
-            ':po_item_id'    => !empty($data['po_item_id'])    ? (int)$data['po_item_id']    : null,
+            ':name'                 => $data['name'],
+            ':sku'                  => $data['sku'],
+            ':brand_model'          => $data['brand_model'] ?? null,
+            ':brand'                => $data['brand'] ?? null,
+            ':model'                => $data['model'] ?? null,
+            ':description'          => $data['description'] ?? '',
+            ':category_id'          => !empty($data['category_id'])  ? (int)$data['category_id']  : null,
+            ':supplier_id'          => !empty($data['supplier_id'])   ? (int)$data['supplier_id']   : null,
+            ':supplier_name'        => $data['supplier_name'] ?? null,
+            ':location_id'          => !empty($data['location_id'])   ? (int)$data['location_id']   : null,
+            ':quantity'             => $data['quantity'] ?? 1,
+            ':image_path'           => $data['image_path'] ?? null,
+            ':serial_number'        => $data['serial_number'] ?? null,
+            ':po_id'                => !empty($data['po_id'])         ? (int)$data['po_id']         : null,
+            ':po_item_id'           => !empty($data['po_item_id'])    ? (int)$data['po_item_id']    : null,
+            ':assigned_employee'    => $data['assigned_employee'] ?? null,
+            ':assigned_employee_id' => $data['assigned_employee_id'] ?? null,
+            ':purchase_date'        => !empty($data['purchase_date']) ? $data['purchase_date'] : null,
+            ':deployed_date'        => !empty($data['deployed_date']) ? $data['deployed_date'] : null,
         ]);
         return (int) $this->db->lastInsertId();
     }
@@ -79,7 +94,8 @@ class ProductModel {
     /** Find all products with the same name (for group editing) */
     public function findByName(string $name): array {
         $stmt = $this->db->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS supplier_name
+            'SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
              FROM products p
              LEFT JOIN categories c ON p.category_id = c.id
              LEFT JOIN suppliers  s ON p.supplier_id  = s.id
@@ -92,7 +108,8 @@ class ProductModel {
 
     /** Find all products created from a specific PO */
     public function findByPoId(int $poId): array {        $stmt = $this->db->prepare(
-            'SELECT p.*, c.name AS category_name, s.name AS supplier_name
+            'SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
              FROM products p
              LEFT JOIN categories c ON p.category_id = c.id
              LEFT JOIN suppliers  s ON p.supplier_id  = s.id

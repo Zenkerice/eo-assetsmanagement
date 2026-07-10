@@ -1,0 +1,54 @@
+﻿<script>
+  /* =========================================================
+     Team Structure — clean rewrite
+     Key rules:
+       - All IDs are always integers (toInt helper used everywhere)
+       - _assignModalUserId is the single source of truth for the modal's target user
+       - modalSelected stores only valid employee IDs (positive int = real, negative int = synthetic)
+       - 0 is never a valid ID and is rejected at every entry point
+  ========================================================= */
+
+  /* -- Helpers ------------------------------------------------------------- */
+  function toInt(v) {
+    const n = parseInt(v, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  function normalizeUser(u) {
+    return { ...u, id: toInt(u.id) };
+  }
+  function normalizeEmployee(e) {
+    return { ...e, id: toInt(e.id) };
+  }
+  function normalizeRow(r) {
+    return {
+      ...r,
+      id:          toInt(r.id),
+      user_id:     toInt(r.user_id),
+      employee_id: toInt(r.employee_id),
+    };
+  }
+  function isValidId(n) {
+    return typeof n === 'number' && !isNaN(n) && n > 0;
+  }
+
+  /* -- State --------------------------------------------------------------- */
+  let allUsers         = [];
+  let allEmployees     = [];
+  let allProducts      = [];
+  let teamRows         = [];
+  let selectedUserId   = null;
+  let modalSelected    = new Set();  // valid employee IDs (positive=real, negative=synthetic)
+  let _assignModalUserId = null;     // set by openAssignModal, read by confirmAssign
+
+  /* -- Avatar helpers ------------------------------------------------------ */
+  function avatarColor(name) {
+    const colors = ['#4f8ef7','#3ecf8e','#f5a623','#9b73f7','#f45b69','#06b6d4'];
+    let h = 0;
+    for (let i = 0; i < (name || '').length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+    return colors[Math.abs(h) % colors.length];
+  }
+  function initials(name) {
+    return (name || '').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  }
+

@@ -1,15 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="js/chart.umd.min.js"></script>
+  <script src="js/jspdf.umd.min.js"></script>
+  <script src="js/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -107,6 +109,7 @@
     .stat-icon {
       width: 44px; height: 44px; border-radius: 10px;
       display: grid; place-items: center; font-size: 20px; margin-bottom: 14px;
+      font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
     }
     .blue  .stat-icon { background: var(--blue-dim); }
     .green .stat-icon { background: var(--green-dim); }
@@ -117,7 +120,7 @@
       text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
     }
     .stat-value {
-      font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800;
+      font-family: 'Poppins', sans-serif; font-size: 44px; font-weight: 700;
       line-height: 1; letter-spacing: -1px; margin-bottom: 6px;
     }
     .blue  .stat-value { color: var(--blue); }
@@ -138,9 +141,13 @@
     /* -- Chart grid ------------------------------- */
     .chart-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 300px 1fr;
       gap: 20px;
       margin-bottom: 32px;
+      align-items: stretch;
+    }
+    .chart-grid > .chart-card {
+      height: 420px;
     }
 
     .chart-card {
@@ -191,6 +198,81 @@
     }
     .cat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
 
+    /* -- Export dropdown ---------------------------------- */
+    .export-wrap { position: relative; display: inline-flex; }
+    /* Ensure topbar doesn't clip the dropdown */
+    .topbar { overflow: visible !important; }
+    .export-btn-group {
+      display: inline-flex; align-items: stretch;
+      border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      overflow: hidden; transition: border-color .15s;
+    }
+    .export-btn-group:focus-within,
+    .export-btn-group.open { border-color: var(--blue); }
+    .export-btn-main {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 14px; background: transparent;
+      color: var(--muted2); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500; cursor: pointer; border: none;
+      transition: background .15s, color .15s;
+    }
+    .export-btn-main:hover { background: var(--bg3); color: var(--text); }
+    .export-btn-chevron {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; background: transparent; border: none;
+      border-left: 1px solid var(--border2); color: var(--muted2);
+      cursor: pointer; transition: background .15s, color .15s;
+      font-size: 11px;
+    }
+    .export-btn-chevron:hover { background: var(--bg3); color: var(--text); }
+    .export-dropdown {
+      display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      width: 300px; background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: var(--radius); box-shadow: 0 16px 48px rgba(0,0,0,.5);
+      z-index: 200; animation: slideDown .18s cubic-bezier(.22,1,.36,1) both;
+    }
+    .export-dropdown.open { display: block; }
+    .export-dd-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .export-dd-title { font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
+    .export-dd-toggle { font-size: 12px; color: var(--blue); background: none; border: none; cursor: pointer; padding: 0; font-family: 'DM Sans',sans-serif; }
+    .export-dd-toggle:hover { text-decoration: underline; }
+    .export-sections { padding: 8px 0; max-height: 240px; overflow-y: auto; }
+    .export-section-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; cursor: pointer;
+      transition: background .12s;
+    }
+    .export-section-row:hover { background: var(--bg3); }
+    .export-section-row input[type=checkbox] { accent-color: var(--blue); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+    .export-section-label { font-size: 13px; color: var(--text); flex: 1; }
+    .export-section-desc  { font-size: 11px; color: var(--muted); }
+    .export-dd-validation {
+      display: none; padding: 6px 16px;
+      font-size: 12px; color: var(--red);
+    }
+    .export-dd-actions {
+      padding: 10px 16px 14px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 8px;
+    }
+    .export-dd-actions .btn { flex: 1; justify-content: center; }
+    /* Light mode */
+    html[data-theme="light"] .export-btn-group { border-color: rgba(0,0,0,.13) !important; }
+    html[data-theme="light"] .export-btn-group.open,
+    html[data-theme="light"] .export-btn-group:focus-within { border-color: #2563eb !important; }
+    html[data-theme="light"] .export-btn-main,
+    html[data-theme="light"] .export-btn-chevron { color: #334155 !important; }
+    html[data-theme="light"] .export-btn-main:hover,
+    html[data-theme="light"] .export-btn-chevron:hover { background: rgba(0,0,0,.06) !important; color: #0f172a !important; }
+    html[data-theme="light"] .export-btn-chevron { border-left-color: rgba(0,0,0,.13) !important; }
+    html[data-theme="light"] .export-dropdown { background: #ffffff !important; border-color: rgba(0,0,0,.12) !important; box-shadow: 0 16px 48px rgba(0,0,0,.18) !important; }
+    html[data-theme="light"] .export-section-row:hover { background: #f4f6fb !important; }
+    html[data-theme="light"] .export-section-label { color: #0f172a !important; }
+
     /* -- Toast ------------------------------------ */
     #toast-container {
       position: fixed; bottom: 24px; right: 24px;
@@ -222,8 +304,42 @@
         <option value="">All Locations</option>
       </select>
       <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">&#8635; Refresh</button>
-</div>
-  </div>
+      <!-- Export full report -->
+      <div class="export-wrap" id="export-wrap">
+        <div class="export-btn-group" id="export-btn-group">
+          <button class="export-btn-main" onclick="triggerExportMain()" title="Export full report">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export full report
+          </button>
+          <button class="export-btn-chevron" id="export-chevron-btn" onclick="toggleExportDropdown(event)" title="Choose sections">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="export-dropdown" id="export-dropdown">
+          <div class="export-dd-header">
+            <span class="export-dd-title">Sections to include</span>
+            <button class="export-dd-toggle" id="export-toggle-all" onclick="toggleAllSections()">Deselect all</button>
+          </div>
+          <div class="export-sections">
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="summary"  checked><span class="export-section-label">Summary Metrics <span class="export-section-desc">&#9670; Total, Categories, Available, Issues</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="status"   checked><span class="export-section-label">Asset Status <span class="export-section-desc">&#9670; Available / Deployed / Damaged</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="stockvsdeploy" checked><span class="export-section-label">Stock In vs Deployed <span class="export-section-desc">&#9670; by category</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="deployed" checked><span class="export-section-label">Deployed Assets <span class="export-section-desc">&#9670; daily deployments chart</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="stock"    checked><span class="export-section-label">Stock Received <span class="export-section-desc">&#9670; daily stock chart</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="age"      checked><span class="export-section-label">Asset Age Funnel <span class="export-section-desc">&#9670; New &#8594; End of Life</span></span></label>
+            <label class="export-section-row"><input type="checkbox" class="export-section-cb" value="categories" checked><span class="export-section-label">Assets by Category <span class="export-section-desc">&#9670; per-category counts</span></span></label>
+          </div>
+          <div class="export-dd-validation" id="export-validation">Select at least one section.</div>
+          <div class="export-dd-actions">
+            <button class="btn btn-sm" id="export-pdf-btn" onclick="exportFullReport('pdf')" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.35);width:100%;justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Export as PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.topbar-actions -->
+  </div><!-- /.topbar -->
 
   <div class="content">
 
@@ -236,7 +352,7 @@
         <div class="stat-sub">in inventory</div>
       </div>
       <div class="stat-card green">
-        <div class="stat-icon">&#127991;</div>
+        <div class="stat-icon">&#128194;</div>
         <div class="stat-label">Categories</div>
         <div class="stat-value" id="stat-categories">&ndash;</div>
         <div class="stat-sub">product groups</div>
@@ -248,7 +364,7 @@
         <div class="stat-sub">ready to deploy</div>
       </div>
       <div class="stat-card red">
-        <div class="stat-icon">&#9888;</div>
+        <div class="stat-icon">&#128736;&#65039;</div>
         <div class="stat-label">Open Issues</div>
         <div class="stat-value" id="stat-damages">&ndash;</div>
         <div class="stat-sub">damage reports</div>
@@ -276,39 +392,39 @@
       </div>
 
       <!-- Category Overview: Stock In vs Deployed (moved up, replaces old bar chart) -->
-      <div class="chart-card" style="grid-column: span 2;">
-        <div class="chart-card-header">
-          <h3 id="cat-chart-title">Stock In vs Deployed</h3>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted2);">
-              <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:3px;background:#29b6e8;display:inline-block;"></span>Stock In</span>
-              <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:3px;background:#3ecf8e;display:inline-block;"></span>Deployed</span>
-            </div>
-            <div style="display:flex;gap:6px;">
-              <button class="btn btn-sm period-btn active" id="cat-range-1day"   onclick="setCatRange('1day')">Last 1 day</button>
-              <button class="btn btn-sm period-btn"        id="cat-range-2days"  onclick="setCatRange('2days')">Last 2 days</button>
-              <button class="btn btn-sm period-btn"        id="cat-range-week"   onclick="setCatRange('week')">Last 7 days</button>
-              <button class="btn btn-sm period-btn"        id="cat-range-month"  onclick="setCatRange('month')">Last 30 days</button>
-              <button class="btn btn-sm period-btn"        id="cat-range-custom" onclick="setCatRange('custom')">Custom</button>
+      <div class="chart-card" style="display:flex; flex-direction:column; min-height:0;">
+        <div style="flex-shrink:0; margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <h3 id="cat-chart-title" style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">Stock In vs Deployed</h3>
+            <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted2);flex-shrink:0;">
+              <span style="display:flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:11px;height:11px;border-radius:3px;background:#3ecf8e;display:inline-block;"></span>Stock In</span>
+              <span style="display:flex;align-items:center;gap:5px;white-space:nowrap;"><span style="width:11px;height:11px;border-radius:3px;background:#29b6e8;display:inline-block;"></span>Deployed</span>
             </div>
           </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-sm period-btn active" id="cat-range-1day"   onclick="setCatRange('1day')">Last 1 day</button>
+            <button class="btn btn-sm period-btn"        id="cat-range-2days"  onclick="setCatRange('2days')">Last 2 days</button>
+            <button class="btn btn-sm period-btn"        id="cat-range-week"   onclick="setCatRange('week')">Last 7 days</button>
+            <button class="btn btn-sm period-btn"        id="cat-range-month"  onclick="setCatRange('month')">Last 30 days</button>
+            <button class="btn btn-sm period-btn"        id="cat-range-custom" onclick="setCatRange('custom')">Custom</button>
+          </div>
         </div>
-        <div class="custom-range" id="cat-custom-range">
+        <div class="custom-range" id="cat-custom-range" style="flex-shrink:0;">
           <span class="custom-sep">From</span>
           <input type="datetime-local" id="cat-from" onchange="setCatRange('custom')" />
           <span class="custom-sep">to</span>
           <input type="datetime-local" id="cat-to" onchange="setCatRange('custom')" />
         </div>
-        <div class="period-summary" id="cat-period-summary"></div>
-        <div class="chart-wrap">
-          <canvas id="chart-cat-overview" height="220"></canvas>
+        <div class="period-summary" id="cat-period-summary" style="flex-shrink:0;"></div>
+        <div style="flex:1; min-height:250px; position:relative;">
+          <canvas id="chart-cat-overview" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
         </div>
       </div>
 
     </div>
 
     <!-- ROW 2: Deployed Assets + Stock Received side by side -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
+    <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
 
       <!-- Deployed Assets -->
       <div>
@@ -372,7 +488,50 @@
 
     </div>
 
-    <!-- Category mini-cards -->
+    <!-- -- Asset Age ----------------------------------------------- -->
+    <div class="section-heading" style="margin-top:8px;">
+      <h2>Asset Age</h2>
+    </div>
+
+    <!-- Asset age bar chart card -->
+    <div class="chart-card" style="margin-bottom:32px;padding:28px 32px 24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:var(--blue);">Asset Age Distribution</span>
+        </div>
+        <span style="font-size:12px;color:var(--muted);">by count</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr auto;gap:32px;align-items:start;">
+
+        <!-- Left: Chart.js horizontal bar chart -->
+        <div class="chart-wrap" style="height:260px;position:relative;">
+          <canvas id="chart-age" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
+        </div>
+
+        <!-- Right: summary stat cards -->
+        <div style="display:flex;flex-direction:column;gap:14px;min-width:180px;">
+          <div style="border:1px solid var(--border2);border-radius:12px;padding:16px 18px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Total Assets</div>
+            <div id="funnel-total" style="font-family:'Poppins',sans-serif;font-size:32px;font-weight:800;color:var(--blue);line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">across all stages</div>
+          </div>
+          <div style="border:1px solid var(--border2);border-radius:12px;padding:16px 18px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">End of Life</div>
+            <div id="funnel-eol-pct" style="font-family:'Poppins',sans-serif;font-size:32px;font-weight:800;color:#f45b69;line-height:1;">0%</div>
+            <div id="funnel-eol-sub" style="font-size:11px;color:var(--muted);margin-top:4px;">0 assets (7+ yrs)</div>
+          </div>
+          <div style="border:1px solid var(--border2);border-radius:12px;padding:16px 18px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">At Risk</div>
+            <div id="funnel-at-risk" style="font-family:'Poppins',sans-serif;font-size:32px;font-weight:800;color:#f5a623;line-height:1;">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Aging + Old + EoL</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /age bar chart card -->
+
+    <!-- -- Assets by Category ---------------------------------------- -->
     <div class="section-heading">
       <h2>Assets by Category</h2>
       <a href="categories.html" class="btn btn-ghost btn-sm">Manage &#8594;</a>
@@ -381,99 +540,15 @@
       <div style="color:var(--muted);font-size:13px;">Loading&hellip;</div>
     </div>
 
-    <!-- -- Asset Age ----------------------------------------------- -->
-    <div class="section-heading" style="margin-top:8px;">
-      <h2>Asset Age</h2>
-    </div>
-
-    <!-- Donut LEFT + (flow strip + stat cards) RIGHT -->
-    <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;margin-bottom:32px;align-items:start;">
-
-      <!-- Left: By age group donut -->
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <h3>&#x1F504; By age group</h3>
-          <span>by count</span>
-        </div>
-        <div class="chart-wrap doughnut">
-          <canvas id="chart-age-donut" height="220"></canvas>
-        </div>
-        <div class="chart-legend" id="legend-age"></div>
-      </div>
-
-      <!-- Right: age flow strip stacked above stat cards -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
-
-        <!-- Age flow strip -->
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;" id="age-flow-strip">
-          <div class="chart-card" style="padding:16px 18px 12px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">New</div>
-            <div id="age-flow-new" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#3ecf8e;line-height:1;">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">&lt; 1 yr</div>
-            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-new" style="height:100%;border-radius:4px;background:#3ecf8e;width:0%;transition:width .6s ease;"></div></div>
-          </div>
-          <div class="chart-card" style="padding:16px 18px 12px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Active</div>
-            <div id="age-flow-active" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#29b6e8;line-height:1;">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">1&ndash;3 yrs</div>
-            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-active" style="height:100%;border-radius:4px;background:#29b6e8;width:0%;transition:width .6s ease;"></div></div>
-          </div>
-          <div class="chart-card" style="padding:16px 18px 12px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Aging</div>
-            <div id="age-flow-aging" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f5a623;line-height:1;">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">3&ndash;5 yrs</div>
-            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-aging" style="height:100%;border-radius:4px;background:#f5a623;width:0%;transition:width .6s ease;"></div></div>
-          </div>
-          <div class="chart-card" style="padding:16px 18px 12px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Old</div>
-            <div id="age-flow-old" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f97316;line-height:1;">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">5&ndash;7 yrs</div>
-            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-old" style="height:100%;border-radius:4px;background:#f97316;width:0%;transition:width .6s ease;"></div></div>
-          </div>
-          <div class="chart-card" style="padding:16px 18px 12px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">End of Life</div>
-            <div id="age-flow-eol" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#f45b69;line-height:1;">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">7+ yrs</div>
-            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:4px;margin-top:8px;overflow:hidden;"><div id="age-bar-eol" style="height:100%;border-radius:4px;background:#f45b69;width:0%;transition:width .6s ease;"></div></div>
-          </div>
-        </div>
-
-        <!-- Age summary stat cards -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
-          <div class="stat-card blue" style="padding:20px 22px 16px;">
-            <div class="stat-label">Total Assets</div>
-            <div class="stat-value" id="age-stat-total" style="font-size:36px;">&ndash;</div>
-            <div class="stat-sub" id="age-stat-total-sub">all deployed</div>
-          </div>
-          <div class="stat-card amber" style="padding:20px 22px 16px;">
-            <div class="stat-label">Avg. Age</div>
-            <div class="stat-value" id="age-stat-avg" style="font-size:36px;">&ndash;</div>
-            <div class="stat-sub">across all assets</div>
-          </div>
-          <div class="stat-card red" style="padding:20px 22px 16px;">
-            <div class="stat-label">End of Life</div>
-            <div class="stat-value" id="age-stat-eol" style="font-size:36px;">&ndash;</div>
-            <div class="stat-sub">need replacement</div>
-          </div>
-          <div class="stat-card amber" style="padding:20px 22px 16px;">
-            <div class="stat-label">Needs Repair</div>
-            <div class="stat-value" id="age-stat-repair" style="font-size:36px;">&ndash;</div>
-            <div class="stat-sub">flagged assets</div>
-          </div>
-        </div>
-
-      </div><!-- /right column -->
-    </div><!-- /age grid -->
-
   </div>
 </div>
 
 <div id="toast-container"></div>
 
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script>
   // -- Chart.js global defaults ----------------------------------------------
   Chart.defaults.color          = '#6b7080';
@@ -604,7 +679,7 @@
         if (locSel) locSel.value = saved || '';
       }
 
-      // Always read location from localStorage � never rely solely on dropdown.value
+      // Always read location from localStorage ? never rely solely on dropdown.value
       const selectedLoc = localStorage.getItem('emp_location_id') || '';
       const filteredProducts = selectedLoc
         ? products.data.filter(p => String(p.location_id) === selectedLoc)
@@ -726,7 +801,7 @@
            onmouseout="this.style.borderColor=''">
           <div style="width:36px;height:36px;border-radius:10px;background:${dv};display:grid;place-items:center;font-size:17px;margin-bottom:12px;">${icon}</div>
           <div style="font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${esc(c.name)}</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:${cv};line-height:1;">${count}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;color:${cv};line-height:1;">${count}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px;">${count === 1 ? 'asset' : 'assets'}</div>
         </a>`;
     }).join('');
@@ -879,8 +954,8 @@
             {
               label: 'Stock In',
               data: stockData,
-              backgroundColor: 'rgba(41,182,232,0.25)',
-              borderColor: '#29b6e8',
+              backgroundColor: 'rgba(62,207,142,0.25)',
+              borderColor: '#3ecf8e',
               borderWidth: 2,
               borderRadius: 5,
               borderSkipped: false,
@@ -888,8 +963,8 @@
             {
               label: 'Deployed',
               data: deployData,
-              backgroundColor: 'rgba(62,207,142,0.25)',
-              borderColor: '#3ecf8e',
+              backgroundColor: 'rgba(41,182,232,0.25)',
+              borderColor: '#29b6e8',
               borderWidth: 2,
               borderRadius: 5,
               borderSkipped: false,
@@ -898,6 +973,7 @@
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -1016,20 +1092,11 @@
   }
 
   // -- Asset Age section ----------------------------------------------------
-  let chartAgeDonut = null;
 
   function ageYears(dateStr) {
     if (!dateStr) return 0;
     const ms = Date.now() - new Date(dateStr).getTime();
     return ms < 0 ? 0 : ms / (1000 * 60 * 60 * 24 * 365.25);
-  }
-
-  function fmtAvgAge(yrs) {
-    if (yrs < 1) {
-      const m = Math.round(yrs * 12);
-      return (m <= 1 ? '1' : m) + ' <span style="font-size:18px;font-weight:600;">mo' + (m === 1 ? '' : 's') + '</span>';
-    }
-    return yrs.toFixed(1) + ' <span style="font-size:18px;font-weight:600;">yrs</span>';
   }
 
   function ageStage(yrs) {
@@ -1040,74 +1107,562 @@
     return 'eol';
   }
 
+  let chartAge = null;
+
   function renderAgeSection(products, damages) {
     const total = products.length;
     const ages  = products.map(p => ageYears(p.created_at));
-    const avg   = total > 0 ? ages.reduce((a, b) => a + b, 0) / total : 0;
     const eolCount = ages.filter(a => a >= 7).length;
-    const openDmgIds = new Set(damages.filter(d => d.status === 'damaged').map(d => d.product_id));
-    const repairCount = products.filter(p => openDmgIds.has(p.id)).length;
 
-    // Stat cards
-    document.getElementById('age-stat-total').textContent    = total;
-    document.getElementById('age-stat-total-sub').textContent = total === 1 ? '1 asset total' : total + ' assets total';
-    document.getElementById('age-stat-avg').innerHTML  = fmtAvgAge(avg);
-    document.getElementById('age-stat-eol').textContent    = eolCount;
-    document.getElementById('age-stat-repair').textContent = repairCount;
-
-    // Flow strip
     const counts = { new:0, active:0, aging:0, old:0, eol:0 };
     products.forEach(p => { counts[ageStage(ageYears(p.created_at))]++; });
-    const t = total || 1;
+
+    // Keep legacy element IDs working (for export)
     ['new','active','aging','old','eol'].forEach(s => {
-      const el = document.getElementById('age-flow-' + s);
-      const bar = document.getElementById('age-bar-' + s);
-      if (el)  el.textContent = counts[s];
-      if (bar) setTimeout(() => { bar.style.width = Math.round((counts[s] / t) * 100) + '%'; }, 50);
+      const v = document.getElementById('funnel-val-' + s);
+      if (v) v.textContent = counts[s];
     });
 
-    // Donut chart
-    const labels = ['New','Active','Aging','Old','End of Life'];
-    const data   = [counts.new, counts.active, counts.aging, counts.old, counts.eol];
-    const colors = ['#3ecf8e','#29b6e8','#f5a623','#f97316','#f45b69'];
-    if (chartAgeDonut) chartAgeDonut.destroy();
-    chartAgeDonut = new Chart(document.getElementById('chart-age-donut'), {
-      type: 'doughnut',
+    const labels = ['New  < 1 yr', 'Active  1-3 yrs', 'Aging  3-5 yrs', 'Old  5-7 yrs', 'End of Life  7+ yrs'];
+    const values = [counts.new, counts.active, counts.aging, counts.old, counts.eol];
+    const bgColors = [
+      'rgba(62,207,142,0.25)',
+      'rgba(41,182,232,0.25)',
+      'rgba(245,166,35,0.25)',
+      'rgba(249,115,22,0.25)',
+      'rgba(244,91,105,0.25)',
+    ];
+    const borderColors = ['#3ecf8e', '#29b6e8', '#f5a623', '#f97316', '#f45b69'];
+
+    if (chartAge) chartAge.destroy();
+    chartAge = new Chart(document.getElementById('chart-age'), {
+      type: 'bar',
       data: {
-        labels: labels.map((l, i) => l + ' ' + data[i]),
-        datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }],
+        labels,
+        datasets: [{
+          label: 'Assets',
+          data: values,
+          backgroundColor: bgColors,
+          borderColor: borderColors,
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
+          barThickness: 22,
+        }]
       },
       options: {
-        cutout: '68%',
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed } },
+          tooltip: {
+            callbacks: {
+              label: ctx => ' ' + ctx.parsed.x + ' asset' + (ctx.parsed.x !== 1 ? 's' : '')
+            }
+          }
         },
-      },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#6b7080', font: { size: 11 }, stepSize: 1, precision: 0 }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#6b7080', font: { size: 12 } }
+          }
+        }
+      }
     });
 
-    // Custom legend matching Asset Status style
-    const legend = document.getElementById('legend-age');
-    if (legend) {
-      legend.innerHTML = labels.map((l, i) => `
-        <div class="legend-item">
-          <span class="legend-dot" style="background:${colors[i]}"></span>
-          <span>${l}</span>
-          <span class="legend-val">${data[i]}</span>
-        </div>`).join('');
-    }
+    // Right-side summary cards
+    const totalEl = document.getElementById('funnel-total');
+    if (totalEl) totalEl.textContent = total;
+
+    const eolPct = total > 0 ? Math.round((eolCount / total) * 100) : 0;
+    const eolPctEl = document.getElementById('funnel-eol-pct');
+    const eolSubEl = document.getElementById('funnel-eol-sub');
+    if (eolPctEl) eolPctEl.textContent = eolPct + '%';
+    if (eolSubEl) eolSubEl.textContent = eolCount + ' asset' + (eolCount !== 1 ? 's' : '') + ' (7+ yrs)';
+
+    const atRisk = counts.aging + counts.old + counts.eol;
+    const riskEl = document.getElementById('funnel-at-risk');
+    if (riskEl) riskEl.textContent = atRisk;
   }
 
   // -- Auto-refresh when employees page deploys/undeploys an asset ----------
   window.addEventListener('storage', e => {
     if (e.key === 'emp_dashboard_refresh') {
-      // Reload just the charts (not the full dashboard stats) for a lightweight refresh
       loadCatOverviewChart(currentCatRange);
       loadDeployedChart(currentDeployRange);
       loadStockChart(currentStockRange);
-      loadDashboard(); // also refresh stat cards
+      loadDashboard();
     }
   });
+
+  // -- Export full report ----------------------------------------------------
+
+  /* Section ? DOM element ID mapping */
+  const EXPORT_SECTIONS = {
+    summary:       { label: 'Summary Metrics',        elId: 'export-section-summary' },
+    status:        { label: 'Asset Status',           elId: 'export-section-status' },
+    stockvsdeploy: { label: 'Stock In vs Deployed',   elId: 'export-section-stockvsdeploy' },
+    deployed:      { label: 'Deployed Assets',        elId: 'export-section-deployed' },
+    stock:         { label: 'Stock Received',         elId: 'export-section-stock' },
+    age:           { label: 'Asset Age Funnel',       elId: 'export-section-age' },
+    categories:    { label: 'Assets by Category',     elId: 'export-section-categories' },
+  };
+
+  /* Wrap each dashboard section in a named div for capture */
+  (function wrapSections() {
+    function wrap(el, id) {
+      if (!el || document.getElementById(id)) return;
+      const div = document.createElement('div');
+      div.id = id;
+      el.parentNode.insertBefore(div, el);
+      div.appendChild(el);
+    }
+    // Wait for DOM
+    document.addEventListener('DOMContentLoaded', () => {}, { once: true });
+    const stat   = document.querySelector('.stat-grid');
+    const status = document.querySelector('#chart-status')?.closest('.chart-card');
+    const svd    = document.querySelector('#chart-cat-overview')?.closest('.chart-card');
+    const dep    = document.querySelector('#chart-deployed')?.closest('.chart-card');
+    const stk    = document.querySelector('#chart-stock')?.closest('.chart-card');
+    const age    = document.querySelector('#chart-age')?.closest('.chart-card');
+    const cats   = document.getElementById('cat-grid');
+
+    if (stat)   wrap(stat,   'export-section-summary');
+    if (status) wrap(status, 'export-section-status');
+    if (svd)    wrap(svd,    'export-section-stockvsdeploy');
+    if (dep)    wrap(dep,    'export-section-deployed');
+    if (stk)    wrap(stk,    'export-section-stock');
+    if (age)    wrap(age,    'export-section-age');
+    if (cats)   wrap(cats,   'export-section-categories');
+  })();
+
+  /* Dropdown open/close */
+  function toggleExportDropdown(e) {
+    e.stopPropagation();
+    const dd  = document.getElementById('export-dropdown');
+    const grp = document.getElementById('export-btn-group');
+    const open = dd.classList.toggle('open');
+    grp.classList.toggle('open', open);
+    if (open) {
+      document.addEventListener('click', closeExportDropdown, { once: true });
+    }
+  }
+
+  function closeExportDropdown() {
+    document.getElementById('export-dropdown')?.classList.remove('open');
+    document.getElementById('export-btn-group')?.classList.remove('open');
+  }
+
+  function triggerExportMain() {
+    // Main button click directly opens dropdown (same as chevron)
+    const dd = document.getElementById('export-dropdown');
+    if (dd.classList.contains('open')) {
+      closeExportDropdown();
+    } else {
+      document.getElementById('export-chevron-btn').click();
+    }
+  }
+
+  /* Select all / deselect all */
+  function toggleAllSections() {
+    const cbs  = document.querySelectorAll('.export-section-cb');
+    const btn  = document.getElementById('export-toggle-all');
+    const anyUnchecked = [...cbs].some(c => !c.checked);
+    cbs.forEach(c => c.checked = anyUnchecked);
+    btn.textContent = anyUnchecked ? 'Deselect all' : 'Select all';
+    updateExportValidation();
+  }
+
+  /* Attach change listeners to checkboxes */
+  document.querySelectorAll('.export-section-cb').forEach(cb => {
+    cb.addEventListener('change', updateExportValidation);
+  });
+
+  function updateExportValidation() {
+    const anyChecked = [...document.querySelectorAll('.export-section-cb')].some(c => c.checked);
+    const val  = document.getElementById('export-validation');
+    const pdf  = document.getElementById('export-pdf-btn');
+    const xlsx = document.getElementById('export-xlsx-btn');
+    const tog  = document.getElementById('export-toggle-all');
+    val.style.display  = anyChecked ? 'none' : 'block';
+    pdf.disabled  = !anyChecked;
+    xlsx.disabled = !anyChecked;
+    // Update toggle label
+    const allChecked = [...document.querySelectorAll('.export-section-cb')].every(c => c.checked);
+    tog.textContent = allChecked ? 'Deselect all' : 'Select all';
+  }
+
+  /* Get currently checked section keys in order */
+  function getCheckedSections() {
+    return [...document.querySelectorAll('.export-section-cb')]
+      .filter(c => c.checked)
+      .map(c => c.value);
+  }
+
+  /* Location label helper */
+  function getLocationLabel() {
+    const locId = localStorage.getItem('emp_location_id');
+    if (!locId) return 'All Locations';
+    const sel = document.getElementById('filter-location');
+    const opt = sel ? [...sel.options].find(o => o.value === locId) : null;
+    return opt ? opt.textContent : 'All Locations';
+  }
+
+  /* Format date for filename */
+  function exportDateStr() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+
+  /* Set export buttons busy / idle */
+  function setExportBusy(busy) {
+    const pdf  = document.getElementById('export-pdf-btn');
+    const xlsx = document.getElementById('export-xlsx-btn');
+    if (pdf)  pdf.disabled  = busy;
+    if (xlsx) xlsx.disabled = busy;
+  }
+
+  /* -- Master export dispatcher -- */
+  async function exportFullReport(format) {
+    closeExportDropdown();
+    const sections = getCheckedSections();
+    if (!sections.length) return;
+    setExportBusy(true);
+
+    if (format === 'pdf') {
+      await exportPDF(sections);
+    } else {
+      await exportExcel(sections);
+    }
+    setExportBusy(false);
+  }
+
+  /* -- PDF export � text/table only, no screenshots -- */
+  async function exportPDF(sections) {
+    if (typeof window.jspdf === 'undefined') {
+      showToast('PDF library not loaded yet, please try again.', 'error');
+      return;
+    }
+    showToast('Generating PDF�');
+    try {
+      const { jsPDF } = window.jspdf;
+      const locLabel = getLocationLabel();
+      const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                  ', ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+      const doc    = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+      const pageW  = doc.internal.pageSize.getWidth();
+      const pageH  = doc.internal.pageSize.getHeight();
+      const M      = 16;   // left/right margin
+      const colW   = (pageW - M * 2) / 2;
+      let y        = 0;
+
+      // -- helpers ------------------------------------------------------
+      function checkPage(needed) {
+        if (y + needed > pageH - 14) { doc.addPage(); y = 14; }
+      }
+
+      function heading(text) {
+        checkPage(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(30, 64, 175);
+        doc.text(text, M, y);
+        y += 2;
+        doc.setDrawColor(41, 182, 232);
+        doc.setLineWidth(0.4);
+        doc.line(M, y, pageW - M, y);
+        y += 6;
+      }
+
+      function tableRow(cols, isHeader) {
+        const rowH = 7;
+        checkPage(rowH + 2);
+        if (isHeader) {
+          doc.setFillColor(240, 248, 255);
+          doc.rect(M, y - 5, pageW - M * 2, rowH, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(51, 65, 85);
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.setTextColor(30, 30, 30);
+        }
+        const cellW = (pageW - M * 2) / cols.length;
+        cols.forEach((c, i) => {
+          doc.text(String(c ?? ''), M + i * cellW + 2, y);
+        });
+        y += rowH;
+        // thin separator
+        doc.setDrawColor(220, 220, 230);
+        doc.setLineWidth(0.15);
+        doc.line(M, y - 1, pageW - M, y - 1);
+      }
+
+      function table(headers, rows) {
+        tableRow(headers, true);
+        rows.forEach(r => tableRow(r, false));
+        y += 4;
+      }
+
+      function metricPair(label, value, color) {
+        checkPage(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(107, 112, 128);
+        doc.text(label, M, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        const [r, g, b] = color || [30, 30, 30];
+        doc.setTextColor(r, g, b);
+        doc.text(String(value), M + 70, y);
+        y += 8;
+      }
+
+      // -- Cover header -------------------------------------------------
+      doc.setFillColor(10, 14, 26);
+      doc.rect(0, 0, pageW, 38, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(41, 182, 232);
+      doc.text('EmpireOne', M, 16);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(13);
+      doc.setTextColor(232, 234, 240);
+      doc.text('Dashboard Report', M + 52, 16);
+
+      doc.setFontSize(9);
+      doc.setTextColor(107, 112, 128);
+      doc.text('Location: ' + locLabel, M, 26);
+      doc.text('Generated: ' + now, pageW - M, 26, { align: 'right' });
+      const sectionsLine = 'Sections: ' + sections.map(k => EXPORT_SECTIONS[k]?.label).filter(Boolean).join(' � ');
+      const sectionsWrapped = doc.splitTextToSize(sectionsLine, pageW - M * 2);
+      doc.text(sectionsWrapped, M, 33);
+      const coverTextH = sectionsWrapped.length * 4.5;
+
+      y = 38 + coverTextH + 6;
+
+      // -- Sections -----------------------------------------------------
+      for (const key of sections) {
+        const sec = EXPORT_SECTIONS[key];
+        if (!sec) continue;
+        heading(sec.label);
+
+        switch (key) {
+          case 'summary': {
+            const vals = [
+              ['Total Assets',  document.getElementById('stat-products')?.textContent,    [41, 182, 232]],
+              ['Categories',    document.getElementById('stat-categories')?.textContent,  [41, 182, 232]],
+              ['Available',     document.getElementById('stat-assigned')?.textContent,    [41, 182, 232]],
+              ['Open Issues',   document.getElementById('stat-damages')?.textContent,     [41, 182, 232]],
+            ];
+            vals.forEach(([l, v, c]) => metricPair(l, v || '�', c));
+            y += 4;
+            break;
+          }
+          case 'status': {
+            if (chartStatus?.data) {
+              const rows = chartStatus.data.labels.map((l, i) => [l, chartStatus.data.datasets[0].data[i]]);
+              table(['Status', 'Count'], rows);
+            }
+            break;
+          }
+          case 'stockvsdeploy': {
+            if (chartCatOverview?.data) {
+              const rows = chartCatOverview.data.labels.map((l, i) => [
+                l,
+                chartCatOverview.data.datasets[0].data[i],
+                chartCatOverview.data.datasets[1].data[i],
+              ]);
+              table(['Category', 'Stock In', 'Deployed'], rows);
+            }
+            break;
+          }
+          case 'deployed': {
+            if (chartDeployed?.data) {
+              const rows = chartDeployed.data.labels.map((l, i) => [l, chartDeployed.data.datasets[0].data[i]]);
+              table(['Date', 'Deployments'], rows);
+            }
+            break;
+          }
+          case 'stock': {
+            if (chartStock?.data) {
+              const rows = chartStock.data.labels.map((l, i) => [l, chartStock.data.datasets[0].data[i]]);
+              table(['Date', 'Units Received'], rows);
+            }
+            break;
+          }
+          case 'age': {
+            const stages = [
+              ['New',         document.getElementById('funnel-val-new')?.textContent,    '< 1 yr'],
+              ['Active',      document.getElementById('funnel-val-active')?.textContent, '1�3 yrs'],
+              ['Aging',       document.getElementById('funnel-val-aging')?.textContent,  '3�5 yrs'],
+              ['Old',         document.getElementById('funnel-val-old')?.textContent,    '5�7 yrs'],
+              ['End of Life', document.getElementById('funnel-val-eol')?.textContent,    '7+ yrs'],
+            ];
+            table(['Stage', 'Count', 'Age Range'], stages.map(([s, v, r]) => [s, v || '0', r]));
+            // summary stats
+            const total   = document.getElementById('funnel-total')?.textContent || '�';
+            const eolPct  = document.getElementById('funnel-eol-pct')?.textContent || '�';
+            const atRisk  = document.getElementById('funnel-at-risk')?.textContent || '�';
+            metricPair('Total Assets',       total,  [41, 182, 232]);
+            metricPair('End-of-Life %',      eolPct, [41, 182, 232]);
+            metricPair('At Risk (Aging+)',   atRisk, [41, 182, 232]);
+            y += 4;
+            break;
+          }
+          case 'categories': {
+            const rows = [];
+            document.querySelectorAll('#cat-grid .cat-card').forEach(card => {
+              const name  = card.querySelector('[style*="uppercase"]')?.textContent?.trim() || '';
+              const count = card.querySelector('[style*="font-size:28px"]')?.textContent?.trim() || '0';
+              if (name) rows.push([name, parseInt(count) || 0]);
+            });
+            if (rows.length) table(['Category', 'Asset Count'], rows);
+            break;
+          }
+        }
+      }
+
+      // -- Footer on every page -----------------------------------------
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text('EmpireOne Inventory � ' + now, M, pageH - 8);
+        doc.text('Page ' + p + ' of ' + totalPages, pageW - M, pageH - 8, { align: 'right' });
+      }
+
+      doc.save('dashboard-report-' + exportDateStr() + '.pdf');
+      showToast('Report exported successfully', 'success');
+    } catch(e) {
+      console.error(e);
+      showToast('Export failed: ' + (e.message || 'Unknown error'), 'error');
+    }
+  }
+
+  /* -- Excel export -- */
+  async function exportExcel(sections) {
+    if (typeof XLSX === 'undefined') {
+      showToast('Excel library not loaded yet, please try again.', 'error');
+      return;
+    }
+    showToast('Generating Excel�');
+    try {
+      const wb = XLSX.utils.book_new();
+      const locLabel = getLocationLabel();
+      const now = new Date().toLocaleString('en-US');
+
+      // Info sheet
+      const infoData = [
+        ['EmpireOne Dashboard Report'],
+        ['Generated', now],
+        ['Location', locLabel],
+        ['Sections included', sections.map(k => EXPORT_SECTIONS[k]?.label).filter(Boolean).join(', ')],
+      ];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(infoData), 'Report Info');
+
+      for (const key of sections) {
+        const sec = EXPORT_SECTIONS[key];
+        if (!sec) continue;
+        let rows = [];
+
+        switch(key) {
+          case 'summary': {
+            rows = [
+              ['Metric', 'Value'],
+              ['Total Assets',  document.getElementById('stat-products')?.textContent || ''],
+              ['Categories',    document.getElementById('stat-categories')?.textContent || ''],
+              ['Available',     document.getElementById('stat-assigned')?.textContent || ''],
+              ['Open Issues',   document.getElementById('stat-damages')?.textContent || ''],
+            ];
+            break;
+          }
+          case 'status': {
+            rows = [['Status', 'Count']];
+            if (chartStatus?.data) {
+              chartStatus.data.labels.forEach((l, i) => {
+                rows.push([l, chartStatus.data.datasets[0].data[i]]);
+              });
+            }
+            break;
+          }
+          case 'stockvsdeploy': {
+            rows = [['Category', 'Stock In', 'Deployed']];
+            if (chartCatOverview?.data) {
+              chartCatOverview.data.labels.forEach((l, i) => {
+                rows.push([l,
+                  chartCatOverview.data.datasets[0].data[i],
+                  chartCatOverview.data.datasets[1].data[i],
+                ]);
+              });
+            }
+            break;
+          }
+          case 'deployed': {
+            rows = [['Date', 'Deployments']];
+            if (chartDeployed?.data) {
+              chartDeployed.data.labels.forEach((l, i) => {
+                rows.push([l, chartDeployed.data.datasets[0].data[i]]);
+              });
+            }
+            break;
+          }
+          case 'stock': {
+            rows = [['Date', 'Units Received']];
+            if (chartStock?.data) {
+              chartStock.data.labels.forEach((l, i) => {
+                rows.push([l, chartStock.data.datasets[0].data[i]]);
+              });
+            }
+            break;
+          }
+          case 'age': {
+            rows = [
+              ['Stage', 'Count'],
+              ['New',         parseInt(document.getElementById('funnel-val-new')?.textContent)  || 0],
+              ['Active',      parseInt(document.getElementById('funnel-val-active')?.textContent) || 0],
+              ['Aging',       parseInt(document.getElementById('funnel-val-aging')?.textContent) || 0],
+              ['Old',         parseInt(document.getElementById('funnel-val-old')?.textContent)  || 0],
+              ['End of Life', parseInt(document.getElementById('funnel-val-eol')?.textContent)  || 0],
+            ];
+            break;
+          }
+          case 'categories': {
+            rows = [['Category', 'Asset Count']];
+            document.querySelectorAll('#cat-grid .cat-card').forEach(card => {
+              const name  = card.querySelector('[style*="uppercase"]')?.textContent?.trim() || '';
+              const count = card.querySelector('[style*="font-size:28px"]')?.textContent?.trim() || '0';
+              if (name) rows.push([name, parseInt(count) || 0]);
+            });
+            break;
+          }
+        }
+
+        if (rows.length) {
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), sec.label.slice(0, 31));
+        }
+      }
+
+      XLSX.writeFile(wb, 'dashboard-report-' + exportDateStr() + '.xlsx');
+      showToast('Report exported successfully', 'success');
+    } catch(e) {
+      console.error(e);
+      showToast('Export failed: ' + (e.message || 'Unknown error'), 'error');
+    }
+  }
 </script>
 </body>
 </html>

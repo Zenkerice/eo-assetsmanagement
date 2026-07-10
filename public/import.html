@@ -1,15 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Import &mdash; EmpireOne</title>
   <script src="js/theme.js"></script>
-  <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/utils.js?v=3"></script>
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -50,7 +49,8 @@
     .step-connector.done{background:var(--green)}
 
     /* -- Wizard card -- */
-    .wizard-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .wizard-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease}
+    .wizard-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22)}
 
     /* -- Panel body -- */
     .panel-body{padding:32px}
@@ -98,9 +98,9 @@
     /* -- Review -- */
     .review-header{margin-bottom:16px}
     .review-header p{font-size:14px;color:var(--muted2);line-height:1.6}
-    .review-wrap{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:340px;overflow-y:auto}
-    .review-table{width:100%;border-collapse:collapse;font-size:12px}
-    .review-table th{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+    .review-wrap{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:auto;max-height:340px;}
+    .review-table{width:max-content;min-width:100%;border-collapse:collapse;font-size:12px}
+    .review-table th{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;background:rgba(15,23,41,0.98);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;white-space:nowrap}
     .review-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
     .review-table tr:last-child td{border-bottom:none}
     .review-table tr.row-error td{background:rgba(244,91,105,0.06)}
@@ -130,6 +130,133 @@
     #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
     .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
     .toast.error{border-color:var(--red);color:var(--red)} .toast.success{border-color:var(--green);color:var(--green)}
+
+    /* ============================
+       ANIMATIONS
+    ============================== */
+
+    /* Keyframes */
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity:0; transform:translateY(-16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity:0; transform:scale(0.93); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    @keyframes floatCloud {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+      0%,100% { box-shadow:0 0 0 4px var(--blue-dim); }
+      50%      { box-shadow:0 0 0 8px rgba(41,182,232,0.22); }
+    }
+    @keyframes shimmer {
+      0%   { background-position:200% center; }
+      100% { background-position:-200% center; }
+    }
+    @keyframes connectorFill {
+      from { transform:scaleX(0); transform-origin:left; }
+      to   { transform:scaleX(1); transform-origin:left; }
+    }
+    @keyframes ripple {
+      0%   { transform:scale(0.8); opacity:1; }
+      100% { transform:scale(2.2); opacity:0; }
+    }
+    @keyframes checkPop {
+      0%   { transform:scale(0) rotate(-20deg); opacity:0; }
+      60%  { transform:scale(1.2) rotate(4deg); opacity:1; }
+      100% { transform:scale(1) rotate(0deg); opacity:1; }
+    }
+    @keyframes rowSlideIn {
+      from { opacity:0; transform:translateX(-10px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* -- Page entrance -- */
+    .wizard-wrap  { animation: fadeInUp .45s ease both; }
+    .steps-bar    { animation: fadeInDown .4s .05s ease both; }
+    .wizard-card  { animation: scaleIn .4s .1s ease both; }
+
+    /* -- Step circle active pulse -- */
+    .step-item.active .step-circle { animation: pulseGlow 2.2s ease-in-out infinite; }
+
+    /* -- Step circle done check pop -- */
+    .step-item.done .step-circle { animation: checkPop .35s ease both; }
+
+    /* -- Connector fill -- */
+    .step-connector.done { animation: connectorFill .35s ease both; }
+
+    /* -- Drop zone cloud float -- */
+    .dz-icon { animation: floatCloud 3.2s ease-in-out infinite; display:block; }
+    .drop-zone:hover .dz-icon,
+    .drop-zone.drag-over .dz-icon { animation-duration: 1.4s; }
+
+    /* -- Drop zone hover ring -- */
+    .drop-zone { transition: border-color .25s, background .25s, transform .2s, box-shadow .25s; }
+    .drop-zone:hover { transform:scale(1.012); box-shadow:0 0 0 4px rgba(41,182,232,0.1); }
+    .drop-zone.drag-over { transform:scale(1.018); box-shadow:0 0 0 6px rgba(41,182,232,0.18); }
+
+    /* -- File chosen entrance -- */
+    .file-chosen { animation: fadeInUp .3s ease both; }
+
+    /* -- Type buttons -- */
+    .type-btn { transition: all .2s cubic-bezier(.34,1.56,.64,1); }
+    .type-btn:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(0,0,0,0.2); }
+    .type-btn.active { transform:translateY(-1px); box-shadow:0 4px 16px rgba(41,182,232,0.15); }
+
+    /* -- Panel transition -- */
+    .panel-body { animation: fadeInUp .35s ease both; }
+
+    /* -- Map table rows stagger -- */
+    #map-tbody tr { animation: rowSlideIn .28s ease both; }
+    #map-tbody tr:nth-child(1)  { animation-delay:.03s }
+    #map-tbody tr:nth-child(2)  { animation-delay:.06s }
+    #map-tbody tr:nth-child(3)  { animation-delay:.09s }
+    #map-tbody tr:nth-child(4)  { animation-delay:.12s }
+    #map-tbody tr:nth-child(5)  { animation-delay:.15s }
+    #map-tbody tr:nth-child(6)  { animation-delay:.18s }
+    #map-tbody tr:nth-child(7)  { animation-delay:.21s }
+    #map-tbody tr:nth-child(8)  { animation-delay:.24s }
+    #map-tbody tr:nth-child(9)  { animation-delay:.27s }
+    #map-tbody tr:nth-child(10) { animation-delay:.30s }
+    #map-tbody tr:nth-child(n+11){ animation-delay:.33s }
+
+    /* -- Review rows stagger -- */
+    #review-tbody tr { animation: rowSlideIn .22s ease both; }
+    #review-tbody tr:nth-child(1)  { animation-delay:.04s }
+    #review-tbody tr:nth-child(2)  { animation-delay:.07s }
+    #review-tbody tr:nth-child(3)  { animation-delay:.10s }
+    #review-tbody tr:nth-child(4)  { animation-delay:.13s }
+    #review-tbody tr:nth-child(5)  { animation-delay:.16s }
+    #review-tbody tr:nth-child(n+6){ animation-delay:.19s }
+
+    /* -- Progress bar shimmer -- */
+    .import-progress-bar {
+      background: linear-gradient(90deg, var(--blue) 0%, var(--green) 40%, var(--blue) 60%, var(--green) 100%);
+      background-size: 200% auto;
+      animation: shimmer 1.8s linear infinite;
+      transition: width .35s ease;
+    }
+
+    /* -- Footer buttons -- */
+    .btn { transition: all .18s cubic-bezier(.34,1.56,.64,1); }
+    .btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
+    .btn:not(:disabled):active { transform: translateY(0) scale(0.97); }
+    .btn-primary:not(:disabled):hover { box-shadow: 0 4px 18px rgba(41,182,232,0.3); }
+
+    /* -- Wizard card hover lift -- */
+    .wizard-card { transition: box-shadow .25s ease, transform .25s ease; }
+    .wizard-card:hover { transform: translateY(-2px); }
 
   </style>
 </head>
@@ -192,7 +319,7 @@
               <span class="type-icon">&#128246;</span> Assets
             </button>
             <button class="type-btn" id="type-categories" onclick="setType('categories')">
-              <span class="type-icon">&#127991;</span> Categories
+              <span class="type-icon">&#128194;</span> Categories
             </button>
           </div>
           <div class="drop-zone" id="drop-zone"
@@ -260,11 +387,26 @@
 </div><!-- /main -->
 <div id="toast-container"></div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/sidebar.js?v=77"></script>
+<script src="js/xlsx.full.min.js"></script>
 <script>
+// Inline fallback � guarantees fuzzyMatchLocation is always available
+// regardless of browser cache on utils.js
+if (typeof fuzzyMatchLocation !== 'function') {
+  window.fuzzyMatchLocation = function(needle, locations) {
+    if (!needle || !locations || !locations.length) return null;
+    const n = needle.toLowerCase().trim();
+    let match = locations.find(x => x.name.toLowerCase() === n);
+    if (match) return match;
+    match = locations.find(x => { const h = x.name.toLowerCase(); return h.includes(n) || n.includes(h); });
+    if (match) return match;
+    const prefix = n.slice(0, 5);
+    return locations.find(x => { const h = x.name.toLowerCase(); return h.startsWith(prefix) || n.startsWith(h.slice(0, 5)); }) || null;
+  };
+}
+
 (async () => {
   const user = await auth.requireAuth();
   if (!user) return;
@@ -288,12 +430,17 @@ let allSuppliers  = [];
 
 const FIELDS = {
   assets: [
-    { key:'name',         label:'Name',         required:true  },
-    { key:'serial_number',label:'Serial Number', required:false },
-    { key:'brand_model',  label:'Brand / Model', required:false },
-    { key:'category',     label:'Category',      required:false },
-    { key:'supplier',     label:'Supplier',      required:false },
-    { key:'location',     label:'Location',      required:false },
+    { key:'assigned_employee',    label:'Assigned Employee',         required:false },
+    { key:'assigned_employee_id', label:'Assigned Employee ID Number',required:false },
+    { key:'category',             label:'Category',                   required:false },
+    { key:'brand',                label:'Brand',                      required:false },
+    { key:'model',                label:'Model',                      required:false },
+    { key:'serial_number',        label:'Serial Number',              required:false },
+    { key:'description',          label:'Description',                required:true  },
+    { key:'location',             label:'Location',                   required:false },
+    { key:'purchase_date',        label:'Purchase Date',              required:false },
+    { key:'supplier',             label:'Supplier / Vendor',          required:false },
+    { key:'status',               label:'Status',                     required:false },
   ],
   categories: [
     { key:'name',        label:'Name',        required:true  },
@@ -314,7 +461,7 @@ function downloadTemplate() {
   const fields  = FIELDS[importType];
   const header  = fields.map(f => f.label).join(',');
   const example = importType === 'assets'
-    ? '"Dell Laptop","SN-001234","Dell XPS 15","Computers","Empire One","Dungganon"'
+    ? '"Juan dela Cruz","EMP-001","Computers","Dell","XPS 15","SN-001234","Dell Laptop XPS 15","Dungganon","2024-01-15","Empire One","Active"'
     : '"Computers","Desktop and laptop computers"';
   const csv  = header + '\n' + example;
   const blob = new Blob([csv], { type:'text/csv' });
@@ -427,7 +574,14 @@ function goBack() {
 function setStep(n) {
   currentStep = n;
   [1,2,3].forEach(i => {
-    document.getElementById('panel-' + i).style.display = i === n ? '' : 'none';
+    const panel = document.getElementById('panel-' + i);
+    panel.style.display = i === n ? '' : 'none';
+    // Re-trigger entrance animation on the active panel
+    if (i === n) {
+      panel.style.animation = 'none';
+      panel.offsetHeight; // reflow
+      panel.style.animation = '';
+    }
     const s = document.getElementById('step-' + i);
     s.classList.remove('active','done');
     if (i < n) s.classList.add('done');
@@ -449,19 +603,45 @@ async function loadDropdowns() {
     allCategories = c.data || [];
     allSuppliers  = s.data || [];
     allLocations  = l.data || [];
-  } catch(e) {}
+  } catch(e) {
+    showToast('Warning: could not load categories/suppliers/locations � mapping may be incomplete', 'error');
+  }
 }
 
 function buildColumnMap() {
   const fields = FIELDS[importType];
   columnMap = {};
+
+  // Sort fields by specificity (longest key first) so "assigned_employee_id" beats "assigned_employee"
+  const sortedFields = [...fields].sort((a, b) => b.key.length - a.key.length);
+
   fileHeaders.forEach(h => {
     const norm = h.toLowerCase().replace(/[\s_\-\/]+/g,'');
-    const match = fields.find(f => {
+    let match = null;
+
+    // Pass 1: exact match on normalized key or normalized label
+    match = sortedFields.find(f => {
       const fn = f.key.toLowerCase().replace(/[\s_\-\/]+/g,'');
       const fl = f.label.toLowerCase().replace(/[\s_\-\/]+/g,'');
-      return fn === norm || fl === norm || fn.includes(norm) || norm.includes(fn);
+      return fn === norm || fl === norm;
     });
+
+    // Pass 2: header starts with the normalized label (most specific prefix)
+    if (!match) {
+      match = sortedFields.find(f => {
+        const fl = f.label.toLowerCase().replace(/[\s_\-\/]+/g,'');
+        return norm.startsWith(fl) || fl.startsWith(norm);
+      });
+    }
+
+    // Pass 3: header contains the normalized key (longest key wins due to sort)
+    if (!match) {
+      match = sortedFields.find(f => {
+        const fn = f.key.toLowerCase().replace(/[\s_\-\/]+/g,'');
+        return norm.includes(fn) || fn.includes(norm);
+      });
+    }
+
     columnMap[h] = match ? match.key : '';
   });
 
@@ -499,16 +679,13 @@ function buildReview() {
 
   const shownFields = fields.filter(f => Object.values(columnMap).includes(f.key));
   document.getElementById('review-thead').innerHTML = '<tr><th>#</th>' +
-    shownFields.map(f => `<th>${f.label}</th>`).join('') + '<th>Status</th></tr>';
+    shownFields.map(f => `<th>${f.label}</th>`).join('') + '</tr>';
 
   document.getElementById('review-tbody').innerHTML = previewRows.slice(0,200).map(r => {
-    const cls    = r.errors.length ? 'row-error' : 'row-ok';
-    const status = r.errors.length
-      ? `<span class="row-status error">Missing: ${r.errors.join(', ')}</span>`
-      : `<span class="row-status ok">&#10003; Ready</span>`;
+    const cls = r.errors.length ? 'row-error' : 'row-ok';
     return `<tr class="${cls}"><td>${r.idx}</td>` +
       shownFields.map(f => `<td>${esc(r.data[f.key] || '')}</td>`).join('') +
-      `<td>${status}</td></tr>`;
+      `</tr>`;
   }).join('');
 
   document.getElementById('review-summary').innerHTML =
@@ -532,11 +709,15 @@ async function runImport() {
   prog.style.display = '';
 
   let done = 0, failed = 0;
+  const failReasons = [];
   for (const row of rows) {
     try {
       importType === 'assets' ? await importAsset(row.data) : await importCategory(row.data);
       done++;
-    } catch(e) { failed++; }
+    } catch(e) {
+      failed++;
+      failReasons.push(`Row ${row.idx}: ${e.message || e}`);
+    }
     bar.style.width = Math.round(((done + failed) / rows.length) * 100) + '%';
   }
 
@@ -544,37 +725,123 @@ async function runImport() {
   showToast(`Imported ${done} ${importType}${failed ? ` (${failed} failed)` : ''}`, done > 0 ? 'success' : 'error');
   document.getElementById('review-summary').innerHTML =
     `<span style="color:var(--green);">&#10003; ${done} imported successfully</span>` +
-    (failed ? `<span style="color:var(--red);">&#9888; ${failed} failed</span>` : '');
+    (failed ? `<span style="color:var(--red);">&#9888; ${failed} failed</span>` : '') +
+    (failReasons.length ? `<details style="width:100%;margin-top:6px;font-size:11px;color:var(--muted);"><summary style="cursor:pointer;color:var(--red);">Show errors</summary><pre style="margin-top:6px;white-space:pre-wrap;">${esc(failReasons.join('\n'))}</pre></details>` : '');
 }
 
 async function importAsset(data) {
   let catId = null, supId = null, locId = null;
-  if (data.category) { const c = allCategories.find(x => x.name.toLowerCase() === data.category.toLowerCase()); catId = c?.id || null; }
-  if (data.supplier) { const s = allSuppliers.find(x => x.name.toLowerCase() === data.supplier.toLowerCase()); supId = s?.id || null; }
+  if (data.category) {
+    const cNeedle = data.category.toLowerCase().trim();
+    const c = allCategories.find(x => x.name.toLowerCase() === cNeedle)
+           // singular vs plural: "Headset" matches "Headsets", "Mouse" matches "Mice" etc.
+           || allCategories.find(x => { const h = x.name.toLowerCase(); return h.includes(cNeedle) || cNeedle.includes(h); })
+           // stem match: strip trailing s/es from both sides
+           || allCategories.find(x => {
+               const h = x.name.toLowerCase().replace(/e?s$/, '');
+               const n = cNeedle.replace(/e?s$/, '');
+               return h === n;
+             });
+    catId = c?.id || null;
+  }
+  if (data.supplier) {
+    const sNeedle = data.supplier.toLowerCase().trim();
+    const s = allSuppliers.find(x => x.name.toLowerCase() === sNeedle)
+           || allSuppliers.find(x => { const h = x.name.toLowerCase(); return h.includes(sNeedle) || sNeedle.includes(h); });
+    supId = s?.id || null;
+  }
 
-  // Resolve location: use the CSV's Location column first, then fall back to active location filter
+  // Resolve location: fuzzy match then fall back to active location filter
   if (data.location) {
-    const l = allLocations.find(x => x.name.toLowerCase() === data.location.toLowerCase());
-    locId = l?.id || null;
+    const loc = fuzzyMatchLocation(data.location, allLocations);
+    locId = loc?.id || null;
   }
   if (!locId) locId = localStorage.getItem('emp_location_id') || null;
 
-  // Generate a unique SKU � use serial if provided, otherwise auto-generate
-  const base = data.serial_number || data.sku || '';
-  const uniqueSuffix = Date.now() + '-' + Math.random().toString(36).slice(2, 6);
-  const sku = base ? base + '-' + uniqueSuffix : 'IMP-' + uniqueSuffix;
+  // Build brand_model from separate brand + model columns
+  const brand_model = [data.brand, data.model].filter(Boolean).join(' ') || '';
 
-  await api.createProduct({
-    name:          data.name,
-    sku:           sku,
-    serial_number: data.serial_number || '',
-    brand_model:   data.brand_model   || '',
-    description:   data.description   || '',
-    category_id:   catId,
-    supplier_id:   supId,
-    location_id:   locId,
-    quantity:      1
+  // In the Assets table, "name" is the Description field � use data.description for it
+  // Fall back to brand_model or a generic label if description is empty
+  const name = data.description || brand_model || 'Imported Asset';
+
+  // Generate a truly unique SKU � never reuse the serial as the SKU to avoid collisions.
+  // SKU = IMP- + timestamp (ms) + random 6-char hex, guaranteed unique per row.
+  const sku = 'IMP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+  // Normalize purchase_date to yyyy-mm-dd (accepts dd/mm/yyyy, mm/dd/yyyy, yyyy-mm-dd, etc.)
+  let purchase_date = null;
+  if (data.purchase_date && data.purchase_date.trim()) {
+    const raw = data.purchase_date.trim();
+    // dd/mm/yyyy or dd-mm-yyyy
+    const dmyMatch = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+    // yyyy-mm-dd or yyyy/mm/dd
+    const ymdMatch = raw.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$/);
+    if (dmyMatch) {
+      const [, d, m, y] = dmyMatch;
+      purchase_date = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    } else if (ymdMatch) {
+      const [, y, m, d] = ymdMatch;
+      purchase_date = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    } else {
+      // Try native Date parse as last resort
+      const d = new Date(raw);
+      if (!isNaN(d)) purchase_date = d.toISOString().slice(0,10);
+    }
+  }
+
+  // Normalize status � map CSV values to internal asset_status values
+  // If an employee is assigned, override status to 'assigned'
+  const statusMap = {
+    'active': 'available', 'available': 'available',
+    'spare': 'spare',
+    'under repair': 'under_repair', 'under_repair': 'under_repair', 'under maintenance': 'under_repair',
+    'damaged': 'damaged',
+    'lost': 'lost',
+    'disposed': 'disposed',
+    'inactive': 'spare',
+  };
+  const rawStatus = (data.status || 'active').toLowerCase().trim();
+  const hasAssignee = !!(data.assigned_employee && data.assigned_employee.trim());
+  // Always create the product as 'available' first � createAssignment will flip it to 'assigned'
+  const asset_status = hasAssignee ? 'available' : (statusMap[rawStatus] || 'available');
+
+  const response = await api.createProduct({
+    name:                  name,
+    sku:                   sku,
+    serial_number:         data.serial_number         || '',
+    brand:                 data.brand                 || '',
+    model:                 data.model                 || '',
+    brand_model:           brand_model,
+    description:           data.description           || '',
+    category_id:           catId,
+    supplier_id:           supId,
+    location_id:           locId,
+    purchase_date:         purchase_date,
+    assigned_employee:     data.assigned_employee     || '',
+    assigned_employee_id:  data.assigned_employee_id  || '',
+    asset_status:          asset_status,
+    quantity:              1
   });
+  const product = response?.data || response;
+
+  // If an employee was specified, create an active assignment so the asset
+  // shows as "Deployed" and appears in the "Assigned To" column.
+  if (hasAssignee && product && product.id) {
+    try {
+      await api.createAssignment({
+        product_id:    product.id,
+        assignee_name: data.assigned_employee.trim(),
+        assigned_by:   'Import',
+        location_id:   locId || null,
+        notes:         data.assigned_employee_id
+                         ? `Employee ID: ${data.assigned_employee_id.trim()}`
+                         : null,
+      });
+    } catch (_) {
+      // Assignment creation failure is non-fatal � the asset itself was saved
+    }
+  }
 }
 
 async function importCategory(data) {

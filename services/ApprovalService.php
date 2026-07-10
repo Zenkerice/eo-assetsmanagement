@@ -126,7 +126,9 @@ class ApprovalService {
         $notifTitle = $decision === 'approved'
             ? "✅ Your request was approved"
             : "✖ Your request was rejected";
-        $notifBody  = "{$action} {$req['resource_type']}: {$resource}"
+
+        $friendlyType = $req['resource_type'] === 'asset_request' ? 'Asset Request' : $req['resource_type'];
+        $notifBody  = "{$action} {$friendlyType}: {$resource}"
             . ($reviewNotes ? " — \"{$reviewNotes}\"" : '');
 
         $this->notif->create([
@@ -174,14 +176,52 @@ class ApprovalService {
                 };
             case 'Assignment': case 'assignment': case 'assignments':
                 require_once __DIR__ . '/AssignmentService.php';
+                require_once __DIR__ . '/../model/AssignmentModel.php';
                 $svc = new AssignmentService();
                 $assignmentPayload = $this->normalizeAssignmentPayload($payload, $req);
-                return match($actionType) {
-                    'create' => $svc->create($assignmentPayload),
+
+                // For delete (return), read the assignment BEFORE deleting so we keep product_id
+                $preDeleteAssignment = null;
+                if ($actionType === 'delete' && $resourceId) {
+                    $am = new AssignmentModel();
+                    $preDeleteAssignment = $am->findById($resourceId);
+                }
+
+                $result = match($actionType) {
+                    'create' => $svc->create($assignmentPayload, skipAvailabilityCheck: true),
                     'update' => $svc->update($resourceId, $assignmentPayload),
                     'delete' => $svc->delete($resourceId),
                     default  => null,
                 };
+
+                // After a return approval: if condition is damaged/broken, auto-create damage record
+                if ($actionType === 'delete') {
+                    $condition = strtolower(trim($payload['condition'] ?? ''));
+                    if (in_array($condition, ['damaged', 'broken'], true)) {
+                        // Resolve product_id: prefer payload, fallback to pre-delete snapshot
+                        $productId = (int)($payload['product_id'] ?? 0);
+                        if (!$productId && $preDeleteAssignment) {
+                            $productId = (int)($preDeleteAssignment['product_id'] ?? 0);
+                        }
+                        if ($productId) {
+                            require_once __DIR__ . '/DamageService.php';
+                            $dmgSvc     = new DamageService();
+                            $issueLabel = $condition === 'broken' ? 'Broken / non-functional' : 'Damaged — needs repair';
+                            $issueNote  = $payload['notes'] ?? '';
+                            try {
+                                $dmgSvc->create([
+                                    'product_id'  => $productId,
+                                    'reported_by' => $req['requested_by'] ?? 'System',
+                                    'issue'       => $issueLabel . ($issueNote ? ': ' . $issueNote : ''),
+                                    'status'      => 'damaged',
+                                ]);
+                            } catch (\Exception $e) {
+                                // Non-fatal — return was already processed
+                            }
+                        }
+                    }
+                }
+                return $result;
             case 'Damage': case 'damage': case 'damages':
                 require_once __DIR__ . '/DamageService.php';
                 $svc = new DamageService();
@@ -200,6 +240,58 @@ class ApprovalService {
                     'delete' => $svc->deleteSupplier($resourceId),
                     default  => null,
                 };
+            case 'asset_request':
+                // Request Form submission — create assignments for each requested asset.
+                require_once __DIR__ . '/AssignmentService.php';
+                require_once __DIR__ . '/../model/ProductModel.php';
+                $assignSvc   = new AssignmentService();
+                $productModel = new ProductModel();
+                $assigneeName = trim($payload['assignee'] ?? $req['requested_by'] ?? 'Unknown');
+                $assignedBy   = $req['reviewed_by'] ?? 'Admin';
+                $dueBack      = null;
+                if (!empty($payload['expected_return'])) {
+                    // Normalise various date formats to Y-m-d
+                    $parsed = date_create($payload['expected_return']);
+                    $dueBack = $parsed ? date_format($parsed, 'Y-m-d') : null;
+                }
+                $notes    = trim($payload['purpose'] ?? $req['notes'] ?? '');
+                $assets   = $payload['assets'] ?? [];
+                $created  = [];
+
+                foreach ($assets as $asset) {
+                    $assetName = trim($asset['name'] ?? '');
+                    $assetTag  = trim($asset['tag']  ?? '');
+                    if ($assetName === '') continue;
+
+                    // Try to find the product by serial number first, then by name
+                    $product = null;
+                    if ($assetTag !== '') {
+                        $product = $productModel->findBySku($assetTag);
+                        if (!$product) {
+                            $product = $productModel->findBySerial($assetTag);
+                        }
+                    }
+                    if (!$product) {
+                        $matches = $productModel->findByName($assetName);
+                        $product = $matches[0] ?? null;
+                    }
+                    if (!$product) continue; // product not found in inventory — skip
+
+                    try {
+                        $assignment = $assignSvc->create([
+                            'product_id'    => (int)$product['id'],
+                            'assignee_name' => $assigneeName,
+                            'assigned_by'   => $assignedBy,
+                            'due_back'      => $dueBack,
+                            'notes'         => $notes ?: null,
+                            'location_id'   => $product['location_id'] ?? null,
+                        ], skipAvailabilityCheck: true);
+                        $created[] = $assignment['id'];
+                    } catch (\Exception $e) {
+                        // Non-fatal — continue with remaining assets
+                    }
+                }
+                return ['assignments_created' => $created];
             default:
                 throw new RuntimeException("Cannot execute action for resource type: $resourceType");
         }

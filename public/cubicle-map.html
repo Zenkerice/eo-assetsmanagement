@@ -1,0 +1,1278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=10" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cubicle Map &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0e1a;--bg2:#0f1729;--bg3:#162040;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:#29b6e8;--blue-dim:rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--sidebar-w:260px;--radius:14px;--radius-sm:8px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px;}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+    .content{padding:24px 32px 56px;flex:1;}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .btn-primary:hover{background:#1fa3d4;}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text);}
+    .btn-sm{padding:6px 12px;font-size:12px;}
+    .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+    .controls-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;animation:slideUp 0.5s 0.08s cubic-bezier(0.16,1,0.3,1) both;}
+    .station-select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 14px;outline:none;cursor:pointer;}
+    .station-select option{background:var(--bg2);}
+    .legend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted2);}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .stats-strip{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;animation:slideUp 0.5s 0.14s cubic-bezier(0.16,1,0.3,1) both;}
+    .stat-chip{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,0.15);transition:box-shadow 0.2s ease,transform 0.2s ease;}
+    .stat-chip:hover{box-shadow:0 4px 16px rgba(0,0,0,0.22);transform:translateY(-1px);}
+    .s-val{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;}
+    .s-lbl{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+    .s-val.blue{color:var(--blue);}.s-val.green{color:var(--green);}.s-val.amber{color:var(--amber);}
+    .floor-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease,border-color 0.2s ease;}
+    .floor-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22);}
+    .floor-card-head{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--border);}
+    .floor-card-head h2{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;}
+    .floor-ts{font-size:11px;color:var(--muted);}
+    .floor-body{padding:16px;overflow:hidden;}
+    svg.floor{display:block;width:100%;height:auto;}
+    .cubicle{cursor:pointer;}
+    .cubicle:hover .chair-ring{filter:brightness(1.25);}
+    .sdc-head{display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid var(--border);}
+    .sdc-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;}
+    .sdc-name{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+    .sdc-badges{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .sdc-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted2);}
+    .sdc-body{padding:16px 24px 20px;}
+    .sdc-section-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px;}
+    .sdc-asset-row{display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin-bottom:8px;}
+    .sdc-asset-icon{width:30px;height:30px;border-radius:8px;background:var(--bg2);border:1px solid var(--border2);display:grid;place-items:center;flex-shrink:0;font-size:13px;}
+    .sdc-asset-name{font-size:13px;font-weight:600;}
+    .sdc-asset-sn{font-size:11px;color:var(--muted2);margin-top:2px;font-family:'DM Mono',monospace;}
+    .sdc-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;flex-shrink:0;}
+    .sdc-status.ok{background:var(--green-dim);color:var(--green);}
+    .sdc-status.report{background:var(--amber-dim);color:var(--amber);}
+    .sdc-empty-hint{color:var(--muted2);font-size:13px;padding:8px 0 4px;}
+    .sdc-actions{display:flex;gap:8px;margin-top:14px;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:480px;padding:26px 28px;box-shadow:0 24px 64px rgba(0,0,0,.6);}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .modal-head h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:3px 7px;border-radius:6px;}
+    .modal-close:hover{background:var(--bg3);color:var(--text);}
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .fg label{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
+    .fg input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%;}
+    .fg input:focus{border-color:var(--blue);}
+    .product-search-list{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;}
+    .product-row{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:border-color .15s,background .15s;}
+    .product-row:hover{border-color:var(--blue);background:var(--blue-dim);}
+    .product-row-name{font-size:13px;font-weight:600;}
+    .product-row-meta{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;margin-top:2px;}
+    .product-row-icon{width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--border2);display:grid;place-items:center;font-size:12px;flex-shrink:0;}
+    .no-results{color:var(--muted2);font-size:13px;padding:12px 4px;}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999;}
+    /* -- Light mode -- */
+    html[data-theme="light"] body{background:#f0f4ff;}
+    html[data-theme="light"] .topbar{background:#ffffff;border-bottom-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] .topbar h1{color:#1e40af;}
+    html[data-theme="light"] .topbar-sub{color:#64748b;}
+    html[data-theme="light"] .btn-ghost{color:#475569;border-color:rgba(0,0,0,0.15);}
+    html[data-theme="light"] .btn-ghost:hover{background:#e2e8f0;color:#ffffff;}
+    html[data-theme="light"] .controls-bar .station-select{background:#ffffff;border-color:rgba(0,0,0,0.15);color:#0f172a;}
+    html[data-theme="light"] .legend-item{color:#475569;}
+    html[data-theme="light"] .stat-chip{background:#ffffff;border-color:rgba(0,0,0,0.10);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+    html[data-theme="light"] .s-lbl{color:#64748b;}
+    html[data-theme="light"] .s-val:not(.blue):not(.green):not(.amber){color:#0f172a;}
+    html[data-theme="light"] .floor-card{background:#ffffff;border-color:rgba(0,0,0,0.10);}
+    html[data-theme="light"] .floor-card-head{border-bottom-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] .floor-card-head h2{color:#1e40af;}
+    html[data-theme="light"] .floor-body{background:#f8fafc;}
+    html[data-theme="light"] .sdc-head{border-bottom-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] .sdc-name{color:#0f172a;}
+    html[data-theme="light"] .sdc-badge{color:#475569;}
+    html[data-theme="light"] .sdc-section-title{color:#2563eb;}
+    html[data-theme="light"] .sdc-asset-row{background:#f8fafc;border-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] .sdc-asset-icon{background:#ffffff;border-color:rgba(0,0,0,0.10);}
+    html[data-theme="light"] .sdc-asset-name{color:#0f172a;}
+    html[data-theme="light"] .sdc-asset-sn{color:#64748b;}
+    html[data-theme="light"] .sdc-empty-hint{color:#64748b;}
+    html[data-theme="light"] .modal{background:#ffffff;border-color:rgba(0,0,0,0.12);}
+    html[data-theme="light"] .modal-head h3{color:#0f172a;}
+    html[data-theme="light"] .modal-close{color:#64748b;}
+    html[data-theme="light"] .fg input{background:#f8fafc;border-color:rgba(0,0,0,0.15);color:#0f172a;}
+    html[data-theme="light"] .product-row{background:#f8fafc;border-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] .product-row:hover{border-color:#2563eb;background:rgba(37,99,235,0.06);}
+    html[data-theme="light"] .product-row-name{color:#0f172a;}
+    html[data-theme="light"] .product-row-meta{color:#64748b;}
+    html[data-theme="light"] .no-results{color:#64748b;}
+    /* -- Assign modal: category combobox -- */
+    #assign-cat-select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;outline:none;cursor:pointer;width:100%;}
+    #assign-cat-select:focus{border-color:var(--blue);}
+    #assign-cat-select option{background:var(--bg2);}
+    html[data-theme="light"] #assign-search{background:#f8fafc;border-color:rgba(0,0,0,0.15);color:#0f172a;}
+    html[data-theme="light"] #assign-search:focus{border-color:#2563eb;}
+    #assign-confirm-btn:disabled{opacity:.4;cursor:not-allowed;}
+    html[data-theme="light"] #assign-footer{border-top-color:rgba(0,0,0,0.08);}
+    html[data-theme="light"] #assign-selected-label{color:#64748b;}
+    html[data-theme="light"] #assign-cat-select{background:#f8fafc;border-color:rgba(0,0,0,0.15);color:#0f172a;}
+    html[data-theme="light"] #assign-cat-select:focus{border-color:#2563eb;}
+  </style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Cubicle Map</h1>
+      <div class="topbar-sub" id="topbar-sub">Left wing 1&ndash;64 &middot; Mid bay 65&ndash;80 &middot; Right wing 81&ndash;144 &middot; Bottom row 145&ndash;154 &middot; 154 total seats</div>
+    </div>
+    <div class="topbar-actions" id="topbar-right">
+      <button class="btn btn-ghost btn-sm" onclick="loadMap()">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg> Refresh
+      </button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="controls-bar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <select class="station-select" id="location-select" onchange="switchLocation(this.value)">
+          <option value="">All Locations</option>
+        </select>
+        <select class="station-select" id="floor-select" onchange="switchFloor(this.value)" style="display:none;">
+          <option value="C">Pantalan 1st Floor</option>
+          <option value="B">Pantalan 2nd Floor</option>
+        </select>
+        <select class="station-select" id="station-select" onchange="filterMap()" style="display:none;">
+          <option value="all">All Stations</option>
+          <option value="left">Left Wing</option>
+          <option value="right">Right Wing</option>
+        </select>
+      </div>
+      <div class="legend" id="map-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>All assets working</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Has a damaged asset</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--bg3);border:1px dashed var(--border2)"></span>Empty seat</span>
+      </div>
+    </div>
+    <div class="stats-strip">
+      <div class="stat-chip"><span class="s-val blue" id="stat-total">0</span><span class="s-lbl">total seats</span></div>
+      <div class="stat-chip"><span class="s-val green" id="stat-occupied">0</span><span class="s-lbl">with assets</span></div>
+      <div class="stat-chip"><span class="s-val" id="stat-empty">0</span><span class="s-lbl">empty</span></div>
+      <div class="stat-chip"><span class="s-val amber" id="stat-reports">0</span><span class="s-lbl">seats with damage</span></div>
+    </div>
+    <div class="floor-card">
+      <div class="floor-card-head">
+        <h2 id="floor-title">Floor Plan</h2>
+        <span class="floor-ts" id="floor-ts"></span>
+      </div>
+      <div class="floor-body">
+        <svg class="floor" id="floorSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Seat detail modal -->
+<div class="modal-overlay" id="seat-detail-modal" onclick="if(event.target===this)closeDetail()">
+  <div class="modal" style="max-width:500px;padding:0;overflow:hidden;">
+    <div class="sdc-head">
+      <div class="sdc-avatar" id="sdc-avatar">?</div>
+      <div style="flex:1;min-width:0;">
+        <div class="sdc-name" id="sdc-name"></div>
+        <div class="sdc-badges" id="sdc-badges"></div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()" style="margin-left:8px;">&times;</button>
+    </div>
+    <div class="sdc-body" id="sdc-body"></div>
+  </div>
+</div>
+
+<!-- Add Asset modal -->
+<div class="modal-overlay" id="assign-modal" onclick="if(event.target===this)closeAssignModal()">
+  <div class="modal" style="max-width:560px;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh;">
+    <div class="modal-head" style="padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <h3 id="assign-modal-title">Add Assets to Seat</h3>
+      <button class="modal-close" onclick="closeAssignModal()">&times;</button>
+    </div>
+    <!-- Category combobox -->
+    <div style="padding:12px 22px 0;flex-shrink:0;">
+      <select id="assign-cat-select" onchange="_setAssignCat(this.value)"></select>
+    </div>
+    <!-- Search -->
+    <div style="padding:10px 22px 0;flex-shrink:0;">
+      <input type="text" id="assign-search" placeholder="Search by name or serial&ndash;" oninput="_filterProducts()" autocomplete="off"
+        style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;" />
+    </div>
+    <!-- Product list -->
+    <div class="product-search-list" id="product-search-list" style="flex:1;overflow-y:auto;padding:10px 22px;min-height:0;"></div>
+    <!-- Footer: selected count + confirm -->
+    <div id="assign-footer" style="display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-top:1px solid var(--border);flex-shrink:0;gap:10px;">
+      <span id="assign-selected-label" style="font-size:13px;color:var(--muted2);">No assets selected</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="closeAssignModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="assign-confirm-btn" onclick="_confirmBulkAdd()" disabled
+          style="min-width:110px;">Add Assets</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js?v=77"></script>
+<script src="js/toast.js"></script>
+<script>
+/* -- Theme palette -- */
+function _isDark(){ return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function _pal(){
+  if(_isDark()) return { floor:'#0c1a2c',desk:'#1a2c44',deskStr:'#27374f',spine:'#324867',divider:'#27374f',label:'#5d7290',walkBg:'#0e1a2c',walkStr:'#16263e',walkText:'#33455f',emptyFill:'#16243a',emptyStr:'#33455f',selRing:'#29b6e8' };
+  return { floor:'#dbe7f7',desk:'#c8d8ef',deskStr:'#a8bcda',spine:'#94adc8',divider:'#a8bcda',label:'#4a6785',walkBg:'#b8cce0',walkStr:'#8aaac4',walkText:'#5a7a9a',emptyFill:'#e8f0fa',emptyStr:'#94adc8',selRing:'#1d6fa4' };
+}
+/* -- Geometry -- */
+const CHAIR_R=12, CHAIR_OFFSET=17, PAIR_W=70, PAIRS_PER_ROW=8;
+const ROW_LEN=PAIR_W*PAIRS_PER_ROW, ROW_THICK=100, ROW_GAP=36;
+const WING_HEIGHT=4*ROW_THICK+3*ROW_GAP;
+const PAIRS_PER_MID=8, MID_BAY_W=ROW_THICK, MID_BAY_HEIGHT=WING_HEIGHT;
+const MARGIN_L=44, MARGIN_T=40, AISLE_W=64;
+
+/* -- Storage -- */
+const STORAGE_KEY_PREFIX='cubicle_assets_v2_loc_';
+
+function _storageKey(){
+  const locId = _getActiveLocationId() || 'all';
+  return STORAGE_KEY_PREFIX + locId;
+}
+let _asgn={}, _productCache={}, _wing='all', _selectedSeat=null, _assignModalSeat=null, _currentFloor='A';
+function _load(){ try{ _asgn=JSON.parse(localStorage.getItem(_storageKey())||'{}'); }catch(_e){ _asgn={}; } }
+function _save(){ try{ localStorage.setItem(_storageKey(),JSON.stringify(_asgn)); }catch(_e){} }
+function _key(n){ return `seat-${n}`; }
+function _getSeatAssets(n){ return _asgn[_key(n)]||[]; }
+function _seatStatus(n){
+  const ids=_getSeatAssets(n);
+  if(!ids.length) return 'empty';
+  for(const id of ids){ const p=_productCache[id]; if(p&&p.asset_status==='damaged') return 'report'; }
+  return 'ok';
+}
+
+/* -- Chair SVG -- */
+function _chair(seatNum,cx,cy){
+  const ids=_getSeatAssets(seatNum), st=_seatStatus(seatNum), sel=seatNum===_selectedSeat, p=_pal();
+  const strokeW=sel?3:(st!=='empty'?2.4:1.6);
+  const dashAttr=st==='empty'?'stroke-dasharray="2.5,2.5"':'';
+  const selRing=sel?`<circle cx="${cx}" cy="${cy}" r="${CHAIR_R+5}" fill="none" stroke="${p.selRing}" stroke-width="2" opacity="0.6"/>`:'';
+  let fill,stroke;
+  if(st==='report'){stroke='#f5a623';fill='#29b6e8';}
+  else if(st==='ok'){stroke='#3ecf8e';fill='#29b6e8';}
+  else{stroke=p.emptyStr;fill=p.emptyFill;}
+  const inner=st!=='empty'?`<text x="${cx}" y="${cy+3.5}" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="9" fill="#ffffff">${ids.length}</text>`:'';
+  return `<g class="cubicle" onclick="selectSeat(${seatNum})">${selRing}<circle class="chair-ring" cx="${cx}" cy="${cy}" r="${CHAIR_R}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" ${dashAttr}/>${inner}</g>`;
+}
+
+/* -- Draw horizontal row -- */
+function _drawHRow(x,y,startSeat,bayLabel,mirrored,allowed){
+  const p=_pal(); let svg='';
+  svg+=`<rect x="${x}" y="${y}" width="${ROW_LEN}" height="${ROW_THICK}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg+=`<line x1="${x+4}" y1="${y+ROW_THICK/2}" x2="${x+ROW_LEN-4}" y2="${y+ROW_THICK/2}" stroke="${p.spine}" stroke-width="2"/>`;
+  for(let pp=1;pp<PAIRS_PER_ROW;pp++){const tx=x+pp*PAIR_W;svg+=`<line x1="${tx}" y1="${y+4}" x2="${tx}" y2="${y+ROW_THICK-4}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<text x="${x+ROW_LEN/2}" y="${y-10}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">${bayLabel}</text>`;
+  for(let pi=0;pi<PAIRS_PER_ROW;pi++){
+    const cx=x+pi*PAIR_W+PAIR_W/2;
+    const topSeat=mirrored?startSeat+(7-pi):startSeat+pi;
+    const botSeat=mirrored?startSeat+8+pi:startSeat+(15-pi);
+    [[topSeat,0],[botSeat,1]].forEach(([sn,side])=>{
+      if(allowed&&!allowed.has(sn)) return;
+      const cy=side===0?y+ROW_THICK/2-CHAIR_OFFSET:y+ROW_THICK/2+CHAIR_OFFSET;
+      svg+=_chair(sn,cx,cy);
+      const numY=side===0?cy-CHAIR_R-4:cy+CHAIR_R+10;
+      svg+=`<text x="${cx}" y="${numY}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;
+    });
+  }
+  return svg;
+}
+function _drawWing(x,topY,startSeat,bayNumStart,mirrored,allowed){
+  let svg='';
+  for(let r=0;r<4;r++) svg+=_drawHRow(x,topY+r*(ROW_THICK+ROW_GAP),startSeat+r*16,`BAY ${bayNumStart+r}`,mirrored,allowed);
+  return svg;
+}
+
+/* -- Draw mid bay -- */
+function _drawMidBay(x,topY,allowed){
+  const p=_pal(), pH=MID_BAY_HEIGHT/PAIRS_PER_MID; let svg='';
+  svg+=`<rect x="${x}" y="${topY}" width="${MID_BAY_W}" height="${MID_BAY_HEIGHT}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg+=`<line x1="${x+MID_BAY_W/2}" y1="${topY+4}" x2="${x+MID_BAY_W/2}" y2="${topY+MID_BAY_HEIGHT-4}" stroke="${p.spine}" stroke-width="2"/>`;
+  for(let pp=1;pp<PAIRS_PER_MID;pp++){const ty=topY+pp*pH;svg+=`<line x1="${x+4}" y1="${ty}" x2="${x+MID_BAY_W-4}" y2="${ty}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<text x="${x+MID_BAY_W/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">BAY 5</text>`;
+  for(let pi=0;pi<PAIRS_PER_MID;pi++){
+    const cy=topY+pi*pH+pH/2, ls=65+pi, rs=80-pi;
+    [[ls,0],[rs,1]].forEach(([sn,side])=>{
+      if(allowed&&!allowed.has(sn)) return;
+      const cx=side===0?x+MID_BAY_W/2-CHAIR_OFFSET:x+MID_BAY_W/2+CHAIR_OFFSET;
+      svg+=_chair(sn,cx,cy);
+      const numX=side===0?cx-CHAIR_R-3:cx+CHAIR_R+3;
+      svg+=`<text x="${numX}" y="${cy-CHAIR_R-2}" text-anchor="${side===0?'end':'start'}" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;
+    });
+  }
+  return svg;
+}
+function _drawWalkway(x,topY,height,label){
+  const p=_pal();
+  let svg=`<rect x="${x}" y="${topY}" width="${AISLE_W}" height="${height}" fill="${p.walkBg}" stroke="${p.walkStr}" stroke-width="1" stroke-dasharray="6,8" rx="4"/>`;
+  svg+=`<text x="${x+AISLE_W/2}" y="${topY+height/2+4}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" letter-spacing="2" fill="${p.walkText}" transform="rotate(-90 ${x+AISLE_W/2} ${topY+height/2})">${label}</text>`;
+  return svg;
+}
+
+/* -- Site B (Pantalan 2nd Floor) geometry ----------------------------------
+   9 full vertical bays (15 seats each) + 1 half bay (7 seats) + 1 row of 18
+   Total = 9&ndash;15 + 7 + 18 = 160 seats
+   Full bay: 7 facing pairs (left col top?bottom, right col bottom?top) + 1 cap seat
+   Half bay: single column of 7
+   Row-18:   18 single seats in one horizontal strip below the bay block
+-------------------------------------------------------------------------- */
+const FB_W=ROW_THICK, FB_GAP=ROW_GAP, FB_SIDE=7, FB_CAP_H=ROW_LEN-(7*PAIR_W);
+const FB_PAIR_H=PAIR_W;
+const FB_H = FB_SIDE*FB_PAIR_H + FB_CAP_H;   // = ROW_LEN = 560
+const FB_INSET=14;
+const HB_W=FB_W/2, HB_AISLE=FB_GAP;
+const HB_H=FB_SIDE*FB_PAIR_H;
+const HB_SLOT=HB_H/7;
+const R18_COUNT=18, R18_THICK=ROW_THICK;
+const TOTAL_B=160;
+
+function _fbX(i){ return MARGIN_L + i*(FB_W+FB_GAP); }
+
+function _drawFullBayB(x,topY,startSeat,label,allowed){
+  const p=_pal(); let svg='';
+  const sideH=FB_SIDE*FB_PAIR_H;
+  svg+=`<rect x="${x}" y="${topY}" width="${FB_W}" height="${FB_H}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg+=`<line x1="${x+FB_W/2}" y1="${topY+4}" x2="${x+FB_W/2}" y2="${topY+sideH-4}" stroke="${p.spine}" stroke-width="2"/>`;
+  for(let r=1;r<FB_SIDE;r++){const ty=topY+r*FB_PAIR_H;svg+=`<line x1="${x+4}" y1="${ty}" x2="${x+FB_W-4}" y2="${ty}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<line x1="${x+4}" y1="${topY+sideH}" x2="${x+FB_W-4}" y2="${topY+sideH}" stroke="${p.spine}" stroke-width="1.5"/>`;
+  svg+=`<text x="${x+FB_W/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">${label}</text>`;
+  const lCx=x+FB_INSET+CHAIR_R-2, rCx=x+FB_W-FB_INSET-CHAIR_R+2;
+  for(let row=0;row<FB_SIDE;row++){
+    const cy=topY+row*FB_PAIR_H+FB_PAIR_H/2;
+    const lSn=startSeat+row, rSn=startSeat+8+(FB_SIDE-1-row);
+    if(!allowed||allowed.has(lSn)){svg+=_chair(lSn,lCx,cy);svg+=`<text x="${lCx}" y="${cy-CHAIR_R-3}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${lSn}</text>`;}
+    if(!allowed||allowed.has(rSn)){svg+=_chair(rSn,rCx,cy);svg+=`<text x="${rCx}" y="${cy-CHAIR_R-3}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${rSn}</text>`;}
+  }
+  const capSn=startSeat+7;
+  if(!allowed||allowed.has(capSn)){
+    const capCx=x+FB_W/2, capCy=topY+sideH+FB_CAP_H/2+4;
+    svg+=`<path d="M ${capCx-16} ${capCy+18} L ${capCx-16} ${capCy+26} L ${capCx+16} ${capCy+26} L ${capCx+16} ${capCy+18}" fill="none" stroke="${p.spine}" stroke-width="2"/>`;
+    svg+=_chair(capSn,capCx,capCy);
+    svg+=`<text x="${capCx}" y="${capCy-CHAIR_R-5}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${capSn}</text>`;
+  }
+  return svg;
+}
+
+function _drawHalfBayB(x,topY,startSeat,allowed){
+  const p=_pal(); let svg='';
+  svg+=`<rect x="${x}" y="${topY}" width="${HB_W}" height="${HB_H}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  for(let i=1;i<7;i++){const ty=topY+i*HB_SLOT;svg+=`<line x1="${x+4}" y1="${ty}" x2="${x+HB_W-4}" y2="${ty}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<text x="${x+HB_W/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">HALF BAY</text>`;
+  for(let i=0;i<7;i++){
+    const cy=topY+i*HB_SLOT+HB_SLOT/2, sn=startSeat+i, cx=x+HB_W/2;
+    if(!allowed||allowed.has(sn)){svg+=_chair(sn,cx,cy);svg+=`<text x="${cx}" y="${cy-CHAIR_R-5}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;}
+  }
+  return svg;
+}
+
+function _drawRow18B(x,topY,startSeat,allowed,rowLen){
+  const p=_pal(); const sw=rowLen/R18_COUNT; let svg='';
+  svg+=`<rect x="${x}" y="${topY}" width="${rowLen}" height="${R18_THICK}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  for(let i=1;i<R18_COUNT;i++){const tx=x+i*sw;svg+=`<line x1="${tx}" y1="${topY+4}" x2="${tx}" y2="${topY+R18_THICK-4}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<text x="${x+rowLen/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">ROW 18 &ndash; SINGLE LINE</text>`;
+  for(let i=0;i<R18_COUNT;i++){
+    const cx=x+i*sw+sw/2, cy=topY+R18_THICK/2+6, sn=startSeat+i;
+    if(!allowed||allowed.has(sn)){svg+=_chair(sn,cx,cy);svg+=`<text x="${cx}" y="${cy-CHAIR_R-5}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;}
+  }
+  return svg;
+}
+
+function buildFloorSvgB(allowed){
+  const topY=40;
+  const lastBayX=_fbX(8);
+  const bayBlockLeft=MARGIN_L, bayBlockRight=lastBayX+FB_W;
+  const bayBlockW=bayBlockRight-bayBlockLeft;
+  const hbX=lastBayX+FB_W+HB_AISLE;
+  const mainBottom=topY+FB_H;
+  const r18TopY=mainBottom+60;
+  const r18Len=bayBlockW;
+  const totalW=Math.max(hbX+HB_W,bayBlockLeft+r18Len)+MARGIN_L;
+  const totalH=r18TopY+R18_THICK+30;
+  const svgEl=document.getElementById('floorSvg');
+  svgEl.setAttribute('viewBox',`0 0 ${totalW} ${totalH}`);
+  svgEl.style.width='100%'; svgEl.style.height='auto';
+  const p=_pal();
+  let svg=`<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${p.floor}" rx="10"/>`;
+  for(let i=0;i<9;i++) svg+=_drawFullBayB(_fbX(i),topY,i*15+1,`BAY ${i+1}`,allowed);
+  svg+=_drawHalfBayB(hbX,topY,136,allowed);
+  svg+=_drawRow18B(bayBlockLeft,r18TopY,143,allowed,r18Len);
+  svgEl.innerHTML=svg;
+}
+
+function _buildFloorSvgStrB(allowed){
+  const topY=40;
+  const lastBayX=_fbX(8);
+  const bayBlockLeft=MARGIN_L, bayBlockRight=lastBayX+FB_W;
+  const bayBlockW=bayBlockRight-bayBlockLeft;
+  const hbX=lastBayX+FB_W+HB_AISLE;
+  const mainBottom=topY+FB_H;
+  const r18TopY=mainBottom+60;
+  const r18Len=bayBlockW;
+  const totalW=Math.max(hbX+HB_W,bayBlockLeft+r18Len)+MARGIN_L;
+  const totalH=r18TopY+R18_THICK+30;
+  const p=_pal();
+  let html=`<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${p.floor}" rx="10"/>`;
+  for(let i=0;i<9;i++) html+=_drawFullBayB(_fbX(i),topY,i*15+1,`BAY ${i+1}`,allowed);
+  html+=_drawHalfBayB(hbX,topY,136,allowed);
+  html+=_drawRow18B(bayBlockLeft,r18TopY,143,allowed,r18Len);
+  return {html, w:totalW, h:totalH};
+}
+</script>
+<script>
+/* -- Site C (Pantalan 1st Floor) -------------------------------------------
+   6 bays &ndash; 10 seats each (5 rows &ndash; 2 cols) = 60 total seats
+   Seat numbering: Bay 1 ? 1-10, Bay 2 ? 11-20, &ndash; Bay 6 ? 51-60
+-------------------------------------------------------------------------- */
+const FC_BAYS      = 6;
+const FC_ROWS      = 5;          // rows per bay
+const FC_PAIR_H    = FB_PAIR_H;  // reuse Site B slot height
+const FC_H         = FC_ROWS * FC_PAIR_H;
+const TOTAL_C      = FC_BAYS * FC_ROWS * 2;  // 60
+
+function _fcBayX(i){ return MARGIN_L + i*(FB_W+FB_GAP); }
+
+function _drawBayC(x, topY, startSeat, label, allowed){
+  const p=_pal(); let svg='';
+  svg+=`<rect x="${x}" y="${topY}" width="${FB_W}" height="${FC_H}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg+=`<line x1="${x+FB_W/2}" y1="${topY+4}" x2="${x+FB_W/2}" y2="${topY+FC_H-4}" stroke="${p.spine}" stroke-width="2"/>`;
+  for(let r=1;r<FC_ROWS;r++){const ty=topY+r*FC_PAIR_H;svg+=`<line x1="${x+4}" y1="${ty}" x2="${x+FB_W-4}" y2="${ty}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  svg+=`<text x="${x+FB_W/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">${label}</text>`;
+  const lCx=x+FB_INSET+CHAIR_R-2, rCx=x+FB_W-FB_INSET-CHAIR_R+2;
+  for(let row=0;row<FC_ROWS;row++){
+    const cy=topY+row*FC_PAIR_H+FC_PAIR_H/2;
+    const lSn=startSeat+row;
+    const rSn=startSeat+FC_ROWS+(FC_ROWS-1-row);
+    if(!allowed||allowed.has(lSn)){svg+=_chair(lSn,lCx,cy);svg+=`<text x="${lCx}" y="${cy-CHAIR_R-3}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${lSn}</text>`;}
+    if(!allowed||allowed.has(rSn)){svg+=_chair(rSn,rCx,cy);svg+=`<text x="${rCx}" y="${cy-CHAIR_R-3}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${rSn}</text>`;}
+  }
+  return svg;
+}
+
+function _buildFloorSvgC_inner(){
+  const p=_pal(), topY=40;
+  const totalW=_fcBayX(FC_BAYS-1)+FB_W+MARGIN_L;
+  const totalH=topY+FC_H+30;
+  let html=`<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${p.floor}" rx="10"/>`;
+  for(let i=0;i<FC_BAYS;i++){
+    html+=_drawBayC(_fcBayX(i), topY, 1+i*10, `BAY ${i+1}`, null);
+  }
+  return {html, w:totalW, h:totalH};
+}
+
+function buildFloorSvgC(allowed){
+  const {html,w,h}=_buildFloorSvgC_inner();
+  const svgEl=document.getElementById('floorSvg');
+  svgEl.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svgEl.style.width='100%'; svgEl.style.height='auto';
+  svgEl.innerHTML=html;
+}
+
+function _buildFloorSvgStrC(allowed){
+  return _buildFloorSvgC_inner();
+}
+</script>
+<script>
+/* -- Draw extra facing-down half-bay cubicles below a wing -- */
+function _drawBottomCubicles(x, topY, startSeat, count, allowed){
+  const p=_pal(); let svg='';
+  const slotW = PAIR_W;            // same slot width as main bay columns
+  const stripW = slotW * count;    // e.g. 70&ndash;3 = 210px
+  const stripH = Math.round(ROW_THICK * 0.55); // ~half the normal row height
+  // Desk strip (left-aligned, half-height)
+  svg+=`<rect x="${x}" y="${topY}" width="${stripW}" height="${stripH}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  // Dividers
+  for(let i=1;i<count;i++){const tx=x+i*slotW;svg+=`<line x1="${tx}" y1="${topY+4}" x2="${tx}" y2="${topY+stripH-4}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  // Chairs + labels
+  for(let i=0;i<count;i++){
+    const sn=startSeat+i;
+    if(allowed&&!allowed.has(sn)) continue;
+    const cx=x+i*slotW+slotW/2;
+    const cy=topY+stripH/2+4;
+    svg+=_chair(sn,cx,cy);
+    svg+=`<text x="${cx}" y="${topY+12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;
+  }
+  return svg;
+}
+
+/* -- Draw corner room with N cubicles (horizontal layout) -- */
+function _drawCornerRoom(x, topY, startSeat, count, allowed, roomLabel){
+  const p=_pal(); let svg='';
+  roomLabel = roomLabel || 'ROOM';
+  const slotW=PAIR_W, roomH=Math.round(ROW_THICK*0.55);
+  const roomW=slotW*count;
+  // Room border
+  svg+=`<rect x="${x}" y="${topY}" width="${roomW}" height="${roomH}" rx="6" fill="${p.desk}" stroke="${p.spine}" stroke-width="1.5"/>`;
+  // Room label
+  svg+=`<text x="${x+roomW/2}" y="${topY-10}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" letter-spacing="1" fill="${p.label}">${roomLabel}</text>`;
+  // Vertical dividers between cubicles
+  for(let i=1;i<count;i++){const tx=x+i*slotW;svg+=`<line x1="${tx}" y1="${topY+4}" x2="${tx}" y2="${topY+roomH-4}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`;}
+  // Chairs + labels
+  for(let i=0;i<count;i++){
+    const sn=startSeat+i;
+    if(allowed&&!allowed.has(sn)) continue;
+    const cx=x+i*slotW+slotW/2, cy=topY+roomH/2+4;
+    svg+=_chair(sn,cx,cy);
+    svg+=`<text x="${cx}" y="${topY+12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="600" fill="${p.label}">${sn}</text>`;
+  }
+  return svg;
+}
+
+/* -- Build SVG -- */
+function buildFloorSvg(allowed){
+  if(_currentFloor==='B'){ buildFloorSvgB(allowed); return; }
+  if(_currentFloor==='C'){ buildFloorSvgC(allowed); return; }
+  const leftX=MARGIN_L, topY=MARGIN_T, aisle1X=leftX+ROW_LEN;
+  const midX=aisle1X+AISLE_W, aisle2X=midX+MID_BAY_W, rightX=aisle2X+AISLE_W;
+  const halfH=Math.round(ROW_THICK*0.55);
+  const bottomRowGap=48, bottomRowY=topY+WING_HEIGHT+bottomRowGap;
+  // Left corner room: left-edge flush with left wing, same Y, separated from 145&ndash;147 strip
+  const leftRoomX=leftX, leftRoomY=bottomRowY;
+  // Right corner room: right-edge flush with right wing, same Y, separated from 148&ndash;150 strip
+  const roomX=rightX+ROW_LEN-2*PAIR_W, roomY=bottomRowY;
+  const totalW=rightX+ROW_LEN+MARGIN_L, totalH=bottomRowY+halfH+30;
+  const svgEl=document.getElementById('floorSvg');
+  svgEl.setAttribute('viewBox',`0 0 ${totalW} ${totalH}`);
+  svgEl.style.width='100%'; svgEl.style.height='auto';
+  let svg=`<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${_pal().floor}" rx="10"/>`;
+  const showL=_wing==='all'||_wing==='left', showR=_wing==='all'||_wing==='right';
+  if(showL) svg+=_drawWing(leftX,topY,1,1,false,allowed);
+  svg+=_drawMidBay(midX,topY,allowed);
+  if(showR) svg+=_drawWing(rightX,topY,81,6,true,allowed);
+  // Extra bottom cubicles (3 per wing, half-bay sized)
+  // Left: x-aligned so seat 147 lines up under seat 57 (pair index 7)
+  if(showL) svg+=_drawBottomCubicles(leftX+5*PAIR_W,bottomRowY,145,3,allowed);
+  if(showR) svg+=_drawBottomCubicles(rightX,bottomRowY,148,3,allowed);
+  // Corner rooms
+  if(showL) svg+=_drawCornerRoom(leftRoomX,leftRoomY,153,2,allowed,'BOARDROOM');
+  svg+=_drawCornerRoom(roomX,roomY,151,2,allowed,'IT OFFICE');
+  svgEl.innerHTML=svg;
+}
+function _allowedSet(){
+  if(_currentFloor==='B') return null; // show all seats on Site B
+  if(_currentFloor==='C') return null; // show all seats on Site C
+  if(_wing==='left')  return new Set([...Array(64)].map((_,i)=>i+1).concat([65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,145,146,147,153,154]));
+  if(_wing==='right') return new Set([...Array(64)].map((_,i)=>i+81).concat([65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,148,149,150,151,152]));
+  return null;
+}
+function renderMap(){
+  buildFloorSvg(_allowedSet());
+  document.getElementById('floor-title').textContent=
+    _currentFloor==='B'?'Pantalan 2nd Floor':
+    _currentFloor==='C'?'Pantalan 1st Floor':
+    (_wing==='left'?'Left Wing (Dungganon)':_wing==='right'?'Right Wing (Dungganon)':'Dungganon &ndash; All Stations');
+}
+function updateStats(){
+  const total=_currentFloor==='B'?TOTAL_B:_currentFloor==='C'?TOTAL_C:154;
+  let occ=0,rep=0;
+  for(let n=1;n<=total;n++){ const st=_seatStatus(n); if(st!=='empty'){occ++; if(st==='report') rep++;} }
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-occupied').textContent=occ;
+  document.getElementById('stat-empty').textContent=total-occ;
+  document.getElementById('stat-reports').textContent=rep;
+}
+function updateTs(){ const el=document.getElementById('floor-ts'); if(el) el.textContent='Updated '+new Date().toLocaleTimeString(); }
+async function loadMap(){
+  // Clear stale localStorage immediately so initial render is clean
+  _asgn = {};
+  try{
+    const [prodRes, asgRes] = await Promise.all([api.getProducts(), api.getActiveAssignments()]);
+    const list = prodRes.data || prodRes || [];
+    _productCache = {};
+    for(const p of list) _productCache[p.id] = p;
+
+    // Rebuild cubicle seat map from DB active assignments (Seat #N pattern),
+    // filtered to the currently active location so seats don't bleed across locations
+    const activeAssignments = asgRes.data || asgRes || [];
+    const activeLocId = _getActiveLocationId(); // e.g. "1", "2", or ""
+    const syncedMap = {};
+    for(const a of activeAssignments){
+      const m = a.assignee_name && a.assignee_name.match(/^Seat #(\d+)$/);
+      if(!m) continue;
+      const pid = parseInt(a.product_id, 10);
+      if(!pid || pid <= 0) continue;
+      // Only include assignments that belong to the current location
+      if(activeLocId && String(a.location_id) !== activeLocId) continue;
+      const k = _key(Number(m[1]));
+      if(!syncedMap[k]) syncedMap[k] = [];
+      // Avoid duplicates
+      if(!syncedMap[k].includes(String(pid))) syncedMap[k].push(String(pid));
+    }
+    _asgn = syncedMap;
+    _save();
+  }catch(_e){ _productCache={}; }
+  renderMap(); updateStats(); updateTs();
+}
+
+/* -- Location selector -- */
+async function populateLocationSelect(){
+  const sel = document.getElementById('location-select');
+  if(!sel) return;
+  try{
+    const res = await api.getLocations();
+    const locs = res.data || [];
+    sel.innerHTML = '<option value="">All Locations</option>' +
+      locs.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+    // Reflect current active location
+    const cur = _getActiveLocationId();
+    sel.value = cur || '';
+  }catch(_){}
+}
+
+function switchLocation(locId){
+  // Persist to localStorage so all pages respect it
+  if(locId){
+    localStorage.setItem('emp_location_id', locId);
+    // Also store name for display elsewhere
+    const sel = document.getElementById('location-select');
+    const opt = sel ? sel.options[sel.selectedIndex] : null;
+    if(opt) localStorage.setItem('emp_location_name', opt.text);
+  } else {
+    localStorage.removeItem('emp_location_id');
+    localStorage.removeItem('emp_location_name');
+  }
+
+  // Tear down any existing all-locs view
+  const existing = document.getElementById('all-locs-wrapper');
+  if(existing) existing.remove();
+  const existingFilter = document.getElementById('loc-filter-bar');
+  if(existingFilter) existingFilter.remove();
+
+  // Re-boot with the new location
+  _bootMap();
+}
+function filterMap(){
+  _wing=document.getElementById('station-select').value;
+  const sub=document.getElementById('topbar-sub');
+  if(sub){
+    if(_wing==='left') sub.innerHTML='Left wing 1&ndash;64 &middot; 64 seats &ndash; Dungganon';
+    else if(_wing==='right') sub.innerHTML='Right wing 81&ndash;144 &middot; 64 seats &ndash; Dungganon';
+    else sub.innerHTML='Left wing 1&ndash;64 &middot; Mid bay 65&ndash;80 &middot; Right wing 81&ndash;144 &middot; Bottom row 145&ndash;154 &middot; 154 total seats';
+  }
+  renderMap();
+}
+function switchFloor(floor){
+  _currentFloor=floor;
+  _selectedSeat=null;
+  _wing='all';
+  document.getElementById('station-select').value='all';
+  // Update subtitle
+  const sub=document.getElementById('topbar-sub');
+  if(sub){
+    if(floor==='B') sub.textContent='9 bays (15 seats) + half bay (7) + row of 18 – 160 seats – Pantalan 2nd Floor';
+    else if(floor==='C') sub.textContent=`6 bays – 10 seats – ${TOTAL_C} seats – Pantalan 1st Floor`;
+    else sub.innerHTML='Left wing 1&ndash;64 &middot; Mid bay 65&ndash;80 &middot; Right wing 81&ndash;144 &middot; Bottom row 145&ndash;154 &middot; 154 total seats';
+  }
+  renderMap(); updateStats();
+}
+function selectSeat(n){ _selectedSeat=_selectedSeat===n?null:n; renderMap(); if(_selectedSeat!==null) openDetail(n); else closeDetail(); }
+
+/* -- Bay label -- */
+const BAY_RANGES=[
+  {min:1,max:16,label:'Bay 1'},{min:17,max:32,label:'Bay 2'},{min:33,max:48,label:'Bay 3'},{min:49,max:64,label:'Bay 4'},
+  {min:65,max:80,label:'Bay 5'},{min:81,max:96,label:'Bay 6'},{min:97,max:112,label:'Bay 7'},{min:113,max:128,label:'Bay 8'},{min:129,max:144,label:'Bay 9'},
+  {min:145,max:147,label:'Left Bottom'},{min:148,max:150,label:'Right Bottom'},{min:151,max:152,label:'Right Corner Room'},{min:153,max:154,label:'Left Corner Room'},
+];
+const BAY_RANGES_C=(function(){
+  const r=[];
+  for(let i=0;i<FC_BAYS;i++) r.push({min:1+i*10, max:(i+1)*10, label:`Bay ${i+1}`});
+  return r;
+})();
+
+function _bayLabel(n){
+  const ranges = _currentFloor==='C' ? BAY_RANGES_C : BAY_RANGES;
+  const b=ranges.find(b=>n>=b.min&&n<=b.max);
+  return b?b.label:'';
+}
+
+/* -- Detail modal -- */
+async function openDetail(num){
+  const ids=_getSeatAssets(num);
+  const av=document.getElementById('sdc-avatar'), nm=document.getElementById('sdc-name');
+  const bg=document.getElementById('sdc-badges'), bd=document.getElementById('sdc-body');
+  av.style.background=ids.length?'#29b6e8':'#33455f';
+  av.textContent=ids.length?String(ids.length):'?';
+  nm.textContent=`Seat ${num} \u00b7 ${_bayLabel(num)}`;
+  bg.innerHTML=`<span class="sdc-badge">?? ${_bayLabel(num)}</span>`;
+  if(!ids.length){
+    bd.innerHTML=`<div class="sdc-empty-hint">No assets assigned to this seat.</div><div class="sdc-actions"><button class="btn btn-primary btn-sm" onclick="openAssignModal(${num})">+ Add Asset</button></div>`;
+  } else {
+    const rows=ids.map(id=>{
+      const p=_productCache[id];
+      if(!p) return `<div class="sdc-asset-row"><div class="sdc-asset-icon">?</div><div style="flex:1"><div class="sdc-asset-name">Unknown (ID: ${id})</div></div><button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,.25);margin-left:8px;" onclick="removeAsset(${num},${id})">Remove</button></div>`;
+      const dmg=p.asset_status==='damaged'||p.asset_status==='under_repair';
+      const deployed=p.asset_status==='assigned';
+      const statusLabel = dmg ? 'Damaged' : deployed ? 'Deployed' : p.asset_status || 'OK';
+      const statusClass = dmg ? 'report' : 'ok';
+      return `<div class="sdc-asset-row">
+        <div class="sdc-asset-icon">?</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sdc-asset-name">${esc(p.name||'Unknown')}</div>
+          <div class="sdc-asset-sn">SN: ${esc(p.serial_number||'&ndash;')}</div>
+        </div>
+        <div class="sdc-status ${statusClass}" style="margin-left:8px;">${statusLabel}</div>
+        <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,.25);margin-left:8px;" onclick="removeAsset(${num},${id})">Remove</button>
+      </div>`;
+    }).join('');
+    bd.innerHTML=`<div class="sdc-section-title">Assets at this seat (${ids.length})</div>${rows}<div class="sdc-actions"><button class="btn btn-primary btn-sm" onclick="openAssignModal(${num})">+ Add Asset</button></div>`;
+  }
+  document.getElementById('seat-detail-modal').classList.add('open');
+}
+function closeDetail(){ _selectedSeat=null; document.getElementById('seat-detail-modal').classList.remove('open'); renderMap(); }
+async function removeAsset(seatNum, productId){
+  const k=_key(seatNum); if(!_asgn[k]) return;
+
+  // Find and return the active assignment in the DB so asset_status resets to 'available'
+  try{
+    const res = await api.getAssignmentsByProduct(productId);
+    const assignments = res.data || res || [];
+    const active = assignments.find(a => a.status === 'active' && String(a.assignee_name) === `Seat #${seatNum}`);
+    if(active){
+      await api.returnAsset(active.id);
+    }
+    // Update local cache
+    if(_productCache[productId]) _productCache[productId].asset_status = 'available';
+  } catch(e){
+    console.warn('Return assignment failed:', e.message);
+    // Still remove from map even if return fails (avoids stale UI)
+  }
+
+  _asgn[k]=_asgn[k].filter(id=>String(id)!==String(productId));
+  if(!_asgn[k].length) delete _asgn[k];
+  _save(); renderMap(); updateStats(); openDetail(seatNum);
+  if(window.toast) toast('Asset removed and returned to available.','success');
+}
+
+/* -- Assign modal (bulk + categories) -- */
+let _assignActiveCat = 'all';   // active category tab filter
+let _assignSelected  = new Set(); // selected product IDs (pending)
+
+function openAssignModal(seatNum){
+  _assignModalSeat  = seatNum;
+  _assignActiveCat  = 'all';
+  _assignSelected   = new Set();
+  document.getElementById('assign-modal-title').textContent = `Add Assets to Seat ${seatNum}`;
+  document.getElementById('assign-search').value = '';
+  _buildCatTabs();
+  _filterProducts();
+  _syncAssignFooter();
+  document.getElementById('assign-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('assign-search').focus(), 80);
+}
+
+function closeAssignModal(){
+  document.getElementById('assign-modal').classList.remove('open');
+  _assignModalSeat = null;
+  _assignSelected  = new Set();
+}
+
+/* Build category combobox options from product cache */
+function _buildCatTabs(){
+  const already          = new Set((_asgn[_key(_assignModalSeat)]||[]).map(String));
+  const globallyAssigned = _globalAssignedIds(_assignModalSeat);
+  const activeLocId      = _getActiveLocationId();
+  // Collect categories that have at least one assignable product
+  const catMap = {};
+  for(const p of Object.values(_productCache)){
+    if(already.has(String(p.id))) continue;
+    if(globallyAssigned.has(String(p.id))) continue;
+    if(activeLocId && String(p.location_id) !== activeLocId) continue;
+    const cname = p.category_name || p.category || 'Uncategorized';
+    if(!catMap[cname]) catMap[cname] = 0;
+  }
+  const cats = Object.keys(catMap).sort();
+  const sel  = document.getElementById('assign-cat-select');
+  sel.innerHTML = `<option value="all">All Categories</option>`
+    + cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  sel.value = _assignActiveCat && cats.includes(_assignActiveCat) ? _assignActiveCat : 'all';
+}
+
+function _setAssignCat(cat){
+  _assignActiveCat = cat;
+  _filterProducts();
+}
+
+function _filterProducts(){
+  const q       = (document.getElementById('assign-search').value||'').trim().toLowerCase();
+  const list    = document.getElementById('product-search-list');
+  const all     = Object.values(_productCache);
+  if(!all.length){ list.innerHTML='<div class="no-results">No products loaded. Try refreshing.</div>'; return; }
+
+  // IDs already on this seat
+  const already = new Set((_asgn[_key(_assignModalSeat)]||[]).map(String));
+  // IDs already on ANY other seat
+  const globallyAssigned = _globalAssignedIds(_assignModalSeat);
+  // Active location filter
+  const activeLocId = _getActiveLocationId();
+
+  let filtered = all.filter(p=>{
+    if(already.has(String(p.id))) return false;           // already on this seat
+    if(globallyAssigned.has(String(p.id))) return false;  // already on another seat
+    // Only available assets can be deployed
+    if(p.asset_status && p.asset_status !== 'available') return false;
+    // Only show assets belonging to the currently selected location
+    if(activeLocId && String(p.location_id) !== activeLocId) return false;
+    if(_assignActiveCat !== 'all'){
+      const cname = p.category_name || p.category || 'Uncategorized';
+      if(cname !== _assignActiveCat) return false;
+    }
+    if(!q) return true;
+    return (p.name||'').toLowerCase().includes(q)||(p.serial_number||'').toLowerCase().includes(q);
+  });
+
+  if(!filtered.length){
+    list.innerHTML='<div class="no-results">No products match.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.slice(0,80).map(p=>{
+    const checked = _assignSelected.has(String(p.id));
+    const cname   = p.category_name || p.category || '';
+    return `<label class="product-row" style="cursor:pointer;user-select:none;${checked?'border-color:var(--blue);background:var(--blue-dim);':''}">
+      <input type="checkbox" value="${p.id}" onchange="_toggleAssignSelect(this)"
+        ${checked?'checked':''}
+        style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0;cursor:pointer;" />
+      <div style="flex:1;min-width:0;">
+        <div class="product-row-name">${esc(p.name||'Unknown')}</div>
+        <div class="product-row-meta">SN: ${esc(p.serial_number||'&ndash;')}${cname?` &nbsp;|&nbsp; ${esc(cname)}`:''}</div>
+      </div>
+    </label>`;
+  }).join('');
+}
+
+function _toggleAssignSelect(cb){
+  const id  = String(cb.value);
+  const row = cb.closest('.product-row');
+  if(cb.checked){
+    _assignSelected.add(id);
+    row.style.borderColor = 'var(--blue)';
+    row.style.background  = 'var(--blue-dim)';
+  } else {
+    _assignSelected.delete(id);
+    row.style.borderColor = '';
+    row.style.background  = '';
+  }
+  _refreshCatTabBadges();
+  _syncAssignFooter();
+}
+
+function _syncAssignFooter(){
+  const n   = _assignSelected.size;
+  const lbl = document.getElementById('assign-selected-label');
+  const btn = document.getElementById('assign-confirm-btn');
+  lbl.textContent = n === 0 ? 'No assets selected' : `${n} asset${n>1?'s':''} selected`;
+  btn.textContent = n === 0 ? 'Add Assets' : `Add ${n} Asset${n>1?'s':''}`;
+  btn.disabled    = n === 0;
+}
+
+/* Re-paint only the badge numbers on category options without rebuilding them */
+function _refreshCatTabBadges(){
+  // No-op for combobox — option text badges not needed.
+  // The selected count is shown in the footer label instead.
+}
+
+/* Returns a Set of all product IDs assigned to ANY seat except `excludeSeat` */
+function _globalAssignedIds(excludeSeat){
+  const excludeKey = excludeSeat ? _key(excludeSeat) : null;
+  const ids = new Set();
+  for(const [k, arr] of Object.entries(_asgn)){
+    if(k === excludeKey) continue;
+    for(const id of arr) ids.add(String(id));
+  }
+  return ids;
+}
+
+async function _confirmBulkAdd(){
+  const num = _assignModalSeat;
+  if(!num || !_assignSelected.size) return;
+  const k = _key(num);
+  if(!_asgn[k]) _asgn[k] = [];
+
+  // Build a set of all IDs already assigned to OTHER seats
+  const globallyAssigned = _globalAssignedIds(num);
+
+  const toAdd = [];
+  let skipped = 0;
+  const skippedNames = [];
+  for(const id of _assignSelected){
+    // Skip if already in this seat
+    if(_asgn[k].some(x=>String(x)===id)){ skipped++; continue; }
+    // Skip if already assigned to another seat
+    if(globallyAssigned.has(id)){
+      skipped++;
+      const p = _productCache[id];
+      if(p) skippedNames.push(p.name || id);
+      continue;
+    }
+    toAdd.push(id);
+  }
+
+  if(!toAdd.length){
+    closeAssignModal();
+    if(skipped > 0 && window.toast)
+      toast(`No assets added – ${skipped > 1 ? 'they are' : 'it is'} already assigned to another seat.`, 'error');
+    return;
+  }
+
+  // Disable confirm button while deploying (guard against double-click)
+  const btn = document.getElementById('assign-confirm-btn');
+  if(btn){
+    if(btn.dataset.deploying === '1') return; // already in-flight
+    btn.dataset.deploying = '1';
+    btn.disabled = true;
+    btn.textContent = 'Deploying–';
+  }
+
+  const assignedBy = (window.auth && auth.currentUser) ? auth.currentUser.name : 'Admin';
+  const locId      = _getActiveLocationId() || null;
+
+  let added = 0, failed = 0;
+  for(const id of toAdd){
+    const productId = parseInt(id, 10);
+    // Guard: skip invalid IDs (NaN, 0, negative)
+    if(!productId || productId <= 0){
+      console.warn('Skipping invalid product id:', id);
+      failed++;
+      continue;
+    }
+    try{
+      // Create assignment record in DB &ndash; this also sets asset_status ? 'assigned'
+      await api.createAssignment({
+        product_id:    productId,
+        assignee_name: `Seat #${num}`,
+        assigned_by:   assignedBy,
+        due_back:      null,
+        location_id:   locId,
+        notes:         `Deployed to cubicle Seat #${num}`,
+      });
+      // Persist to localStorage map only after DB success
+      _asgn[k].push(String(productId));
+      // Update local cache so the map reflects deployed status immediately
+      if(_productCache[productId]) _productCache[productId].asset_status = 'assigned';
+      added++;
+    } catch(e){
+      failed++;
+      const p = _productCache[productId];
+      console.warn('Deploy failed for', p ? p.name : productId, e.message);
+    }
+  }
+  if(btn) btn.dataset.deploying = '';
+
+  _save();
+  closeAssignModal();
+  renderMap();
+  updateStats();
+  if(_selectedSeat === num) openDetail(num);
+
+  if(added > 0 && failed === 0 && skipped === 0){
+    if(window.toast) toast(`${added} asset${added!==1?'s':''} deployed to Seat #${num}.`, 'success');
+  } else if(added > 0 && (failed > 0 || skipped > 0)){
+    if(window.toast) toast(`${added} deployed. ${skipped+failed} skipped/failed.`, 'warning');
+  } else if(added === 0){
+    if(window.toast) toast(`No assets deployed – they may already be assigned or unavailable.`, 'error');
+  }
+}
+
+/* -- Location gate --
+   Only Dungganon Site 3 (location id = 1) has a cubicle map.
+   &ndash; Specific location selected ? show map or "no map" message.
+   &ndash; All locations (no filter) ? list every location, each with its map
+     (or a "no map yet" placeholder for those without one).
+--------------------------------------------------------------------------- */
+const DUNGGANON_LOCATION_ID = '1';
+const PANTALAN_LOCATION_ID  = '2';
+
+function _getActiveLocationId(){
+  try{ return localStorage.getItem('emp_location_id') || ''; }catch(_){ return ''; }
+}
+function _getActiveLocationName(){
+  try{ return localStorage.getItem('emp_location_name') || 'this location'; }catch(_){ return 'this location'; }
+}
+
+/* Build an SVG string for the floor plan without touching the DOM */
+function _buildFloorSvgStr(allowed){
+  const leftX=MARGIN_L, topY=MARGIN_T, aisle1X=leftX+ROW_LEN;
+  const midX=aisle1X+AISLE_W, aisle2X=midX+MID_BAY_W, rightX=aisle2X+AISLE_W;
+  const halfH=Math.round(ROW_THICK*0.55);
+  const bottomRowGap=48, bottomRowY=topY+WING_HEIGHT+bottomRowGap;
+  const leftRoomX=leftX, leftRoomY=bottomRowY;
+  const roomX=rightX+ROW_LEN-2*PAIR_W, roomY=bottomRowY;
+  const totalW=rightX+ROW_LEN+MARGIN_L, totalH=bottomRowY+halfH+30;
+  let inner=`<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${_pal().floor}" rx="10"/>`;
+  inner+=_drawWing(leftX,topY,1,1,false,allowed);
+  inner+=_drawMidBay(midX,topY,allowed);
+  inner+=_drawWing(rightX,topY,81,6,true,allowed);
+  inner+=_drawBottomCubicles(leftX+5*PAIR_W,bottomRowY,145,3,allowed);
+  inner+=_drawBottomCubicles(rightX,bottomRowY,148,3,allowed);
+  inner+=_drawCornerRoom(leftRoomX,leftRoomY,153,2,allowed,'BOARDROOM');
+  inner+=_drawCornerRoom(roomX,roomY,151,2,allowed,'IT OFFICE');
+  return {html:inner, w:totalW, h:totalH};
+}
+
+/* -- Single-location: no map placeholder -- */
+function _showNoMapState(locationName){
+  document.querySelector('.controls-bar').style.display='none';
+  document.querySelector('.stats-strip').style.display='none';
+  document.querySelector('.floor-card').style.display='none';
+  document.getElementById('topbar-right').style.display='none';
+
+  const content = document.querySelector('.content');
+  const div = document.createElement('div');
+  div.id = 'no-map-state';
+  div.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:16px;text-align:center;';
+  div.innerHTML=`
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/>
+      <rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="4" rx="1"/>
+      <line x1="13" y1="20" x2="22" y2="20"/>
+    </svg>
+    <div style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--text);">No map for ${esc(locationName)}</div>
+    <div style="font-size:14px;color:var(--muted2);max-width:340px;line-height:1.6;">There is no map for this location yet.</div>
+  `;
+  content.appendChild(div);
+}
+
+/* -- Boot map based on currently active location -- */
+function _bootMap(){
+  const activeId = _getActiveLocationId();
+
+  // Always keep the controls bar (and the location combobox inside it) visible
+  const floorCard  = document.querySelector('.floor-card');
+  const statsStrip = document.querySelector('.stats-strip');
+  const controlsBar = document.querySelector('.controls-bar');
+  const topbarRight = document.getElementById('topbar-right');
+  const legend      = document.getElementById('map-legend');
+  if(floorCard)   floorCard.style.display   = '';
+  if(statsStrip)  statsStrip.style.display  = '';
+  if(controlsBar) controlsBar.style.display = '';  // always visible &ndash; contains location select
+  if(topbarRight) topbarRight.style.display = '';
+  if(legend)      legend.style.display      = '';
+
+  // Remove any existing all-locs view
+  const existingWrapper = document.getElementById('all-locs-wrapper');
+  if(existingWrapper) existingWrapper.remove();
+  const existingFilter = document.querySelector('.loc-filter-bar');
+  if(existingFilter) existingFilter.remove();
+
+  if(!activeId){
+    // All locations &ndash; hide map-specific controls but keep the location combobox
+    if(floorCard)   floorCard.style.display   = 'none';
+    if(statsStrip)  statsStrip.style.display  = 'none';
+    if(topbarRight) topbarRight.style.display = 'none';
+    if(legend)      legend.style.display      = 'none';
+    document.getElementById('floor-select').style.display   = 'none';
+    document.getElementById('station-select').style.display = 'none';
+    const sub=document.getElementById('topbar-sub');
+    if(sub) sub.textContent='All locations';
+    _asgn = {};
+    api.getProducts().then(r=>{
+      const list=r.data||r||[]; _productCache={};
+      for(const p of list) _productCache[p.id]=p;
+    }).catch(()=>{}).finally(()=>{ _showAllLocationsView(); });
+
+  } else if(activeId === DUNGGANON_LOCATION_ID){
+    _currentFloor='A';
+    document.getElementById('floor-select').style.display='none';
+    document.getElementById('station-select').style.display='';
+    const sub=document.getElementById('topbar-sub');
+    if(sub) sub.innerHTML='Left wing 1&ndash;64 &middot; Mid bay 65&ndash;80 &middot; Right wing 81&ndash;144 &middot; Bottom row 145&ndash;154 &middot; 154 total seats';
+    loadMap();
+
+  } else if(activeId === PANTALAN_LOCATION_ID){
+    _currentFloor='C';
+    const fs=document.getElementById('floor-select');
+    fs.style.display=''; fs.value='C';
+    document.getElementById('station-select').style.display='none';
+    const sub=document.getElementById('topbar-sub');
+    if(sub) sub.textContent=`6 bays – 10 seats – ${TOTAL_C} seats – Pantalan 1st Floor`;
+    loadMap();
+
+  } else {
+    document.getElementById('floor-select').style.display='none';
+    document.getElementById('station-select').style.display='none';
+    _showNoMapState(_getActiveLocationName());
+  }
+}
+
+/* -- All-locations filter: show/hide location blocks -- */
+function _scrollToLoc(locId){
+  // Update pill active state
+  document.querySelectorAll('#loc-filter-pills button').forEach(btn => {
+    const isActive = btn.id === 'loc-pill-' + locId;
+    btn.style.borderColor  = isActive ? 'var(--blue)' : 'var(--border2)';
+    btn.style.background   = isActive ? 'var(--blue-dim)' : 'transparent';
+    btn.style.color        = isActive ? 'var(--blue)' : 'var(--muted2)';
+  });
+
+  // Show/hide location blocks
+  document.querySelectorAll('#all-locs-wrapper .loc-block').forEach(block => {
+    if(locId === 'all'){
+      block.style.display = '';
+    } else {
+      block.style.display = block.dataset.locId === String(locId) ? '' : 'none';
+    }
+  });
+}
+
+/* -- All-locations view -- */
+async function _showAllLocationsView(){
+  // Hide only the map-specific elements, keep controls-bar (location combobox) visible
+  document.querySelector('.stats-strip').style.display='none';
+  document.querySelector('.floor-card').style.display='none';
+  document.getElementById('topbar-right').style.display='none';
+  // Hide legend and secondary selects &ndash; not relevant without a specific map
+  const legend = document.getElementById('map-legend');
+  if(legend) legend.style.display='none';
+  document.getElementById('floor-select').style.display='none';
+  document.getElementById('station-select').style.display='none';
+
+  const content = document.querySelector('.content');
+
+  // Fetch all locations AND active assignments in parallel
+  let locations = [], allActiveAssignments = [];
+  try{
+    const [locRes, asgRes] = await Promise.all([api.getLocations(), api.getActiveAssignments()]);
+    locations = locRes.data || [];
+    allActiveAssignments = asgRes.data || [];
+  }catch(_){ locations = []; }
+
+  if(!locations.length){
+    const div = document.createElement('div');
+    div.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:12px;text-align:center;';
+    div.innerHTML=`<div style="font-size:14px;color:var(--muted2);">No locations found.</div>`;
+    content.appendChild(div);
+    return;
+  }
+
+  // Helper: build _asgn map for a specific location from DB assignments
+  function _buildAsgnForLoc(locId){
+    const map = {};
+    for(const a of allActiveAssignments){
+      if(String(a.location_id) !== String(locId)) continue;
+      const m = a.assignee_name && a.assignee_name.match(/^Seat #(\d+)$/);
+      if(!m) continue;
+      const pid = parseInt(a.product_id, 10);
+      if(!pid || pid <= 0) continue;
+      const k = _key(Number(m[1]));
+      if(!map[k]) map[k] = [];
+      if(!map[k].includes(String(pid))) map[k].push(String(pid));
+    }
+    return map;
+  }
+
+  // Build a wrapper that stacks all location blocks
+  const wrapper = document.createElement('div');
+  wrapper.id = 'all-locs-wrapper';
+  wrapper.style.cssText='display:flex;flex-direction:column;gap:40px;';
+  content.appendChild(wrapper);
+
+  for(const loc of locations){
+    const hasMap = String(loc.id) === DUNGGANON_LOCATION_ID || String(loc.id) === PANTALAN_LOCATION_ID;
+
+    // Wrap everything for this location in one block div for show/hide filtering
+    const block = document.createElement('div');
+    block.className = 'loc-block';
+    block.dataset.locId = String(loc.id);
+    block.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+    wrapper.appendChild(block);
+
+    // Location name label
+    const label = document.createElement('div');
+    label.style.cssText='font-family:"Poppins",sans-serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px;padding-bottom:2px;border-bottom:1px solid var(--border);margin-bottom:4px;';
+    label.textContent = loc.name;
+    block.appendChild(label);
+
+    if(hasMap){
+      // For all-locations view, show both floors stacked for Pantalan
+      if(String(loc.id) === PANTALAN_LOCATION_ID){
+        // Build seat map from DB assignments for this location only
+        _asgn = _buildAsgnForLoc(loc.id);
+        // 1st floor
+        const {html:htmlC, w:wC, h:hC} = _buildFloorSvgStrC(null);
+        const cardC = document.createElement('div');
+        cardC.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;padding:16px;';
+        cardC.innerHTML=`<div style="font-size:12px;color:var(--muted2);margin-bottom:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;">1st Floor</div><svg xmlns="http://www.w3.org/2000/svg" class="floor" viewBox="0 0 ${wC} ${hC}" style="width:100%;height:auto;display:block;">${htmlC}</svg>`;
+        block.appendChild(cardC);
+        // 2nd floor
+        const {html:htmlB, w:wB, h:hB} = _buildFloorSvgStrB(null);
+        const cardB = document.createElement('div');
+        cardB.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;padding:16px;';
+        cardB.innerHTML=`<div style="font-size:12px;color:var(--muted2);margin-bottom:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;">2nd Floor</div><svg xmlns="http://www.w3.org/2000/svg" class="floor" viewBox="0 0 ${wB} ${hB}" style="width:100%;height:auto;display:block;">${htmlB}</svg>`;
+        block.appendChild(cardB);
+      } else {
+        // Build seat map from DB assignments for this location only
+        _asgn = _buildAsgnForLoc(loc.id);
+        const {html, w, h} = _buildFloorSvgStr(null);
+        const card = document.createElement('div');
+        card.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;padding:16px;';
+        card.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" class="floor" viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block;">${html}</svg>`;
+        block.appendChild(card);
+      }
+    } else {
+      // No-map placeholder for this location
+      const placeholder = document.createElement('div');
+      placeholder.style.cssText='display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;color:var(--muted2);font-size:14px;';
+      placeholder.innerHTML=`
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.5;">
+          <rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/>
+          <rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="4" rx="1"/>
+          <line x1="13" y1="20" x2="22" y2="20"/>
+        </svg>
+        <span>There is no map for this location yet.</span>
+      `;
+      block.appendChild(placeholder);
+    }
+  }
+}
+
+/* -- Boot -- */
+document.addEventListener('DOMContentLoaded',()=>{
+  auth.requireAuth().then(u=>{
+    if(!u) return;
+    populateLocationSelect();
+    _bootMap();
+  });
+
+  // Re-render the single map on theme change (only relevant when single map is showing)
+  new MutationObserver(()=>{
+    const svg = document.getElementById('floorSvg');
+    if(svg && svg.innerHTML) renderMap();
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){
+      if(document.getElementById('assign-modal').classList.contains('open')) closeAssignModal();
+      else if(document.getElementById('seat-detail-modal').classList.contains('open')) closeDetail();
+    }
+  });
+});
+</script>
+</body>
+</html>

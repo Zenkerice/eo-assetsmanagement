@@ -56,10 +56,44 @@ function showLocationBadge(locName, opts = {}) {
   badge.style.cursor  = opts.onClick ? 'pointer' : '';
 }
 
-window.resolveProjectRoot = resolveProjectRoot;
-window.esc              = esc;
-window.formatDate       = formatDate;
-window.showLocationBadge = showLocationBadge;
+/**
+ * Fuzzy-match a location name string against an array of location objects.
+ * Uses a 3-tier fallback so minor spelling differences (e.g. "Dungganon" vs
+ * "Dunganon") still resolve to the correct record.
+ *
+ * @param {string} needle          - The name to search for (from CSV / user input)
+ * @param {Array<{id:number, name:string}>} locations - All available locations
+ * @returns {{ id: number, name: string }|null}
+ */
+function fuzzyMatchLocation(needle, locations) {
+  if (!needle || !locations || !locations.length) return null;
+  const n = needle.toLowerCase().trim();
+
+  // Tier 1 — exact case-insensitive
+  let match = locations.find(x => x.name.toLowerCase() === n);
+  if (match) return match;
+
+  // Tier 2 — one name contains the other (handles "Dungganon" ↔ "Dunganon")
+  match = locations.find(x => {
+    const h = x.name.toLowerCase();
+    return h.includes(n) || n.includes(h);
+  });
+  if (match) return match;
+
+  // Tier 3 — first-5-chars prefix (catches other common spelling variants)
+  const prefix = n.slice(0, 5);
+  match = locations.find(x => {
+    const h = x.name.toLowerCase();
+    return h.startsWith(prefix) || n.startsWith(h.slice(0, 5));
+  });
+  return match || null;
+}
+
+window.resolveProjectRoot  = resolveProjectRoot;
+window.esc                 = esc;
+window.formatDate          = formatDate;
+window.showLocationBadge   = showLocationBadge;
+window.fuzzyMatchLocation  = fuzzyMatchLocation;
 
 // Back-compat alias used by some pages
 window.fmtDate = (d, empty) => formatDate(d, { empty: empty ?? '<span style="color:var(--muted)">&mdash;</span>' });

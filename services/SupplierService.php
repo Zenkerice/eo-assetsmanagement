@@ -232,12 +232,10 @@ class SupplierService {
             // Create one product record per unit with its serial number
             for ($u = 0; $u < $qty; $u++) {
                 $serial = $unitSerials[$u] ?? null;
-                // Build a unique SKU: base SKU + serial, or auto-generate
                 $unitSku = $serial
                     ? ($sku ? $sku . '-' . $serial : $serial)
                     : ($sku ? $sku . '-' . ($u + 1) : 'PO' . $id . '-' . $itemId . '-' . ($u + 1));
 
-                // Check if SKU already exists — update qty instead
                 $existing = $this->productModel->findBySku($unitSku);
                 if ($existing) {
                     $this->productModel->adjustQuantity((int)$existing['id'], 1);
@@ -245,12 +243,16 @@ class SupplierService {
                     $this->productModel->create([
                         'name'          => $name,
                         'sku'           => $unitSku,
-                        'brand_model'   => $item['brand_model'] ?? null,
+                        'brand_model'   => trim(($item['brand'] ?? $name) . ' ' . ($item['model'] ?? '')) ?: $name,
+                        'brand'         => $item['brand']       ?? $name,
+                        'model'         => $item['model']        ?? null,
+                        'description'   => $item['description']  ?? null,
                         'quantity'      => 1,
                         'supplier_id'   => $po['supplier_id'],
                         'category_id'   => !empty($item['category_id']) ? (int)$item['category_id'] : null,
                         'location_id'   => $effectiveLocationId,
                         'serial_number' => $serial,
+                        'purchase_date' => $po['order_date'] ?? null,
                         'po_id'         => $id,
                         'po_item_id'    => $itemId,
                     ]);
@@ -308,12 +310,16 @@ class SupplierService {
                     $this->productModel->create([
                         'name'          => $name,
                         'sku'           => $unitSku,
-                        'brand_model'   => $item['brand_model'] ?? null,
+                        'brand_model'   => trim(($item['brand'] ?? $name) . ' ' . ($item['model'] ?? '')) ?: $name,
+                        'brand'         => $item['brand']       ?? $name,
+                        'model'         => $item['model']        ?? null,
+                        'description'   => $item['description']  ?? null,
                         'quantity'      => 1,
                         'supplier_id'   => $po['supplier_id'],
                         'category_id'   => !empty($item['category_id']) ? (int)$item['category_id'] : null,
                         'location_id'   => $effectiveLocationId,
                         'serial_number' => $serial,
+                        'purchase_date' => $po['order_date'] ?? null,
                         'po_id'         => $id,
                         'po_item_id'    => $itemId,
                     ]);

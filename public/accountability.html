@@ -1,17 +1,40 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Accountability Form &mdash; EmpireOne</title>
+  <title>Asset Accountability Form &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      if (new URLSearchParams(window.location.search).get('modal') !== '1') return;
+      document.documentElement.setAttribute('data-modal-embed', '1');
+      try {
+        const _origReplace = window.location.replace.bind(window.location);
+        Object.defineProperty(window.location, 'replace', {
+          value: function(url) { if (url && (url.includes('login.html') || url.includes('requests.html'))) return; _origReplace(url); }, configurable: true
+        });
+      } catch(_) {}
+      try {
+        const _origAssign = window.location.assign.bind(window.location);
+        Object.defineProperty(window.location, 'assign', {
+          value: function(url) { if (url && (url.includes('login.html') || url.includes('requests.html'))) return; _origAssign(url); }, configurable: true
+        });
+      } catch(_) {}
+    })();
+  </script>
+  <style>
+    html[data-modal-embed="1"] aside.sidebar,
+    html[data-modal-embed="1"] .topbar { display: none !important; }
+    html[data-modal-embed="1"] .main   { margin-left: 0 !important; }
+  </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -24,333 +47,254 @@
       --amber: #f5a623; --amber-dim: rgba(245,166,35,0.12);
       --radius: 14px; --radius-sm: 8px; --sidebar-w: 260px;
     }
-    body {
-      font-family: "DM Sans", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-      font-size: 16px;
-    }
+    body { font-family: "DM Sans", Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 16px; }
     .sidebar { width: var(--sidebar-w); }
-    .main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .btn-print {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px;
-      background: var(--blue); color: #fff;
-      border: none; border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: background 0.15s;
-    }
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .btn-print { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
     .btn-print:hover { background: #1fa3d4; }
-    .page-content {
-      padding: 28px 48px 60px;
-      flex: 1;
-    }
-    /* Pre-fill bar */
-    .prefill-bar {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 14px 20px;
-      margin-bottom: 24px;
-    }
-    .prefill-bar label {
-      font-size: 13px; font-weight: 600; color: var(--muted2);
-      white-space: nowrap;
-    }
-    .prefill-search-wrap {
-      flex: 1; max-width: 340px;
-      position: relative;
-    }
-    .prefill-search-input {
-      width: 100%;
-      background: var(--bg3); color: var(--text);
-      border: 1px solid var(--border2); border-radius: var(--radius-sm);
-      padding: 8px 36px 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif;
-      outline: none; transition: border-color 0.15s;
-    }
+    .btn-submit { display: none; align-items: center; gap: 8px; padding: 10px 20px; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 500; align-items: center; justify-content: center; }
+    .success-overlay.open { display: flex; }
+    .success-modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); width: 100%; max-width: 440px; padding: 40px 36px 32px; text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,0.6); animation: slideUp .25s ease; }
+    .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-dim); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+    .success-modal h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .success-modal p { font-size: 14px; color: var(--muted2); line-height: 1.6; margin-bottom: 28px; }
+    .success-modal-actions { display: flex; gap: 10px; justify-content: center; }
+    .page-content { padding: 28px 48px 60px; flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .page-content > * { width: 100%; max-width: 900px; }
+    .prefill-bar { display: flex; align-items: center; gap: 14px; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 14px 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
+    .prefill-bar label { font-size: 13px; font-weight: 600; color: var(--muted2); white-space: nowrap; }
+    .prefill-search-wrap { flex: 1; max-width: 340px; position: relative; }
+    .prefill-search-input { width: 100%; background: var(--bg3); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 36px 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; }
     .prefill-search-input:focus { border-color: var(--blue); }
     .prefill-search-input::placeholder { color: var(--muted); }
-    .prefill-search-icon {
-      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); pointer-events: none; font-size: 15px;
-    }
-    .prefill-dropdown {
-      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-      background: var(--bg3); border: 1px solid var(--border2);
-      border-radius: var(--radius-sm); z-index: 999;
-      max-height: 240px; overflow-y: auto;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      display: none;
-    }
+    .prefill-search-icon { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 15px; }
+    .prefill-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); z-index: 999; max-height: 240px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
     .prefill-dropdown.open { display: block; }
-    .prefill-dropdown-item {
-      padding: 9px 14px; font-size: 13px; color: var(--text);
-      cursor: pointer; transition: background 0.1s;
-    }
-    .prefill-dropdown-item:hover,
-    .prefill-dropdown-item.active { background: var(--blue-dim); color: var(--blue); }
-    .prefill-dropdown-empty {
-      padding: 10px 14px; font-size: 13px; color: var(--muted);
-      font-style: italic;
-    }
+    .prefill-dropdown-item { padding: 9px 14px; font-size: 13px; color: var(--text); cursor: pointer; transition: background 0.1s; }
+    .prefill-dropdown-item:hover, .prefill-dropdown-item.active { background: var(--blue-dim); color: var(--blue); }
+    .prefill-dropdown-empty { padding: 10px 14px; font-size: 13px; color: var(--muted); font-style: italic; }
     .prefill-hint { font-size: 12px; color: var(--muted); }
-    /* -- FORM WRAPPER -- */
-    .form-wrapper {
-      background: #ffffff;
-      color: #111;
-      border-radius: 10px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.35);
-      max-width: 900px;
-      margin: 0 auto;
-      overflow: hidden;
-      font-family: 'DM Sans', Arial, sans-serif;
-    }
-    /* Form header */
-    .form-header {
-      background: #0f2057;
-      color: #fff;
-      padding: 18px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .form-header-left { display: flex; flex-direction: column; gap: 2px; }
-    .form-logo { display: flex; align-items: baseline; gap: 0; line-height: 1; }
-    .logo-empire { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-    .logo-one    { font-size: 26px; font-weight: 800; color: #29b6e8; letter-spacing: -0.5px; }
-    .form-subtitle {
-      font-size: 10px; font-weight: 600; letter-spacing: 2px;
-      text-transform: uppercase; color: rgba(255,255,255,0.55);
-      margin-top: 3px;
-    }
-    .form-header-right { text-align: right; }
-    .form-number {
-      font-size: 13px; font-weight: 700; color: #fff;
-      font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
-    }
-    .form-date-issued {
-      font-size: 11px; color: rgba(255,255,255,0.60); margin-top: 4px;
-    }
-    /* Title row */
-    .form-title-row {
-      background: #f0f4ff;
-      border-bottom: 2px solid #0f2057;
-      padding: 12px 28px;
-      display: flex; align-items: center; gap: 14px;
-    }
-    .official-badge {
-      background: #0f2057; color: #fff;
-      font-size: 9px; font-weight: 800; letter-spacing: 2px;
-      text-transform: uppercase; padding: 3px 8px; border-radius: 3px;
-    }
-    .form-main-title {
-      font-size: 15px; font-weight: 800; letter-spacing: 2px;
-      text-transform: uppercase; color: #0f2057;
-    }
-    /* Form body */
-    .form-body { padding: 22px 28px 28px; }
-    /* Section */
-    .form-section { margin-bottom: 22px; }
-    .section-header {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 12px;
-    }
-    .section-dot {
-      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
-    }
-    .dot-green  { background: #3ecf8e; }
-    .dot-blue   { background: #29b6e8; }
-    .dot-amber  { background: #f5a623; }
-    .dot-red    { background: #f45b69; }
-    .section-title {
-      font-size: 10px; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: #0f2057;
-    }
-    /* Grid rows */
-    .form-row { display: grid; gap: 18px; margin-bottom: 12px; }
-    .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
-    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-    .form-row.cols-1 { grid-template-columns: 1fr; }
-    .form-field { display: flex; flex-direction: column; gap: 4px; }
-    .form-field label {
-      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-      text-transform: uppercase; color: #6b7080;
-    }
-    .form-field input[type="text"] {
-      border: none; border-bottom: 1.5px solid #b0b8cc;
-      background: transparent; color: #111;
-      font-size: 13px; font-family: 'DM Sans', Arial, sans-serif;
-      padding: 4px 2px; outline: none; width: 100%;
-      transition: border-color 0.15s;
-    }
-    .form-field input[type="text"]:focus { border-bottom-color: #0f2057; }
-    .form-field textarea {
-      border: 1.5px solid #b0b8cc; border-radius: 4px;
-      background: transparent; color: #111;
-      font-size: 13px; font-family: 'DM Sans', Arial, sans-serif;
-      padding: 8px; outline: none; width: 100%; resize: vertical;
-      min-height: 70px;
-    }
-    .form-field textarea:focus { border-color: #0f2057; }
-    /* Asset table */
-    .asset-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .asset-table thead tr { background: #0f2057; color: #fff; }
-    .asset-table thead th {
-      padding: 8px 10px; text-align: left;
-      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .asset-table thead th:first-child { width: 32px; text-align: center; }
-    .asset-table thead th:last-child  { width: 160px; }
-    .asset-table tbody tr { border-bottom: 1px solid #dde3f0; }
-    .asset-table tbody tr:nth-child(even) { background: #f7f9ff; }
-    .asset-table tbody td { padding: 7px 10px; vertical-align: middle; }
-    .asset-table tbody td:first-child { text-align: center; color: #6b7080; font-size: 11px; }
-    .asset-table tbody td input[type="text"] {
-      border: none; border-bottom: 1px solid #b0b8cc;
-      background: transparent; color: #111;
-      font-size: 12px; font-family: 'DM Sans', Arial, sans-serif;
-      padding: 2px 2px; outline: none; width: 100%;
-    }
-    .asset-table tbody td input[type="text"]:focus { border-bottom-color: #0f2057; }
-    .condition-checks { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .condition-checks label {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 11px; color: #444; cursor: pointer; white-space: nowrap;
-    }
-    .condition-checks input[type="checkbox"] { cursor: pointer; accent-color: #0f2057; }
-    /* Acknowledgement box */
-    .ack-box {
-      border: 2px solid #29b6e8; border-radius: 6px;
-      padding: 14px 16px; background: #f0f8ff;
-      font-size: 12px; line-height: 1.7; color: #1a2a4a;
-      font-style: italic;
-    }
-    .ack-box strong { font-weight: 700; text-decoration: underline; font-style: normal; }
-    /* Signatures */
-    .sig-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 8px; }
-    .sig-block { display: flex; flex-direction: column; gap: 6px; }
-    .sig-role {
-      font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-      text-transform: uppercase; color: #6b7080; margin-bottom: 2px;
-    }
-    .sig-line {
-      border-bottom: 1.5px solid #0f2057; height: 44px; width: 100%;
-    }
-    .sig-label { font-size: 10px; color: #6b7080; text-align: center; }
-    .sig-date-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-    .sig-date-row span { font-size: 10px; color: #6b7080; white-space: nowrap; }
-    .sig-date-row input[type="text"] {
-      border: none; border-bottom: 1px solid #b0b8cc;
-      background: transparent; color: #111;
-      font-size: 11px; font-family: 'DM Sans', Arial, sans-serif;
-      padding: 2px; outline: none; flex: 1;
-    }
-    /* Light mode overrides for app chrome */
     html[data-theme="light"] body { background: #f0f4f8; color: #0f172a; }
     html[data-theme="light"] .prefill-bar { background: #fff; border-color: #dde3f0; }
     html[data-theme="light"] .prefill-search-input { background: #f8fafc; color: #0f172a; border-color: #dde3f0; }
     html[data-theme="light"] .prefill-dropdown { background: #fff; border-color: #dde3f0; }
     html[data-theme="light"] .prefill-dropdown-item { color: #0f172a; }
-    html[data-theme="light"] .prefill-dropdown-item:hover,
-    html[data-theme="light"] .prefill-dropdown-item.active { background: #e0f0ff; color: #0f2057; }
-    html[data-theme="light"]
+    html[data-theme="light"] .prefill-dropdown-item:hover, html[data-theme="light"] .prefill-dropdown-item.active { background: #e0f0ff; color: #0f2057; }
     html[data-theme="light"] .prefill-hint { color: #94a3b8; }
-    /* -- PRINT -- */
+  </style>
+  <style>
+    /* ===== PHYSICAL DOCUMENT FORM ===== */
+    .form-wrapper { background: #fff; color: #111; border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.35); width: 100%; font-family: Arial, 'DM Sans', sans-serif; font-size: 12px; padding: 28px 36px 32px; }
+    .doc-header { text-align: center; padding: 10px 20px; margin-bottom: 10px; display: block; width: 100%; }
+    .doc-header img { display: block; margin: 0 auto; }
+    .doc-title { text-align: center; font-size: 13px; font-weight: 700; text-decoration: underline; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 12px; font-family: Arial, 'DM Sans', sans-serif; }
+    .info-grid { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
+    .info-grid td { border: 1px solid #333; padding: 5px 10px 3px; vertical-align: bottom; }
+    .info-grid .cell-label { font-size: 10px; font-weight: 600; color: #111; display: block; margin-bottom: 2px; white-space: nowrap; }
+    .info-grid input[type="text"] { border: none; border-bottom: 1px solid #555; background: transparent; color: #111; font-size: 12px; font-family: Arial, 'DM Sans', sans-serif; padding: 2px 2px 1px; outline: none; width: 100%; }
+    .info-grid input[type="text"]:focus { border-bottom-color: #29b6e8; }
+    .hidden-field { display: none; }
+    .asset-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 14px; table-layout: fixed; }
+    .asset-table th, .asset-table td { border: 1px solid #333; padding: 5px 7px; vertical-align: middle; overflow: hidden; }
+    .asset-table thead th { background: #f0f0f0; font-weight: 700; font-size: 11px; text-align: center; color: #111; line-height: 1.3; word-break: normal; white-space: normal; }
+    .asset-table thead th:first-child { text-align: left; }
+    .asset-table tbody td.asset-type-cell { font-weight: 600; color: #111; white-space: nowrap; background: #fafafa; padding: 3px 5px; }
+    .asset-table tbody td input[type="text"] { border: none; background: transparent; color: #111; font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; padding: 1px 2px; outline: none; width: 100%; }
+    .asset-table tbody td input[type="text"]:focus { border-bottom: 1px solid #29b6e8; }
+
+    /* -- Custom inline combo -- */
+    .ic-wrap { position: relative; display: block; width: 100%; }
+    .ic-display {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 3px; cursor: pointer; border-bottom: 1px solid #bbb;
+      padding: 2px 2px 1px; min-height: 18px; min-width: 0; user-select: none;
+      font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; color: #111;
+    }
+    .ic-display:hover { border-bottom-color: #29b6e8; }
+    .ic-display.open  { border-bottom-color: #29b6e8; }
+    .ic-display.empty .ic-val { color: #999; font-style: italic; min-width: 4px; }
+    .ic-val   { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ic-arrow { font-size: 8px; color: #888; flex-shrink: 0; transition: transform .15s; }
+    .ic-display.open .ic-arrow { transform: rotate(180deg); }
+    .ic-dropdown {
+      display: none; position: fixed;
+      background: #fff; border: 1px solid #ccc; border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 9999;
+      max-height: 160px; overflow-y: auto; font-size: 11px;
+      min-width: 120px;
+    }
+    .ic-dropdown.open { display: block; }
+    .ic-option {
+      padding: 5px 10px; cursor: pointer; color: #111;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ic-option:hover, .ic-option.focused { background: #e8f4fd; color: #0a6fa8; }
+    .ic-option.selected { background: #d0eaf9; font-weight: 600; }
+    .ic-option.placeholder { color: #999; font-style: italic; }
+    .ic-empty { padding: 6px 10px; color: #999; font-style: italic; font-size: 10.5px; }
+
+    .ic-display.ic-locked {
+      cursor: not-allowed !important;
+      opacity: 0.38;
+      border-bottom-color: #ddd !important;
+    }
+    .ic-display.ic-locked:hover { border-bottom-color: #ddd !important; }
+
+    /* Print: flatten combo widgets to plain inline text, zero overhead */
+    @media print {
+      .ic-arrow    { display: none !important; }
+      .ic-dropdown { display: none !important; }
+      .ic-wrap     { display: inline !important; }
+      .ic-display  {
+        display: inline !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        cursor: default !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+      }
+      .ic-display.ic-locked { opacity: 1 !important; }
+      .ic-display.empty .ic-val { color: #111 !important; font-style: normal !important; }
+      .ic-val { white-space: normal !important; overflow: visible !important; }
+    }
+    .policy-section { margin-bottom: 14px; font-size: 11.5px; line-height: 1.55; color: #111; }
+    .policy-heading { font-weight: 700; font-size: 12px; margin-bottom: 7px; color: #111; }
+    .policy-section ol { margin-left: 20px; }
+    .policy-section ol > li { margin-bottom: 5px; font-weight: 600; }
+    .policy-section ol > li > ul { margin-left: 18px; margin-top: 2px; }
+    .policy-section ol > li > ul > li { font-weight: 400; margin-bottom: 2px; list-style: disc; }
+    .policy-section ol > li > ul > li > ul { margin-left: 16px; }
+    .policy-section ol > li > ul > li > ul > li { list-style: circle; }
+    .ack-section { margin-bottom: 18px; font-size: 11.5px; line-height: 1.6; color: #111; }
+    .ack-heading { font-weight: 700; font-size: 12px; margin-bottom: 5px; color: #111; }
+    .sig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 20px; }
+    .sig-block { display: flex; flex-direction: column; align-items: center; }
+    .sig-line { border-bottom: 1.5px solid #111; height: 48px; width: 100%; margin-bottom: 4px; }
+    .sig-label { font-size: 10px; color: #111; font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+    .doc-disclaimer { font-size: 9px; font-style: italic; color: #555; line-height: 1.5; border-top: 1px solid #ccc; padding-top: 8px; margin-top: 4px; }
+
+    /* -- PRINT -- Legal 21.59 � 33.02 cm (8.5 � 13 in) -- */
     @page {
-      size: 8.5in 13in;
-      margin: 0.45in 0.5in;
+      size: 21.59cm 33.02cm portrait;
+      margin: 0;
     }
     @media print {
       html, body {
         background: #fff !important;
         color: #111 !important;
-        font-size: 10px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        width: 21.59cm !important;
+        height: 33.02cm !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
-      .sidebar, .topbar, .prefill-bar { display: none !important; }
-      .main { margin-left: 0 !important; }
-      .page-content { padding: 0 !important; }
 
-      .form-wrapper {
+      /* Hide UI chrome */
+      .sidebar, aside,
+      .topbar, .prefill-bar, #modal-action-bar,
+      #toast-container, .success-overlay, #val-modal-overlay { display: none !important; }
+
+      /* Kill flex layout */
+      .main {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        flex: none !important;
+        animation: none !important;
+      }
+      .page-content {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .page-content > * {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+      }
+
+      /*
+       * Render at natural width, then scale to fit legal page.
+       * Legal at 96dpi � 816px wide. Form renders at ~794px wide.
+       * scale(0.88) keeps everything on one page comfortably.
+       */
+      #accountability-form {
+        display: block !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        max-width: 100% !important;
+        width: 794px !important;
+        max-width: 794px !important;
         margin: 0 !important;
-        page-break-inside: avoid;
+        padding: 20px 28px 16px !important;
+        font-size: 12px !important;
+        transform-origin: top left !important;
+        transform: scale(1.0) !important;
       }
 
-      /* Shrink header */
-      .form-header { padding: 8px 16px !important; }
-      .logo-empire, .logo-one { font-size: 18px !important; }
-      .form-subtitle { font-size: 7px !important; margin-top: 1px !important; }
-      .form-number { font-size: 10px !important; }
-      .form-date-issued { font-size: 9px !important; margin-top: 2px !important; }
+      /* header */
+      .doc-header { padding: 0 0 8px !important; margin-bottom: 6px !important; }
+      .doc-header img { height: 52px !important; display: block !important; margin: 0 auto !important; }
+      .doc-title { font-size: 12px !important; margin-bottom: 10px !important; }
 
-      /* Title row */
-      .form-title-row { padding: 6px 16px !important; }
-      .official-badge { font-size: 7px !important; padding: 2px 5px !important; }
-      .form-main-title { font-size: 11px !important; letter-spacing: 1.5px !important; }
+      /* info grid */
+      .info-grid { margin-bottom: 12px !important; font-size: 11px !important; }
+      .info-grid td { padding: 5px 10px 4px !important; }
+      .info-grid .cell-label { font-size: 9px !important; margin-bottom: 1px !important; }
+      .info-grid input[type="text"] { font-size: 11px !important; border-bottom: none !important; }
 
-      /* Body */
-      .form-body { padding: 8px 16px 10px !important; }
-      .form-section { margin-bottom: 8px !important; }
-      .section-header { margin-bottom: 5px !important; }
-      .section-dot { width: 7px !important; height: 7px !important; }
-      .section-title { font-size: 7.5px !important; letter-spacing: 1.5px !important; }
+      /* asset table */
+      .asset-table { font-size: 11px !important; margin-bottom: 12px !important; table-layout: fixed !important; width: 100% !important; }
+      .asset-table th, .asset-table td { padding: 5px 6px !important; line-height: 1.3 !important; border: 1px solid #333 !important; }
+      .asset-table thead th { font-size: 10px !important; background: #efefef !important; text-align: center !important; }
+      .asset-table thead th:first-child { text-align: left !important; }
+      .asset-table tbody td.asset-type-cell { font-size: 11px !important; }
+      .asset-table tbody td input[type="text"] { font-size: 11px !important; border: none !important; background: transparent !important; width: 100% !important; padding: 0 !important; }
 
-      /* Form rows */
-      .form-row { gap: 10px !important; margin-bottom: 6px !important; }
-      .form-field label { font-size: 7px !important; letter-spacing: 1px !important; }
-      .form-field input[type="text"] {
+      /* policy */
+      .policy-section { font-size: 9.5px !important; line-height: 1.5 !important; margin-bottom: 10px !important; }
+      .policy-heading  { font-size: 10px !important; font-weight: 700 !important; margin-bottom: 5px !important; }
+      .policy-section ol { margin-left: 18px !important; }
+      .policy-section ol > li { margin-bottom: 2px !important; line-height: 1.5 !important; }
+      .policy-section ol > li > ul { margin-left: 14px !important; margin-top: 1px !important; }
+      .policy-section ol > li > ul > li { margin-bottom: 1px !important; line-height: 1.45 !important; }
+      .policy-section ol > li > ul > li > ul { margin-left: 12px !important; }
+
+      /* acknowledgment */
+      .ack-section { font-size: 9.5px !important; line-height: 1.55 !important; margin-bottom: 14px !important; }
+      .ack-heading  { font-size: 10px !important; font-weight: 700 !important; margin-bottom: 5px !important; }
+
+      /* signature */
+      .sig-row { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 80px !important; margin-bottom: 14px !important; }
+      .sig-block { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
+      .sig-line  { height: 42px !important; width: 100% !important; border-bottom: 1.5px solid #111 !important; margin-bottom: 4px !important; }
+      .sig-label { font-size: 9px !important; }
+
+      /* disclaimer */
+      .doc-disclaimer {
         font-size: 9px !important;
-        padding: 2px 1px !important;
-        border-bottom-width: 1px !important;
-      }
-      .form-field textarea {
-        font-size: 9px !important;
-        min-height: 36px !important;
-        padding: 4px !important;
-      }
-
-      /* Asset table */
-      .asset-table { font-size: 8.5px !important; }
-      .asset-table thead th {
-        padding: 4px 6px !important;
-        font-size: 7px !important;
-        letter-spacing: 1px !important;
-      }
-      .asset-table tbody td { padding: 3px 6px !important; }
-      .asset-table tbody td input[type="text"] { font-size: 8.5px !important; }
-      .condition-checks { gap: 5px !important; }
-      .condition-checks label { font-size: 8px !important; }
-
-      /* Ack box */
-      .ack-box {
-        font-size: 8px !important;
         line-height: 1.5 !important;
-        padding: 7px 10px !important;
-        border-width: 1.5px !important;
+        padding-top: 6px !important;
+        margin-top: 4px !important;
+        border-top: 1px solid #ccc !important;
+        color: #555 !important;
+        position: static !important;
       }
 
-      /* Signatures */
-      .sig-row { gap: 12px !important; margin-top: 4px !important; }
-      .sig-role { font-size: 7px !important; }
-      .sig-line { height: 28px !important; }
-      .sig-label { font-size: 7.5px !important; }
-      .sig-date-row span { font-size: 7.5px !important; }
-      .sig-date-row input[type="text"] { font-size: 8px !important; }
-
-      /* Force colors */
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+      /* Prevent any element from forcing a page break */
+      #accountability-form, #accountability-form * {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
     }
   </style>
 </head>
@@ -359,28 +303,33 @@
   <div class="main">
     <div class="topbar">
       <div>
-        <div class="topbar-title">Accountability Form</div>
-        <div class="topbar-sub">Asset accountability and responsibility record</div>
+        <div class="topbar-title">Asset Accountability Form</div>
+        <div class="topbar-sub">Fill out and print the employee asset accountability form</div>
       </div>
       <div class="topbar-actions">
+        <button class="btn-submit" onclick="submitRequest()">&#10003; Submit Request</button>
         <button class="btn-print" onclick="window.print()">&#128424; Print</button>
-</div>
+      </div>
     </div>
     <div class="page-content">
-      <!-- Pre-fill bar (hidden on print) -->
+      <div id="modal-action-bar" style="display:none;justify-content:flex-end;gap:10px;margin-bottom:16px;">
+        <button class="btn-submit" onclick="submitRequest()">&#10003; Submit Request</button>
+        <button class="btn-print" onclick="window.print()">&#128424; Print</button>
+      </div>
+      <script>
+        if (new URLSearchParams(location.search).get('modal') === '1') {
+          document.getElementById('modal-action-bar').style.display = 'flex';
+          // Hide the topbar submit button � the parent page provides its own submit button
+          document.querySelectorAll('.topbar-actions .btn-submit').forEach(b => b.style.display = 'none');
+          // Also hide the modal-action-bar submit � parent handles it via postMessage
+          document.querySelectorAll('#modal-action-bar .btn-submit').forEach(b => b.style.display = 'none');
+        }
+      </script>
+      <!-- Pre-fill bar -->
       <div class="prefill-bar" id="prefill-bar">
         <label for="assignee-search">&#128100; Pre-fill from assignee:</label>
         <div class="prefill-search-wrap">
-          <input
-            type="text"
-            id="assignee-search"
-            class="prefill-search-input"
-            placeholder="Search employee name�"
-            autocomplete="off"
-            aria-label="Search employee"
-            aria-autocomplete="list"
-            aria-controls="assignee-dropdown"
-          >
+          <input type="text" id="assignee-search" class="prefill-search-input" placeholder="Search employee name&hellip;" autocomplete="off" aria-label="Search employee" aria-autocomplete="list" aria-controls="assignee-dropdown">
           <span class="prefill-search-icon">&#128269;</span>
           <div class="prefill-dropdown" id="assignee-dropdown" role="listbox"></div>
         </div>
@@ -389,367 +338,836 @@
       <!-- FORM -->
       <div class="form-wrapper" id="accountability-form">
         <!-- Header -->
-        <div class="form-header">
-          <div class="form-header-left">
-            <div class="form-logo">
-              <span class="logo-empire">Empire</span><span class="logo-one">One</span>
-            </div>
-            <div class="form-subtitle">Asset Management System</div>
-          </div>
-          <div class="form-header-right">
-            <div class="form-number">EO-AAF-<input type="text" id="form-number-field" style="width:80px;border:none;border-bottom:1px solid rgba(255,255,255,0.4);background:transparent;color:#fff;font-family:'DM Mono',monospace;font-size:13px;padding:0 2px;outline:none;"></div>
-            <div class="form-date-issued">Date Issued:&nbsp;
-              <input type="date" id="date-issued" style="width:110px;border:none;border-bottom:1px solid rgba(255,255,255,0.4);background:transparent;color:rgba(255,255,255,0.85);font-size:11px;font-family:'DM Sans',sans-serif;padding:0 2px;outline:none;color-scheme:dark;">
-            </div>
-          </div>
+        <div class="doc-header">
+          <img src="logo.png" alt="EmpireOne" style="height:48px;max-width:220px;object-fit:contain;">
         </div>
-        <!-- Title row -->
-        <div class="form-title-row">
-          <span class="official-badge">Official</span>
-          <span class="form-main-title">Asset Accountability Form</span>
+        <!-- Title -->
+        <div class="doc-title">Asset Accountability Form</div>
+        <!-- Hidden JS-wired fields -->
+        <div class="hidden-field">
+          <input type="text" id="field-role">
+          <input type="text" id="field-contact">
+          <input type="text" id="field-email">
+          <input type="text" id="field-return-date">
+          <input type="text" id="field-purpose">
+          <input type="text" id="field-remarks">
+          <input type="date"  id="date-issued">
         </div>
-        <!-- Body -->
-        <div class="form-body">
-          <!-- Section 1: Assignee Information -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-green"></span>
-              <span class="section-title">Assignee Information</span>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label>Full Name</label>
+        <!-- Employee info grid -->
+        <table class="info-grid">
+          <tbody>
+            <tr>
+              <td style="width:55%">
+                <span class="cell-label">Complete Employee Name:</span>
                 <input type="text" id="field-fullname">
-              </div>
-              <div class="form-field">
-                <label>Employee / Agent ID</label>
-                <input type="text" id="field-empid">
-              </div>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label>Department / Team</label>
+              </td>
+              <td>
+                <span class="cell-label">Account/Program:</span>
                 <input type="text" id="field-dept">
-              </div>
-              <div class="form-field">
-                <label>Position / Role</label>
-                <input type="text" id="field-role">
-              </div>
-            </div>
-            <div class="form-row cols-2">
-              <div class="form-field">
-                <label>Contact Number</label>
-                <input type="text" id="field-contact">
-              </div>
-              <div class="form-field">
-                <label>Email Address</label>
-                <input type="text" id="field-email">
-              </div>
-            </div>
-          </div>
-          <!-- Section 2: Assignment Details -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-blue"></span>
-              <span class="section-title">Assignment Details</span>
-            </div>
-            <div class="form-row cols-3">
-              <div class="form-field">
-                <label>Date Deployed</label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="cell-label">Employee #:</span>
+                <input type="text" id="field-empid">
+              </td>
+              <td>
+                <span class="cell-label">Date of Issue:</span>
                 <input type="text" id="field-date-assigned">
-              </div>
-              <div class="form-field">
-                <label>Expected Return Date</label>
-                <input type="text" id="field-return-date">
-              </div>
-              <div class="form-field">
-                <label>Assignment Type</label>
-                <input type="text" id="field-assign-type">
-              </div>
-            </div>
-            <div class="form-row cols-1">
-              <div class="form-field">
-                <label>Purpose / Project</label>
-                <input type="text" id="field-purpose">
-              </div>
-            </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="cell-label">Hire date:</span>
+                <input type="text" id="field-hire-date">
+              </td>
+              <td>
+                <span class="cell-label">Location:</span>
+                <input type="text" id="field-location">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Asset table -->
+        <table class="asset-table" style="table-layout:fixed;width:100%;">
+          <thead>
+            <tr>
+              <th style="width:16%">Asset Type</th>
+              <th style="width:20%">Brand/Model</th>
+              <th style="width:16%">Serial Number</th>
+              <th style="width:14%">Condition at<br>Issuance</th>
+              <th style="width:18%">Value at the Time<br>of Purchase</th>
+              <th style="width:16%">Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="asset-tbody">
+            <!-- rows injected by buildAssetRows() -->
+          </tbody>
+        </table>
+        <!-- Physical Security Policy -->
+        <div class="policy-section">
+          <div class="policy-heading">Physical Security Policy for Issued Assets</div>
+          <ol>
+            <li>Ownership and Use
+              <ul>
+                <li>All assets remain the exclusive property of the company.</li>
+                <li>Assets are issued for business use only, unless otherwise authorized.</li>
+                <li>Employees must not transfer, sell, or lend assets to unauthorized persons.</li>
+              </ul>
+            </li>
+            <li>Care and Safekeeping
+              <ul>
+                <li>Employees must exercise reasonable care to prevent damage, loss, or unauthorized access.</li>
+                <li>Assets must be stored securely when not in use (e.g., locked drawers, secure bags).</li>
+                <li>Food, liquids, and hazardous materials must be kept away from devices.</li>
+              </ul>
+            </li>
+            <li>Loss, Theft, or Damage
+              <ul>
+                <li>Any incident of loss, theft, or damage must be reported immediately to HR/IT.</li>
+                <li>In cases of negligence, the employee may be held financially liable for repair or replacement costs, subject to labor law.</li>
+                <li>Normal wear and tear are exempt from liability.</li>
+              </ul>
+            </li>
+            <li>Access Control
+              <ul>
+                <li>Employees must use company-approved authentication methods (passwords, biometrics, badges).</li>
+                <li>Sharing of login credentials or bypassing security controls is strictly prohibited.</li>
+                <li>Devices must be locked when unattended.</li>
+                <li>Unauthorized software installation or data transfer is prohibited.</li>
+              </ul>
+            </li>
+            <li>Reporting to IT
+              <ul>
+                <li>Employees must promptly report to IT any:
+                  <ul>
+                    <li>Hardware or software malfunction</li>
+                    <li>Security incident (e.g., phishing attempt, malware detection)</li>
+                    <li>Loss, theft, or damage of assets</li>
+                  </ul>
+                </li>
+                <li>IT will document and investigate reported issues, and employees must cooperate fully.</li>
+              </ul>
+            </li>
+            <li>Confidentiality
+              <ul>
+                <li>Employees must maintain strict confidentiality of company data stored, accessed, or transmitted through issued assets.</li>
+                <li>Sensitive information must not be copied, transferred, or disclosed without proper authorization.</li>
+                <li>Any suspected data breach or unauthorized access must be reported immediately to IT.</li>
+              </ul>
+            </li>
+            <li>Return and Separation
+              <ul>
+                <li>All assets must be returned in good condition upon:
+                  <ul>
+                    <li>Resignation or termination</li>
+                    <li>Role change requiring different equipment</li>
+                    <li>Company request</li>
+                  </ul>
+                </li>
+                <li>A Return &amp; Clearance Form will be completed during offboarding to confirm asset recovery.</li>
+                <li>Inspection and Audit</li>
+                <li>The company reserves the right to inspect and audit assets at any time to ensure compliance with security and usage policies.</li>
+                <li>Employees must cooperate fully during inspections.</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+        <!-- Acknowledgment -->
+        <div class="ack-section">
+          <div class="ack-heading">Acknowledgment</div>
+          <p>I, the undersigned, acknowledge receipt of the above-listed company assets and agree to comply with the terms stated in this document, including the physical security policy. I understand that failure to comply may result in accountability measures under company policy and applicable labor regulations.</p>
+        </div>
+        <!-- Signature -->
+        <div class="sig-row">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Date</div>
           </div>
-          <!-- Section 3: Asset Details -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-amber"></span>
-              <span class="section-title">Asset Details</span>
-            </div>
-            <table class="asset-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Asset Name / Description</th>
-                  <th>Asset Tag / ID</th>
-                  <th>Category</th>
-                  <th>Condition at Issue</th>
-                </tr>
-              </thead>
-              <tbody id="asset-tbody">
-                <!-- rows injected by JS -->
-              </tbody>
-            </table>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Signature Over Printed Name</div>
           </div>
-          <!-- Section 4: Remarks / Notes -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-green"></span>
-              <span class="section-title">Remarks / Notes</span>
-            </div>
-            <div class="form-field">
-              <textarea id="field-remarks"></textarea>
-            </div>
-          </div>
-          <!-- Section 5: Acknowledgement -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-red"></span>
-              <span class="section-title">Acknowledgement &amp; Responsibility</span>
-            </div>
-            <div class="ack-box">
-              I, the undersigned, acknowledge receipt of the above-listed asset(s) in the described condition.
-              I understand that I am <strong>fully responsible</strong> for the safekeeping, proper use, and timely return of all deployed items.
-              Any loss, damage, or unauthorized transfer of these assets must be <strong>reported immediately</strong> to the Asset Management team.
-              I agree to return all items on or before the expected return date in the same or better condition,
-              and I accept that I may be held <strong>financially liable</strong> for any damage or loss caused by negligence or misuse.
-            </div>
-          </div>
-          <!-- Section 6: Signatures -->
-          <div class="form-section">
-            <div class="section-header">
-              <span class="section-dot dot-green"></span>
-              <span class="section-title">Signatures</span>
-            </div>
-            <div class="sig-row">
-              <div class="sig-block">
-                <div class="sig-role">Received by (Assignee)</div>
-                <div class="sig-line"></div>
-                <div class="sig-label">Signature over Printed Name</div>
-                <div class="sig-date-row">
-                  <span>Date:</span>
-                  <input type="text">
-                </div>
-              </div>
-              <div class="sig-block">
-                <div class="sig-role">Issued by (Admin / IT)</div>
-                <div class="sig-line"></div>
-                <div class="sig-label">Signature over Printed Name</div>
-                <div class="sig-date-row">
-                  <span>Date:</span>
-                  <input type="text">
-                </div>
-              </div>
-              <div class="sig-block">
-                <div class="sig-role">Noted by (Manager)</div>
-                <div class="sig-line"></div>
-                <div class="sig-label">Signature over Printed Name</div>
-                <div class="sig-date-row">
-                  <span>Date:</span>
-                  <input type="text">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div><!-- /form-body -->
+        </div>
+        <!-- Disclaimer -->
+        <div class="doc-disclaimer">
+          <strong>Disclaimer:</strong><br>
+          This document and its contents are the property of <em>EmpireOne BPO Solutions, Inc.</em> and are intended for internal use only. Unauthorized reproduction, disclosure, or distribution of this material, in whole or in part, without prior written permission from the company is strictly prohibited.
+        </div>
       </div><!-- /form-wrapper -->
     </div><!-- /page-content -->
   </div><!-- /main -->
 
+  <div id="toast-container"></div>
+
+  <!-- Success Modal -->
+  <div class="success-overlay" id="success-overlay">
+    <div class="success-modal">
+      <div class="success-icon">&#10003;</div>
+      <h2>Request Submitted!</h2>
+      <p>Your asset request has been sent to the admin for approval. You'll be notified once it's reviewed.</p>
+      <div class="success-modal-actions">
+        <button class="btn-print" onclick="window.print()" style="background:transparent;color:var(--muted2);border:1px solid var(--border2);">&#128424; Print Copy</button>
+        <button class="btn-submit" style="display:inline-flex" onclick="handleDone()">&#10003; Done</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation Modal -->
+  <div id="val-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:600;align-items:center;justify-content:center;">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:380px;padding:36px 32px 28px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:slideUp .2s ease;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--red-dim);border:2px solid var(--red);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:var(--red);">!</div>
+      <p style="font-size:14px;color:var(--text);line-height:1.6;margin-bottom:24px;" id="val-modal-msg"></p>
+      <button id="val-modal-ok" style="background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 30px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;" onmouseover="this.style.background='#1fa3d4'" onmouseout="this.style.background='var(--blue)'">OK</button>
+    </div>
+  </div>
+
   <script src="js/api.js?v=24"></script>
-  <script src="js/auth.js?v=5"></script>
-  <script src="js/sidebar.js?v=61"></script>
+  <script src="js/auth.js?v=9"></script>
+  <script>
+    if (new URLSearchParams(window.location.search).get('modal') === '1' && typeof auth !== 'undefined') {
+      auth._redirectLogin = function() {};
+    }
+  </script>
+  <script src="js/sidebar.js?v=77"></script>
   <script src="js/toast.js?v=2"></script>
   <script>
-    // -- Build asset table rows ----------------------------------------------
-    const ASSET_ROWS = 5;
+    const FIXED_ASSET_TYPES = ['Laptop','Mobile Device','Headset','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+    const ASSET_ROWS = FIXED_ASSET_TYPES.length;
+
+    let _categories = [], _products = [], _productsByCategory = {};
+
+    async function loadCatalog() {
+      try {
+        const [catRes, prodRes] = await Promise.all([api.getCategories(), api.getProducts()]);
+        _categories = catRes.data || catRes || [];
+        _products   = prodRes.data || prodRes || [];
+        _productsByCategory = {};
+        for (const p of _products) {
+          // Store under both numeric and string key to avoid type-mismatch lookups
+          const cid = p.category_id != null ? p.category_id : 'uncategorized';
+          const cidStr = String(cid);
+          if (!_productsByCategory[cidStr]) _productsByCategory[cidStr] = [];
+          _productsByCategory[cidStr].push(p);
+        }
+      } catch(e) { console.warn('Could not load catalog:', e); }
+    }
+
+    function buildCategoryOptions(selectedValue) {
+      // Use actual DB categories as the options list
+      const fromCats = _categories.map(c => c.name || c.category_name || '').filter(Boolean).sort();
+      // Also include fixed types that aren't already in DB categories
+      const builtIn  = FIXED_ASSET_TYPES.filter(t =>
+        !fromCats.some(c => c.toLowerCase() === t.toLowerCase())
+      );
+      const merged = [...new Set([...fromCats, ...builtIn])];
+      return merged;
+    }
+
+    function getProductsForCategory(categoryLabel) {
+      if (!categoryLabel) return [];
+      const lbl = categoryLabel.toLowerCase().trim();
+
+      // 1. Exact match by category name ? use _productsByCategory map
+      const cat = _categories.find(c =>
+        (c.name || c.category_name || '').toLowerCase().trim() === lbl
+      );
+      if (cat) {
+        const cid = cat.id ?? cat.category_id;
+        const byMap = _productsByCategory[cid] || _productsByCategory[String(cid)] || [];
+        if (byMap.length) return byMap;
+      }
+
+      // 2. Stem/substring match ? use _productsByCategory map
+      const lStem = lbl.replace(/s$/i, '');
+      const fuzzy = _categories.find(c => {
+        const cn    = (c.name || c.category_name || '').toLowerCase().trim();
+        const cStem = cn.replace(/s$/i, '');
+        return cStem === lStem || cn.startsWith(lStem) || lbl.startsWith(cStem)
+            || lbl.includes(cn) || cn.includes(lbl);
+      });
+      if (fuzzy) {
+        const cid = fuzzy.id ?? fuzzy.category_id;
+        const byMap = _productsByCategory[cid] || _productsByCategory[String(cid)] || [];
+        if (byMap.length) return byMap;
+      }
+
+      // 3. Fallback � scan all products by their category_name field
+      return _products.filter(p => {
+        const cn    = (p.category_name || '').toLowerCase().trim();
+        const cStem = cn.replace(/s$/i, '');
+        return cn === lbl || cStem === lStem || lbl.includes(cn) || cn.includes(lbl);
+      });
+    }
+
+    function getBrandsForCategory(categoryLabel) {
+      const prods = getProductsForCategory(categoryLabel);
+      return [...new Set(prods.map(p => (p.brand_model || '').trim()).filter(Boolean))].sort();
+    }
+
+    function getAvailableSerials(categoryLabel, brandName, currentSn) {
+      const prods = getProductsForCategory(categoryLabel);
+      const filtered = prods.filter(p => {
+        const brandMatch  = !brandName || (p.brand_model || '').trim() === brandName;
+        const statusVal   = (p.asset_status || '').toLowerCase().trim();
+        const isAvailable = statusVal === 'available' || statusVal === '';
+        const isCurrent   = currentSn && (p.serial_number || '').trim() === (currentSn || '').trim();
+        const hasSn       = (p.serial_number || '').trim() !== '';
+        return brandMatch && hasSn && (isAvailable || isCurrent);
+      });
+      return [...new Set(filtered.map(p => (p.serial_number || '').trim()).filter(Boolean))].sort();
+    }
+
+    /* -- Custom inline combo widget -- */
+    function makeCombo({ id, options: _initOptions, value, placeholder, bold, onChange }) {
+      // Mutable options reference � both openDropdown and _refresh share this
+      let _optionsFn = _initOptions;
+
+      const hasVal = value && value !== '';
+      const displayText = hasVal ? value : placeholder;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'ic-wrap';
+      wrap.innerHTML = `
+        <div class="ic-display${hasVal ? '' : ' empty'}" id="${id}-display" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+          <span class="ic-val" style="${bold ? 'font-weight:600;' : ''}">${esc(displayText)}</span>
+          <span class="ic-arrow">&#9660;</span>
+        </div>
+        <input type="hidden" id="${id}" value="${esc(value || '')}">`;
+
+      // Dropdown lives on body so it escapes any overflow:hidden ancestor
+      const dropdown = document.createElement('div');
+      dropdown.className = 'ic-dropdown';
+      dropdown.id = `${id}-dropdown`;
+      dropdown.setAttribute('role', 'listbox');
+      document.body.appendChild(dropdown);
+
+      const display  = wrap.querySelector('.ic-display');
+      const hidden   = wrap.querySelector(`#${id}`);
+      const valSpan  = wrap.querySelector('.ic-val');
+
+      function populateDropdown(opts, current) {
+        dropdown.innerHTML = '';
+        if (!opts.length) {
+          dropdown.innerHTML = `<div class="ic-empty">No options</div>`;
+          return;
+        }
+        // Only add blank row if there's a non-empty placeholder label
+        if (placeholder) {
+          const ph = document.createElement('div');
+          ph.className = 'ic-option placeholder' + (!current ? ' selected' : '');
+          ph.textContent = placeholder;
+          ph.dataset.value = '';
+          dropdown.appendChild(ph);
+        }
+        opts.forEach(opt => {
+          const el = document.createElement('div');
+          el.className = 'ic-option' + (opt === current ? ' selected' : '');
+          el.textContent = opt;
+          el.dataset.value = opt;
+          dropdown.appendChild(el);
+        });
+      }
+
+      function openDropdown() {
+        // Close all other open dropdowns first
+        document.querySelectorAll('.ic-dropdown.open').forEach(d => {
+          if (d !== dropdown) {
+            d.classList.remove('open');
+            d.previousElementSibling?.classList.remove('open');
+            d.previousElementSibling?.setAttribute('aria-expanded', 'false');
+          }
+        });
+        populateDropdown(_optionsFn(), hidden.value);   // always uses latest _optionsFn
+        // Position using fixed coords so it escapes table overflow:hidden
+        function positionDropdown() {
+          const rect = display.getBoundingClientRect();
+          dropdown.style.left  = rect.left + 'px';
+          dropdown.style.width = Math.max(rect.width + 12, 120) + 'px';
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const dropH = Math.min(160, 200);
+          if (spaceBelow >= dropH + 4 || spaceBelow >= 80) {
+            dropdown.style.top    = (rect.bottom + 2) + 'px';
+            dropdown.style.bottom = '';
+          } else {
+            dropdown.style.top    = '';
+            dropdown.style.bottom = (window.innerHeight - rect.top + 2) + 'px';
+          }
+        }
+        positionDropdown();
+        dropdown._repositionFn = positionDropdown;
+        window.addEventListener('scroll', positionDropdown, { capture: true, passive: true });
+        window.addEventListener('resize', positionDropdown, { passive: true });
+        dropdown.classList.add('open');
+        display.classList.add('open');
+        display.setAttribute('aria-expanded', 'true');
+        const sel = dropdown.querySelector('.selected');
+        if (sel) sel.scrollIntoView({ block: 'nearest' });
+      }
+
+      function closeDropdown() {
+        if (dropdown._repositionFn) {
+          window.removeEventListener('scroll', dropdown._repositionFn, { capture: true });
+          window.removeEventListener('resize', dropdown._repositionFn);
+          dropdown._repositionFn = null;
+        }
+        dropdown.classList.remove('open');
+        display.classList.remove('open');
+        display.setAttribute('aria-expanded', 'false');
+      }
+
+      function selectValue(val) {
+        hidden.value = val;
+        const isEmpty = !val;
+        valSpan.textContent = isEmpty ? placeholder : val;
+        valSpan.style.fontWeight = (!isEmpty && bold) ? '600' : '';
+        display.classList.toggle('empty', isEmpty);
+        closeDropdown();
+        if (wrap._onChange) wrap._onChange(val);
+      }
+
+      let focusIdx = -1;
+      display.addEventListener('keydown', e => {
+        const items = [...dropdown.querySelectorAll('.ic-option')];
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dropdown.classList.contains('open') ? (items[focusIdx] && selectValue(items[focusIdx].dataset.value)) : openDropdown(); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); if (!dropdown.classList.contains('open')) openDropdown(); focusIdx = Math.min(focusIdx + 1, items.length - 1); items.forEach((el,j) => el.classList.toggle('focused', j === focusIdx)); items[focusIdx]?.scrollIntoView({ block: 'nearest' }); }
+        else if (e.key === 'ArrowUp')   { e.preventDefault(); focusIdx = Math.max(focusIdx - 1, 0); items.forEach((el,j) => el.classList.toggle('focused', j === focusIdx)); items[focusIdx]?.scrollIntoView({ block: 'nearest' }); }
+        else if (e.key === 'Escape')    { closeDropdown(); }
+      });
+
+      dropdown.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const opt = e.target.closest('.ic-option');
+        if (opt) selectValue(opt.dataset.value);
+      });
+
+      // _refresh: update the options function AND reset the displayed value
+      wrap._refresh = (newOptionsFn, newValue) => {
+        _optionsFn = newOptionsFn;            // update the shared reference
+        selectValue(newValue !== undefined ? newValue : '');
+        if (dropdown.classList.contains('open')) populateDropdown(_optionsFn(), hidden.value);
+      };
+      wrap._getValue  = () => hidden.value;
+      wrap._selectVal = (v) => selectValue(v);
+      wrap._onChange  = null;                 // set by wireRowEvents
+
+      let _locked = false;
+      wrap._lock = () => {
+        _locked = true;
+        display.classList.add('ic-locked');
+        display.setAttribute('tabindex', '-1');
+      };
+      wrap._unlock = () => {
+        _locked = false;
+        display.classList.remove('ic-locked');
+        display.setAttribute('tabindex', '0');
+      };
+      wrap._isLocked = () => _locked;
+
+      display.addEventListener('click', e => {
+        e.stopPropagation();
+        if (_locked) return;
+        dropdown.classList.contains('open') ? closeDropdown() : openDropdown();
+      });
+
+      return wrap;
+    }
+    
+
+    // Close all combos when clicking outside
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.ic-dropdown.open').forEach(d => {
+        // Find the matching display via the dropdown id convention (id-dropdown ? id-display)
+        const displayId = d.id ? d.id.replace(/-dropdown$/, '-display') : null;
+        const disp = displayId ? document.getElementById(displayId) : null;
+        d.classList.remove('open');
+        if (disp) { disp.classList.remove('open'); disp.setAttribute('aria-expanded', 'false'); }
+        if (d._repositionFn) {
+          window.removeEventListener('scroll', d._repositionFn, { capture: true });
+          window.removeEventListener('resize', d._repositionFn);
+          d._repositionFn = null;
+        }
+      });
+    });
+
+    function autofillFromProduct(p, condCombo, valInp) {
+      if (condCombo && p.condition) condCombo._selectVal(p.condition);
+      if (valInp) {
+        const v = p.value || p.unit_price || p.price || '';
+        if (v) valInp.value = v;
+      }
+    }
+
+    function wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp) {
+      // Category ? refresh brands (live), reset serial but keep unlocked so all SNs are visible
+      typeCombo._onChange = (cat) => {
+        // Always pass a live function so _optionsFn stays current
+        brandCombo._refresh(() => getBrandsForCategory(typeCombo._getValue()), '');
+        // Show all available serials for the category (no brand filter yet)
+        snCombo._unlock();
+        snCombo._refresh(
+          () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), ''),
+          ''
+        );
+      };
+
+      brandCombo._onChange = (brand) => {
+        const cat = typeCombo._getValue();
+        // When brand is selected (or cleared), update SN list � always unlocked
+        snCombo._unlock();
+        snCombo._refresh(
+          () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), ''),
+          ''
+        );
+        if (!brand) return;
+        // Auto-select if only one serial available
+        const serials = getAvailableSerials(cat, brand, '');
+        if (serials.length === 1) {
+          snCombo._selectVal(serials[0]);
+          const prod = getProductsForCategory(cat).find(p =>
+            (p.brand_model || '').trim() === brand &&
+            (p.serial_number || '').trim() === serials[0]
+          );
+          if (prod) autofillFromProduct(prod, condCombo, valInp);
+        }
+      };
+
+      snCombo._onChange = (sn) => {
+        const cat   = typeCombo._getValue();
+        const brand = brandCombo._getValue();
+        const prod  = getProductsForCategory(cat).find(p =>
+          (p.brand_model || '').trim() === brand &&
+          (p.serial_number || '').trim() === sn
+        );
+        if (prod) autofillFromProduct(prod, condCombo, valInp);
+      };
+    }
+
     function buildAssetRows(assets) {
       const tbody = document.getElementById('asset-tbody');
       tbody.innerHTML = '';
-      for (let i = 0; i < ASSET_ROWS; i++) {
-        const a = assets && assets[i] ? assets[i] : null;
-        const name     = a ? (a.product_name || a.asset_name || '') : '';
-        const tag      = a ? (a.serial_number || a.asset_tag || a.product_id || '') : '';
-        const category = a ? (a.category_name || a.category || '') : '';
+
+      FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+        let matched = null;
+        if (assets && assets.length) {
+          matched = assets.find(a => {
+            const n = (a.category_name || a.category || a.product_name || a.asset_name || '').toLowerCase();
+            return n.includes(typeLabel.toLowerCase().split(' ')[0]) || typeLabel.toLowerCase().includes(n.split(' ')[0]);
+          }) || null;
+        }
+        const assetType = matched ? (matched.category_name || matched.category || typeLabel) : typeLabel;
+
+        // Resolve to actual DB category name so the combo finds products
+        const resolvedType = (() => {
+          const lbl = assetType.toLowerCase().trim();
+          // Already an exact DB category?
+          if (_categories.some(c =>
+            (c.name || c.category_name || '').toLowerCase().trim() === lbl
+          )) return assetType;
+          // Find best matching DB category
+          const match = _categories.find(c => {
+            const cn = (c.name || c.category_name || '').toLowerCase().trim();
+            const lStem = lbl.replace(/s$/i, '');
+            const cStem = cn.replace(/s$/i, '');
+            return cStem === lStem || lbl.includes(cn) || cn.includes(lbl);
+          });
+          return match ? (match.name || match.category_name) : assetType;
+        })();
+        const brand  = matched ? (matched.brand_model || matched.brand || matched.product_name || '') : '';
+        const sn     = matched ? (matched.serial_number || matched.asset_tag || '') : '';
+        const cond   = matched ? (matched.condition || '') : '';
+        const val    = matched ? (matched.value || matched.unit_price || '') : '';
+        const rem    = matched ? (matched.remarks || '') : '';
+
+        const COND_OPTS = ['New','Good','Fair','Poor','Damaged'];
+
         const tr = document.createElement('tr');
+        // Build cells � combos will be appended after
         tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td><input type="text" value="${esc(name)}"></td>
-          <td><input type="text" value="${esc(String(tag))}"></td>
-          <td><input type="text" value="${esc(category)}"></td>
-          <td>
-            <div class="condition-checks">
-              <label><input type="checkbox" name="cond-${i}" value="good"> Good</label>
-              <label><input type="checkbox" name="cond-${i}" value="fair"> Fair</label>
-              <label><input type="checkbox" name="cond-${i}" value="poor"> Poor</label>
-            </div>
-          </td>`;
+          <td class="asset-type-cell" id="td-type-${i}" style="padding:3px 5px;"></td>
+          <td id="td-brand-${i}" style="padding:3px 5px;"></td>
+          <td id="td-sn-${i}"    style="padding:3px 5px;"></td>
+          <td id="td-cond-${i}"  style="padding:3px 5px;"></td>
+          <td><input type="text" id="asset-val-${i}" value="${esc(String(val))}"></td>
+          <td><input type="text" id="asset-rem-${i}" value="${esc(String(rem))}"></td>`;
         tbody.appendChild(tr);
-      }
+
+        const valInp = tr.querySelector(`#asset-val-${i}`);
+
+        // Type combo
+        const typeCombo = makeCombo({
+          id: `asset-type-${i}`,
+          options: () => buildCategoryOptions(resolvedType),
+          value: resolvedType,
+          placeholder: '� Type �',
+          bold: true,
+          onChange: null
+        });
+        tr.querySelector(`#td-type-${i}`).appendChild(typeCombo);
+
+        // Brand combo
+        const brandCombo = makeCombo({
+          id: `asset-brand-${i}`,
+          options: () => getBrandsForCategory(typeCombo._getValue()),
+          value: brand,
+          placeholder: '',
+          bold: false,
+          onChange: null
+        });
+        tr.querySelector(`#td-brand-${i}`).appendChild(brandCombo);
+
+        // Serial combo
+        const snCombo = makeCombo({
+          id: `asset-sn-${i}`,
+          options: () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), sn),
+          value: sn,
+          placeholder: '',
+          bold: false,
+          onChange: null
+        });
+        tr.querySelector(`#td-sn-${i}`).appendChild(snCombo);
+
+        // Condition combo
+        const condCombo = makeCombo({
+          id: `asset-cond-${i}`,
+          options: () => COND_OPTS,
+          value: cond,
+          placeholder: '',
+          bold: false,
+          onChange: null
+        });
+        tr.querySelector(`#td-cond-${i}`).appendChild(condCombo);
+
+        wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp);
+
+        // Unlock SN whenever a type is selected so all available serials are accessible.
+        // Only lock if there is no resolved type (no category context yet).
+        if (!resolvedType) snCombo._lock();
+      });
     }
 
-    // Build empty rows on load
-    buildAssetRows([]);
-
-    // Set today's date as default for Date Issued
+    // Pre-fill today as Date of Issue
     (function() {
-      const d = new Date();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const yy = d.getFullYear();
-      document.getElementById('date-issued').value = `${yy}-${mm}-${dd}`;
+      const d = new Date(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0'), yy = d.getFullYear();
+      const di = document.getElementById('date-issued'); if (di) di.value = `${yy}-${mm}-${dd}`;
+      const da = document.getElementById('field-date-assigned'); if (da && !da.value) da.value = `${mm} / ${dd} / ${yy}`;
     })();
 
-    // -- Pre-fill from assignee (search) ------------------------------------
-    let _assigneeList = [];   // [{name, station, assets, ...}]
-    let _activeIdx    = -1;   // keyboard navigation index
+    let _assigneeList = [], _userByName = {}, _employeeById = {}, _activeIdx = -1;
 
     async function loadAssignees() {
+      try { const a = await api.getAssignees(); _assigneeList = a; } catch(e) { console.warn('Could not load assignees:', e); }
+      await loadCatalog();
+      buildAssetRows([]);
+      // Build name ? employee_id map from the employees table
       try {
-        const assignees = await api.getAssignees();
-        _assigneeList = assignees;
-      } catch (e) {
-        console.warn('Could not load assignees:', e);
+        const empRes = await api.getEmployees();
+        const empList = empRes.data || empRes || [];
+        empList.forEach(e => {
+          if (e.name) _employeeById[e.name.toLowerCase()] = e.employee_id || '';
+        });
+      } catch(e) { console.warn('Could not load employees:', e); }
+      const me = auth.currentUser;
+      if (me && me.name) _userByName[me.name.toLowerCase()] = { role: me.role||'', position: me.position||'', contact_number: me.contact_number||'', email: me.email||'', username: me.username||'', employee_id: me.employee_id||'' };
+      if (auth.isAdmin()) {
+        try { const users = await auth.getUsers(); users.forEach(u => { _userByName[u.name.toLowerCase()] = { role: u.role||'', position: u.position||'', contact_number: u.contact_number||'', email: u.email||'', username: u.username||'', employee_id: u.employee_id||'' }; }); } catch(_) {}
       }
     }
+
+    const _roleLabels = { admin:'Admin', manager:'Manager', staff:'Staff', viewer:'Supervisor' };
+    function _roleDisplay(u) { const l = _roleLabels[u.role] || u.role || ''; return u.position ? `${u.position} (${l})` : l; }
 
     function applyAssignee(assignee) {
       if (!assignee) return;
-
       document.getElementById('field-fullname').value = assignee.name || '';
-      if (assignee.station) {
-        document.getElementById('field-dept').value = assignee.station;
+      if (assignee.station) document.getElementById('field-location').value = assignee.station;
+      const ui = _userByName[(assignee.name||'').toLowerCase()];
+      if (ui) {
+        // Prefer user record's employee_id, fall back to employees table lookup
+        const empId = ui.employee_id || _employeeById[(assignee.name||'').toLowerCase()] || '';
+        document.getElementById('field-empid').value   = empId;
+        document.getElementById('field-role').value    = _roleDisplay(ui);
+        document.getElementById('field-contact').value = ui.contact_number || '';
+        document.getElementById('field-email').value   = ui.email || '';
+      } else {
+        // Assignee exists in assignments but not in users � still try to fill employee_id
+        const empId = _employeeById[(assignee.name||'').toLowerCase()] || '';
+        if (empId) document.getElementById('field-empid').value = empId;
       }
       buildAssetRows(assignee.assets || []);
-
-      if (assignee.assets && assignee.assets.length > 0) {
-        const first = assignee.assets[0];
-        if (first.assigned_date || first.created_at) {
-          const raw = first.assigned_date || first.created_at;
-          const d   = new Date(raw);
-          if (!isNaN(d)) {
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            const yy = d.getFullYear();
-            document.getElementById('field-date-assigned').value = `${mm} / ${dd} / ${yy}`;
-          }
-        }
+      if (assignee.assets && assignee.assets.length) {
+        const first = assignee.assets[0], raw = first.assigned_date || first.created_at;
+        if (raw) { const d = new Date(raw); if (!isNaN(d)) { const mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'), yy=d.getFullYear(); document.getElementById('field-date-assigned').value = `${mm} / ${dd} / ${yy}`; } }
       }
-
-      document.getElementById('prefill-hint').textContent =
-        `Filled ${(assignee.assets || []).length} active deployment(s) for ${assignee.name}.`;
+      document.getElementById('prefill-hint').textContent = `Filled ${(assignee.assets||[]).length} active deployment(s) for ${assignee.name}.`;
     }
 
     function renderDropdown(filtered) {
-      const drop = document.getElementById('assignee-dropdown');
-      drop.innerHTML = '';
-      _activeIdx = -1;
-
-      if (filtered.length === 0) {
-        drop.innerHTML = '<div class="prefill-dropdown-empty">No matching employees found.</div>';
-        drop.classList.add('open');
-        return;
-      }
-
-      filtered.forEach((a, i) => {
-        const item = document.createElement('div');
-        item.className    = 'prefill-dropdown-item';
-        item.role         = 'option';
-        item.dataset.idx  = i;
-        item.textContent  = a.name + (a.station ? ' � ' + a.station : '');
-        item.addEventListener('mousedown', e => {
-          e.preventDefault(); // prevent blur closing dropdown first
-          selectAssignee(a);
-        });
-        drop.appendChild(item);
-      });
-
+      const drop = document.getElementById('assignee-dropdown'); drop.innerHTML = ''; _activeIdx = -1;
+      if (!filtered.length) { drop.innerHTML = '<div class="prefill-dropdown-empty">No matching employees found.</div>'; drop.classList.add('open'); return; }
+      filtered.forEach((a,i) => { const item = document.createElement('div'); item.className='prefill-dropdown-item'; item.dataset.idx=i; item.textContent=a.name+(a.station?' \u00b7 '+a.station:''); item.addEventListener('mousedown',e=>{e.preventDefault();selectAssignee(a);}); drop.appendChild(item); });
       drop.classList.add('open');
     }
+    function selectAssignee(assignee) { document.getElementById('assignee-search').value = assignee.name+(assignee.station?' \u00b7 '+assignee.station:''); closeDropdown(); applyAssignee(assignee); }
+    function closeDropdown() { document.getElementById('assignee-dropdown').classList.remove('open'); _activeIdx=-1; }
+    function highlightItem(idx) { document.querySelectorAll('.prefill-dropdown-item').forEach((el,i)=>el.classList.toggle('active',i===idx)); }
 
-    function selectAssignee(assignee) {
-      const input = document.getElementById('assignee-search');
-      input.value = assignee.name + (assignee.station ? ' � ' + assignee.station : '');
-      closeDropdown();
-      applyAssignee(assignee);
-    }
-
-    function closeDropdown() {
-      document.getElementById('assignee-dropdown').classList.remove('open');
-      _activeIdx = -1;
-    }
-
-    function highlightItem(idx) {
-      const items = document.querySelectorAll('.prefill-dropdown-item');
-      items.forEach((el, i) => el.classList.toggle('active', i === idx));
-    }
-
-    // -- Search input events -------------------------------------------------
     const searchInput = document.getElementById('assignee-search');
-
-    searchInput.addEventListener('input', function () {
-      const q = this.value.trim().toLowerCase();
-      if (!q) { closeDropdown(); return; }
-
-      const filtered = _assigneeList.filter(a =>
-        a.name.toLowerCase().includes(q) ||
-        (a.station && a.station.toLowerCase().includes(q))
-      );
-      renderDropdown(filtered);
-      // store filtered for keyboard nav
-      searchInput._filtered = filtered;
+    searchInput.addEventListener('input', function() { const q=this.value.trim().toLowerCase(); if(!q){closeDropdown();return;} const f=_assigneeList.filter(a=>a.name.toLowerCase().includes(q)||(a.station&&a.station.toLowerCase().includes(q))); renderDropdown(f); searchInput._filtered=f; });
+    searchInput.addEventListener('keydown', function(e) {
+      const drop=document.getElementById('assignee-dropdown'), items=drop.querySelectorAll('.prefill-dropdown-item');
+      if(!drop.classList.contains('open')||!items.length) return;
+      if(e.key==='ArrowDown'){e.preventDefault();_activeIdx=Math.min(_activeIdx+1,items.length-1);highlightItem(_activeIdx);items[_activeIdx]?.scrollIntoView({block:'nearest'});}
+      else if(e.key==='ArrowUp'){e.preventDefault();_activeIdx=Math.max(_activeIdx-1,0);highlightItem(_activeIdx);items[_activeIdx]?.scrollIntoView({block:'nearest'});}
+      else if(e.key==='Enter'){e.preventDefault();if(_activeIdx>=0&&searchInput._filtered)selectAssignee(searchInput._filtered[_activeIdx]);}
+      else if(e.key==='Escape')closeDropdown();
     });
+    searchInput.addEventListener('blur', function() { setTimeout(closeDropdown,150); });
 
-    searchInput.addEventListener('keydown', function (e) {
-      const drop  = document.getElementById('assignee-dropdown');
-      const items = drop.querySelectorAll('.prefill-dropdown-item');
-      if (!drop.classList.contains('open') || items.length === 0) return;
+    function showValModal(msg) {
+      document.getElementById('val-modal-msg').textContent = msg;
+      const o = document.getElementById('val-modal-overlay'); o.style.display='flex';
+      document.getElementById('val-modal-ok').onclick = ()=>{ o.style.display='none'; };
+      o.onclick = e=>{ if(e.target===o) o.style.display='none'; };
+    }
 
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        _activeIdx = Math.min(_activeIdx + 1, items.length - 1);
-        highlightItem(_activeIdx);
-        items[_activeIdx]?.scrollIntoView({ block: 'nearest' });
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        _activeIdx = Math.max(_activeIdx - 1, 0);
-        highlightItem(_activeIdx);
-        items[_activeIdx]?.scrollIntoView({ block: 'nearest' });
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (_activeIdx >= 0 && searchInput._filtered) {
-          selectAssignee(searchInput._filtered[_activeIdx]);
-        }
-      } else if (e.key === 'Escape') {
-        closeDropdown();
+    function submitRequest() {
+      const name = document.getElementById('field-fullname').value.trim();
+      if (!name) { showValModal('Please enter the employee name before submitting.'); document.getElementById('field-fullname').focus(); return; }
+      const assets = [];
+      for (let i=0; i<ASSET_ROWS; i++) {
+        const brandSel2=document.getElementById(`asset-brand-${i}`);
+        const snSel2=document.getElementById(`asset-sn-${i}`);
+        const brand=(brandSel2?brandSel2.value:'').trim();
+        const sn=(snSel2?snSel2.value:'').trim();
+        const assetTypeSel=document.getElementById(`asset-type-${i}`);
+        const assetTypeName=assetTypeSel?assetTypeSel.value:FIXED_ASSET_TYPES[i];
+        const condSel=document.getElementById(`asset-cond-${i}`);
+        const condVal=condSel?condSel.value:'';
+        if (brand||sn) assets.push({ name:assetTypeName, brand, tag:sn, condition:condVal, value:document.getElementById(`asset-val-${i}`)?.value.trim()||'', remarks:document.getElementById(`asset-rem-${i}`)?.value.trim()||'' });
       }
-    });
+      const payload = { assignee:name, department:document.getElementById('field-dept').value.trim(), location:document.getElementById('field-location').value.trim(), purpose:'Asset Accountability', date_deployed:document.getElementById('field-date-assigned').value.trim(), expected_return:'', remarks:'', assets };
+      const btn = document.querySelector('.btn-submit'); if(btn){btn.disabled=true;btn.textContent='Submitting\u2026';}
+      api.submitApproval({ action_type:'create', resource_type:'asset_request', resource_name:name, notes:'Asset Accountability', payload })
+        .then(()=>{ document.getElementById('success-overlay').classList.add('open'); if(btn){btn.disabled=true;btn.textContent='\u2713 Submitted';} if(window.parent&&window.parent!==window)window.parent.postMessage({type:'REQUEST_FORM_SUBMITTED'},'*'); })
+        .catch(err=>{ showToast('Failed to submit: '+(err.message||'Unknown error'),'error'); if(btn){btn.disabled=false;btn.textContent='\u2713 Submit Request';} });
+    }
 
-    searchInput.addEventListener('blur', function () {
-      // small delay so mousedown on item fires first
-      setTimeout(closeDropdown, 150);
-    });
+    function handleDone() {
+      const isModal = new URLSearchParams(location.search).get('modal') === '1';
+      if (isModal) {
+        // Reset and go back to the form (reload without the success overlay)
+        window.location.reload();
+      } else {
+        window.location.href = 'requests.html';
+      }
+    }
 
-    // -- Auth & init ---------------------------------------------------------
     auth.initPage({ onReady: async () => {
+      if (!auth.isAdmin()) document.querySelectorAll('.btn-submit').forEach(b=>b.style.display='inline-flex');
       await loadAssignees();
-      const params = new URLSearchParams(window.location.search);
-      const assigneeName = params.get('assignee');
+      const params = new URLSearchParams(window.location.search), assigneeName = params.get('assignee');
       if (assigneeName) {
-        const match = _assigneeList.find(a => a.name.toLowerCase() === assigneeName.toLowerCase());
-        if (match) {
-          selectAssignee(match);
-        } else {
-          document.getElementById('field-fullname').value = assigneeName;
-          document.getElementById('assignee-search').value = assigneeName;
-          document.getElementById('prefill-hint').textContent = 'Employee pre-filled from approved request.';
-        }
+        const match = _assigneeList.find(a=>a.name.toLowerCase()===assigneeName.toLowerCase());
+        if (match) selectAssignee(match);
+        else { document.getElementById('field-fullname').value=assigneeName; document.getElementById('assignee-search').value=assigneeName; const ui=_userByName[assigneeName.toLowerCase()]; if(ui){document.getElementById('field-empid').value=ui.employee_id||'';document.getElementById('field-role').value=_roleDisplay(ui);document.getElementById('field-contact').value=ui.contact_number||'';document.getElementById('field-email').value=ui.email||'';} document.getElementById('prefill-hint').textContent='Pre-filled from your profile.'; }
+      } else {
+        const me = auth.currentUser;
+        if (me) { const match=_assigneeList.find(a=>a.name.toLowerCase()===me.name.toLowerCase()); if(match)selectAssignee(match); else { document.getElementById('field-fullname').value=me.name||''; document.getElementById('assignee-search').value=me.name||''; document.getElementById('field-empid').value=me.employee_id||''; document.getElementById('field-role').value=_roleDisplay(me); document.getElementById('field-contact').value=me.contact_number||''; document.getElementById('field-email').value=me.email||''; document.getElementById('prefill-hint').textContent=`Pre-filled with your profile, ${me.name}.`; } }
       }
     }});
+
+    window.addEventListener('message', function(e) { if(e.data&&e.data.type==='SUBMIT_REQUEST_FORM') submitRequest(); });
+
+    // -- Force correct print layout regardless of CSS specificity --
+    window.addEventListener('beforeprint', function() {
+      document.body.style.cssText = 'margin:0!important;padding:0!important;display:block!important;background:#fff!important;overflow:hidden!important;';
+
+      const sidebar = document.querySelector('aside.sidebar');
+      if (sidebar) sidebar.style.cssText = 'display:none!important;width:0!important;';
+
+      const main = document.querySelector('.main');
+      if (main) main.style.cssText = 'display:block!important;margin:0!important;padding:0!important;width:100%!important;flex:none!important;animation:none!important;';
+
+      const pc = document.querySelector('.page-content');
+      if (pc) pc.style.cssText = 'display:block!important;margin:0!important;padding:0!important;width:100%!important;';
+
+      const fw = document.getElementById('accountability-form');
+      if (fw) fw.style.cssText = 'display:block!important;margin:0!important;padding:20px 28px 16px!important;width:794px!important;max-width:794px!important;box-shadow:none!important;border-radius:0!important;transform:scale(1.0)!important;transform-origin:top left!important;font-size:12px!important;';
+
+      const disclaimer = document.querySelector('.doc-disclaimer');
+      if (disclaimer) disclaimer.style.cssText = 'position:static!important;font-size:9px!important;line-height:1.5!important;padding-top:6px!important;margin-top:4px!important;border-top:1px solid #ccc!important;color:#555!important;';
+
+      // Policy & ack � full size to fill the page
+      document.querySelectorAll('.policy-section').forEach(el => {
+        el.style.cssText = 'font-size:9.5px!important;line-height:1.5!important;margin-bottom:10px!important;';
+      });
+      document.querySelectorAll('.policy-heading').forEach(el => {
+        el.style.cssText = 'font-size:10px!important;font-weight:700!important;margin-bottom:5px!important;';
+      });
+      document.querySelectorAll('.ack-section').forEach(el => {
+        el.style.cssText = 'font-size:9.5px!important;line-height:1.55!important;margin-bottom:14px!important;';
+      });
+      document.querySelectorAll('.ack-heading').forEach(el => {
+        el.style.cssText = 'font-size:10px!important;font-weight:700!important;margin-bottom:5px!important;';
+      });
+      document.querySelectorAll('.asset-table').forEach(el => {
+        el.style.cssText = 'font-size:11px!important;margin-bottom:12px!important;table-layout:fixed!important;width:100%!important;';
+      });
+      document.querySelectorAll('.asset-table th, .asset-table td').forEach(el => {
+        el.style.cssText = 'padding:5px 6px!important;line-height:1.3!important;border:1px solid #333!important;';
+      });
+      document.querySelectorAll('.info-grid').forEach(el => {
+        el.style.cssText = 'margin-bottom:12px!important;font-size:11px!important;';
+      });
+      document.querySelectorAll('.info-grid td').forEach(el => {
+        el.style.cssText = 'padding:5px 10px 4px!important;border:1px solid #333!important;';
+      });
+      document.querySelectorAll('.doc-title').forEach(el => {
+        el.style.cssText = 'font-size:12px!important;margin-bottom:10px!important;';
+      });
+      document.querySelectorAll('.doc-header').forEach(el => {
+        el.style.cssText = 'padding:0 0 8px!important;margin-bottom:6px!important;';
+      });
+      document.querySelectorAll('.doc-header img').forEach(el => {
+        el.style.cssText = 'height:52px!important;display:block!important;margin:0 auto!important;';
+      });
+      document.querySelectorAll('.sig-row').forEach(el => {
+        el.style.cssText = 'display:grid!important;grid-template-columns:1fr 1fr!important;gap:80px!important;margin-bottom:14px!important;';
+      });
+      document.querySelectorAll('.sig-line').forEach(el => {
+        el.style.cssText = 'height:42px!important;width:100%!important;border-bottom:1.5px solid #111!important;margin-bottom:4px!important;';
+      });
+      document.querySelectorAll('.sig-label').forEach(el => {
+        el.style.cssText = 'font-size:9px!important;';
+      });
+    });
+
+    window.addEventListener('afterprint', function() {
+      document.body.style.cssText = '';
+      const sidebar = document.querySelector('aside.sidebar');
+      if (sidebar) sidebar.style.cssText = '';
+      const main = document.querySelector('.main');
+      if (main) main.style.cssText = '';
+      const pc = document.querySelector('.page-content');
+      if (pc) pc.style.cssText = '';
+      const fw = document.getElementById('accountability-form');
+      if (fw) fw.style.cssText = '';
+      const disclaimer = document.querySelector('.doc-disclaimer');
+      if (disclaimer) disclaimer.style.cssText = '';
+      // Restore all sections
+      document.querySelectorAll('.policy-section, .policy-heading, .ack-section, .ack-heading, .asset-table, .info-grid, .doc-title, .sig-line, .sig-label, .sig-row, .doc-header').forEach(el => {
+        el.style.cssText = '';
+      });
+      document.querySelectorAll('.asset-table th, .asset-table td, .info-grid td').forEach(el => {
+        el.style.cssText = '';
+      });
+      // Restore logo to screen size
+      document.querySelectorAll('.doc-header img').forEach(el => {
+        el.style.cssText = 'height:48px;max-width:220px;object-fit:contain;';
+      });
+    });
   </script>
 </body>
 </html>

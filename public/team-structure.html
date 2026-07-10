@@ -1,0 +1,1919 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/theme.js"></script>
+  <script src="js/utils.js?v=2"></script>
+  <link rel="stylesheet" href="css/theme.css?v=10" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Structure &mdash; EmpireOne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0e1a;--bg2:#0f1729;--bg3:#162040;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+      --text:#e8eaf0;--muted:#6b7080;--muted2:#9aa0b2;
+      --blue:#29b6e8;--blue-dim:rgba(41,182,232,0.12);
+      --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+      --red:#f45b69;--red-dim:rgba(244,91,105,0.12);
+      --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+      --purple:#9b73f7;--purple-dim:rgba(155,115,247,0.15);
+      --sidebar-w:260px;--radius:14px;--radius-sm:8px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:16px}
+    .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:row;min-height:100vh}
+    /* -- Left panel ------------------------------------------------------- */
+    .left-panel{width:310px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;background:var(--bg2);overflow-y:auto}
+    .left-panel::-webkit-scrollbar{width:4px}
+    .left-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+    .left-panel-top{padding:28px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .left-panel-top h1{font-family:'Poppins',sans-serif;font-size:19px;font-weight:800;letter-spacing:-0.3px;margin-bottom:3px}
+    .left-panel-top p{font-size:12px;color:var(--muted2)}
+    /* Role group */
+    .role-group{margin-bottom:2px}
+    .role-group-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;cursor:pointer;user-select:none}
+    .role-group-header:hover .role-group-label{color:var(--text)}
+    .role-group-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);transition:color .15s}
+    .role-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dot-manager{background:var(--blue)}
+    .dot-supervisor{background:var(--green)}
+    .dot-staff{background:var(--amber)}
+    .dot-unassigned{background:var(--muted)}
+    .role-count{font-size:11px;color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:1px 8px;font-weight:600}
+    .role-group-body{padding:0 8px 6px}
+    /* Person row in left panel */
+    .person-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .15s;margin-bottom:2px}
+    .person-row:hover{background:rgba(255,255,255,0.04)}
+    .person-row.active{background:rgba(41,182,232,0.10);border:1px solid rgba(41,182,232,0.18)}
+    .person-row:not(.active){border:1px solid transparent}
+    .person-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+    .person-info{flex:1;min-width:0}
+    .person-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .person-sub{font-size:11px;color:var(--muted);margin-top:1px}
+    .person-badge,.badge-manager,.badge-viewer,.badge-staff{font-size:11px !important;font-weight:700 !important;padding:4px 12px !important;border-radius:10px !important;flex-shrink:0;white-space:nowrap;background:#ffffff !important;color:#16a34a !important;border:1.5px solid #16a34a !important;box-shadow:0 2px 10px rgba(22,163,74,0.18) !important}
+    /* Unassigned pool */
+    .unassigned-section{border-top:1px solid var(--border);padding:10px 8px 12px}
+    .unassigned-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 8px;cursor:pointer;user-select:none}
+    .unassigned-header:hover .role-group-label{color:var(--text)}
+    .unassigned-pool{display:flex;flex-direction:column;gap:2px}
+    .unassigned-emp{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;border:1px solid transparent}
+    .empty-pool{padding:12px 10px;font-size:12px;color:var(--muted);text-align:center}
+    /* -- Right detail panel ------------------------------------------------ */
+    .detail-panel{flex:1;overflow-y:auto;padding:36px 44px 60px;min-width:0}
+    .detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;color:var(--muted);text-align:center;gap:12px}
+    .detail-empty-icon{font-size:36px;opacity:.35}
+    .detail-empty h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--muted2)}
+    .detail-empty p{font-size:13px;max-width:300px;line-height:1.6}
+    /* Detail header */
+    .detail-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}
+    .detail-hd-left{display:flex;align-items:center;gap:16px}
+    .detail-avatar-lg{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:19px;font-weight:700;color:#fff;flex-shrink:0}
+    .detail-name{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;letter-spacing:-0.4px}
+    .detail-chips{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--muted2)}
+    .chip.blue{background:var(--blue-dim);border-color:rgba(41,182,232,0.25);color:var(--blue)}
+    .chip.green{background:var(--green-dim);border-color:rgba(62,207,142,0.25);color:var(--green)}
+    .chip.amber{background:var(--amber-dim);border-color:rgba(245,166,35,0.25);color:var(--amber)}
+    /* Assigned agents list */
+    .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .section-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700}
+    .agent-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:8px;transition:border-color .15s}
+    .agent-row:hover{border-color:var(--border2)}
+    .agent-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+    .agent-info{flex:1;min-width:0}
+    .agent-name{font-size:13px;font-weight:500}
+    .agent-sub{font-size:11px;color:var(--muted);margin-top:1px}
+    .agent-station{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--muted2);margin-right:4px;flex-shrink:0}
+    .btn-edit{background:rgba(155,115,247,0.10);color:var(--purple);border:1px solid rgba(155,115,247,0.22);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;white-space:nowrap;flex-shrink:0}
+    .btn-edit:hover{background:rgba(155,115,247,0.22)}
+    .unassigned-emp:hover{background:rgba(255,255,255,0.03);border-color:var(--border)}
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;white-space:nowrap}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-primary:hover{background:#6b9ef8}
+    .btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,0.25)}
+    .btn-danger:hover{background:rgba(244,91,105,0.22)}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}
+    .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+    .btn-add-agent:hover{background:rgba(255,255,255,0.06) !important;color:#000 !important}
+    .btn-sm{padding:5px 11px;font-size:12px}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn-view{background:rgba(155,115,247,0.12);color:var(--purple);border:1px solid rgba(155,115,247,0.25)}
+    .btn-view:hover{background:rgba(155,115,247,0.22)}
+    /* Assets modal wider */
+    .modal-lg{max-width:680px}
+    /* Asset item row inside assets modal */
+    .asset-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);margin-bottom:6px}
+    .asset-item-icon{width:36px;height:36px;border-radius:8px;background:var(--bg2);border:1px solid var(--border2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+    .asset-item-info{flex:1;min-width:0}
+    .asset-item-name{font-size:13px;font-weight:500}
+    .asset-item-sku{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:2px}
+    .asset-status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap;border:1px solid transparent}
+    .badge-working{background:var(--green-dim);color:var(--green);border-color:rgba(62,207,142,0.25)}
+    .badge-damaged{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,0.25)}
+    .badge-repair{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,166,35,0.25)}
+    .btn-return{background:rgba(244,91,105,0.10);color:var(--red);border:1px solid rgba(244,91,105,0.25);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s;white-space:nowrap;flex-shrink:0}
+    .btn-return:hover{background:rgba(244,91,105,0.22)}
+    .btn-return:disabled{opacity:.45;cursor:not-allowed}
+    /* Add asset form inside modal */
+    .add-asset-form{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px}
+    .add-asset-form-title{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
+    .form-row{display:flex;gap:10px}
+    .form-group{display:flex;flex-direction:column;gap:5px;flex:1}
+    .form-group label{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2)}
+    .form-group select,.form-group input{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%}
+    .form-group select:focus,.form-group input:focus{border-color:var(--blue)}
+    .form-group select option{background:var(--bg3)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
+    @keyframes modalIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .modal-header h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700}
+    .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
+    .modal-close:hover{color:var(--text);background:var(--border2)}
+    .modal-search-wrap{padding:14px 24px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .modal-search{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 13px;outline:none;transition:border-color .15s}
+    .modal-search:focus{border-color:var(--blue)}
+    .modal-search::placeholder{color:var(--muted)}
+    .modal-list{flex:1;overflow-y:auto;padding:8px 12px}
+    .modal-list::-webkit-scrollbar{width:4px}
+    .modal-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+    .modal-emp-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+    .modal-emp-row:hover{background:rgba(255,255,255,0.04)}
+    .modal-emp-row.selected{background:rgba(41,182,232,0.09);border-color:rgba(41,182,232,0.2)}
+    .modal-emp-row .check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:11px;color:var(--blue);transition:all .15s}
+    .modal-emp-row.selected .check{background:var(--blue);border-color:var(--blue);color:#fff}
+    .modal-emp-info{flex:1;min-width:0}
+    .modal-emp-name{font-size:13px;font-weight:500}
+    .modal-emp-sub{font-size:11px;color:var(--muted);margin-top:1px}
+    .modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .modal-sel-count{font-size:12px;color:var(--muted2)}
+    .modal-footer-btns{display:flex;gap:8px}
+    .modal-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px}
+    /* -- Entrance animations ----------------------------------------------- */
+    .ts-animate{animation:slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both}
+    .ts-fade{animation:fadeIn 0.35s ease both}
+    /* Stagger delays — up to 20 rows */
+    .ts-d1{animation-delay:.04s}.ts-d2{animation-delay:.08s}.ts-d3{animation-delay:.12s}
+    .ts-d4{animation-delay:.16s}.ts-d5{animation-delay:.20s}.ts-d6{animation-delay:.24s}
+    .ts-d7{animation-delay:.28s}.ts-d8{animation-delay:.32s}.ts-d9{animation-delay:.36s}
+    .ts-d10{animation-delay:.40s}.ts-d11{animation-delay:.44s}.ts-d12{animation-delay:.48s}
+    .ts-d13{animation-delay:.52s}.ts-d14{animation-delay:.56s}.ts-d15{animation-delay:.60s}
+    .ts-d16{animation-delay:.64s}.ts-d17{animation-delay:.68s}.ts-d18{animation-delay:.72s}
+    .ts-d19{animation-delay:.76s}.ts-d20{animation-delay:.80s}
+    /* Panel header */
+    .left-panel-top{animation:slideUp 0.45s 0.02s cubic-bezier(0.16,1,0.3,1) both}
+    /* Group headers fade in */
+    .role-group-header{animation:fadeIn 0.35s ease both}
+    @media(prefers-reduced-motion:reduce){
+      .ts-animate,.ts-fade,.left-panel-top,.role-group-header{animation:none !important}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <div class="main">
+    <!-- -- Left panel --------------------------------------------------- -->
+    <div class="left-panel" id="leftPanel">
+      <div class="left-panel-top">
+        <h1>Team Structure</h1>
+        <p>View team members grouped by role and assign them to supervisors and managers.</p>
+      </div>
+
+      <!-- Role search -->
+      <div style="padding:10px 12px 6px;position:relative">
+        <svg style="position:absolute;left:21px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.45" width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="roleSearch" type="text" placeholder="Search by name or role…" oninput="filterRoles(this.value)" autocomplete="off"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px 7px 28px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor=''" />
+      </div>
+
+      <!-- Managers group -->
+      <div class="role-group" id="group-managers">
+        <div class="role-group-header">
+          <span class="role-group-label">
+            <span class="role-dot dot-manager"></span>
+            Managers
+          </span>
+          <span class="role-count" id="count-managers">0</span>
+        </div>
+        <div class="role-group-body" id="list-managers"></div>
+      </div>
+
+      <!-- Supervisors group -->
+      <div class="role-group" id="group-supervisors">
+        <div class="role-group-header">
+          <span class="role-group-label">
+            <span class="role-dot dot-supervisor"></span>
+            Supervisors
+          </span>
+          <span class="role-count" id="count-supervisors">0</span>
+        </div>
+        <div class="role-group-body" id="list-supervisors"></div>
+      </div>
+
+      <!-- Staff group -->
+      <div class="role-group" id="group-staff">
+        <div class="role-group-header">
+          <span class="role-group-label">
+            <span class="role-dot dot-staff"></span>
+            Staff
+          </span>
+          <span class="role-count" id="count-staff">0</span>
+        </div>
+        <div class="role-group-body" id="list-staff"></div>
+      </div>
+
+      <!-- Unassigned members pool -->
+      <div class="unassigned-section">
+        <div class="unassigned-header">
+          <span class="role-group-label">
+            <span class="role-dot dot-unassigned"></span>
+            Unassigned Members
+          </span>
+          <span class="role-count" id="count-unassigned">0</span>
+        </div>
+        <div style="padding:6px 10px 4px;position:relative">
+          <svg style="position:absolute;left:19px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.45" width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="unassignedSearch" type="text" placeholder="Search members…" oninput="filterUnassignedPool(this.value)" autocomplete="off"
+            style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px 7px 28px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor=''" />
+        </div>
+        <div class="unassigned-pool" id="pool-unassigned">
+          <div class="empty-pool">Loading&hellip;</div>
+        </div>
+        <div style="padding:8px 10px 4px">
+          <button class="btn btn-ghost btn-sm btn-add-agent" style="width:100%;justify-content:center;gap:5px" onclick="openAddAgentModal()">
+            <span style="font-size:15px;line-height:1">+</span> Add Member
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- -- Right detail panel -------------------------------------------- -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-empty" id="detailEmpty">
+        <div class="detail-empty-icon">??</div>
+        <h3>Select a person</h3>
+        <p>Click a manager, supervisor, or staff member on the left to view and manage their assigned members.</p>
+      </div>
+      <div id="detailContent" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- -- Unassign confirmation modal ---------------------------------------- -->
+  <div class="modal-overlay" id="unassignModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Unassign Member</h3>
+        <button class="modal-close" onclick="closeUnassignModal()">&#10005;</button>
+      </div>
+      <div style="padding:20px 24px 8px;font-size:14px;color:var(--muted2);line-height:1.6;">
+        Are you sure you want to unassign
+        <strong style="color:var(--text)" id="unassignAgentName"></strong>?
+        <br>They will move back to the unassigned pool.
+      </div>
+      <div class="modal-footer">
+        <span></span>
+        <div class="modal-footer-btns">
+          <button class="btn btn-ghost btn-sm" onclick="closeUnassignModal()">Cancel</button>
+          <button class="btn btn-danger btn-sm" id="unassignConfirmBtn" onclick="doUnassign()">Unassign</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- -- Assign Member modal ----------------------------------------------- -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Assign Members</h3>
+        <button class="modal-close" onclick="closeAssignModal()">&#10005;</button>
+      </div>
+      <div class="modal-search-wrap">
+        <input class="modal-search" id="modalSearch" placeholder="Search available members..." oninput="filterModalList()" autocomplete="off" />
+      </div>
+      <div class="modal-list" id="modalList"></div>
+      <div class="modal-footer">
+        <span class="modal-sel-count" id="modalSelCount">0 selected</span>
+        <div class="modal-footer-btns">
+          <button class="btn btn-ghost btn-sm" onclick="closeAssignModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="modalConfirmBtn" disabled>Assign</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- -- Add Member modal ------------------------------------------------- -->
+  <div class="modal-overlay" id="addAgentModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Add Member</h3>
+        <button class="modal-close" onclick="closeAddAgentModal()">&#10005;</button>
+      </div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+        <div class="form-group">
+          <label>Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="newAgentEmployeeId" class="modal-search" placeholder="e.g. EMP-0042" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Full Name <span style="color:var(--red)">*</span></label>
+          <input type="text" id="newAgentName" class="modal-search" placeholder="e.g. Raven Ompar" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="newAgentStation" class="modal-search" placeholder="e.g. JTV" autocomplete="off" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span></span>
+        <div class="modal-footer-btns">
+          <button class="btn btn-ghost btn-sm" onclick="closeAddAgentModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="addAgentConfirmBtn" onclick="confirmAddAgent()">Add Member</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- -- Edit Member modal ------------------------------------------------ -->
+  <div class="modal-overlay" id="editAgentModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Edit Member</h3>
+        <button class="modal-close" onclick="closeEditAgentModal()">&#10005;</button>
+      </div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+        <div class="form-group">
+          <label>Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="editAgentEmployeeId" class="modal-search" placeholder="e.g. EMP-0042" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Full Name <span style="color:var(--red)">*</span></label>
+          <input type="text" id="editAgentName" class="modal-search" placeholder="e.g. Raven Ompar" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="editAgentStation" class="modal-search" placeholder="e.g. JTV" autocomplete="off" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span></span>
+        <div class="modal-footer-btns">
+          <button class="btn btn-ghost btn-sm" onclick="closeEditAgentModal()">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="editAgentConfirmBtn" onclick="confirmEditAgent()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- -- View Assets modal ------------------------------------------------ -->
+  <div class="modal-overlay" id="assetsModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="assetsModalTitle">Assets</h3>
+          <div style="font-size:12px;color:var(--muted2);margin-top:3px" id="assetsModalSub"></div>
+        </div>
+        <button class="modal-close" onclick="closeAssetsModal()">&#10005;</button>
+      </div>
+      <!-- Add asset inline form (collapsed by default) -->
+      <div id="addAssetFormWrap" style="padding:14px 24px 0;display:none">
+        <div class="add-asset-form">
+          <div class="add-asset-form-title">Assign a new asset</div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label>Asset / Product</label>
+              <select id="newAssetProductId"><option value="">Select a product�</option></select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label>Due Back (optional)</label>
+              <input type="date" id="newAssetDueBack" />
+            </div>
+            <div class="form-group">
+              <label>Notes (optional)</label>
+              <input type="text" id="newAssetNotes" placeholder="e.g. Field use" />
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+            <button class="btn btn-ghost btn-sm" onclick="toggleAddAssetForm(false)">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="confirmAddAssetBtn" onclick="confirmAddAsset()">Confirm</button>
+          </div>
+        </div>
+      </div>
+      <!-- Asset list -->
+      <div class="modal-list" id="assetsList" style="padding:14px 24px;min-height:140px"></div>
+      <div class="modal-footer">
+        <span style="font-size:12px;color:var(--muted2)" id="assetsCount"></span>
+        <div class="modal-footer-btns">
+          <button class="btn btn-view btn-sm" id="addAssetToggleBtn" onclick="toggleAddAssetForm(true)">+ Add Asset</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeAssetsModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js?v=26"></script>
+  <script src="js/auth.js?v=9"></script>
+  <script src="js/toast.js?v=2"></script>
+  <script src="js/sidebar.js?v=77"></script>
+  <script>
+  /* =====================================================================
+
+     Team Structure — full rewrite (clean, no accumulated patches)
+
+     All IDs are normalized to integers at ingestion. 0 is never valid.
+
+     _assignModalUserId is the sole source of truth for assign modal.
+
+     modalSelected stores integers only (positive=DB, negative=synthetic).
+
+  ===================================================================== */
+
+  
+
+  /* -- Helpers --------------------------------------------------------- */
+
+  function toInt(v) {
+
+    const n = parseInt(v, 10);
+
+    return isNaN(n) ? null : n;
+
+  }
+
+  function isValidId(n) {
+
+    return n !== null && typeof n === 'number' && !isNaN(n) && n > 0;
+
+  }
+
+  function normalizeEmployee(e) {
+
+    return { ...e, id: toInt(e.id) };
+
+  }
+
+  function normalizeRow(r) {
+
+    return { ...r, id: toInt(r.id), user_id: toInt(r.user_id), employee_id: toInt(r.employee_id) };
+
+  }
+
+  
+
+  /* -- State ----------------------------------------------------------- */
+
+  let allUsers           = [];
+
+  let allEmployees       = [];
+
+  let allProducts        = [];
+
+  let teamRows           = [];
+
+  let selectedUserId     = null;
+
+  let modalSelected      = new Set();
+
+  let _assignModalUserId = null;
+
+  
+
+  /* -- Avatar helpers -------------------------------------------------- */
+
+  function avatarColor(name) {
+
+    const colors = ['#4f8ef7','#3ecf8e','#f5a623','#9b73f7','#f45b69','#06b6d4'];
+
+    let h = 0;
+
+    for (let i = 0; i < (name || '').length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+
+    return colors[Math.abs(h) % colors.length];
+
+  }
+
+  function initials(name) {
+
+    return (name || '').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
+  }
+
+  
+
+  /* -- Role helpers ---------------------------------------------------- */
+
+  function roleLabel(role) {
+
+    return { admin: 'Admin', manager: 'Manager', viewer: 'Supervisor', staff: 'Staff' }[role] || role;
+
+  }
+
+  function roleBadgeClass(role) {
+
+    return { manager: 'badge-manager', viewer: 'badge-viewer', staff: 'badge-staff', admin: 'badge-manager' }[role] || '';
+
+  }
+
+  function chipClass(role) {
+
+    return { manager: 'blue', viewer: 'green', staff: 'amber' }[role] || '';
+
+  }
+
+  
+
+  /* -- Load everything ------------------------------------------------- */
+
+  async function loadAll() {
+
+    try {
+
+      const [users, employees, team, prodRes] = await Promise.all([
+
+        auth.getUsers(),
+
+        api.getEmployees(),
+
+        api.getTeamStructure(),
+
+        api.getProducts().catch(() => ({ data: [] })),
+
+      ]);
+
+  
+
+      // Normalize and validate all IDs at ingestion — prevents type mismatches throughout
+
+      allUsers = (users || [])
+
+        .filter(u => u.role !== 'admin')
+
+        .map(u => ({ ...u, id: toInt(u.id) }))
+
+        .filter(u => isValidId(u.id));
+
+  
+
+      allEmployees = (employees.data || employees || [])
+
+        .map(normalizeEmployee)
+
+        .filter(e => isValidId(e.id));
+
+  
+
+      teamRows = (team.data || [])
+
+        .map(normalizeRow)
+
+        .filter(r => isValidId(r.id) && isValidId(r.user_id) && isValidId(r.employee_id));
+
+  
+
+      allProducts = prodRes.data || [];
+
+  
+
+      renderLeftPanel();
+
+  
+
+      if (selectedUserId) {
+
+        const user = allUsers.find(u => u.id === selectedUserId);
+
+        if (user) renderDetail(user);
+
+      }
+
+    } catch (e) {
+
+      showToast(e.message || 'Failed to load data', 'error');
+
+    }
+
+  }
+
+  
+
+  /* -- Left panel ----------------------------------------------------- */
+
+  function assignedEmployeeIds() {
+
+    return new Set(teamRows.map(r => r.employee_id));
+
+  }
+
+  
+
+  function renderLeftPanel() {
+
+    const groups = { manager: [], viewer: [], staff: [] };
+
+    for (const u of allUsers) {
+
+      if (groups[u.role]) groups[u.role].push(u);
+
+    }
+
+    renderGroup('managers',    groups.manager, 'manager');
+
+    renderGroup('supervisors', groups.viewer,  'viewer');
+
+    renderGroup('staff',       groups.staff,   'staff');
+
+    renderUnassigned();
+
+    requestAnimationFrame(() => animateLeftPanel());
+
+    // Re-apply active search filter after re-render
+
+    const q = document.getElementById('roleSearch')?.value || '';
+
+    if (q.trim()) filterRoles(q);
+
+  }
+
+  function filterRoles(q) {
+
+    const term = (q || '').toLowerCase().trim();
+
+    ['list-managers','list-supervisors','list-staff'].forEach(listId => {
+
+      const listEl = document.getElementById(listId);
+
+      if (!listEl) return;
+
+      listEl.querySelectorAll('.person-row').forEach(row => {
+
+        const name = (row.querySelector('.person-name')?.textContent || '').toLowerCase();
+
+        const sub  = (row.querySelector('.person-sub')?.textContent  || '').toLowerCase();
+
+        row.style.display = (!term || name.includes(term) || sub.includes(term)) ? '' : 'none';
+
+      });
+
+    });
+
+  }
+
+  
+
+  function renderGroup(key, users, role) {
+
+    const listEl  = document.getElementById(`list-${key}`);
+
+    const countEl = document.getElementById(`count-${key}`);
+
+    countEl.textContent = users.length;
+
+    if (!users.length) {
+
+      listEl.innerHTML = `<div class="empty-pool" style="font-size:11px;padding:6px 10px">No ${key} yet</div>`;
+
+      return;
+
+    }
+
+    listEl.innerHTML = users.map(u => {
+
+      const agentCount = teamRows.filter(r => r.user_id === u.id).length;
+
+      const isActive   = selectedUserId === u.id;
+
+      return `
+
+        <div class="person-row${isActive ? ' active' : ''}" onclick="selectUser(${u.id})" data-user-id="${u.id}">
+
+          <div class="person-avatar" style="background:${avatarColor(u.name)}">${initials(u.name)}</div>
+
+          <div class="person-info">
+
+            <div class="person-name">${esc(u.name)}</div>
+
+            <div class="person-sub">${u.position ? esc(u.position) + ' (' + roleLabel(role) + ')' : roleLabel(role)}</div>
+
+          </div>
+
+          <span class="person-badge ${roleBadgeClass(role)}">${agentCount} ${agentCount !== 1 ? 'Members' : 'Member'}</span>
+
+        </div>`;
+
+    }).join('');
+
+  }
+
+  
+
+  function renderUnassigned() {
+
+    const search = document.getElementById('unassignedSearch');
+
+    if (search) search.value = '';
+
+    const assigned = assignedEmployeeIds();
+
+    const poolFromEmployees = allEmployees.filter(e => !assigned.has(e.id));
+
+    const knownNames = new Set(allEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+    const seenNames  = new Set(poolFromEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+    const poolFromProducts = [];
+
+    allProducts.forEach(p => {
+
+      if (!p.assigned_employee) return;
+
+      const key = p.assigned_employee.trim().toLowerCase();
+
+      if (knownNames.has(key) || seenNames.has(key)) return;
+
+      seenNames.add(key);
+
+      poolFromProducts.push({ id: null, name: p.assigned_employee, employee_id: p.assigned_employee_id || '', station: '', _fromProduct: true });
+
+    });
+
+  
+
+    const pool    = [...poolFromEmployees, ...poolFromProducts];
+
+    const countEl = document.getElementById('count-unassigned');
+
+    const poolEl  = document.getElementById('pool-unassigned');
+
+    countEl.textContent = pool.length;
+
+    if (!pool.length) { poolEl.innerHTML = `<div class="empty-pool">All members are assigned</div>`; return; }
+
+    poolEl.innerHTML = pool.map(e => `
+
+      <div class="unassigned-emp">
+
+        <div class="person-avatar" style="background:${avatarColor(e.name)};width:28px;height:28px;font-size:10px">${initials(e.name)}</div>
+
+        <div class="person-info" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0">
+
+          <div class="person-name" style="font-size:12px;white-space:nowrap">${esc(e.name)}</div>
+
+          ${e.employee_id ? `<span data-empid="${esc(e.employee_id)}" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(41,182,232,0.2);border-radius:8px;padding:1px 6px;white-space:nowrap;">#${esc(e.employee_id)}</span>` : ''}
+
+          ${!e.employee_id && (e.location_name || e.station) ? `<div class="person-sub" style="font-size:10px">${esc(e.location_name || e.station)}</div>` : ''}
+
+        </div>
+
+        <button class="btn-edit" style="font-size:10px;padding:3px 8px;flex-shrink:0" onclick="openEditAgentModal(${e._fromProduct ? `'_product:${esc(e.name)}'` : e.id})">Edit</button>
+
+      </div>`).join('');
+
+  }
+
+  function filterUnassignedPool(q) {
+
+    const term = (q || '').toLowerCase().trim();
+
+    const poolEl = document.getElementById('pool-unassigned');
+
+    if (!poolEl) return;
+
+    poolEl.querySelectorAll('.unassigned-emp').forEach(row => {
+
+      const name = (row.querySelector('.person-name')?.textContent || '').toLowerCase();
+
+      const id   = (row.querySelector('[data-empid]')?.dataset.empid || '').toLowerCase();
+
+      row.style.display = (!term || name.includes(term) || id.includes(term)) ? '' : 'none';
+
+    });
+
+  }
+
+  
+
+  /* -- User selection / detail panel ---------------------------------- */
+
+  function selectUser(userId) {
+
+    selectedUserId = toInt(userId);
+
+    const user = allUsers.find(u => u.id === selectedUserId);
+
+    if (!user) return;
+
+    document.querySelectorAll('.person-row').forEach(el => {
+
+      el.classList.toggle('active', toInt(el.dataset.userId) === selectedUserId);
+
+    });
+
+    renderDetail(user);
+
+  }
+
+  
+
+  function renderDetail(user) {
+
+    const myRows  = teamRows.filter(r => r.user_id === user.id);
+
+    document.getElementById('detailEmpty').style.display   = 'none';
+
+    document.getElementById('detailContent').style.display = 'block';
+
+    const locText  = user.location_name ? `<span class="chip">${esc(user.location_name)}</span>` : '';
+
+    const roleChip = `<span class="chip ${chipClass(user.role)}">${user.position ? esc(user.position) + ' (' + roleLabel(user.role) + ')' : roleLabel(user.role)}</span>${user.employee_id ? `<span class="chip" style="font-family:'DM Mono',monospace;font-size:11px;">#${esc(user.employee_id)}</span>` : ''}`;
+
+    const safeName = user.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+
+    document.getElementById('detailContent').innerHTML = `
+
+      <div class="detail-hd">
+
+        <div class="detail-hd-left">
+
+          <div class="detail-avatar-lg" style="background:${avatarColor(user.name)}">${initials(user.name)}</div>
+
+          <div>
+
+            <div class="detail-name">${esc(user.name)}</div>
+
+            <div class="detail-chips">${roleChip}${locText}</div>
+
+          </div>
+
+        </div>
+
+        <button class="btn btn-view btn-sm" onclick="openAssetsModal('${safeName}', '')">&#128230; View Assets</button>
+
+      </div>
+
+      <div class="section-hd">
+
+        <div class="section-title">Assigned Members (${myRows.length})</div>
+
+        <button class="btn btn-primary btn-sm" onclick="openAssignModal(${user.id})">+ Assign Member</button>
+
+      </div>
+
+      <div id="agentList">
+
+        ${myRows.length ? myRows.map(r => renderAgentRow(r)).join('') : `
+
+          <div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px">
+
+            No members assigned yet.<br>Click &ldquo;+ Assign Member&rdquo; to get started.
+
+          </div>`}
+
+      </div>`;
+
+    requestAnimationFrame(() => {
+
+      const content = document.getElementById('detailContent');
+
+      content.querySelectorAll('.detail-hd, .section-hd, .agent-row').forEach((el, i) => {
+
+        el.classList.remove(...Array.from(el.classList).filter(c => c.startsWith('ts-')));
+
+        el.classList.add('ts-animate');
+
+        el.classList.add(i < 20 ? `ts-d${i + 1}` : 'ts-d20');
+
+      });
+
+    });
+
+  }
+
+  
+
+  function renderAgentRow(r) {
+
+    const loc = r.location_name || r.employee_station || '';
+
+    const emp = allEmployees.find(e => e.id === r.employee_id);
+
+    const empDisplayId = emp?.employee_id || '';
+
+    return `
+
+      <div class="agent-row" id="agent-row-${r.id}">
+
+        <div class="agent-avatar" style="background:${avatarColor(r.employee_name)}">${initials(r.employee_name)}</div>
+
+        <div class="agent-info">
+
+          <div class="agent-name">${esc(r.employee_name)}</div>
+
+          ${empDisplayId ? `<div class="agent-sub" style="font-family:'DM Mono',monospace">${esc(empDisplayId)}</div>` : ''}
+
+        </div>
+
+        ${loc ? `<span class="agent-station">${esc(loc)}</span>` : ''}
+
+        <button class="btn btn-view btn-sm" onclick="openAssetsModal('${esc(r.employee_name)}', '${esc(empDisplayId)}')">&#128230; Assets</button>
+
+        <button class="btn-edit" onclick="openEditAgentModal(${r.employee_id})">Edit</button>
+
+        <button class="btn btn-danger btn-sm" onclick="confirmUnassign(${r.id}, ${r.user_id}, '${esc(r.employee_name)}')">Unassign</button>
+
+      </div>`;
+
+  }
+
+  
+
+  /* -- Unassign -------------------------------------------------------- */
+
+  let _pendingUnassign = null;
+
+  
+
+  function confirmUnassign(rowId, userId, name) {
+
+    _pendingUnassign = { rowId: toInt(rowId), userId: toInt(userId) };
+
+    document.getElementById('unassignAgentName').textContent = name;
+
+    document.getElementById('unassignModal').classList.add('open');
+
+  }
+
+  function closeUnassignModal() {
+
+    document.getElementById('unassignModal').classList.remove('open');
+
+    _pendingUnassign = null;
+
+  }
+
+  async function unassignAgent(rowId, userId) {
+
+    try {
+
+      await api.unassignAgent(rowId);
+
+      teamRows = teamRows.filter(r => r.id !== rowId);
+
+      renderLeftPanel();
+
+      const user = allUsers.find(u => u.id === userId);
+
+      if (user) renderDetail(user);
+
+      showToast('Member unassigned', 'success');
+
+    } catch (e) {
+
+      showToast(e.message || 'Failed to unassign', 'error');
+
+    }
+
+  }
+
+  async function doUnassign() {
+
+    if (!_pendingUnassign) return;
+
+    const { rowId, userId } = _pendingUnassign;
+
+    const btn = document.getElementById('unassignConfirmBtn');
+
+    btn.disabled = true; btn.textContent = 'Unassigning…';
+
+    closeUnassignModal();
+
+    await unassignAgent(rowId, userId);
+
+    btn.disabled = false; btn.textContent = 'Unassign';
+
+  }
+
+  document.getElementById('unassignModal').addEventListener('click', function(e) {
+
+    if (e.target === this) closeUnassignModal();
+
+  });
+
+  
+
+  /* -- Assign modal ---------------------------------------------------- */
+
+  // Maps synthetic negative IDs → product-sourced employee entries
+
+  const _productPoolMap = new Map();
+
+  
+
+  function _buildUnassignedPool() {
+
+    const assigned = assignedEmployeeIds();
+
+    // Only real employees with valid positive IDs that aren't already assigned
+
+    const poolFromEmployees = allEmployees.filter(e => isValidId(e.id) && !assigned.has(e.id));
+
+  
+
+    const knownNames = new Set(allEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+    const seenNames  = new Set(poolFromEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+  
+
+    _productPoolMap.clear();
+
+    let syntheticId = -1;
+
+    allProducts.forEach(p => {
+
+      if (!p.assigned_employee) return;
+
+      const key = p.assigned_employee.trim().toLowerCase();
+
+      if (knownNames.has(key) || seenNames.has(key)) return;
+
+      seenNames.add(key);
+
+      _productPoolMap.set(syntheticId, {
+
+        id: syntheticId, name: p.assigned_employee,
+
+        employee_id: p.assigned_employee_id || '', station: '', _fromProduct: true,
+
+      });
+
+      syntheticId--;
+
+    });
+
+  
+
+    return [...poolFromEmployees, ..._productPoolMap.values()];
+
+  }
+
+  
+
+  function openAssignModal(userId) {
+
+    const uid = toInt(userId);
+
+    if (!isValidId(uid)) { showToast('Invalid user', 'error'); return; }
+
+    _assignModalUserId = uid;
+
+    modalSelected.clear();
+
+    document.getElementById('modalSearch').value = '';
+
+    document.getElementById('modalConfirmBtn').disabled = true;
+
+    document.getElementById('modalSelCount').textContent = '0 members selected';
+
+    renderModalList('');
+
+    document.getElementById('assignModal').classList.add('open');
+
+    setTimeout(() => document.getElementById('modalSearch').focus(), 80);
+
+  }
+
+  function closeAssignModal() {
+
+    document.getElementById('assignModal').classList.remove('open');
+
+    _assignModalUserId = null;
+
+  }
+
+  function filterModalList() {
+
+    renderModalList(document.getElementById('modalSearch').value.toLowerCase().trim());
+
+  }
+
+  
+
+  function renderModalList(q) {
+
+    const available = _buildUnassignedPool();
+
+    const filtered  = q
+
+      ? available.filter(e =>
+
+          e.name.toLowerCase().includes(q) ||
+
+          (e.employee_id || '').toLowerCase().includes(q) ||
+
+          (e.station || '').toLowerCase().includes(q))
+
+      : available;
+
+  
+
+    const listEl = document.getElementById('modalList');
+
+    if (!filtered.length) {
+
+      listEl.innerHTML = `<div class="modal-empty">${available.length ? 'No matches found' : 'All members are already assigned'}</div>`;
+
+      return;
+
+    }
+
+    listEl.innerHTML = filtered.map(e => {
+
+      const sel = modalSelected.has(e.id);
+
+      const loc = e.location_name || e.station || '';
+
+      return `
+
+        <div class="modal-emp-row${sel ? ' selected' : ''}" data-emp-id="${e.id}">
+
+          <div class="check">${sel ? '&#10003;' : ''}</div>
+
+          <div class="person-avatar" style="background:${avatarColor(e.name)};width:30px;height:30px;font-size:11px">${initials(e.name)}</div>
+
+          <div class="modal-emp-info">
+
+            <div class="modal-emp-name" style="display:flex;align-items:center;gap:6px;">
+
+              ${esc(e.name)}
+
+              ${e.employee_id ? `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(41,182,232,0.2);border-radius:8px;padding:1px 6px;">#${esc(e.employee_id)}</span>` : ''}
+
+            </div>
+
+            ${loc ? `<div class="modal-emp-sub">${esc(loc)}</div>` : ''}
+
+          </div>
+
+        </div>`;
+
+    }).join('');
+
+  }
+
+  
+
+  function toggleModalEmp(rawId) {
+
+    // rawId comes from data-emp-id attribute — could be positive (real) or negative (synthetic)
+
+    const empId = toInt(rawId);
+
+    if (empId === null || empId === 0) return;  // 0 and null are never valid
+
+  
+
+    if (modalSelected.has(empId)) modalSelected.delete(empId);
+
+    else modalSelected.add(empId);
+
+  
+
+    const row = document.querySelector(`[data-emp-id="${empId}"]`);
+
+    if (row) {
+
+      const sel = modalSelected.has(empId);
+
+      row.classList.toggle('selected', sel);
+
+      row.querySelector('.check').innerHTML = sel ? '&#10003;' : '';
+
+    }
+
+  
+
+    const n = modalSelected.size;
+
+    document.getElementById('modalSelCount').textContent = `${n} member${n !== 1 ? 's' : ''} selected`;
+
+    document.getElementById('modalConfirmBtn').disabled = n === 0;
+
+  }
+
+  
+
+  async function confirmAssign() {
+
+    const userId = _assignModalUserId;
+
+    if (!isValidId(userId)) {
+
+      showToast('No user selected', 'error');
+
+      return;
+
+    }
+
+    if (modalSelected.size === 0) {
+
+      showToast('No members selected', 'error');
+
+      return;
+
+    }
+
+  
+
+    const btn = document.getElementById('modalConfirmBtn');
+
+    btn.disabled = true;
+
+    btn.textContent = 'Assigning\u2026';
+
+  
+
+    try {
+
+      const realIds = [];
+
+  
+
+      for (const id of modalSelected) {
+
+        if (id > 0) {
+
+          // Real employee — send as-is
+
+          realIds.push(id);
+
+        } else {
+
+          // Synthetic (product-sourced) — create a real employee record first
+
+          const entry = _productPoolMap.get(id);
+
+          if (!entry) continue;
+
+          const body = { name: entry.name };
+
+          if (entry.employee_id) body.employee_id = entry.employee_id;
+
+          const res    = await api.createEmployee(body);
+
+          const newEmp = normalizeEmployee(res.data || res);
+
+          if (!isValidId(newEmp.id)) continue;
+
+          allEmployees.push(newEmp);
+
+          const oldName = entry.name;
+
+          const affected = allProducts.filter(p => p.assigned_employee === oldName).map(p => p.id);
+
+          await Promise.all(affected.map(pid =>
+
+            api.updateProduct(pid, {
+
+              assigned_employee:    newEmp.name,
+
+              assigned_employee_id: newEmp.employee_id || entry.employee_id || null,
+
+            })
+
+          ));
+
+          allProducts = allProducts.map(p =>
+
+            p.assigned_employee === oldName
+
+              ? { ...p, assigned_employee: newEmp.name, assigned_employee_id: newEmp.employee_id || null }
+
+              : p
+
+          );
+
+          realIds.push(newEmp.id);
+
+        }
+
+      }
+
+  
+
+      if (realIds.length === 0) {
+
+        showToast('No valid members to assign', 'error');
+
+        return;
+
+      }
+
+  
+
+      const res     = await api.assignAgents(userId, realIds);
+
+      const newRows = (res.data || []).map(normalizeRow).filter(r => isValidId(r.id) && isValidId(r.user_id) && isValidId(r.employee_id));
+
+      teamRows = [...teamRows.filter(r => r.user_id !== userId), ...newRows];
+
+  
+
+      closeAssignModal();
+
+      renderLeftPanel();
+
+      const user = allUsers.find(u => u.id === userId);
+
+      if (user) renderDetail(user);
+
+      showAssignSuccess(realIds.length);
+
+    } catch (e) {
+
+      showToast(e.message || 'Failed to assign', 'error');
+
+    } finally {
+
+      btn.disabled = false;
+
+      btn.textContent = 'Assign';
+
+    }
+
+  }
+
+  
+
+  document.getElementById('assignModal').addEventListener('click', function(e) {
+
+    if (e.target === this) closeAssignModal();
+
+  });
+
+  document.getElementById('assetsModal').addEventListener('click', function(e) {
+
+    if (e.target === this) closeAssetsModal();
+
+  });
+
+  
+
+  /* -- Assets modal ---------------------------------------------------- */
+
+  let currentAgentName = null;
+
+  let productsLoaded   = false;
+
+  
+
+  async function openAssetsModal(employeeName, employeeId) {
+
+    currentAgentName = employeeName;
+
+    document.getElementById('assetsModalTitle').textContent = employeeName;
+
+    document.getElementById('assetsModalSub').textContent   = employeeId ? 'Active assigned assets' : 'Active assets assigned to this user';
+
+    document.getElementById('assetsCount').textContent      = '';
+
+    document.getElementById('assetsList').innerHTML         = '<div class="modal-empty">Loading\u2026</div>';
+
+    document.getElementById('addAssetFormWrap').style.display  = 'none';
+
+    document.getElementById('addAssetToggleBtn').style.display = '';
+
+    document.getElementById('assetsModal').classList.add('open');
+
+    try {
+
+      const [assetsRes] = await Promise.all([api.getAssignmentsByAssignee(employeeName), loadProductsOnce()]);
+
+      renderAssetsList(assetsRes.data || assetsRes || []);
+
+    } catch(e) {
+
+      document.getElementById('assetsList').innerHTML = `<div class="modal-empty" style="color:var(--red)">${esc(e.message)}</div>`;
+
+    }
+
+  }
+
+  function closeAssetsModal() {
+
+    document.getElementById('assetsModal').classList.remove('open');
+
+    currentAgentName = null;
+
+    const wrap = document.getElementById('addAssetFormWrap');
+
+    if (wrap) wrap.style.display = 'none';
+
+    const btn = document.getElementById('addAssetToggleBtn');
+
+    if (btn) btn.style.display = '';
+
+  }
+
+  function renderAssetsList(assets) {
+
+    const listEl = document.getElementById('assetsList');
+
+    document.getElementById('assetsCount').textContent = `${assets.length} active asset${assets.length !== 1 ? 's' : ''}`;
+
+    if (!assets.length) { listEl.innerHTML = '<div class="modal-empty">No active assets assigned to this agent.</div>'; return; }
+
+    const statusIcon  = { working: '\uD83D\uDFE2', damaged: '\uD83D\uDD34', repair: '\uD83D\uDFE1' };
+
+    const statusClass = { working: 'badge-working', damaged: 'badge-damaged', repair: 'badge-repair' };
+
+    listEl.innerHTML = assets.map(a => {
+
+      const st = (a.asset_status || 'assigned').toLowerCase();
+
+      const badge = statusClass[st] || 'badge-working';
+
+      const loc   = a.location_name || '\u2014';
+
+      const serial = a.serial_number || a.product_sku || '';
+
+      return `
+
+        <div class="asset-item" id="asset-item-${a.id}">
+
+          <div class="asset-item-icon">${statusIcon[st] || '\uD83D\uDCE6'}</div>
+
+          <div class="asset-item-info">
+
+            <div class="asset-item-name">${esc(a.product_name || 'Unknown product')}</div>
+
+            <div class="asset-item-sku">${serial ? esc(serial) : ''}${a.category_name ? ' &middot; ' + esc(a.category_name) : ''}</div>
+
+          </div>
+
+          <span class="agent-station" style="flex-shrink:0">${esc(loc)}</span>
+
+          <span class="asset-status-badge ${badge}">${st.charAt(0).toUpperCase() + st.slice(1)}</span>
+
+          <button class="btn-return" id="return-btn-${a.id}" onclick="returnAssetFromModal(${a.id})">Return</button>
+
+        </div>`;
+
+    }).join('');
+
+  }
+
+  async function returnAssetFromModal(assignmentId) {
+
+    const btn = document.getElementById(`return-btn-${assignmentId}`);
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Returning\u2026'; }
+
+    try {
+
+      await api.returnAsset(assignmentId);
+
+      const row = document.getElementById(`asset-item-${assignmentId}`);
+
+      if (row) row.remove();
+
+      const listEl = document.getElementById('assetsList');
+
+      const remaining = listEl.querySelectorAll('.asset-item').length;
+
+      document.getElementById('assetsCount').textContent = `${remaining} active asset${remaining !== 1 ? 's' : ''}`;
+
+      if (!remaining) listEl.innerHTML = '<div class="modal-empty">No active assets assigned to this agent.</div>';
+
+      showToast('Asset returned successfully', 'success');
+
+    } catch(e) {
+
+      if (btn) { btn.disabled = false; btn.textContent = 'Return'; }
+
+      showToast(e.message || 'Failed to return asset', 'error');
+
+    }
+
+  }
+
+  async function loadProductsOnce() {
+
+    if (productsLoaded) return;
+
+    const res = await api.getProducts();
+
+    allProducts    = res.data || res || [];
+
+    productsLoaded = true;
+
+    populateProductDropdown();
+
+  }
+
+  function populateProductDropdown() {
+
+    const sel = document.getElementById('newAssetProductId');
+
+    const available = allProducts.filter(p => !p.asset_status || p.asset_status !== 'assigned');
+
+    sel.innerHTML = '<option value="">Select a product\u2026</option>' +
+
+      available.map(p => `<option value="${p.id}">[${esc(p.sku || p.id)}] ${esc(p.name)}${p.category_name ? ' \u00b7 ' + esc(p.category_name) : ''}</option>`).join('');
+
+  }
+
+  function toggleAddAssetForm(show) {
+
+    document.getElementById('addAssetFormWrap').style.display  = show ? '' : 'none';
+
+    document.getElementById('addAssetToggleBtn').style.display = show ? 'none' : '';
+
+    if (show) {
+
+      document.getElementById('newAssetProductId').value = '';
+
+      document.getElementById('newAssetDueBack').value   = '';
+
+      document.getElementById('newAssetNotes').value     = '';
+
+      if (productsLoaded) populateProductDropdown();
+
+    }
+
+  }
+
+  async function confirmAddAsset() {
+
+    const productId = parseInt(document.getElementById('newAssetProductId').value);
+
+    if (!productId) { showToast('Please select a product', 'error'); return; }
+
+    if (!currentAgentName) return;
+
+    const btn = document.getElementById('confirmAddAssetBtn');
+
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
+
+    try {
+
+      await api.createAssignment({
+
+        product_id:    productId,
+
+        assignee_name: currentAgentName,
+
+        assigned_by:   auth.currentUser?.name || 'Admin',
+
+        due_back:      document.getElementById('newAssetDueBack').value || null,
+
+        notes:         document.getElementById('newAssetNotes').value   || null,
+
+      });
+
+      const res    = await api.getAssignmentsByAssignee(currentAgentName);
+
+      renderAssetsList(res.data || res || []);
+
+      toggleAddAssetForm(false);
+
+      showToast('Asset assigned successfully', 'success');
+
+    } catch(e) {
+
+      showToast(e.message || 'Failed to assign asset', 'error');
+
+    } finally {
+
+      btn.disabled = false; btn.textContent = 'Confirm';
+
+    }
+
+  }
+
+  
+
+  /* -- Edit Agent modal ------------------------------------------------ */
+
+  let _editingEmployeeId  = null;
+
+  let _editingProductName = null;
+
+  
+
+  function openEditAgentModal(empId) {
+
+    _editingEmployeeId  = null;
+
+    _editingProductName = null;
+
+    if (typeof empId === 'string' && empId.startsWith('_product:')) {
+
+      const name = empId.slice(9);
+
+      const prod = allProducts.find(p => p.assigned_employee === name);
+
+      _editingProductName = name;
+
+      document.getElementById('editAgentEmployeeId').value = prod?.assigned_employee_id || '';
+
+      document.getElementById('editAgentName').value       = name;
+
+      document.getElementById('editAgentStation').value    = '';
+
+    } else {
+
+      const emp = allEmployees.find(e => e.id === toInt(empId));
+
+      if (!emp) return;
+
+      _editingEmployeeId = emp.id;
+
+      document.getElementById('editAgentEmployeeId').value = emp.employee_id || '';
+
+      document.getElementById('editAgentName').value       = emp.name        || '';
+
+      document.getElementById('editAgentStation').value    = emp.station     || '';
+
+    }
+
+    document.getElementById('editAgentConfirmBtn').disabled    = false;
+
+    document.getElementById('editAgentConfirmBtn').textContent = 'Save Changes';
+
+    document.getElementById('editAgentModal').classList.add('open');
+
+    setTimeout(() => document.getElementById('editAgentName').focus(), 80);
+
+  }
+
+  function closeEditAgentModal() {
+
+    document.getElementById('editAgentModal').classList.remove('open');
+
+    _editingEmployeeId  = null;
+
+    _editingProductName = null;
+
+  }
+
+  async function confirmEditAgent() {
+
+    const name       = document.getElementById('editAgentName').value.trim();
+
+    const employeeId = document.getElementById('editAgentEmployeeId').value.trim();
+
+    const station    = document.getElementById('editAgentStation').value.trim();
+
+    if (!name) { showToast('Name is required', 'error'); document.getElementById('editAgentName').focus(); return; }
+
+    const btn = document.getElementById('editAgentConfirmBtn');
+
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
+
+    try {
+
+      if (_editingProductName !== null) {
+
+        const body = { name };
+
+        if (employeeId) body.employee_id = employeeId;
+
+        if (station)    body.station     = station;
+
+        const res    = await api.createEmployee(body);
+
+        const newEmp = normalizeEmployee(res.data || res);
+
+        if (isValidId(newEmp.id)) allEmployees.push(newEmp);
+
+        const oldName     = _editingProductName;
+
+        const affectedIds = allProducts.filter(p => p.assigned_employee === oldName).map(p => p.id);
+
+        await Promise.all(affectedIds.map(id => api.updateProduct(id, { assigned_employee: name, assigned_employee_id: employeeId || null })));
+
+        allProducts = allProducts.map(p => p.assigned_employee === oldName ? { ...p, assigned_employee: name, assigned_employee_id: employeeId || null } : p);
+
+        closeEditAgentModal();
+
+        renderLeftPanel();
+
+        showToast(`"${name}" saved as an agent`, 'success');
+
+        return;
+
+      }
+
+      const res = await api.updateEmployee(_editingEmployeeId, { name, employee_id: employeeId, station });
+
+      const updated = res.data || res;
+
+      const idx = allEmployees.findIndex(e => e.id === _editingEmployeeId);
+
+      if (idx !== -1) allEmployees[idx] = normalizeEmployee({ ...allEmployees[idx], ...updated });
+
+      teamRows = teamRows.map(r => r.employee_id === _editingEmployeeId ? { ...r, employee_name: updated.name, employee_station: updated.station } : r);
+
+      closeEditAgentModal();
+
+      renderLeftPanel();
+
+      if (selectedUserId) {
+
+        const user = allUsers.find(u => u.id === selectedUserId);
+
+        if (user) renderDetail(user);
+
+      }
+
+      showToast(`Agent "${name}" updated`, 'success');
+
+    } catch (e) {
+
+      showToast(e.message || 'Failed to update agent', 'error');
+
+    } finally {
+
+      btn.disabled = false; btn.textContent = 'Save Changes';
+
+    }
+
+  }
+
+  document.getElementById('editAgentModal').addEventListener('click', function(e) { if (e.target === this) closeEditAgentModal(); });
+
+  document.getElementById('editAgentName').addEventListener('keydown', function(e) { if (e.key === 'Enter') confirmEditAgent(); });
+
+  
+
+  /* -- Add Agent modal ------------------------------------------------- */
+
+  function openAddAgentModal() {
+
+    document.getElementById('newAgentEmployeeId').value = '';
+
+    document.getElementById('newAgentName').value       = '';
+
+    document.getElementById('newAgentStation').value    = '';
+
+    document.getElementById('addAgentConfirmBtn').disabled    = false;
+
+    document.getElementById('addAgentConfirmBtn').textContent = 'Add Agent';
+
+    document.getElementById('addAgentModal').classList.add('open');
+
+    setTimeout(() => document.getElementById('newAgentEmployeeId').focus(), 80);
+
+  }
+
+  function closeAddAgentModal() {
+
+    document.getElementById('addAgentModal').classList.remove('open');
+
+  }
+
+  async function confirmAddAgent() {
+
+    const employeeId = document.getElementById('newAgentEmployeeId').value.trim();
+
+    const name    = document.getElementById('newAgentName').value.trim();
+
+    const station = document.getElementById('newAgentStation').value.trim();
+
+    if (!name) { showToast('Name is required', 'error'); document.getElementById('newAgentName').focus(); return; }
+
+    const btn = document.getElementById('addAgentConfirmBtn');
+
+    btn.disabled = true; btn.textContent = 'Adding\u2026';
+
+    try {
+
+      const body = { name };
+
+      if (employeeId) body.employee_id = employeeId;
+
+      if (station)    body.station     = station;
+
+      const res    = await api.createEmployee(body);
+
+      const newEmp = normalizeEmployee(res.data || res);
+
+      if (isValidId(newEmp.id)) allEmployees.push(newEmp);
+
+      renderLeftPanel();
+
+      closeAddAgentModal();
+
+      showToast(`Agent "${name}" added`, 'success');
+
+    } catch (e) {
+
+      showToast(e.message || 'Failed to add agent', 'error');
+
+    } finally {
+
+      btn.disabled = false; btn.textContent = 'Add Agent';
+
+    }
+
+  }
+
+  document.getElementById('addAgentModal').addEventListener('click', function(e) { if (e.target === this) closeAddAgentModal(); });
+
+  document.getElementById('newAgentName').addEventListener('keydown', function(e) { if (e.key === 'Enter') confirmAddAgent(); });
+
+  
+
+  /* -- Bootstrap ------------------------------------------------------- */
+
+  auth.initPage({ admin: true, onReady: () => loadAll() });
+
+  
+
+  document.getElementById('modalConfirmBtn').addEventListener('click', function(e) {
+
+    e.preventDefault();
+
+    e.stopPropagation();
+
+    if (!this.disabled) confirmAssign();
+
+  });
+
+  
+
+  document.getElementById('modalList').addEventListener('click', function(e) {
+
+    const row = e.target.closest('.modal-emp-row');
+
+    if (row) toggleModalEmp(row.getAttribute('data-emp-id'));
+
+  });
+
+  
+
+  /* -- Entrance animations --------------------------------------------- */
+
+  function animateLeftPanel() {
+
+    const rows = document.querySelectorAll('#leftPanel .person-row, #leftPanel .unassigned-emp');
+
+    rows.forEach((el, i) => {
+
+      el.classList.remove(...Array.from(el.classList).filter(c => c.startsWith('ts-')));
+
+      el.classList.add('ts-animate');
+
+      el.classList.add(i < 20 ? `ts-d${i + 1}` : 'ts-d20');
+
+    });
+
+    document.querySelectorAll('#leftPanel .role-group-header, .unassigned-header').forEach((el, i) => {
+
+      el.style.animationDelay = `${(i * 0.05).toFixed(2)}s`;
+
+    });
+
+  }
+
+  /* -- Assign success modal ------------------------------------------- */
+
+  function showAssignSuccess(count) {
+
+    const modal = document.getElementById('assignSuccessModal');
+
+    document.getElementById('assignSuccessCount').textContent =
+
+      `${count} member${count !== 1 ? 's' : ''} successfully assigned.`;
+
+    modal.classList.add('open');
+
+    clearTimeout(modal._autoClose);
+
+    modal._autoClose = setTimeout(() => modal.classList.remove('open'), 3500);
+
+  }
+
+  </script>
+
+  <!-- -- Assign success modal ------------------------------------------ -->
+  <div class="modal-overlay" id="assignSuccessModal" style="align-items:flex-end;justify-content:flex-end;padding:28px;pointer-events:none;background:transparent;backdrop-filter:none" onclick="if(event.target===this)this.classList.remove('open')">
+    <div style="pointer-events:auto;background:#ffffff;border:1.5px solid #16a34a;border-radius:14px;padding:20px 28px;box-shadow:0 8px 32px rgba(22,163,74,0.18);display:flex;align-items:center;gap:14px;max-width:340px;animation:modalIn .22s cubic-bezier(0.22,1,0.36,1) both">
+      <div style="width:38px;height:38px;border-radius:50%;background:rgba(22,163,74,0.1);border:1.5px solid #16a34a;display:grid;place-items:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4.5 4.5 7.5-9" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#16a34a">Assignment Complete</div>
+        <div style="font-size:12px;color:#374151;margin-top:2px" id="assignSuccessCount"></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

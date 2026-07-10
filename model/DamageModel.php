@@ -13,6 +13,7 @@ class DamageModel {
             'SELECT d.*,
                     COALESCE(p.name, d.product_name_cache) AS product_name,
                     COALESCE(p.sku,  d.product_sku_cache)  AS product_sku,
+                    p.serial_number AS serial_number,
                     c.name AS category_name,
                     COALESCE(d.location_id, p.location_id) AS location_id,
                     l.name AS location_name
@@ -30,6 +31,7 @@ class DamageModel {
             'SELECT d.*,
                     COALESCE(p.name, d.product_name_cache) AS product_name,
                     COALESCE(p.sku,  d.product_sku_cache)  AS product_sku,
+                    p.serial_number AS serial_number,
                     c.name AS category_name,
                     COALESCE(d.location_id, p.location_id) AS location_id,
                     l.name AS location_name
@@ -48,6 +50,7 @@ class DamageModel {
             'SELECT d.*,
                     COALESCE(p.name, d.product_name_cache) AS product_name,
                     COALESCE(p.sku,  d.product_sku_cache)  AS product_sku,
+                    p.serial_number AS serial_number,
                     c.name AS category_name,
                     COALESCE(d.location_id, p.location_id) AS location_id,
                     l.name AS location_name

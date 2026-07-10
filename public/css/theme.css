@@ -93,15 +93,23 @@ html[data-theme="light"] {
 
 /* ── Buttons ── */
 [data-theme="light"] .btn         { color: #334155 !important; border-color: rgba(0,0,0,0.13) !important; background: transparent !important; }
-[data-theme="light"] .btn:hover   { background: rgba(0,0,0,0.05) !important; color: #0f172a !important; }
+[data-theme="light"] .btn:hover   { background: rgba(0,0,0,0.08) !important; color: #ffffff !important; }
 [data-theme="light"] .btn-primary { background: #2563eb !important; color: #fff !important; border-color: #2563eb !important; }
-[data-theme="light"] .btn-primary:hover { background: #1d4ed8 !important; }
+[data-theme="light"] .btn-primary:hover { background: #1d4ed8 !important; color: #fff !important; }
 [data-theme="light"] .btn-ghost   { background: transparent !important; color: #334155 !important; }
-[data-theme="light"] .btn-ghost:hover { background: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .btn-ghost:hover { background: rgba(0,0,0,0.08) !important; color: #ffffff !important; }
 [data-theme="light"] .btn-danger  { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; }
+[data-theme="light"] .btn-danger:hover  { color: #ffffff !important; background: rgba(220,38,38,0.85) !important; }
 [data-theme="light"] .btn-amber   { background: rgba(217,119,6,0.10) !important; color: #d97706 !important; }
+[data-theme="light"] .btn-amber:hover   { color: #ffffff !important; background: rgba(217,119,6,0.85) !important; }
 [data-theme="light"] .btn-warn    { background: rgba(217,119,6,0.10) !important; color: #d97706 !important; border-color: rgba(217,119,6,0.25) !important; }
+[data-theme="light"] .btn-warn:hover    { color: #ffffff !important; background: rgba(217,119,6,0.85) !important; }
 [data-theme="light"] .btn-success { background: rgba(22,163,74,0.10) !important; color: #16a34a !important; }
+[data-theme="light"] .btn-success:hover { color: #ffffff !important; background: rgba(22,163,74,0.85) !important; }
+
+/* Dark mode — ensure hover text is always white */
+[data-theme="dark"] .btn:hover        { color: #ffffff !important; }
+[data-theme="dark"] .btn-ghost:hover  { color: #ffffff !important; }
 
 /* ── Modals ── */
 [data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.45) !important; }
@@ -128,13 +136,17 @@ html[data-theme="light"] {
 [data-theme="light"] .sidebar-footer      { border-top-color: rgba(255,255,255,0.12) !important; }
 [data-theme="light"] .user-name           { color: #ffffff !important; }
 [data-theme="light"] .user-role           { color: rgba(255,255,255,0.55) !important; }
-[data-theme="light"] .logout-btn          { color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .logout-btn          { color: #9aa0b2 !important; }
 [data-theme="light"] .logout-btn:hover    { background: rgba(244,91,105,0.25) !important; color: #ffffff !important; }
-[data-theme="light"] .theme-toggle-btn    { color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .theme-toggle-btn    { color: #9aa0b2 !important; }
 [data-theme="light"] .theme-toggle-btn:hover { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
 [data-theme="light"] .nav-badge           { background: #29b6e8 !important; color: #fff !important; }
 [data-theme="light"] .sidebar-folder-body { background: rgba(0,0,0,0.15) !important; }
 [data-theme="light"] .nav-dot             { background: rgba(255,255,255,0.45) !important; }
+
+/* ── Sidebar icon buttons — dark mode explicit color ── */
+[data-theme="dark"] .logout-btn       { color: #9aa0b2 !important; }
+[data-theme="dark"] .theme-toggle-btn { color: #9aa0b2 !important; }
 [data-theme="light"] .nav-item.active .nav-dot { background: #ffffff !important; }
 [data-theme="light"] .avatar              { background: linear-gradient(135deg, #29b6e8, #1e3a8a) !important; }
 
@@ -340,6 +352,29 @@ html[data-theme="light"] {
 
 .topbar-actions { overflow: visible; }
 
+/* Header right: suppress color/background transitions so user info
+   appears instantly with no flash when auth resolves */
+.req-header-right,
+.req-header-right * {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+/* Still allow theme-toggle spin and logout hover color to work */
+.req-icon-btn {
+  transition: background 0.15s ease, color 0.15s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* Sidebar footer: suppress color transition so user name/role appear
+   instantly when auth resolves — no text fade-in blink */
+.sidebar-footer,
+.sidebar-footer * {
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+              background 0.15s ease !important;
+}
+.logout-btn, .theme-toggle-btn {
+  transition: background 0.15s ease, color 0.15s ease,
+              transform 0.15s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
 .loc-badge {
   font-size: 12px;
   color: var(--blue, #29b6e8);
@@ -407,7 +442,7 @@ html[data-theme="light"] {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -417,7 +452,7 @@ html[data-theme="light"] {
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -438,19 +473,19 @@ html[data-theme="light"] {
 
 /* ── Page entrance ──────────────────────────────────────────────────── */
 
-/* Every main content area fades + slides up on load */
+/* Layout wrappers fade in gently — no slide so the page doesn't jump */
 .main,
 .page,
 .content,
 .wrap {
-  animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeIn 0.25s ease both;
 }
 
-/* Staggered stat cards */
-.stat-card:nth-child(1) { animation: slideUp 0.35s 0.05s cubic-bezier(0.22,1,0.36,1) both; }
-.stat-card:nth-child(2) { animation: slideUp 0.35s 0.10s cubic-bezier(0.22,1,0.36,1) both; }
-.stat-card:nth-child(3) { animation: slideUp 0.35s 0.15s cubic-bezier(0.22,1,0.36,1) both; }
-.stat-card:nth-child(4) { animation: slideUp 0.35s 0.20s cubic-bezier(0.22,1,0.36,1) both; }
+/* Staggered stat cards — subtle lift, shorter travel distance */
+.stat-card:nth-child(1) { animation: slideUp 0.4s 0.04s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(2) { animation: slideUp 0.4s 0.08s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(3) { animation: slideUp 0.4s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(4) { animation: slideUp 0.4s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
 
 /* ── Card hover lift ────────────────────────────────────────────────── */
 
@@ -493,7 +528,7 @@ html[data-theme="light"] {
 /* ── Card entrance (main page cards) ───────────────────────────────── */
 
 .card {
-  animation: slideUp 0.3s 0.15s cubic-bezier(0.22,1,0.36,1) both;
+  animation: fadeIn 0.2s ease both;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -507,6 +542,14 @@ html[data-theme="light"] {
 .btn:active:not(:disabled) {
   transform: scale(0.97);
 }
+
+/* Ensure hover text is always white on ghost/default buttons in both themes */
+.btn:hover,
+.btn-ghost:hover { color: #ffffff !important; }
+
+/* Primary already white — keep it */
+.btn-primary:hover { color: #ffffff !important; }
+
 .btn-primary:hover {
   box-shadow: 0 4px 16px rgba(41,182,232,0.35);
 }
@@ -619,3 +662,364 @@ tbody tr {
     transform: none !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — breakpoints for sidebar + all page layouts
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Hamburger button (injected by sidebar.js, hidden on desktop) ── */
+.sidebar-hamburger {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  background: #0f2057;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  transition: background 0.15s, transform 0.15s;
+}
+.sidebar-hamburger:active { transform: scale(0.93); }
+.sidebar-hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #e8eaf0;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+.sidebar-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.sidebar-hamburger.open span:nth-child(2) { opacity: 0; }
+.sidebar-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+html[data-theme="light"] .sidebar-hamburger {
+  background: #1e40af;
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* Sidebar overlay (mobile backdrop) */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 99;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.sidebar-overlay.visible {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  /* ── Show hamburger ── */
+  .sidebar-hamburger { display: flex; }
+  .sidebar-overlay   { display: block; }
+
+  /* ── Sidebar: off-screen by default, slides in ── */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22,1,0.36,1),
+                visibility 0.28s ease !important;
+    z-index: 150 !important;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  /* ── Main content: full width, no left margin ── */
+  .main {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    padding: 68px 16px 0 16px !important;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .topbar h1,
+  .topbar-title {
+    font-size: 22px !important;
+  }
+  .topbar-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Content padding ── */
+  .content {
+    padding: 20px 16px 40px !important;
+  }
+
+  /* ── Stat grids → 2 columns on mobile ── */
+  .stat-grid,
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .stat-value {
+    font-size: 28px !important;
+  }
+
+  /* ── Chart grid → single column ── */
+  .chart-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Dashboard deployed/stock row */
+  .chart-grid ~ div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Category mini-cards ── */
+  .cat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* ── Tables: horizontal scroll ── */
+  .table-wrap,
+  .card > table,
+  .card > div > table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 600px;
+  }
+  thead th,
+  tbody td {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* ── Tabs: scrollable row ── */
+  .tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    white-space: nowrap;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    padding: 12px !important;
+    gap: 8px !important;
+  }
+  .filter-bar input[type="text"] {
+    min-width: unset !important;
+    flex: 1 !important;
+  }
+
+  /* ── Modals: full-width on small screens ── */
+  .modal,
+  .modal-overlay > div {
+    max-width: 100% !important;
+    width: calc(100% - 24px) !important;
+    margin: 0 12px !important;
+    padding: 20px !important;
+    border-radius: 14px !important;
+  }
+  .modal-header {
+    padding: 16px 18px !important;
+  }
+  .form-body,
+  .modal-form-body {
+    padding: 16px 18px !important;
+  }
+  .form-actions,
+  .modal-actions {
+    padding: 14px 18px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── Form grids → single column ── */
+  .form-grid,
+  .form-grid.cols-2,
+  .form-grid.cols-3,
+  .rf-grid.cols-2,
+  .rf-grid.cols-3,
+  .sig-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Login role grid → 2 cols ── */
+  .role-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ── Notification panel ── */
+  .notif-panel {
+    width: calc(100vw - 24px) !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+
+  /* ── Dashboard funnel ── */
+  #funnel-bar-new,
+  #funnel-bar-active,
+  #funnel-bar-aging,
+  #funnel-bar-old,
+  #funnel-bar-eol {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  div[style*="grid-template-columns:1fr auto"] {
+    grid-template-columns: 1fr !important;
+  }
+  div[style*="grid-template-columns: 90px 1fr 70px"] {
+    grid-template-columns: 70px 1fr 60px !important;
+  }
+
+  /* ── Topbar btn text: hide labels on very small screens ── */
+  .btn-sm .btn-label { display: none; }
+}
+
+/* ── Extra small (phones < 420px) ── */
+@media (max-width: 420px) {
+  .stat-grid,
+  .stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .cat-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .role-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .topbar h1,
+  .topbar-title {
+    font-size: 20px !important;
+  }
+  .stat-value {
+    font-size: 24px !important;
+  }
+  thead th,
+  tbody td {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ── Tablets (769px–1024px): sidebar stays, reduce padding ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .content {
+    padding: 20px 24px 40px !important;
+  }
+  .topbar {
+    padding: 24px 24px 0 !important;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+  .chart-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .cat-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* ── Dashboard inline-grid overrides (mobile) ── */
+@media (max-width: 768px) {
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .funnel-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .funnel-grid > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  /* Funnel bar rows: reduce label col */
+  .funnel-grid div[style*="grid-template-columns:90px"],
+  .funnel-grid div[style*="grid-template-columns: 90px"] {
+    grid-template-columns: 60px 1fr 50px !important;
+    gap: 8px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GLOBAL DELETE / CONFIRM MODAL — centered card pattern
+   Matches suppliers.html del modal exactly.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.modal-sm { max-width: 420px !important; }
+
+.del-body-wrap { padding: 28px !important; text-align: center !important; }
+
+.del-icon {
+  width: 62px !important;
+  height: 62px !important;
+  background: var(--red-dim) !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 28px !important;
+  margin: 0 auto 14px !important;
+}
+
+.del-title {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  text-align: center !important;
+}
+
+.del-msg {
+  font-size: 13px !important;
+  color: var(--muted2) !important;
+  line-height: 1.6 !important;
+  margin-bottom: 22px !important;
+  text-align: center !important;
+}
+
+.del-actions {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Danger button — matches supplier style */
+.btn-danger {
+  background: var(--red-dim) !important;
+  color: var(--red) !important;
+  border: 1px solid rgba(244,91,105,0.25) !important;
+}
+.btn-danger:hover {
+  background: rgba(244,91,105,0.22) !important;
+  color: var(--red) !important;
+}
+.btn-danger:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Light mode */
+[data-theme="light"] .del-icon  { background: rgba(220,38,38,0.10) !important; }
+[data-theme="light"] .btn-danger { background: rgba(220,38,38,0.10) !important; color: #dc2626 !important; border-color: rgba(220,38,38,0.25) !important; }
+[data-theme="light"] .btn-danger:hover { background: rgba(220,38,38,0.20) !important; color: #dc2626 !important; }

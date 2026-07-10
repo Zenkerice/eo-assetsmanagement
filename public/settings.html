@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,9 +6,9 @@
   <title>Settings &mdash; EmpireOne</title>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -26,7 +26,7 @@
     .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
     .content{padding:28px 48px 56px;display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
     /* Nav */
-    .settings-nav{position:sticky;top:28px;display:flex;flex-direction:column;gap:2px}
+    .settings-nav{position:sticky;top:28px;display:flex;flex-direction:column;gap:2px;animation:slideUp 0.5s 0.08s cubic-bezier(0.16,1,0.3,1) both}
     .settings-nav a{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--muted2);text-decoration:none;transition:all .15s;cursor:pointer;border:none;background:none;width:100%;text-align:left}
     .settings-nav a:hover{background:var(--bg3);color:var(--text)}
     .settings-nav a.active{background:var(--blue-dim);color:var(--blue)}
@@ -34,9 +34,16 @@
     .settings-nav-section{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:12px 12px 4px;margin-top:4px}
     /* Cards */
     .settings-panels{display:flex;flex-direction:column;gap:20px}
-    .settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease,border-color 0.2s ease}
+    .settings-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22)}
+    .settings-card:nth-child(1){animation:slideUp 0.5s 0.12s cubic-bezier(0.16,1,0.3,1) both}
+    .settings-card:nth-child(2){animation:slideUp 0.5s 0.18s cubic-bezier(0.16,1,0.3,1) both}
+    .settings-card:nth-child(3){animation:slideUp 0.5s 0.24s cubic-bezier(0.16,1,0.3,1) both}
+    .settings-card:nth-child(4){animation:slideUp 0.5s 0.30s cubic-bezier(0.16,1,0.3,1) both}
+    .settings-card:nth-child(5){animation:slideUp 0.5s 0.36s cubic-bezier(0.16,1,0.3,1) both}
+    .settings-card:nth-child(6){animation:slideUp 0.5s 0.42s cubic-bezier(0.16,1,0.3,1) both}
     .settings-card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-    .settings-card-header h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+    .settings-card-header h2{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700}
     .settings-card-header p{font-size:12px;color:var(--muted);margin-top:2px}
     .settings-card-icon{font-size:18px;flex-shrink:0}
     .settings-row{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);gap:16px}
@@ -82,7 +89,7 @@
     /* Stats grid */
     .stats-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 24px}
     .stat-mini{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-align:center}
-    .stat-mini-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1}
+    .stat-mini-val{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;line-height:1}
     .stat-mini-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
     /* Danger zone */
     .danger-zone{border-color:rgba(244,91,105,.25) !important}
@@ -97,7 +104,7 @@
     .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:460px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
 
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+    .modal-header h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700}
     .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center}
     .modal-close:hover{color:var(--text)}
     .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
@@ -118,6 +125,8 @@
 </div>
   </div>
   <div class="content">
+    <!-- navTo defined early so inline onclick handlers work before the main script loads -->
+    <script>function navTo(link,id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}</script>
     <!-- Left nav -->
     <nav class="settings-nav">
       <div class="settings-nav-section">General</div>
@@ -419,17 +428,30 @@
       <input type="hidden" id="loc-editing-id" />
     </div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveLocation()">Save Location</button>
-      <button class="btn" onclick="closeModal('modal-location')">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="saveLocation()">Save Location</button>
+      <button type="button" class="btn" onclick="closeModal('modal-location')">Cancel</button>
     </div>
   </div>
 </div>
 
-<div id="toast-container"></div>
+<!-- Confirm Dialog Modal -->
+<div class="modal-overlay" id="modal-confirm" style="z-index:300;">
+  <div class="modal modal-sm">
+    <div class="del-body-wrap">
+      <div class="del-icon">&#128465;</div>
+      <div class="del-title" id="confirm-title">Confirm</div>
+      <div class="del-msg" id="confirm-message"></div>
+      <div class="del-actions">
+        <button class="btn btn-danger" id="confirm-ok-btn" onclick="_confirmResolve(true)">Yes, delete</button>
+        <button class="btn btn-ghost" onclick="_confirmResolve(false)">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script>
 let currentUser = null;
 
@@ -442,10 +464,9 @@ let currentUser = null;
   // Populate account section
   document.getElementById('acc-name').textContent     = user.name;
   document.getElementById('acc-username').textContent = user.username;
-  const roleLabels = { admin:'Administrator', staff:'HR · Staff', viewer:'TL · Staff' };
-  document.getElementById('acc-role').textContent = roleLabels[user.role] || user.role;
-  document.getElementById('topbar-sub').textContent =
-    'Logged in as ' + user.name + ' \u00b7 ' + (roleLabels[user.role] || user.role);
+  document.getElementById('acc-role').textContent     = auth.getRoleDisplay(user);
+  document.getElementById('topbar-sub').textContent   =
+    'Logged in as ' + user.name + ' \u00b7 ' + auth.getRoleDisplay(user);
 
   // Show admin-only sections
   if (user.role === 'admin') {
@@ -539,20 +560,46 @@ async function exportData(type) {
     let rows = [], filename = type + '.csv';
     if (type === 'assets') {
       const res = await api.getProducts();
-      rows = [['ID','Name','SKU','Serial','Brand/Model','Category','Supplier','Quantity','Status','Created']];
-      (res.data||[]).forEach(p => rows.push([p.id,p.name,p.sku,p.serial_number||'',p.brand_model||'',p.category_name||'',p.supplier_name||'',p.quantity,p.asset_status,p.created_at]));
+      rows = [['ID','Name','Serial','Brand/Model','Category','Supplier','Status']];
+      (res.data||[]).forEach(p => rows.push([p.id,p.name,p.serial_number||'',p.brand_model||'',p.category_name||'',p.supplier_name||'',p.asset_status]));
     } else if (type === 'damages') {
       const res = await api.getDamages();
-      rows = [['ID','Asset','SKU','Category','Issue','Reported By','Status','Disposal Reason','Date']];
-      (res.data||[]).forEach(d => rows.push([d.id,d.product_name,d.product_sku,d.category_name||'',d.issue,d.reported_by,d.status,d.disposal_reason||'',d.created_at]));
+      rows = [['ID','Asset','Serial Number','Category','Issue','Reported By','Status','Date']];
+      (res.data||[]).forEach(d => {
+        const raw = d.created_at ? new Date(d.created_at) : null;
+        const date = raw && !isNaN(raw)
+          ? raw.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+          : '';
+        rows.push([d.id,d.product_name,d.serial_number||'',d.category_name||'',d.issue,d.reported_by,d.status,date]);
+      });
     } else if (type === 'assignments') {
       const res = await api.getAssignments();
-      rows = [['ID','Asset','Assignee','Assigned By','Deployed At','Due Back','Returned At','Status']];
-      (res.data||[]).forEach(a => rows.push([a.id,a.product_name||'',a.assignee_name,a.assigned_by,a.assigned_at,a.due_back||'',a.returned_at||'',a.status]));
+      rows = [['ID','Asset','Assignee','Assigned By','Deployed Date','Returned Date','Status']];
+      (res.data||[]).forEach(a => {
+        const raw = a.assigned_at ? new Date(a.assigned_at) : null;
+        const deployedDate = raw && !isNaN(raw)
+          ? raw.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+          : '';
+        const rawRet = a.returned_at ? new Date(a.returned_at) : null;
+        const returnedDate = rawRet && !isNaN(rawRet)
+          ? rawRet.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+          : '';
+        rows.push([a.id,a.product_name||'',a.assignee_name,a.assigned_by,deployedDate,returnedDate,a.status]);
+      });
     } else if (type === 'purchase_orders') {
       const res = await api.getPurchaseOrders();
       rows = [['ID','PO Number','Supplier','Order Date','Expected','Total','Status','Created By']];
-      (res.data||[]).forEach(p => rows.push([p.id,p.po_number,p.supplier_name,p.order_date,p.expected_date||'',p.total_amount,p.status,p.created_by||'']));
+      (res.data||[]).forEach(p => {
+        const rawOrder = p.order_date ? new Date(p.order_date) : null;
+        const orderDate = rawOrder && !isNaN(rawOrder)
+          ? rawOrder.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+          : '';
+        const rawExp = p.expected_date ? new Date(p.expected_date) : null;
+        const expectedDate = rawExp && !isNaN(rawExp)
+          ? rawExp.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+          : '';
+        rows.push([p.id,p.po_number,p.supplier_name,orderDate,expectedDate,p.total_amount,p.status,p.created_by||'']);
+      });
     }
     if (rows.length <= 1) { showToast('No data to export', 'error'); return; }
     const csv  = rows.map(r => r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')).join('\n');
@@ -608,7 +655,8 @@ async function savePassword() {
 
 /* -- Danger Zone -- */
 async function clearResolved() {
-  if (!confirm('Permanently delete ALL resolved damage reports? This cannot be undone.')) return;
+  const ok = await _showConfirm({ title: 'Clear Resolved Reports', message: 'Permanently delete ALL resolved damage reports? This cannot be undone.', okLabel: 'Delete', danger: true });
+  if (!ok) return;
   try {
     const res = await api.getDamages();
     const resolved = (res.data||[]).filter(d => d.status === 'resolved');
@@ -619,7 +667,8 @@ async function clearResolved() {
   } catch(e) { showToast(e.message, 'error'); }
 }
 async function clearDisposed() {
-  if (!confirm('Permanently delete ALL disposed asset records? This cannot be undone.')) return;
+  const ok = await _showConfirm({ title: 'Clear Disposed Records', message: 'Permanently delete ALL disposed asset records? This cannot be undone.', okLabel: 'Delete', danger: true });
+  if (!ok) return;
   try {
     const res = await api.getDamages();
     const disposed = (res.data||[]).filter(d => d.status === 'disposed');
@@ -670,11 +719,43 @@ document.addEventListener('DOMContentLoaded', initScrollSpy);
 // Also run immediately in case DOM is already ready
 if (document.readyState !== 'loading') initScrollSpy();
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+
+/* -- Reusable confirm modal ----------------------------------------------- */
+let _confirmCallback = null;
+
+function _showConfirm({ title = 'Confirm', message, okLabel = 'OK', danger = false }) {
+  return new Promise(resolve => {
+    _confirmCallback = resolve;
+    document.getElementById('confirm-title').textContent   = title;
+    document.getElementById('confirm-message').textContent = message;
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.textContent = okLabel;
+    okBtn.className   = danger ? 'btn btn-danger' : 'btn btn-primary';
+    document.getElementById('modal-confirm').classList.add('open');
+    setTimeout(() => okBtn.focus(), 80);
+  });
+}
+
+function _confirmResolve(result) {
+  document.getElementById('modal-confirm').classList.remove('open');
+  if (_confirmCallback) { const cb = _confirmCallback; _confirmCallback = null; cb(result); }
+}
+
+/* Register backdrop-click and Escape after DOM is fully ready so all modals are found */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => {
+      if (e.target !== o) return;
+      if (o.id === 'modal-confirm') { _confirmResolve(false); return; }
+      o.classList.remove('open');
+    });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const confirmEl = document.getElementById('modal-confirm');
+    if (confirmEl && confirmEl.classList.contains('open')) { _confirmResolve(false); return; }
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  });
 });
 
 /* -- Locations -- */
@@ -699,7 +780,7 @@ function renderLocations() {
       <div class="settings-row-left">
         <div class="settings-row-label">&#128205; ${esc(l.name)}</div>
         <div class="settings-row-desc">
-          ${[l.building, l.floor, l.room].filter(Boolean).join(' � ') || '<span style="color:var(--muted)">No details</span>'}
+          ${[l.building, l.floor, l.room].filter(Boolean).join(' &middot; ') || '<span style="color:var(--muted)">No details</span>'}
         </div>
       </div>
       <div style="display:flex;gap:8px;">
@@ -709,7 +790,9 @@ function renderLocations() {
     </div>`).join('');
 }
 
-function openLocationModal(id) {
+async function openLocationModal(id) {
+  // Always refresh the list before opening so it's up to date
+  await loadLocations();
   document.getElementById('loc-editing-id').value = id || '';
   document.getElementById('loc-modal-title').textContent = id ? 'Edit Location' : 'Add Location';
   if (id) {
@@ -744,24 +827,27 @@ async function saveLocation() {
   try {
     if (id) {
       await api.updateLocation(parseInt(id), data);
+      closeModal('modal-location');
       showToast('Location updated', 'success');
     } else {
       await api.createLocation(data);
+      closeModal('modal-location');
       showToast('Location added', 'success');
     }
-    closeModal('modal-location');
-    loadLocations();
+    await loadLocations();
   } catch(e) { showToast(e.message, 'error'); }
 }
 
 async function deleteLocation(id, name) {
-  if (!confirm(`Delete location "${name}"? Assets deployed to this location will lose their location.`)) return;
+  const ok = await _showConfirm({ title: 'Delete Location', message: `Delete location "${name}"? Assets deployed to this location will lose their location.`, okLabel: 'Delete', danger: true });
+  if (!ok) return;
   try {
     await api.deleteLocation(id);
+    await loadLocations();
     showToast('Location deleted', 'success');
-    loadLocations();
   } catch(e) { showToast(e.message, 'error'); }
 }
 </script>
+<div id="toast-container"></div>
 </body>
 </html>

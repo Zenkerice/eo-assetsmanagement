@@ -1,5 +1,5 @@
-/**
- * Sidebar — renders immediately then fills categories async.
+﻿/**
+ * Sidebar — renders immediately from cache, validates auth async.
  * Call window.refreshSidebar() to re-render after category changes.
  */
 
@@ -13,13 +13,63 @@ const _isCats    = _sidebarPage === 'categories.html';
 const _isDamages = _sidebarPage === 'damages.html';
 const _isUsers   = _sidebarPage === 'users.html';
 const _isAssignees = _sidebarPage === 'assignees2.html';
+const _isTeamStructure = _sidebarPage === 'team-structure.html';
 const _isSuppliers = _sidebarPage === 'suppliers.html';
 const _isReceive   = _sidebarPage === 'receive.html';
 const _isAudit     = _sidebarPage === 'audit.html';
 const _isSettings  = _sidebarPage === 'settings.html';
 const _isImport    = _sidebarPage === 'import.html';
-const _isApprovals = _sidebarPage === 'approvals.html';
+const _isApprovals   = _sidebarPage === 'approvals.html';
+const _isCubicleMap  = _sidebarPage === 'cubicle-map.html';
 const _folderOpen  = _isCats || (_isItems && _activeCatId);
+
+/* ── Session cache helpers ──────────────────────────────────────────────────
+   Store the last known user + categories so the sidebar can render
+   synchronously on every page load — eliminating the auth-wait blink.
+   The real auth check still runs async; if it fails the cache is cleared
+   and the user is redirected to login.
+─────────────────────────────────────────────────────────────────────────── */
+const _CACHE_USER = '_sb_user';
+const _CACHE_CATS = '_sb_cats';
+
+function _cacheWrite(user, cats) {
+  try {
+    sessionStorage.setItem(_CACHE_USER, JSON.stringify(user));
+    sessionStorage.setItem(_CACHE_CATS, JSON.stringify(cats));
+  } catch (_) {}
+}
+
+function _cacheRead() {
+  try {
+    const u = sessionStorage.getItem(_CACHE_USER);
+    const c = sessionStorage.getItem(_CACHE_CATS);
+    if (!u) return null;
+    return { user: JSON.parse(u), cats: c ? JSON.parse(c) : [] };
+  } catch (_) { return null; }
+}
+
+function _cacheClear() {
+  try {
+    sessionStorage.removeItem(_CACHE_USER);
+    sessionStorage.removeItem(_CACHE_CATS);
+  } catch (_) {}
+}
+
+/* ── Instant render from cache (synchronous, before auth) ─────────────── */
+(function _instantRender() {
+  const cached = _cacheRead();
+  if (!cached) return;                         // first visit — wait for auth
+  if (cached.user.role === 'staff' || cached.user.role === 'viewer' || cached.user.role === 'manager') return; // no sidebar for staff/viewer/manager
+
+  // Temporarily set currentUser so _renderSidebar can use it
+  if (typeof auth !== 'undefined' && !auth.currentUser) {
+    auth.currentUser = cached.user;
+  }
+  _renderSidebar(cached.cats);
+  // Mark ready immediately — sidebar is fully populated from cache
+  const aside = document.querySelector('aside.sidebar');
+  if (aside) aside.classList.add('ready');
+})();
 
 function _renderSidebar(categories) {
   const asideEl = document.querySelector('aside.sidebar');
@@ -40,26 +90,26 @@ function _renderSidebar(categories) {
 
   // Current user info (populated by auth.js if available)
   const user        = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser : null;
-  const requestPages = ['accountability.html'];
-  if (user && (user.role === 'staff' || user.role === 'viewer') && !requestPages.includes(_sidebarPage)) {
-    window.location.href = 'requests.html';
-    return;
-  }
-  const userName    = user ? esc(user.name) : 'User';
-  const roleLabels  = { admin: 'System Manager', staff: 'HR', viewer: 'TL' };
+  const userName    = user ? esc(user.name) : '';
+  const roleLabels  = { admin: 'Admin', manager: 'Manager', staff: 'Staff', viewer: 'Supervisor' };
   const userRole    = user ? (roleLabels[user.role] || user.role) : '';
-  const userInitial = user ? user.name.charAt(0).toUpperCase() : 'U';
-  const isAdmin     = user && user.role === 'admin';
+  const userInitial = user ? user.name.charAt(0).toUpperCase() : '';
+  const isAdmin      = user && user.role === 'admin';
+  const isPrivileged = user && (user.role === 'admin' || user.role === 'manager');
 
   const adminLinks = isAdmin ? `
     <div class="nav-section">Admin</div>
-    <a href="approvals.html" class="nav-item ${_isApprovals ? 'active' : ''}">
-      <span class="nav-icon">✅</span>
+    <a href="approvals.html" class="nav-item ${_isApprovals ? 'active' : ''}" data-label="Approvals">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span>Approvals</span>
       <span class="nav-badge" id="nav-approval-badge"></span>
     </a>
-    <a href="users.html" class="nav-item ${_isUsers ? 'active' : ''}">
-      <span class="nav-icon">👥</span>
+    <a href="cubicle-map.html" class="nav-item ${_isCubicleMap ? 'active' : ''}" data-label="Cubicle Map">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect x="13" y="13" width="9" height="4" rx="1"/><line x1="13" y1="20" x2="22" y2="20"/></svg></span>
+      <span>Cubicle Map</span>
+    </a>
+    <a href="users.html" class="nav-item ${_isUsers ? 'active' : ''}" data-label="Users">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
       <span>Users</span>
     </a>` : '';
 
@@ -68,27 +118,32 @@ function _renderSidebar(categories) {
       <a href="index.html" class="brand-wordmark">
         <span class="brand-empire">Empire</span><span class="brand-one">One</span>
       </a>
+      <button class="sb-toggle-btn" onclick="_sbToggle()" aria-label="Toggle sidebar" title="Collapse sidebar">
+        <span class="sb-toggle-line"></span>
+        <span class="sb-toggle-line"></span>
+        <span class="sb-toggle-line"></span>
+      </button>
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-section">Overview</div>
 
-      <a href="index.html" class="nav-item ${_isHome ? 'active' : ''}">
-        <span class="nav-icon">⊞</span>
+      <a href="index.html" class="nav-item ${_isHome ? 'active' : ''}" data-label="Dashboard">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span>Dashboard</span>
       </a>
 
       <div class="nav-section">Manage</div>
 
-      <a href="items.html" class="nav-item ${_isItems && !_activeCatId ? 'active' : ''}">
-        <span class="nav-icon">⬡</span>
+      <a href="items.html" class="nav-item ${_isItems && !_activeCatId ? 'active' : ''}" data-label="Assets">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
         <span>Assets</span>
       </a>
 
       <div class="sidebar-folder">
         <div class="sidebar-folder-header nav-item ${_folderOpen ? 'open' : ''}"
              onclick="_toggleSidebarFolder(this)">
-          <span class="nav-icon">◈</span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
           <span>Categories</span>
           <span class="folder-arrow ${_folderOpen ? 'open' : ''}">›</span>
         </div>
@@ -102,29 +157,29 @@ function _renderSidebar(categories) {
         </div>
       </div>
 
-      <a href="damages.html" class="nav-item ${_isDamages ? 'active' : ''}">
-        <span class="nav-icon">⚠</span>
+      <a href="damages.html" class="nav-item ${_isDamages ? 'active' : ''}" data-label="Asset Status">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
         <span>Asset Status</span>
         ${openIssuesBadge}
       </a>
 
-      <a href="assignees2.html" class="nav-item ${_isAssignees ? 'active' : ''}">
-        <span class="nav-icon">🪪</span>
-        <span>Employees</span>
+      <a href="team-structure.html" class="nav-item ${_isTeamStructure ? 'active' : ''}" data-label="Team Structure">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="5" rx="1"/><rect x="16" y="3" width="6" height="5" rx="1"/><rect x="9" y="16" width="6" height="5" rx="1"/><path d="M5 8v4h14V8"/><line x1="12" y1="12" x2="12" y2="16"/></svg></span>
+        <span>Team Structure</span>
       </a>
 
-      <a href="accountability.html" class="nav-item ${_sidebarPage === 'accountability.html' ? 'active' : ''}">
-        <span class="nav-icon">📋</span>
+      <a href="accountability.html" class="nav-item ${_sidebarPage === 'accountability.html' ? 'active' : ''}" data-label="Accountability">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
         <span>Accountability</span>
       </a>
-      <a href="suppliers.html" class="nav-item ${_isSuppliers ? 'active' : ''}">
-        <span class="nav-icon">🏭</span>
+      <a href="suppliers.html" class="nav-item ${_isSuppliers ? 'active' : ''}" data-label="Suppliers">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
         <span>Suppliers</span>
       </a>
 
-      ${isAdmin ? `
-      <a href="receive.html" class="nav-item ${_isReceive ? 'active' : ''}">
-        <span class="nav-icon">📥</span>
+      ${isPrivileged ? `
+      <a href="receive.html" class="nav-item ${_isReceive ? 'active' : ''}" data-label="Receive">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
         <span>Receive</span>
         <span class="nav-badge" id="nav-po-badge"></span>
       </a>` : ''}
@@ -132,16 +187,16 @@ function _renderSidebar(categories) {
       ${adminLinks}
 
       <div class="nav-section">Preferences</div>
-      <a href="audit.html" class="nav-item ${_isAudit ? 'active' : ''}">
-        <span class="nav-icon">&#128203;</span>
+      <a href="audit.html" class="nav-item ${_isAudit ? 'active' : ''}" data-label="Audit Log">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg></span>
         <span>Audit Log</span>
       </a>
-      <a href="import.html" class="nav-item ${_isImport ? 'active' : ''}">
-        <span class="nav-icon">&#8593;</span>
+      <a href="import.html" class="nav-item ${_isImport ? 'active' : ''}" data-label="Import">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
         <span>Import</span>
       </a>
-      <a href="settings.html" class="nav-item ${_isSettings ? 'active' : ''}">
-        <span class="nav-icon">⚙</span>
+      <a href="settings.html" class="nav-item ${_isSettings ? 'active' : ''}" data-label="Settings">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
         <span>Settings</span>
       </a>
     </nav>
@@ -153,8 +208,8 @@ function _renderSidebar(categories) {
           <div class="user-name">${userName}</div>
           <div class="user-role">${userRole}</div>
         </div>
-        <button class="theme-toggle-btn" id="sidebar-theme-btn" title="Toggle theme" onclick="_sidebarToggleTheme()">🌙</button>
-        <button class="logout-btn" title="Logout" onclick="_sidebarLogout()">⏻</button>
+        <button class="theme-toggle-btn" id="sidebar-theme-btn" title="Toggle theme" onclick="_sidebarToggleTheme()"><svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+        <button class="logout-btn" title="Logout" onclick="_sidebarLogout()"><svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>
       </div>
     </div>
   `;
@@ -170,8 +225,8 @@ function _renderSidebar(categories) {
       .catch(() => {});
   }
 
-  // Populate pending PO badge — admin only
-  if (isAdmin && window.api && window.api.getPendingPurchaseOrders) {
+  // Populate pending PO badge — admin and manager
+  if (isPrivileged && window.api && window.api.getPendingPurchaseOrders) {
     api.getPendingPurchaseOrders()
       .then(res => {
         const count = (res.data || []).length;
@@ -191,6 +246,14 @@ function _renderSidebar(categories) {
       })
       .catch(() => {});
   }
+
+  // Reveal sidebar only once we have real user data — prevents placeholder flash
+  if (user) {
+    asideEl.classList.add('ready');
+  }
+
+  // Sync theme button icon now that the button exists in the DOM
+  _syncThemeBtn();
 
 }
 
@@ -250,9 +313,14 @@ if (!document.getElementById('_global-light-styles')) {
 }
 
 // Inject sidebar CSS (only once)
-if (!document.getElementById('_sidebar-styles')) {
+if (!document.getElementById('_sidebar-styles-v3')) {
+  // Remove any stale version
+  ['_sidebar-styles', '_sidebar-styles-v2'].forEach(id => {
+    const old = document.getElementById(id);
+    if (old) old.remove();
+  });
   const style = document.createElement('style');
-  style.id = '_sidebar-styles';
+  style.id = '_sidebar-styles-v3';
   style.textContent = `
     /* ── Sidebar entrance ── */
     @keyframes badgePop {
@@ -291,9 +359,9 @@ if (!document.getElementById('_sidebar-styles')) {
     html[data-theme="light"] .sidebar-footer   { border-top-color: rgba(255,255,255,0.12) !important; }
     html[data-theme="light"] .user-name        { color: #ffffff !important; }
     html[data-theme="light"] .user-role        { color: rgba(255,255,255,0.55) !important; }
-    html[data-theme="light"] .logout-btn       { color: rgba(255,255,255,0.55) !important; }
+    html[data-theme="light"] .logout-btn       { color: #9aa0b2 !important; }
     html[data-theme="light"] .logout-btn:hover { background: rgba(244,91,105,0.25) !important; color: #ffffff !important; }
-    html[data-theme="light"] .theme-toggle-btn { color: rgba(255,255,255,0.55) !important; }
+    html[data-theme="light"] .theme-toggle-btn { color: #9aa0b2 !important; }
     html[data-theme="light"] .theme-toggle-btn:hover { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
     html[data-theme="light"] .nav-badge        { background: #29b6e8 !important; color: #fff !important; }
     html[data-theme="light"] .sidebar-folder-body { background: rgba(0,0,0,0.15) !important; }
@@ -305,13 +373,91 @@ if (!document.getElementById('_sidebar-styles')) {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 22px 20px 20px;
+      padding: 18px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.10);
       flex-shrink: 0;
+      position: relative;
+      min-height: 64px;
+    }
+
+    /* ── Sidebar collapse toggle button (hamburger ↔ X) ── */
+    .sb-toggle-btn {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 0;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .sb-toggle-btn:hover {
+      transform: translateY(-50%) scale(1.12);
+    }
+    .sb-toggle-btn:active {
+      transform: translateY(-50%) scale(0.94);
+    }
+    html[data-theme="light"] .sb-toggle-btn {
+      background: transparent;
+      border: none;
+    }
+
+    /* The three lines */
+    .sb-toggle-line {
+      display: block;
+      width: 18px;
+      height: 3px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 2px;
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                  opacity   0.3s  cubic-bezier(0.4,0,0.2,1),
+                  width     0.3s  cubic-bezier(0.4,0,0.2,1),
+                  background 0.15s ease;
+    }
+    .sb-toggle-btn:hover .sb-toggle-line {
+      background: #fff;
+    }
+
+    /* middle line */
+    .sb-toggle-line:nth-child(2) {
+      width: 12px;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                  opacity   0.2s  cubic-bezier(0.4,0,0.2,1),
+                  width     0.3s  cubic-bezier(0.4,0,0.2,1),
+                  background 0.15s ease;
+    }
+    .sb-toggle-btn:hover .sb-toggle-line:nth-child(2) {
+      width: 18px;
+    }
+
+    /* X state when sidebar is expanded */
+    aside.sidebar:not(.sb-collapsed) .sb-toggle-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+      width: 18px;
+    }
+    aside.sidebar:not(.sb-collapsed) .sb-toggle-line:nth-child(2) {
+      opacity: 0;
+      width: 0;
+      transform: scaleX(0);
+    }
+    aside.sidebar:not(.sb-collapsed) .sb-toggle-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+      width: 18px;
     }
     .brand-wordmark {
       display: inline-flex;
-      align-items: baseline;
+      align-items: center;
       text-decoration: none;
       line-height: 1;
       gap: 0;
@@ -325,7 +471,7 @@ if (!document.getElementById('_sidebar-styles')) {
       font-family: 'DM Sans', sans-serif;
       font-size: 30px;
       font-weight: 800;
-      letter-spacing: -0.8px;
+      letter-spacing: 0.5px;
       color: #ffffff;
       -webkit-text-stroke: 0.4px #ffffff;
     }
@@ -333,7 +479,7 @@ if (!document.getElementById('_sidebar-styles')) {
       font-family: 'DM Sans', sans-serif;
       font-size: 30px;
       font-weight: 800;
-      letter-spacing: -0.8px;
+      letter-spacing: 0.5px;
       color: #29b6e8;
       -webkit-text-stroke: 0.4px #29b6e8;
     }
@@ -434,7 +580,18 @@ if (!document.getElementById('_sidebar-styles')) {
       opacity: 0.85;
       flex-shrink: 0;
       transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-icon svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     .nav-item:hover .nav-icon {
       transform: translateY(-2px) scale(1.15);
@@ -508,34 +665,7 @@ if (!document.getElementById('_sidebar-styles')) {
     }
     .sidebar-folder-body.open {
       display: flex;
-      animation: folderBodyIn 0.25s cubic-bezier(0.22,1,0.36,1) both;
     }
-
-    @keyframes folderBodyIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes catItemSlide {
-      from { opacity: 0; transform: translateX(-10px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-
-    /* Staggered entrance for every child inside an open folder body */
-    .sidebar-folder-body.open > * {
-      opacity: 0;
-      animation: catItemSlide 0.22s cubic-bezier(0.22,1,0.36,1) forwards;
-    }
-    .sidebar-folder-body.open > *:nth-child(1)  { animation-delay: 0.03s; }
-    .sidebar-folder-body.open > *:nth-child(2)  { animation-delay: 0.07s; }
-    .sidebar-folder-body.open > *:nth-child(3)  { animation-delay: 0.11s; }
-    .sidebar-folder-body.open > *:nth-child(4)  { animation-delay: 0.15s; }
-    .sidebar-folder-body.open > *:nth-child(5)  { animation-delay: 0.18s; }
-    .sidebar-folder-body.open > *:nth-child(6)  { animation-delay: 0.21s; }
-    .sidebar-folder-body.open > *:nth-child(7)  { animation-delay: 0.24s; }
-    .sidebar-folder-body.open > *:nth-child(8)  { animation-delay: 0.27s; }
-    .sidebar-folder-body.open > *:nth-child(9)  { animation-delay: 0.30s; }
-    .sidebar-folder-body.open > *:nth-child(10) { animation-delay: 0.33s; }
-    .sidebar-folder-body.open > *:nth-child(n+11) { animation-delay: 0.35s; }
 
     .nav-cat-link { font-size: 13px; }
 
@@ -574,13 +704,20 @@ if (!document.getElementById('_sidebar-styles')) {
       margin-left: auto;
       background: none;
       border: none;
-      color: rgba(255,255,255,0.48);
+      color: #9aa0b2;
       font-size: 18px;
       cursor: pointer;
       padding: 4px 6px;
       border-radius: 6px;
       transition: background 0.15s, color 0.15s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
       line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logout-btn svg {
+      stroke: currentColor;
+      display: block;
     }
     .logout-btn:hover { background: rgba(244,91,105,0.22); color: #f45b69; transform: scale(1.15); }
     .logout-btn:active { transform: scale(0.9); }
@@ -588,7 +725,7 @@ if (!document.getElementById('_sidebar-styles')) {
     .theme-toggle-btn {
       background: none;
       border: none;
-      color: rgba(255,255,255,0.48);
+      color: #9aa0b2;
       font-size: 16px;
       cursor: pointer;
       padding: 4px 6px;
@@ -596,6 +733,13 @@ if (!document.getElementById('_sidebar-styles')) {
       transition: background 0.15s, color 0.15s, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
       line-height: 1;
       margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .theme-toggle-btn svg {
+      stroke: currentColor;
+      display: block;
     }
     .theme-toggle-btn:hover { background: rgba(255,255,255,0.10); color: #ffffff; transform: rotate(20deg) scale(1.15); }
     .theme-toggle-btn:active { transform: rotate(-10deg) scale(0.9); }
@@ -608,8 +752,6 @@ if (!document.getElementById('_sidebar-styles')) {
       .nav-item.active .nav-icon { transform: none !important; }
       .nav-item::before { transition: none !important; }
       .folder-arrow { transition: transform 0.15s !important; }
-      .sidebar-folder-body.open,
-      .sidebar-folder-body.open > * { animation: none !important; opacity: 1 !important; transform: none !important; }
       .logout-btn:hover,
       .theme-toggle-btn:hover { transform: none !important; }
     }
@@ -617,27 +759,69 @@ if (!document.getElementById('_sidebar-styles')) {
   document.head.appendChild(style);
 }
 
-// Render immediately (no categories — no blink)
-_renderSidebar([]);
+// ─── Sidebar CSS: add visibility rule for the aside ─────────────────────────
+// The aside starts hidden in HTML (via inline style) and is revealed after the
+// first real render so the user never sees a "User / blank" placeholder flash.
+// Inject this before the main sidebar CSS block so specificity works correctly.
+if (!document.getElementById('_sidebar-hide-style')) {
+  const hs = document.createElement('style');
+  hs.id = '_sidebar-hide-style';
+  hs.textContent = `
+    aside.sidebar { visibility: hidden; }
+    aside.sidebar.ready { visibility: visible; }
+    /* Suppress all entrance animations on the sidebar — it reveals atomically */
+    aside.sidebar, aside.sidebar * { animation: none !important; }
+    /* Re-allow only specific interactive animations after reveal */
+    aside.sidebar.ready .nav-badge { animation: badgePop 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+  `;
+  document.head.appendChild(hs);
+}
 
-// Fetch categories and re-render; also re-render once auth resolves so
-// admin-only links appear correctly after the session check.
+// Fetch categories, render, and write to cache so next page load is instant.
 function _loadSidebar() {
   return api.getCategories()
     .then(res => {
-      _renderSidebar(res.data || []);
+      const cats = res.data || [];
+      _renderSidebar(cats);
+      // Cache user + categories for instant render on next navigation
+      if (typeof auth !== 'undefined' && auth.currentUser) {
+        _cacheWrite(auth.currentUser, cats);
+      }
     })
-    .catch(() => {});
+    .catch(() => {
+      _renderSidebar([]);
+    });
 }
 
-_loadSidebar();
+// Don't render immediately on load — wait until auth resolves so we
+// do exactly ONE render with both user + categories populated.
+// The sidebar stays hidden (visibility:hidden) until that render fires.
+
+// Pages that non-admin users are allowed to access (staff/viewer only)
+const _staffAllowedPages = ['requests.html', 'accountability.html', 'assets-available.html'];
 
 // Re-render after auth resolves so auth.currentUser is populated
 if (typeof auth !== 'undefined') {
   const _origRequireAuth = auth.requireAuth.bind(auth);
   auth.requireAuth = async function () {
     const user = await _origRequireAuth();
-    if (!user) return null;
+    if (!user) {
+      _cacheClear(); // session expired — wipe cache so stale sidebar won't show
+      return null;
+    }
+
+    // Non-admin/manager users have no sidebar — redirect them immediately before any render
+    if (user.role === 'staff' || user.role === 'viewer' || user.role === 'manager') {
+      if (!_staffAllowedPages.includes(_sidebarPage)) {
+        window.location.replace('requests.html');
+        return null;
+      }
+      // Allowed page for staff/viewer/manager — skip sidebar render entirely
+      return user;
+    }
+
+    // Admin: always fetch fresh categories and update cache
+    // (re-render only updates badges & any dynamic content)
     await _loadSidebar();
     if (window.refreshNotifDot) refreshNotifDot();
     return user;
@@ -645,15 +829,20 @@ if (typeof auth !== 'undefined') {
 }
 
 // Safety net: if auth.currentUser is already set (page loaded fast),
-// re-render immediately so role-gated links are correct
+// render immediately with real data — but only for admin
 if (typeof auth !== 'undefined' && auth.currentUser) {
-  _loadSidebar();
+  const _u = auth.currentUser;
+  if (_u.role !== 'staff' && _u.role !== 'viewer' && _u.role !== 'manager') {
+    _loadSidebar();
+  }
 } else {
-  // Poll once after a short delay to catch cases where auth resolves
-  // before the requireAuth hook fires (e.g. cached session)
+  // Poll once after a short delay as a fallback
   setTimeout(() => {
     if (typeof auth !== 'undefined' && auth.currentUser) {
-      _loadSidebar();
+      const _u = auth.currentUser;
+      if (_u.role !== 'staff' && _u.role !== 'viewer' && _u.role !== 'manager') {
+        _loadSidebar();
+      }
     }
   }, 300);
 }
@@ -752,7 +941,9 @@ function _syncThemeBtn() {
   const btn = document.getElementById('sidebar-theme-btn');
   if (!btn || typeof theme === 'undefined') return;
   const isDark = theme.current() === 'dark';
-  btn.textContent = isDark ? '🌙' : '☀';
+  const moonSvg = `<svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  const sunSvg  = `<svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  btn.innerHTML = isDark ? moonSvg : sunSvg;
   btn.title = isDark ? 'Switch to Light mode' : 'Switch to Dark mode';
 }
 
@@ -771,39 +962,32 @@ function _sidebarLogout() {
 
 /**
  * Toggle the categories folder open/closed.
- * Forces child animations to re-run each time the folder opens
- * by removing the .open class, forcing a reflow, then re-adding it.
+ * Drives child animations entirely via JS so they always re-run on open.
  */
 function _toggleSidebarFolder(header) {
   const body = header.nextElementSibling;
   if (!body) return;
 
   const isOpen = body.classList.contains('open');
-
   header.classList.toggle('open');
   const arrow = header.querySelector('.folder-arrow');
   if (arrow) arrow.classList.toggle('open');
 
   if (isOpen) {
-    // Closing — just remove
     body.classList.remove('open');
   } else {
-    // Opening — strip .open, force reflow, re-add so CSS animations restart
-    body.classList.remove('open');
-    // Remove animation from all children so they can restart
-    const children = Array.from(body.children);
-    children.forEach(el => {
-      el.style.animation = 'none';
-      el.style.opacity   = '0';
-    });
-    // Force reflow
-    body.getBoundingClientRect();
-    // Re-add .open — CSS will re-apply staggered animations
     body.classList.add('open');
-    // Clear the inline overrides so CSS takes over
-    children.forEach(el => {
-      el.style.animation = '';
-      el.style.opacity   = '';
+    // Animate each child with JS — stagger 45ms per item
+    Array.from(body.children).forEach((el, i) => {
+      el.style.opacity   = '0';
+      el.style.transform = 'translateX(-12px)';
+      el.style.transition = 'none';
+      // Small initial timeout lets display:flex paint first
+      setTimeout(() => {
+        el.style.transition = `opacity 0.22s ease ${i * 45}ms, transform 0.25s cubic-bezier(0.22,1,0.36,1) ${i * 45}ms`;
+        el.style.opacity   = '1';
+        el.style.transform = 'translateX(0)';
+      }, 16);
     });
   }
 }
@@ -1535,3 +1719,251 @@ if (document.readyState === 'loading') {
 }
 
 
+
+/* ══════════════════════════════════════════════════════════════════════
+   SIDEBAR HAMBURGER TOGGLE
+   Injects a ☰ button into the topbar left side.
+   Desktop: collapses/expands the sidebar, state saved in localStorage.
+   Mobile:  slides sidebar in/out with a backdrop overlay.
+══════════════════════════════════════════════════════════════════════ */
+
+// ── CSS ───────────────────────────────────────────────────────────────────────
+if (!document.getElementById('_hamburger-styles')) {
+  const hs = document.createElement('style');
+  hs.id = '_hamburger-styles';
+  hs.textContent = `
+    /* ── Sidebar width transition (mini rail: 260px → 64px) ── */
+    aside.sidebar {
+      transition: width 0.28s cubic-bezier(0.22,1,0.36,1);
+      width: 260px;
+    }
+    aside.sidebar.sb-collapsed {
+      width: 64px;
+    }
+
+    /* ── Main content margin adjusts ── */
+    .main {
+      transition: margin-left 0.28s cubic-bezier(0.22,1,0.36,1);
+    }
+    body.sb-collapsed .main {
+      margin-left: 64px !important;
+    }
+
+    /* ── Hide text when collapsed ── */
+    aside.sidebar.sb-collapsed .nav-item > span:not(.nav-icon),
+    aside.sidebar.sb-collapsed .nav-section,
+    aside.sidebar.sb-collapsed .folder-arrow,
+    aside.sidebar.sb-collapsed .nav-badge,
+    aside.sidebar.sb-collapsed .brand-wordmark,
+    aside.sidebar.sb-collapsed .user-info,
+    aside.sidebar.sb-collapsed .sidebar-folder-body,
+    aside.sidebar.sb-collapsed .sidebar-folder-header {
+      display: none;
+    }
+
+    /* ── Collapsed: centre everything ── */
+    aside.sidebar.sb-collapsed .sidebar-brand,
+    aside.sidebar.sb-collapsed .nav-item,
+    aside.sidebar.sb-collapsed .sidebar-footer .user-row {
+      justify-content: center;
+    }
+
+    /* ── Collapsed brand: smaller padding ── */
+    aside.sidebar.sb-collapsed .sidebar-brand {
+      padding: 16px 0;
+    }
+
+    /* ── Collapsed: center the toggle button ── */
+    aside.sidebar.sb-collapsed .sb-toggle-btn {
+      position: static;
+      transform: none;
+    }
+    aside.sidebar.sb-collapsed .sb-toggle-btn:hover {
+      transform: scale(1.12);
+    }
+    aside.sidebar.sb-collapsed .sb-toggle-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* ── Nav items: tighten padding when collapsed ── */
+    aside.sidebar.sb-collapsed .nav-item {
+      padding: 10px 0;
+      gap: 0;
+    }
+
+    /* ── Footer: stack avatar+buttons vertically ── */
+    aside.sidebar.sb-collapsed .sidebar-footer .user-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+    aside.sidebar.sb-collapsed .logout-btn,
+    aside.sidebar.sb-collapsed .theme-toggle-btn {
+      margin-left: 0;
+    }
+
+    /* ── Tooltip on hover (collapsed only) ── */
+    aside.sidebar.sb-collapsed .nav-item {
+      position: relative;
+    }
+    aside.sidebar.sb-collapsed .nav-item::after {
+      content: attr(data-label);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1a3a8a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      z-index: 300;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+    aside.sidebar.sb-collapsed .nav-item:hover::after {
+      opacity: 1;
+    }
+    html[data-theme="light"] aside.sidebar.sb-collapsed .nav-item::after {
+      background: #1e40af;
+    }
+
+    /* ── Mobile overlay ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(3px);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar-overlay.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ── Mobile: sidebar off-screen by default ── */
+    @media (max-width: 768px) {
+      aside.sidebar {
+        transform: translateX(-260px);
+        width: 260px !important;
+        z-index: 150;
+        transition: transform 0.28s cubic-bezier(0.22,1,0.36,1) !important;
+      }
+      aside.sidebar.sb-mobile-open {
+        transform: translateX(0);
+      }
+      aside.sidebar.sb-collapsed {
+        transform: translateX(-260px) !important;
+        width: 260px !important;
+      }
+      .main { margin-left: 0 !important; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-overlay { display: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      aside.sidebar, .main { transition: none !important; }
+    }
+  `;
+  document.head.appendChild(hs);
+}
+
+// ── Inject overlay (once) ─────────────────────────────────────────────────────
+if (!document.getElementById('_sb-overlay')) {
+  const ov = document.createElement('div');
+  ov.id = '_sb-overlay';
+  ov.className = 'sidebar-overlay';
+  document.body.appendChild(ov);
+  ov.addEventListener('click', _sbClose);
+}
+
+// ── Hamburger lives inside sidebar-brand (rendered by _renderSidebar) ─────────
+// No topbar injection needed.
+
+// ── Core toggle / open / close ────────────────────────────────────────────────
+const _SB_KEY = '_sb_collapsed';
+
+function _sbToggle() {
+  if (window.innerWidth <= 768) {
+    // Mobile: slide in/out with overlay
+    const sidebar = document.querySelector('aside.sidebar');
+    if (!sidebar) return;
+    if (sidebar.classList.contains('sb-mobile-open')) {
+      _sbClose();
+    } else {
+      sidebar.classList.add('sb-mobile-open');
+      document.getElementById('_sb-overlay')?.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+  } else {
+    // Desktop: collapse/expand + persist
+    const sidebar = document.querySelector('aside.sidebar');
+    if (!sidebar) return;
+    const nowCollapsed = !sidebar.classList.contains('sb-collapsed');
+    _sbApply(nowCollapsed, true);
+    localStorage.setItem(_SB_KEY, nowCollapsed ? '1' : '0');
+  }
+}
+
+function _sbClose() {
+  const sidebar = document.querySelector('aside.sidebar');
+  sidebar?.classList.remove('sb-mobile-open');
+  document.getElementById('_sb-overlay')?.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+function _sbApply(collapsed, animate) {
+  const sidebar = document.querySelector('aside.sidebar');
+  if (!sidebar) return;
+  if (!animate) {
+    sidebar.style.transition = 'none';
+    const main = document.querySelector('.main');
+    if (main) main.style.transition = 'none';
+  }
+  if (collapsed) {
+    sidebar.classList.add('sb-collapsed');
+    document.body.classList.add('sb-collapsed');
+    const btn = sidebar.querySelector('.sb-toggle-btn');
+    if (btn) { btn.classList.add('is-collapsed'); btn.title = 'Expand sidebar'; }
+  } else {
+    sidebar.classList.remove('sb-collapsed');
+    document.body.classList.remove('sb-collapsed');
+    const btn = sidebar.querySelector('.sb-toggle-btn');
+    if (btn) { btn.classList.remove('is-collapsed'); btn.title = 'Collapse sidebar'; }
+  }
+  if (!animate) {
+    requestAnimationFrame(() => {
+      sidebar.style.transition = '';
+      const main = document.querySelector('.main');
+      if (main) main.style.transition = '';
+    });
+  }
+}
+
+// Restore saved collapsed state on load (no animation to avoid flash)
+(function _sbRestoreState() {
+  const saved = localStorage.getItem(_SB_KEY) === '1';
+  if (!saved) return;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => _sbApply(true, false));
+  } else {
+    _sbApply(true, false);
+  }
+})();
+
+// Close mobile sidebar when a nav link is tapped
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.nav-item') && window.innerWidth <= 768) _sbClose();
+});
+
+// Clean up mobile state on resize to desktop
+window.addEventListener('resize', function() {
+  if (window.innerWidth > 768) _sbClose();
+});

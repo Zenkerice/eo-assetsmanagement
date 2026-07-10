@@ -20,6 +20,11 @@ class AssignmentController extends BaseController {
             $this->respond(['success' => true, 'data' => $this->service->getByProduct((int)$query['product_id'])]);
             return;
         }
+        // GET /api/assignments?assignee=Name
+        if ($method === 'GET' && !$id && isset($query['assignee'])) {
+            $this->respond(['success' => true, 'data' => $this->service->getByAssigneeName($query['assignee'])]);
+            return;
+        }
         // GET /api/assignments?stats=1
         if ($method === 'GET' && !$id && isset($query['stats'])) {
             $this->respond(['success' => true, 'data' => $this->service->getStats()]);

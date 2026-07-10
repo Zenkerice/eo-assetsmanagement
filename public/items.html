@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=8" />
+  <link rel="stylesheet" href="css/theme.css?v=10" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assets - EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -44,7 +44,9 @@
     .btn-amber{background:var(--amber-dim);color:var(--amber);border-color:rgba(245,166,35,0.25)}
     .btn-amber:hover{background:rgba(245,166,35,0.22)}
     .btn-sm{padding:6px 12px;font-size:12px}
-    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:box-shadow 0.2s ease,border-color 0.2s ease}
+    .card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.22)}
+    .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
     .table-wrap{overflow-x:auto}
     table{width:100%;border-collapse:collapse}
     thead th{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:13px 16px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -73,15 +75,17 @@
     .assignee-chip .chip-av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
     .assignee-chip .chip-name{font-weight:500;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .more-chip{display:inline-flex;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:3px 9px;font-size:12px;color:var(--muted2);}
-    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .actions{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;white-space:nowrap}
     .empty-state{text-align:center;padding:52px 20px;color:var(--muted)}
     .empty-icon{font-size:28px;margin-bottom:10px}
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
     .modal-overlay.open{display:flex}
+    /* View modal sits below other modals so Report/Edit can stack on top */
+    #image-modal{z-index:190;}
     .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .2s ease}
 
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--border)}
-    .modal-header h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+    .modal-header h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700}
     .modal-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .15s}
     .modal-close:hover{color:var(--text);background:var(--border2)}
     .form-body{padding:24px 26px}
@@ -109,12 +113,14 @@
     .view-detail-val{font-size:14px;color:var(--text);flex:1;line-height:1.5}
     /* Serial numbers list inside brand view */
     .serial-list{display:flex;flex-direction:column;gap:6px;margin-top:2px}
-    .serial-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;transition:border-color .15s}
+    .serial-row{display:grid;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;transition:border-color .15s}
     .serial-row:hover{border-color:var(--border2)}
     .serial-row.damaged{border-color:rgba(244,91,105,0.3);background:rgba(244,91,105,0.04)}
+    .serial-col-hdr{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted2);text-align:center;}
+    .serial-col-hdr.left{text-align:left;}
     .serial-code{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;white-space:nowrap}
     .serial-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .serial-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .serial-meta{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;justify-content:center}
     .serial-assignee{font-size:12px;color:var(--muted2)}
     .serial-status{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
     .serial-status.working{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.2)}
@@ -164,6 +170,12 @@
         <option value="">All Assets</option>
         <option value="assigned">Deployed</option>
         <option value="unassigned">Not Deployed</option>
+        <option value="available">Active</option>
+        <option value="under_repair">Under Repair</option>
+        <option value="damaged">Damaged</option>
+        <option value="spare">Spare</option>
+        <option value="lost">Lost</option>
+        <option value="disposed">Disposed</option>
       </select>
     </div>
     <div class="card">
@@ -172,13 +184,13 @@
           <thead>
             <tr>
               <th id="col-type-header">Category</th>
-              <th id="col-name-header">Name</th>
-              <th>Brand / Model</th>
+              <th id="col-name-header">Description</th>
+              <th>Brand</th>
               <th id="col-serial-header">Serial No.</th>
               <th>Supplier</th>
               <th style="text-align:center;">Qty</th>
-              <th>Assignees</th>
-              <th>Actions</th>
+              <th>Assigned To</th>
+              <th style="min-width:180px;">Actions</th>
             </tr>
           </thead>
           <tbody id="product-table">
@@ -200,50 +212,93 @@
     <div class="form-body">
       <form id="product-form" onsubmit="submitForm(event)" autocomplete="off">
         <div class="form-grid">
+
+          <!-- Row 0: Assigned Employee + Employee ID -->
           <div class="form-group">
-            <label for="item-name">Description *</label>
-            <input id="item-name" type="text" name="name" placeholder="e.g. Dell Laptop" autocomplete="off" required />
-          </div>
-          <div class="form-group">
-            <label for="item-sku">Serial Number *</label>
-            <input id="item-sku" type="text" name="sku" placeholder="e.g. SN-001234" autocomplete="off" required />
+            <label for="item-assigned-employee">Assigned Employee</label>
+            <input id="item-assigned-employee" type="text" name="assigned_employee" placeholder="e.g. Juan dela Cruz" autocomplete="off" />
           </div>
           <div class="form-group">
-            <label for="item-brand">Brand / Model</label>
-            <input id="item-brand" type="text" name="brand_model" placeholder="e.g. Dell XPS 15" autocomplete="off" />
+            <label for="item-employee-id">Assigned Employee ID Number</label>
+            <input id="item-employee-id" type="text" name="assigned_employee_id" placeholder="e.g. EMP-001" autocomplete="off" />
           </div>
-          <div class="form-group" id="qty-group">
-            <label for="item-qty">Quantity</label>
-            <input id="item-qty" type="number" name="quantity" min="0" value="1" autocomplete="off" />
-          </div>
-          <div class="form-group" id="cat-group">
+
+          <!-- Row 1: Category (full width) -->
+          <div class="form-group" id="cat-group" style="grid-column:1/-1">
             <label id="cat-label" for="item-category">Category</label>
             <select id="item-category" name="category_id">
               <option value="">-- None --</option>
             </select>
           </div>
-          <div class="form-group" id="supplier-group">
-            <label for="item-supplier">Supplier</label>
-            <select id="item-supplier" name="supplier_id">
-              <option value="">-- None --</option>
-            </select>
+
+          <!-- Row 2: Brand + Model + Serial Number -->
+          <div class="form-group" id="brand-group">
+            <label for="item-brand">Brand</label>
+            <input id="item-brand" type="text" name="brand" placeholder="e.g. Dell" autocomplete="off" />
           </div>
-          <div class="form-group" id="location-group">
+          <div class="form-group">
+            <label for="item-model">Model</label>
+            <input id="item-model" type="text" name="model" placeholder="e.g. XPS 15" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="item-sku">Serial Number</label>
+            <input id="item-sku" type="text" name="sku" placeholder="e.g. SN-001234" autocomplete="off" required />
+          </div>
+
+          <!-- Row 3: Description (full width) -->
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="item-name">Description *</label>
+            <input id="item-name" type="text" name="name" placeholder="e.g. Dell Laptop XPS 15" autocomplete="off" required />
+          </div>
+
+          <!-- Row 4: Location (full width) -->
+          <div class="form-group" id="location-group" style="grid-column:1/-1">
             <label for="item-location">Location</label>
             <select id="item-location" name="location_id">
               <option value="">-- None --</option>
             </select>
           </div>
-          <div class="form-group" id="subcat-group" style="display:none;">
-            <label for="subcategory-select">Subcategory</label>
-            <select id="subcategory-select">
-              <option value="">-- Select subcategory --</option>
+
+          <!-- Row 5: Purchase Date + Supplier -->
+          <div class="form-group" id="purchase-date-group">
+            <label for="item-purchase-date">Purchase Date</label>
+            <input id="item-purchase-date" type="date" name="purchase_date" autocomplete="off" />
+          </div>
+          <div class="form-group" id="supplier-group">
+            <label for="item-supplier">Supplier / Vendor</label>
+            <select id="item-supplier" name="supplier_name">
+              <option value="">-- None --</option>
             </select>
           </div>
+
+          <!-- Row 5b: Deployed Date (full width) -->
           <div class="form-group" style="grid-column:1/-1">
-            <label for="item-desc">Description</label>
-            <textarea id="item-desc" name="description" placeholder="Optional notes..."></textarea>
+            <label for="item-deployed-date">Deployed Date</label>
+            <input id="item-deployed-date" type="datetime-local" name="deployed_date" autocomplete="off" />
           </div>
+
+          <!-- Row 6: Status (full width) -->
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="item-status">Status</label>
+            <select id="item-status" name="asset_status">
+              <option value="available">Active</option>
+              <option value="under_repair">Under Repair</option>
+              <option value="damaged">Damaged</option>
+              <option value="spare">Spare</option>
+              <option value="lost">Lost</option>
+              <option value="disposed">Disposed</option>
+            </select>
+          </div>
+
+          <!-- Row 7: Link to PO (edit only, full width) -->
+          <div class="form-group" id="po-link-group" style="grid-column:1/-1;display:none;">
+            <label for="item-po-id">Link to Purchase Order</label>
+            <select id="item-po-id" name="po_id">
+              <option value="">-- None --</option>
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Associate this asset with an existing PO so its order details are visible in the asset view.</div>
+          </div>
+
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" id="submit-btn">Save Asset</button>
@@ -267,12 +322,12 @@
         <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;">Shared Fields (applied to all units)</div>
         <div class="form-grid">
           <div class="form-group">
-            <label for="ge-name">Name *</label>
+            <label for="ge-name">Description *</label>
             <input id="ge-name" type="text" placeholder="Asset name" autocomplete="off" />
           </div>
           <div class="form-group">
-            <label for="ge-brand">Brand / Model</label>
-            <input id="ge-brand" type="text" placeholder="e.g. Sony WH-1000XM5" autocomplete="off" />
+            <label for="ge-brand">Brand</label>
+            <input id="ge-brand" type="text" placeholder="e.g. Sony" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="ge-category">Category</label>
@@ -283,7 +338,7 @@
             <select id="ge-supplier"><option value="">-- None --</option></select>
           </div>
           <div class="form-group" style="grid-column:1/-1">
-            <label for="ge-desc">Description</label>
+            <label for="ge-desc">Note</label>
             <textarea id="ge-desc" placeholder="Optional notes..." style="min-height:60px;"></textarea>
           </div>
         </div>
@@ -303,7 +358,7 @@
 
 <!-- View Modal -->
 <div class="modal-overlay" id="image-modal">
-  <div class="modal" style="max-width:600px;">
+  <div class="modal" style="max-width:1400px;max-height:94vh;width:98vw;">
     <div class="modal-header">
       <h3 id="image-modal-title">Asset Details</h3>
       <button class="modal-close" onclick="closeImageModal()">&times;</button>
@@ -337,14 +392,25 @@
         </div>
         <div class="receipt-zone-text">
           <span class="receipt-zone-primary">Upload receipt or purchase order</span>
-          <span class="receipt-zone-secondary">JPG, PNG, WEBP � max 5 MB</span>
+          <span class="receipt-zone-secondary">JPG, PNG, WEBP ? max 5 MB</span>
         </div>
       </label>
       <input id="receipt-file-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="_onReceiptFileChosen(this)" />
       <div id="receipt-uploading" style="display:none;font-size:12px;color:var(--blue);text-align:center;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        Uploading�
+        Uploading?
       </div>
+    </div>
+
+    <div style="margin:14px 24px 0;border-top:1px solid var(--border);"></div>
+
+    <!-- PO info row (shown when asset came from a PO) -->
+    <div id="po-info-section" style="display:none;padding:12px 24px 0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h6v13H7v-5"/></svg>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);">Purchase Order</span>
+      </div>
+      <div id="po-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;"></div>
     </div>
 
     <div style="margin:14px 24px 0;border-top:1px solid var(--border);"></div>
@@ -356,7 +422,12 @@
           <div class="view-detail-key">Serial No.</div>
           <div class="view-detail-val" id="view-sku"></div>
         </div>
-        <!-- Actions row � deploy + report buttons -->
+        <!-- Date Received row -->
+        <div class="view-detail-row" id="view-received-row" style="display:none;">
+          <div class="view-detail-key">Date Received</div>
+          <div class="view-detail-val" id="view-received"></div>
+        </div>
+        <!-- Actions row ? deploy + report buttons -->
         <div class="view-detail-row" id="view-actions-row">
           <div class="view-detail-key">Actions</div>
           <div class="view-detail-val" id="view-actions"></div>
@@ -367,6 +438,7 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);">Serial Numbers</span>
           </div>
+          <div id="view-serials-header" style="display:none;"></div>
           <div id="view-serials-list" class="serial-list" style="width:100%;"></div>
         </div>
       </div>
@@ -425,50 +497,96 @@
 
 <div id="toast-container"></div>
 
-<!-- Deploy Modal -->
+<!-- Deploy / Cubicle-Picker Modal -->
 <div class="modal-overlay" id="deploy-modal">
-  <div class="modal" style="max-width:480px;">
+  <div class="modal" style="max-width:960px;width:96vw;">
     <div class="modal-header">
       <h3 id="deploy-modal-title">Deploy Asset</h3>
       <button class="modal-close" onclick="closeDeployModal()">&times;</button>
     </div>
-    <div class="form-body">
-      <div class="form-grid">
-        <div class="form-group" style="grid-column:1/-1">
-          <label>Asset</label>
-          <input type="text" id="deploy-item-name" disabled />
+    <div class="form-body" style="padding:16px 20px;">
+      <!-- Asset label -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Asset</span>
+        <input type="text" id="deploy-item-name" disabled style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;" />
+      </div>
+
+      <!-- Mode toggle: Cubicle vs Employee -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);margin-right:4px;">Deploy to</span>
+        <button id="deploy-mode-cubicle" onclick="setDeployMode('cubicle')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;transition:all .15s;">
+          &#128205; Cubicle
+        </button>
+        <button id="deploy-mode-employee" onclick="setDeployMode('employee')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);transition:all .15s;">
+          &#128100; Employee
+        </button>
+      </div>
+
+      <!-- Cubicle panel -->
+      <div id="deploy-cubicle-panel">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Wing</span>
+          <select id="deploy-wing-select" onchange="deployRenderMap()"
+            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;outline:none;cursor:pointer;">
+            <option value="all">All Stations</option>
+            <option value="left">Left Wing</option>
+            <option value="right">Right Wing</option>
+          </select>
+          <span id="deploy-selected-label" style="font-size:13px;color:var(--blue);display:none;">
+            &#10003; <strong id="deploy-selected-seat-num"></strong> selected
+          </span>
         </div>
-        <div class="form-group" style="grid-column:1/-1;position:relative;">
-          <label for="deploy-employee-search">Employee *</label>
-          <input type="text" id="deploy-employee-search" placeholder="Search name�" autocomplete="off"
-                 oninput="filterEmployeeSuggestions()" onkeydown="onEmployeeSearchKey(event)" />
-          <div id="deploy-employee-suggestions" style="
-            display:none;position:absolute;top:100%;left:0;right:0;z-index:300;
-            background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);
-            max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);margin-top:2px;
-          "></div>
-          <input type="hidden" id="deploy-employee" />
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:auto;padding:12px;max-height:460px;">
+          <svg id="deploySvg" xmlns="http://www.w3.org/2000/svg" style="display:block;"></svg>
         </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label for="deploy-due">Due Back (optional)</label>
-          <input type="date" id="deploy-due" />
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">Click an empty (dashed) seat to select it for deployment.</p>
+      </div>
+
+      <!-- Employee panel -->
+      <div id="deploy-employee-panel" style="display:none;">
+        <!-- Sub-tabs: Employees | System Users -->
+        <div style="display:flex;gap:2px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;margin-bottom:12px;width:fit-content;">
+          <button id="deploy-subtab-employee" onclick="setDeploySubTab('employee')"
+            style="padding:5px 18px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--blue);color:#fff;transition:all .15s;">
+            &#128100; Employees
+          </button>
+          <button id="deploy-subtab-user" onclick="setDeploySubTab('user')"
+            style="padding:5px 18px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);transition:all .15s;">
+            &#128274; System Users
+          </button>
         </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label for="deploy-notes">Notes (optional)</label>
-          <textarea id="deploy-notes" name="notes" placeholder="Any notes�" style="min-height:60px;"></textarea>
+        <!-- Search -->
+        <div style="margin-bottom:10px;position:relative;">
+          <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;">&#128269;</span>
+          <input id="deploy-emp-search" type="text" placeholder="Search name, station or role..."
+            oninput="deployFilterEmployees()"
+            style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px 10px 36px;outline:none;transition:border-color .15s;"
+            autocomplete="off" />
+        </div>
+        <!-- List -->
+        <div id="deploy-emp-list"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:300px;overflow-y:auto;padding:6px 0;">
+          <div style="text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;">Loading&#8230;</div>
+        </div>
+        <!-- Selection summary -->
+        <div id="deploy-emp-selected-wrap" style="display:none;margin-top:10px;padding:10px 14px;background:var(--blue-dim);border:1px solid rgba(41,182,232,0.25);border-radius:var(--radius-sm);align-items:center;gap:10px;">
+          <span style="font-size:13px;color:var(--blue);">&#10003; Deploying to: <strong id="deploy-emp-selected-name"></strong></span>
+          <span id="deploy-emp-selected-station" style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;"></span>
         </div>
       </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-primary" id="deploy-submit-btn" onclick="submitDeployModal()">&#128640; Deploy</button>
-        <button type="button" class="btn btn-ghost" onclick="closeDeployModal()">Cancel</button>
-      </div>
+    </div>
+        <div class="form-actions">
+      <button type="button" class="btn btn-primary" id="deploy-submit-btn" onclick="submitDeployModal()" disabled>&#128640; Deploy to Selected Seat</button>
+      <button type="button" class="btn btn-ghost" onclick="closeDeployModal()">Cancel</button>
     </div>
   </div>
 </div>
 <script src="js/api.js?v=24"></script>
-<script src="js/auth.js?v=5"></script>
+<script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
-<script src="js/sidebar.js?v=61"></script>
+<script src="js/sidebar.js?v=77"></script>
 <script src="js/approval_flow.js?v=2"></script>
 <script>
 (async () => {
@@ -484,8 +602,11 @@
   loadItems();
 })();
 
-let allItems = [], allDamages = [], allCategories = [], allAssignments = [];
+let allItems = [], allDamages = [], allCategories = [], allAssignments = [], allPOs = {}, allEmployees = [], allUsers = [];
 let editingId = null, editingDamageId = null;
+let viewingProductId = null;   // single-asset view
+let viewingGroupIds  = null;   // grouped view (array of ids)
+let viewingGroupName = null;
 let isParentCat = false, childCatIds = [];
 let isLeafSubcat = false; // true when viewing a leaf subcategory (e.g. "Computers")
 
@@ -512,7 +633,9 @@ function avatarColor(name) {
   return avatarColors[h % avatarColors.length];
 }
 function initials(name) {
-  return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const n = (name || '').trim();
+  if (!n) return '';
+  return n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
 /** Format deployment date from assigned_at. Returns '' if not deployed. */
@@ -530,15 +653,34 @@ function deployedDays(dateStr) {
   return days + (days === 1 ? ' day' : ' days');
 }
 
+/** Look up the employee_id for an assignee name from either employees or users list */
+function getAssigneeEmpId(name) {
+  if (!name) return '';
+  const emp = allEmployees.find(e => e.name === name);
+  if (emp && emp.employee_id) return emp.employee_id;
+  const usr = allUsers.find(u => u.name === name);
+  if (usr && usr.employee_id) return usr.employee_id;
+  return '';
+}
+
 async function loadItems() {
   try {
-    const [itemsRes, dmgRes, catRes, assignRes] = await Promise.all([
-      api.getProducts(), api.getDamages(), api.getCategories(), api.getAssignments()
+    const [itemsRes, dmgRes, catRes, assignRes, poRes, empRes, usersRes] = await Promise.all([
+      api.getProducts(), api.getDamages(), api.getCategories(), api.getAssignments(),
+      api.getPurchaseOrders().catch(() => ({ data: [] })),
+      api.getEmployees().catch(() => ({ data: [] })),
+      auth.getUsers().catch(() => []),
     ]);
     allItems       = itemsRes.data;
     allDamages     = dmgRes.data.filter(d => d.status !== 'resolved');
     allCategories  = catRes.data;
     allAssignments = (assignRes.data || []).filter(a => a.status === 'active');
+    allEmployees   = empRes.data || [];
+    allUsers       = usersRes || [];
+
+    // Build PO lookup: id ? PO object
+    allPOs = {};
+    (poRes.data || []).forEach(po => { allPOs[po.id] = po; });
 
     // Apply location filter from dashboard context
     const locId = localStorage.getItem('emp_location_id');
@@ -625,7 +767,7 @@ function applyFilters() {
   const q           = document.getElementById('search').value.toLowerCase();
   const subCat      = parseInt(document.getElementById('filter-subcat').value) || null;
   const catFilter   = parseInt(document.getElementById('filter-category').value) || null;
-  const assignFilter = document.getElementById('filter-assign').value; // '' | 'assigned' | 'unassigned'
+  const assignFilter = document.getElementById('filter-assign').value; // '' | 'assigned' | 'unassigned' | asset_status values
   let data = getBaseData();
   if (q)      data = data.filter(p => p.name.toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q) || (p.serial_number||'').toLowerCase().includes(q));
   if (subCat) data = data.filter(p => p.category_id === subCat);
@@ -633,11 +775,14 @@ function applyFilters() {
     const kids = allCategories.filter(c => c.parent_id == catFilter).map(c => c.id);
     data = kids.length ? data.filter(p => kids.includes(p.category_id)) : data.filter(p => p.category_id === catFilter);
   }
-  // Assignment filter � applied at the individual unit level, then groups are rebuilt
+  // Assignment filter &mdash; applied at the individual unit level, then groups are rebuilt
   if (assignFilter === 'assigned') {
     data = data.filter(p => allAssignments.find(a => a.product_id === p.id));
   } else if (assignFilter === 'unassigned') {
     data = data.filter(p => !allAssignments.find(a => a.product_id === p.id));
+  } else if (assignFilter) {
+    // Status filter: available, under_repair, damaged, spare, lost, disposed
+    data = data.filter(p => (p.asset_status || 'available') === assignFilter);
   }
   renderGroupedTable(data);
 }
@@ -652,7 +797,7 @@ function renderTable(data) {
     const damage     = allDamages.find(d => d.product_id === p.id);
     const isDamaged  = !!damage;
     const assignment = allAssignments.find(a => a.product_id === p.id);
-    const assignee   = assignment ? (assignment.assignee_name || '') : null;
+    const assignee   = assignment ? (assignment.assignee_name || '') : (p.assigned_employee && p.assigned_employee.trim() ? p.assigned_employee.trim() : null);
 
     const catIcon = isDamaged
       ? '<div class="cat-icon-box damaged">&#9888;&#65039;</div>'
@@ -677,17 +822,17 @@ function renderTable(data) {
     const age    = assignment ? deployedAge(assignment.assigned_at) : '';
     const ageHtml = age
       ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + age + '</span>'
-      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+      : '<span style="color:var(--muted);font-size:12px;">?</span>';
 
     const days    = assignment ? deployedDays(assignment.assigned_at) : '';
     const daysHtml = days
       ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + days + '</span>'
-      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+      : '<span style="color:var(--muted);font-size:12px;">?</span>';
 
     return '<tr class="' + (isDamaged ? 'row-damaged' : '') + '">' +
       '<td><div class="cat-cell">' + catIcon + '<div>' + catNameHtml + (isDamaged && filterCatId ? '<div class="damage-badge">&#9888; not working</div>' : '') + '</div></div></td>' +
       nameCell +
-      '<td style="font-size:13px;color:var(--muted2);">' + esc(p.brand_model || '--') + '</td>' +
+      '<td style="font-size:13px;color:var(--muted2);">' + esc(p.brand || '--') + '</td>' +
       '<td><span class="sku-chip' + (isDamaged ? ' damaged' : '') + '">' + esc(p.sku) + '</span></td>' +
       '<td>' + supplierHtml + '</td>' +
       '<td style="text-align:center;"><span class="qty-pill">' + (p.quantity ?? 0) + '</span></td>' +
@@ -706,7 +851,7 @@ function renderTable(data) {
   tbody.querySelectorAll('[data-deploy]').forEach(btn => btn.addEventListener('click', function() { openDeployModal(parseInt(this.dataset.deploy)); }));
 }
 
-// -- Grouped view � groups assets by name, qty = count of units --
+// -- Grouped view ? groups assets by name, qty = count of units --
 function renderGroupedTable(data) {
   const tbody = document.getElementById('product-table');
   if (!data.length) {
@@ -735,16 +880,25 @@ function renderGroupedTable(data) {
     const anyDamaged = items.some(p => allDamages.find(d => d.product_id === p.id));
     const totalQty   = items.length;
 
-    // Build assignee chips � collect unique assignees across all units in the group
+    // Build assignee chips &mdash; collect unique assignees across all units in the group
+    // Source 1: active assignment records; Source 2: assigned_employee field on product (e.g. from import)
     const assigneeMap = new Map();
     items.forEach(p => {
       const a = allAssignments.find(x => x.product_id === p.id);
       if (a && a.assignee_name) {
         if (!assigneeMap.has(a.assignee_name)) assigneeMap.set(a.assignee_name, 0);
         assigneeMap.set(a.assignee_name, assigneeMap.get(a.assignee_name) + 1);
+      } else if (p.assigned_employee && p.assigned_employee.trim()) {
+        // Fallback: product has an assigned_employee but no active assignment record
+        const name = p.assigned_employee.trim();
+        if (!assigneeMap.has(name)) assigneeMap.set(name, 0);
+        assigneeMap.set(name, assigneeMap.get(name) + 1);
       }
     });
-    const assignedCount   = items.filter(p => allAssignments.find(x => x.product_id === p.id)).length;
+    const assignedCount   = items.filter(p =>
+      allAssignments.find(x => x.product_id === p.id) ||
+      (p.assigned_employee && p.assigned_employee.trim())
+    ).length;
     const unassignedCount = totalQty - assignedCount;
 
     let assigneeHtml = '';
@@ -807,17 +961,17 @@ function renderGroupedTable(data) {
     const groupAge    = oldestAssigned ? deployedAge(oldestAssigned) : '';
     const groupAgeHtml = groupAge
       ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + groupAge + '</span>'
-      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+      : '<span style="color:var(--muted);font-size:12px;">?</span>';
 
     const groupDays    = oldestAssigned ? deployedDays(oldestAssigned) : '';
     const groupDaysHtml = groupDays
       ? '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--muted2);">' + groupDays + '</span>'
-      : '<span style="color:var(--muted);font-size:12px;">�</span>';
+      : '<span style="color:var(--muted);font-size:12px;">?</span>';
 
     rows.push(
       '<tr class="' + (anyDamaged ? 'row-damaged' : '') + '">' +
         catCell +
-        '<td style="font-size:13px;color:var(--muted2);">' + esc(rep.brand_model || '--') + '</td>' +
+        '<td style="font-size:13px;color:var(--muted2);">' + esc(rep.brand || '--') + '</td>' +
         '<td style="display:none;"></td>' +
         '<td>' + supplierHtml + '</td>' +
         '<td style="text-align:center;"><span class="qty-pill">' + totalQty + '</span></td>' +
@@ -870,17 +1024,56 @@ async function openModal(id = null) {
       const p   = res.data;
       form.name.value        = p.name;
       form.sku.value         = p.sku;
-      form.quantity.value    = p.quantity;
-      form.description.value = p.description || '';
-      form.brand_model.value = p.brand_model || '';
-      form.category_id.value = p.category_id || '';
-      const supSel = document.getElementById('item-supplier');
-      if (supSel) supSel.value = p.supplier_id || '';
+      if (form.description) form.description.value = p.description || '';
+      const brandInp = document.getElementById('item-brand');
+      if (brandInp) brandInp.value = p.brand || '';
+      const modelInp = document.getElementById('item-model');
+      if (modelInp) modelInp.value = p.model || '';
+      const supInp = document.getElementById('item-supplier');
+      if (supInp) supInp.value = p.supplier_name || '';
       const locSel = document.getElementById('item-location');
       if (locSel) locSel.value = p.location_id || '';
-      if (isParentCat) document.getElementById('subcategory-select').value = p.category_id || '';
+      const statusSel = document.getElementById('item-status');
+      if (statusSel) statusSel.value = p.asset_status || 'available';
+      const pdInput = document.getElementById('item-purchase-date');
+      if (pdInput && p.purchase_date) pdInput.value = p.purchase_date.substring(0, 10);
+      const ddInput = document.getElementById('item-deployed-date');
+      if (ddInput) ddInput.value = p.deployed_date ? p.deployed_date.substring(0, 16) : '';
+      const empInp = document.getElementById('item-assigned-employee');
+      if (empInp) empInp.value = p.assigned_employee || '';
+      const empIdInp = document.getElementById('item-employee-id');
+      if (empIdInp) empIdInp.value = p.assigned_employee_id || '';
     } catch (e) { showToast(e.message, 'error'); return; }
   }
+
+  // Hide fields that are not editable after creation
+  const editOnlyHide = ['cat-group', 'brand-group', 'purchase-date-group'];
+  editOnlyHide.forEach(gid => {
+    const el = document.getElementById(gid);
+    if (el) el.style.display = id ? 'none' : '';
+  });
+
+  // PO link field &mdash; only visible when editing
+  const poLinkGroup = document.getElementById('po-link-group');
+  if (poLinkGroup) {
+    if (id) {
+      poLinkGroup.style.display = '';
+      // Populate the PO dropdown
+      try {
+        const poRes  = await api.getPurchaseOrders();
+        const poSel  = document.getElementById('item-po-id');
+        const poList = poRes.data || [];
+        poSel.innerHTML = '<option value="">-- None --</option>' +
+          poList.map(po => '<option value="' + po.id + '">' + esc(po.po_number) + (po.supplier_name ? ' &mdash; ' + esc(po.supplier_name) : '') + '</option>').join('');
+        // Pre-select current PO if the product already has one
+        const currentProduct = allItems.find(x => x.id === id);
+        if (currentProduct && currentProduct.po_id) poSel.value = currentProduct.po_id;
+      } catch (_) {}
+    } else {
+      poLinkGroup.style.display = 'none';
+    }
+  }
+
   document.getElementById('modal').classList.add('open');
 }
 
@@ -890,38 +1083,27 @@ async function populateDropdowns() {
   const parents  = cats.data.filter(c => !c.parent_id);
   const children = cats.data.filter(c =>  c.parent_id);
 
-  if (isParentCat && filterCatId) {
-    const thisCat = cats.data.find(c => c.id === filterCatId);
-    const kids    = children.filter(c => c.parent_id == filterCatId);
-    catSel.innerHTML = '<option value="' + filterCatId + '" selected>' + esc(thisCat ? thisCat.name : '') + '</option>';
-    catSel.disabled  = true;
-    document.getElementById('subcat-group').style.display = '';
-    document.getElementById('subcategory-select').innerHTML = '<option value="">-- Select subcategory --</option>' +
-      kids.map(k => '<option value="' + k.id + '">' + esc(k.name) + '</option>').join('');
-  } else {
-    catSel.disabled = false;
-    document.getElementById('subcat-group').style.display = 'none';
-    let html = '<option value="">-- None --</option>';
-    parents.forEach(p => {
-      const kids = children.filter(c => c.parent_id == p.id);
-      if (kids.length) {
-        html += '<optgroup label="' + esc(p.name) + '">';
-        kids.forEach(k => { html += '<option value="' + k.id + '">' + esc(k.name) + '</option>'; });
-        html += '</optgroup>';
-      } else {
-        html += '<option value="' + p.id + '">' + esc(p.name) + '</option>';
-      }
-    });
-    catSel.innerHTML = html;
-    if (filterCatId) catSel.value = filterCatId;
-  }
+  catSel.disabled = false;
+  let html = '<option value="">-- None --</option>';
+  parents.forEach(p => {
+    const kids = children.filter(c => c.parent_id == p.id);
+    if (kids.length) {
+      html += '<optgroup label="' + esc(p.name) + '">';
+      kids.forEach(k => { html += '<option value="' + k.id + '">' + esc(k.name) + '</option>'; });
+      html += '</optgroup>';
+    } else {
+      html += '<option value="' + p.id + '">' + esc(p.name) + '</option>';
+    }
+  });
+  catSel.innerHTML = html;
+  if (filterCatId) catSel.value = filterCatId;
 
   try {
     const supRes = await api.getSuppliers();
     const supSel = document.getElementById('item-supplier');
     if (supSel) {
       supSel.innerHTML = '<option value="">-- None --</option>' +
-        (supRes.data || []).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('');
+        (supRes.data || []).map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + '</option>').join('');
     }
   } catch (_) {}
 
@@ -942,18 +1124,34 @@ function closeModal() {
 
 async function submitForm(e) {
   e.preventDefault();
-  const form  = e.target;
-  const catId = isParentCat ? document.getElementById('subcategory-select').value : form.category_id.value;
-  if (isParentCat && !catId) { showToast('Please select a subcategory', 'error'); return; }
+  const form    = e.target;
+  const isEdit  = !!editingId;
+  const catSelEl = document.querySelector('select[name="category_id"]');
+  const catId   = catSelEl ? catSelEl.value : '';
   const fd = new FormData();
-  fd.append('name',        form.name.value.trim());
-  fd.append('sku',         form.sku.value.trim());
-  fd.append('quantity',    form.quantity.value);
-  fd.append('brand_model', form.brand_model.value.trim());
-  fd.append('description', form.description.value.trim());
-  fd.append('category_id', catId || '');
-  fd.append('supplier_id', document.getElementById('item-supplier') ? document.getElementById('item-supplier').value : '');
-  fd.append('location_id', document.getElementById('item-location') ? document.getElementById('item-location').value : '');
+  fd.append('name',                form.name.value.trim());
+  fd.append('sku',                 form.sku.value.trim());
+  fd.append('model',               document.getElementById('item-model') ? document.getElementById('item-model').value.trim() : '');
+  fd.append('description',         form.description ? form.description.value.trim() : '');
+  fd.append('supplier_name',       document.getElementById('item-supplier') ? document.getElementById('item-supplier').value.trim() : '');
+  fd.append('location_id',         document.getElementById('item-location') ? document.getElementById('item-location').value : '');
+  fd.append('asset_status',        document.getElementById('item-status') ? document.getElementById('item-status').value : 'available');
+  fd.append('assigned_employee',   document.getElementById('item-assigned-employee') ? document.getElementById('item-assigned-employee').value.trim() : '');
+  fd.append('assigned_employee_id',document.getElementById('item-employee-id') ? document.getElementById('item-employee-id').value.trim() : '');
+  // Deployed Date
+  const ddVal = document.getElementById('item-deployed-date') ? document.getElementById('item-deployed-date').value : '';
+  fd.append('deployed_date', ddVal);
+  // Fields only sent on Add (hidden during Edit)
+  if (!isEdit) {
+    fd.append('brand',       document.getElementById('item-brand') ? document.getElementById('item-brand').value.trim() : '');
+    fd.append('category_id', catId || '');
+    const pdVal = document.getElementById('item-purchase-date') ? document.getElementById('item-purchase-date').value : '';
+    if (pdVal) fd.append('purchase_date', pdVal);
+  } else {
+    // PO link &mdash; only available during edit
+    const poSel = document.getElementById('item-po-id');
+    if (poSel) fd.append('po_id', poSel.value);
+  }
   try {
     // -- Approval flow for staff ------------------------------------------
     if (ApprovalFlow.isStaff()) {
@@ -974,16 +1172,28 @@ async function submitForm(e) {
     if (editingId) {
       await api.updateProduct(editingId, fd);
       showToast('Asset updated', 'success');
+      const wasViewingProduct = viewingProductId;
+      const wasViewingGroup   = viewingGroupIds ? [...viewingGroupIds] : null;
+      closeModal();
+      await loadItems();
+      // Re-open the view modal so the user sees the updated data
+      if (wasViewingGroup) {
+        viewGroupedItems(wasViewingGroup);
+      } else if (wasViewingProduct) {
+        viewItem(wasViewingProduct);
+      }
     } else {
       await api.createProduct(fd);
       showToast('Asset created', 'success');
+      closeModal();
+      loadItems();
     }
-    closeModal();
-    loadItems();
   } catch (e) { showToast(e.message, 'error'); }
 }
 
 function viewItem(id) {
+  viewingProductId = id;
+  viewingGroupIds  = null;
   const p = allItems.find(x => x.id === id);
   if (!p) return;
   document.getElementById('image-modal-title').textContent = p.name;
@@ -998,6 +1208,21 @@ function viewItem(id) {
 
   document.getElementById('view-sku').textContent = p.sku || '--';
 
+  // Date Received from PO
+  const po = p.po_id ? allPOs[p.po_id] : null;
+  const receivedRow = document.getElementById('view-received-row');
+  const receivedVal = document.getElementById('view-received');
+  if (po && po.received_date) {
+    receivedVal.innerHTML =
+      '<span style="color:var(--green);">&#10003; ' +
+      new Date(po.received_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) +
+      '</span>' +
+      (po.received_by ? '<span style="color:var(--muted2);font-size:12px;margin-left:8px;">by ' + esc(po.received_by) + '</span>' : '');
+    receivedRow.style.display = '';
+  } else {
+    receivedRow.style.display = 'none';
+  }
+
   // Actions: deploy + report buttons
   const damage     = allDamages.find(d => d.product_id === p.id);
   const isStaff    = ApprovalFlow.isStaff();
@@ -1008,15 +1233,17 @@ function viewItem(id) {
     const deployLabel = isStaff ? '&#128640; Request Deployment' : '&#128640; Deploy';
     deployHtml = `<button class="btn btn-primary btn-sm" onclick="closeImageModal();openDeployModal(${p.id})">${deployLabel}</button>`;
   } else if (p.asset_status === 'assigned' && assignment) {
-    deployHtml = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(41,182,232,0.25);border-radius:20px;padding:3px 10px;">&#128100; Deployed to ${esc(assignment.assignee_name)}</span>`;
+    const _empEid = getAssigneeEmpId(assignment.assignee_name);
+    deployHtml = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(41,182,232,0.25);border-radius:20px;padding:3px 10px;">&#128100; Deployed to ${esc(assignment.assignee_name)}${_empEid ? `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);">#${esc(_empEid)}</span>` : ''}</span>
+      <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,0.25);" onclick="returnAssetInView(${assignment.id}, this)">&#8617; Return</button>`;
   }
 
   const dmgHtml = damage
-    ? `<button class="btn btn-danger btn-sm" onclick="closeImageModal();openDamageModal(${p.id})">&#9888; Edit Status Report</button>`
-    : `<button class="btn btn-amber btn-sm" onclick="closeImageModal();openDamageModal(${p.id})">&#9888; Report Status</button>`;
+    ? `<button class="btn btn-danger btn-sm" onclick="openDamageModal(${p.id})">&#9888; Edit Status Report</button>`
+    : `<button class="btn btn-amber btn-sm" onclick="openDamageModal(${p.id})">&#9888; Report Status</button>`;
 
   const editHtml = !isStaff
-    ? `<button class="btn btn-ghost btn-sm" onclick="closeImageModal();openModal(${p.id})">&#9998; Edit</button>`
+    ? `<button class="btn btn-ghost btn-sm" onclick="openModal(${p.id})">&#9998; Edit</button>`
     : '';
 
   document.getElementById('view-actions').innerHTML =
@@ -1029,14 +1256,18 @@ function viewItem(id) {
 
 // View all serial numbers for a grouped brand (leaf subcategory mode)
 function viewGroupedItems(ids) {
+  viewingGroupIds  = ids;
+  viewingProductId = null;
   const items = ids.map(id => allItems.find(x => x.id === id)).filter(Boolean);
   if (!items.length) return;
   const rep = items[0];
 
   document.getElementById('image-modal-title').textContent = rep.name;
 
-  // Receipt section � use the representative product's image_path
-  _initReceiptSection(rep.id, rep.image_path);
+  // Receipt section &mdash; use the first item that has an image; for PO, use the first item with a po_id
+  const receiptRep = items.find(p => p.image_path) || rep;
+  const poRep      = items.find(p => p.po_id)      || rep;
+  _initReceiptSection(receiptRep.id, receiptRep.image_path, poRep.po_id);
 
   // Hide single serial row, show multi-serial list
   document.getElementById('view-serial-row').style.display  = 'none';
@@ -1047,58 +1278,117 @@ function viewGroupedItems(ids) {
   const list = document.getElementById('view-serials-list');
   const isStaff = ApprovalFlow.isStaff();
   const deployBtnLabel = isStaff ? '&#128640; Request' : '&#128640; Deploy';
+  const showLocation = !localStorage.getItem('emp_location_id');
+
+  // Single source of truth &mdash; header and every data row use this exact template + gap
+  const GRID = showLocation
+    ? 'minmax(90px,auto) minmax(200px,2fr) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)'
+    : 'minmax(90px,auto) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)';
+  const GAP  = '10px';
+  const PAD  = '8px 14px'; // same padding used by both header and rows
+  const HDR_PAD = '8px 15px'; // header has no border, add 1px L/R to align with bordered rows
+
+  const hdr = document.getElementById('view-serials-header');
+  hdr.style.cssText = 'display:grid;width:100%;grid-template-columns:' + GRID + ';gap:' + GAP + ';padding:' + HDR_PAD + ';align-items:center;margin-bottom:4px;border-bottom:1px solid var(--border);box-sizing:border-box;';
+  const S = 'style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted2);"';
+  const SC = 'style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted2);text-align:center;"';
+  hdr.innerHTML =
+    '<span ' + S  + '>Serial No.</span>' +
+    (showLocation ? '<span ' + SC + '>Location</span>' : '') +
+    '<span ' + SC + '>Availability</span>' +
+    '<span ' + SC + '>Purchase Date</span>' +
+    '<span ' + SC + '>Model</span>' +
+    '<span ' + SC + '>Status</span>' +
+    '<span ' + SC + '>Date Deployed</span>' +
+    '<span ' + SC + '>Actions</span>';
+
+  const ctr = (html) => '<div style="display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;">' + html + '</div>';
+
   list.innerHTML = items.map(p => {
     const damage     = allDamages.find(d => d.product_id === p.id);
     const assignment = allAssignments.find(a => a.product_id === p.id);
     const assignee   = assignment ? assignment.assignee_name : null;
+    const assigneeEid = assignee ? getAssigneeEmpId(assignee) : '';
     const isDamaged  = !!damage;
 
     let statusHtml;
     if (isDamaged) {
       statusHtml = '<span class="serial-status damaged">&#9888; Damaged</span>';
     } else if (assignee) {
-      statusHtml = '<span class="serial-status assigned">&#128100; ' + esc(assignee) + '</span>';
+      statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
+    } else if (p.assigned_employee) {
+      statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
+    } else if (p.asset_status === 'assigned') {
+      statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
     } else {
       statusHtml = '<span class="serial-status working">&#10003; Available</span>';
     }
 
-    const deployDate = assignment
+    // Asset status badge (the actual asset_status column value)
+    const assetStatusLabels = {
+      available:     { label: 'Active',          color: 'var(--green)',  bg: 'var(--green-dim)',  icon: '&#10003;' },
+      assigned:      { label: 'Deployed',         color: 'var(--blue)',   bg: 'var(--blue-dim)',   icon: '&#128640;' },
+      under_repair:  { label: 'Under Repair',     color: 'var(--amber)',  bg: 'var(--amber-dim)',  icon: '&#9881;' },
+      damaged:       { label: 'Damaged',           color: 'var(--red)',    bg: 'var(--red-dim)',    icon: '&#9888;' },
+      spare:         { label: 'Spare',             color: 'var(--muted2)',bg: 'rgba(255,255,255,0.05)', icon: '&#128179;' },
+      lost:          { label: 'Lost',              color: 'var(--red)',    bg: 'var(--red-dim)',    icon: '&#10007;' },
+      disposed:      { label: 'Disposed',          color: 'var(--muted)', bg: 'rgba(255,255,255,0.04)', icon: '&#128465;' },
+    };
+    const st = assetStatusLabels[p.asset_status] || { label: p.asset_status || 'Active', color: 'var(--green)', bg: 'var(--green-dim)', icon: '&#10003;' };
+    const assetStatusBadge = '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:' + st.color + ';background:' + st.bg + ';border:1px solid ' + st.color + '33;border-radius:20px;padding:2px 9px;white-space:nowrap;">' + st.icon + ' ' + esc(st.label) + '</span>';
+
+    const po = p.po_id ? allPOs[p.po_id] : null;
+    const dateReceivedHtml = po && po.received_date
+      ? '<span style="font-size:11px;color:var(--green);background:var(--green-dim);border:1px solid rgba(62,207,142,.2);border-radius:12px;padding:2px 8px;white-space:nowrap;">&#10003; ' +
+        new Date(po.received_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</span>'
+      : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>';
+
+    const purchaseDateHtml = p.purchase_date
       ? '<span style="font-size:11px;color:var(--muted2);font-family:\'DM Mono\',monospace;white-space:nowrap;">&#128197; ' +
-        new Date(assignment.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) +
-        '</span>'
-      : '';
+        new Date(p.purchase_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</span>'
+      : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>';
 
     const deployDays = assignment
-      ? (() => {
-          const d = Math.floor((Date.now() - new Date(assignment.assigned_at).getTime()) / 86400000);
-          return '<span style="font-size:11px;color:var(--muted2);white-space:nowrap;">' + (d <= 0 ? '< 1 day' : d + (d === 1 ? ' day' : ' days')) + '</span>';
-        })()
+      ? (() => { const d = Math.floor((Date.now()-new Date(assignment.assigned_at).getTime())/86400000); return d<=0?'< 1 day':d+(d===1?' day':' days'); })()
+      : '';
+    const dateDeployedHtml = assignment
+      ? '<span style="font-size:11px;color:var(--muted2);font-family:\'DM Mono\',monospace;white-space:nowrap;">&#128197; ' +
+        new Date(assignment.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) +
+        ' <span style="color:var(--muted);">&middot; ' + deployDays + '</span></span>'
+      : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>';
+
+    const locationHtml = showLocation
+      ? (p.location_name
+          ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted2);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-family:\'DM Mono\',monospace;">&#128205; ' + esc(p.location_name) + '</span>'
+          : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>')
       : '';
 
-    return '<div class="serial-row' + (isDamaged ? ' damaged' : '') + '">' +
-      '<span class="serial-code">' + esc(p.serial_number || p.sku) + '</span>' +
-      '<div class="serial-info">' +
-        statusHtml +
-        (assignee
-          ? '<span style="font-size:11px;color:var(--muted2);font-family:\'DM Mono\',monospace;">' + deployDate.replace(/<[^>]+>/g,'').trim() + ' � ' + deployDays.replace(/<[^>]+>/g,'').trim() + '</span>'
-          : '') +
-      '</div>' +
-      '<div class="serial-meta">' +
-        (!isDamaged && !assignee
-          ? '<button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:11px;" data-deploy-from-view="' + p.id + '">' + deployBtnLabel + '</button>'
-          : '') +
-        (isDamaged
-          ? '<button class="btn btn-danger btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">? Edit Status</button>'
-          : '<button class="btn btn-amber btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">Report</button>') +
-        (!isStaff ? '<button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;" data-edit-from-view="' + p.id + '">Edit</button>' : '') +
-      '</div>' +
+    const isOccupied = !!(assignee || p.assigned_employee || p.asset_status === 'assigned');
+
+    const actionBtns =
+      (!isDamaged && !isOccupied ? '<button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:11px;" data-deploy-from-view="' + p.id + '">' + deployBtnLabel + '</button>' : '') +
+      (assignee ? '<button class="btn btn-sm" style="padding:4px 10px;font-size:11px;background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,0.25);" data-return-from-view="' + assignment.id + '">&#8617; Return</button>' : '') +
+      (isDamaged
+        ? '<button class="btn btn-danger btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">&#9888; Edit Status</button>'
+        : '<button class="btn btn-amber btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">Report</button>') +
+      (!isStaff ? '<button class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:11px;" data-edit-from-view="' + p.id + '">Edit</button>' : '');
+
+    // Each row is its own grid with the SAME template, gap, and padding as the header
+    return '<div class="serial-row' + (isDamaged ? ' damaged' : '') + '" style="display:grid;width:100%;box-sizing:border-box;grid-template-columns:' + GRID + ';gap:' + GAP + ';padding:' + PAD + ';align-items:center;">' +
+      '<div style="display:flex;align-items:center;"><span class="serial-code">' + esc(p.serial_number || p.sku) + '</span></div>' +
+      (showLocation ? ctr(locationHtml) : '') +
+      ctr(statusHtml) +
+      ctr(purchaseDateHtml) +
+      ctr(p.model ? '<span style="font-size:12px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">' + esc(p.model) + '</span>' : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>') +
+      ctr(assetStatusBadge) +
+      ctr(dateDeployedHtml) +
+      '<div class="serial-meta" style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:nowrap;">' + actionBtns + '</div>' +
     '</div>';
   }).join('');
 
   // Wire edit buttons inside the serial list
   list.querySelectorAll('[data-edit-from-view]').forEach(btn => {
     btn.addEventListener('click', function() {
-      closeImageModal();
       openModal(parseInt(this.dataset.editFromView));
     });
   });
@@ -1114,8 +1404,14 @@ function viewGroupedItems(ids) {
   // Wire damage buttons inside the serial list
   list.querySelectorAll('[data-dmg-from-view]').forEach(btn => {
     btn.addEventListener('click', function() {
-      closeImageModal();
       openDamageModal(parseInt(this.dataset.dmgFromView));
+    });
+  });
+
+  // Wire return buttons inside the serial list
+  list.querySelectorAll('[data-return-from-view]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      returnAssetInView(parseInt(this.dataset.returnFromView), this);
     });
   });
 
@@ -1127,7 +1423,7 @@ function viewGroupedItems(ids) {
 ------------------------------------------ */
 let _currentReceiptProductId = null;
 
-function _initReceiptSection(productId, imagePath) {
+function _initReceiptSection(productId, imagePath, overridePoId) {
   _currentReceiptProductId = productId;
 
   const previewWrap  = document.getElementById('receipt-preview-wrap');
@@ -1149,6 +1445,45 @@ function _initReceiptSection(productId, imagePath) {
     previewWrap.style.display  = 'none';
     uploadZone.style.display   = '';
     chip.style.display         = 'none';
+  }
+
+  // Clear PO section while loading
+  const poSection = document.getElementById('po-info-section');
+  const poGrid    = document.getElementById('po-info-grid');
+  poSection.style.display = 'none';
+  poGrid.innerHTML = '';
+
+  // Resolve the PO id: caller may pass an explicit override (e.g. grouped view
+  // where the representative product has no po_id but other units in the group do)
+  const product = allItems.find(x => x.id === productId);
+  const resolvedPoId = overridePoId || (product && product.po_id) || null;
+  if (resolvedPoId) {
+    api.getPurchaseOrder(resolvedPoId)
+      .then(res => {
+        const po = res.data;
+        if (!po) return;
+
+        const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '?';
+        const fmtDt = (d) => d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '?';
+
+        const fields = [
+          { label: 'PO Number',        value: po.po_number   || '?' },
+          { label: 'Order Date',        value: fmt(po.order_date) },
+          { label: 'Date Received',     value: fmt(po.received_date) },
+          { label: 'Expected Delivery', value: fmt(po.expected_date) },
+          { label: 'Received By',       value: po.received_by || '?' },
+          { label: 'Created By',        value: po.created_by  || '?' },
+        ];
+
+        poGrid.innerHTML = fields.map(f => `
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">${f.label}</div>
+            <div style="font-size:13px;color:${f.highlight ? 'var(--green)' : 'var(--text)'};">${esc(String(f.value))}</div>
+          </div>`).join('');
+
+        poSection.style.display = '';
+      })
+      .catch(() => { /* PO not found ? hide section */ });
   }
 }
 
@@ -1207,7 +1542,11 @@ async function _removeReceipt() {
   }
 }
 
-function closeImageModal() { document.getElementById('image-modal').classList.remove('open'); }
+function closeImageModal() {
+  document.getElementById('image-modal').classList.remove('open');
+  viewingProductId = null;
+  viewingGroupIds  = null;
+}
 
 async function openDamageModal(productId) {
   const p      = allItems.find(x => x.id === productId);
@@ -1242,183 +1581,556 @@ function closeDamageModal() {
   editingDamageId = null;
 }
 
+async function submitDamageForm(e) {
+  e.preventDefault();
+  const form      = document.getElementById('damage-form');
+  const productId = parseInt(form.dataset.productId);
+  const submitBtn = form.querySelector('[type="submit"]');
+
+  const payload = {
+    product_id:       productId,
+    reported_by:      form.reported_by.value.trim(),
+    issue:            form.issue.value.trim(),
+    status:           form.status.value,
+    disposal_reason:  form.disposal_reason?.value.trim() || null,
+    donated_to:       form.donated_to?.value.trim()      || null,
+  };
+
+  submitBtn.disabled    = true;
+  submitBtn.textContent = 'Saving?';
+
+  try {
+    let result;
+    if (editingDamageId) {
+      result = await api.updateDamage(editingDamageId, payload);
+    } else {
+      result = await api.createDamage(payload);
+    }
+
+    // Update local damage list
+    const updated = result.data || result;
+    if (editingDamageId) {
+      const idx = allDamages.findIndex(d => d.id === editingDamageId);
+      if (idx !== -1) {
+        if (['resolved', 'disposed', 'donated'].includes(updated.status)) {
+          allDamages.splice(idx, 1);
+        } else {
+          allDamages[idx] = updated;
+        }
+      }
+    } else {
+      allDamages.push(updated);
+    }
+
+    // Update the product's asset_status in local allItems so UI reflects immediately
+    const itemIdx = allItems.findIndex(x => x.id === productId);
+    if (itemIdx !== -1) {
+      if (['resolved'].includes(updated.status)) {
+        allItems[itemIdx].asset_status = 'available';
+      } else if (['disposed', 'donated'].includes(updated.status)) {
+        // product deleted on backend ? remove from local list
+        allItems.splice(itemIdx, 1);
+      } else {
+        // damaged / open ? mark as under_repair so Deploy button disappears
+        allItems[itemIdx].asset_status = 'under_repair';
+      }
+    }
+
+    closeDamageModal();
+    applyFilters();
+    // Re-open the view modal so the user stays in context
+    if (viewingGroupIds) {
+      viewGroupedItems(viewingGroupIds);
+    } else if (viewingProductId) {
+      viewItem(viewingProductId);
+    }
+    showToast(editingDamageId ? 'Status report updated.' : 'Damage reported.', 'success');
+  } catch (err) {
+    showToast(err.message || 'Failed to save report.', 'error');
+  } finally {
+    submitBtn.disabled    = false;
+    submitBtn.textContent = 'Save Report';
+  }
+}
+
 /* ------------------------------------------
-   DEPLOY MODAL
+   DEPLOY MODAL ? Cubicle Map Picker
 ------------------------------------------ */
 let deployProductId = null;
-let allEmployeesCache = [];
+let _deploySelectedSeat = null;
+let _deployWing = 'all';
+let _deployProductCache = {};
+let _deployAsgn = {};
+let _deployMode = 'cubicle';        // 'cubicle' | 'employee'
+let _deployEmployees = [];          // cached employee list
+let _deploySelectedEmployee = null; // { name, station, employee_id? }
 
-function filterEmployeeSuggestions() {
-  const q      = (document.getElementById('deploy-employee-search').value || '').toLowerCase().trim();
-  const box    = document.getElementById('deploy-employee-suggestions');
-  const hidden = document.getElementById('deploy-employee');
-  hidden.value = '';
-  if (!q) { box.style.display = 'none'; return; }
-  const matches = allEmployeesCache.filter(e => (e.name || '').toLowerCase().includes(q)).slice(0, 10);
-  if (!matches.length) { box.style.display = 'none'; return; }
-  box.innerHTML = matches.map(e => {
-    const sub = [e.seat_number ? 'Seat ' + e.seat_number : '', e.station || '', e.location_name || ''].filter(Boolean).join(' � ');
-    return `<div data-name="${esc(e.name)}"
-      style="padding:10px 14px;cursor:pointer;font-size:14px;color:var(--text);border-bottom:1px solid var(--border);transition:background .1s;"
-      onmousedown="selectEmployeeSuggestion('${esc(e.name).replace(/'/g,"&#39;")}')"
-      onmouseover="this.style.background='var(--bg2)'"
-      onmouseout="this.style.background=''"
-    >${esc(e.name)}${sub ? ' <span style="color:var(--muted);font-size:11px;">� ' + esc(sub) + '</span>' : ''}</div>`;
+/* -- Palette (mirrors cubicle-map) -- */
+function _dIsDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function _dPal() {
+  if (_dIsDark()) return { floor:'#0c1a2c',desk:'#1a2c44',deskStr:'#27374f',spine:'#324867',divider:'#27374f',label:'#5d7290',walkBg:'#0e1a2c',walkStr:'#16263e',walkText:'#33455f',emptyFill:'#16243a',emptyStr:'#33455f',selRing:'#29b6e8' };
+  return { floor:'#dbe7f7',desk:'#c8d8ef',deskStr:'#a8bcda',spine:'#94adc8',divider:'#a8bcda',label:'#4a6785',walkBg:'#b8cce0',walkStr:'#8aaac4',walkText:'#5a7a9a',emptyFill:'#e8f0fa',emptyStr:'#94adc8',selRing:'#1d6fa4' };
+}
+
+/* -- Geometry (matches cubicle-map) -- */
+const _D_CHAIR_R=12,_D_CHAIR_OFFSET=17,_D_PAIR_W=70,_D_PAIRS_PER_ROW=8;
+const _D_ROW_LEN=_D_PAIR_W*_D_PAIRS_PER_ROW,_D_ROW_THICK=100,_D_ROW_GAP=36;
+const _D_WING_HEIGHT=4*_D_ROW_THICK+3*_D_ROW_GAP;
+const _D_PAIRS_PER_MID=8,_D_MID_BAY_W=_D_ROW_THICK,_D_MID_BAY_HEIGHT=_D_WING_HEIGHT;
+const _D_MARGIN_L=44,_D_MARGIN_T=40,_D_AISLE_W=64;
+const _D_STORAGE_KEY='cubicle_assets_v1';
+
+function _dLoadAsgn() {
+  try { _deployAsgn = JSON.parse(localStorage.getItem(_D_STORAGE_KEY) || '{}'); } catch(_) { _deployAsgn = {}; }
+}
+function _dKey(n) { return 'seat-' + n; }
+function _dSeatHasAsset(n) { return (_deployAsgn[_dKey(n)] || []).length > 0; }
+function _dSeatStatus(n) {
+  const ids = _deployAsgn[_dKey(n)] || [];
+  if (!ids.length) return 'empty';
+  for (const id of ids) { const p = _deployProductCache[id]; if (p && p.asset_status === 'damaged') return 'report'; }
+  return 'ok';
+}
+
+function _dChair(seatNum, cx, cy) {
+  const p = _dPal();
+  const st = _dSeatStatus(seatNum);
+  const sel = seatNum === _deploySelectedSeat;
+  const strokeW = sel ? 3 : (st !== 'empty' ? 2.4 : 1.6);
+  const dashAttr = st === 'empty' ? 'stroke-dasharray="2.5,2.5"' : '';
+  const selRing = sel ? `<circle cx="${cx}" cy="${cy}" r="${_D_CHAIR_R+5}" fill="none" stroke="${p.selRing}" stroke-width="2.5" opacity="0.9"/>` : '';
+  let fill, stroke;
+  if (st === 'report')      { stroke = '#f5a623'; fill = '#29b6e8'; }
+  else if (st === 'ok')     { stroke = '#3ecf8e'; fill = '#29b6e8'; }
+  else                      { stroke = p.emptyStr; fill = p.emptyFill; }
+  // Only allow clicking empty seats
+  const onclick = st === 'empty'
+    ? `onclick="deploySelectSeat(${seatNum})"`
+    : `onclick="showToast('Seat #${seatNum} already has assets assigned.','error')" style="cursor:not-allowed;"`;
+  const count = (_deployAsgn[_dKey(seatNum)] || []).length;
+  const inner = st !== 'empty' ? `<text x="${cx}" y="${cy+3.5}" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="9" fill="#ffffff">${count}</text>` : '';
+  return `<g class="cubicle" ${onclick}>${selRing}<circle class="chair-ring" cx="${cx}" cy="${cy}" r="${_D_CHAIR_R}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" ${dashAttr}/>${inner}</g>`;
+}
+
+function _dDrawHRow(x, y, startSeat, bayLabel, mirrored, allowed) {
+  const p = _dPal(); let svg = '';
+  svg += `<rect x="${x}" y="${y}" width="${_D_ROW_LEN}" height="${_D_ROW_THICK}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg += `<line x1="${x+4}" y1="${y+_D_ROW_THICK/2}" x2="${x+_D_ROW_LEN-4}" y2="${y+_D_ROW_THICK/2}" stroke="${p.spine}" stroke-width="2"/>`;
+  for (let pp = 1; pp < _D_PAIRS_PER_ROW; pp++) { const tx = x+pp*_D_PAIR_W; svg += `<line x1="${tx}" y1="${y+4}" x2="${tx}" y2="${y+_D_ROW_THICK-4}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`; }
+  svg += `<text x="${x+_D_ROW_LEN/2}" y="${y-10}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">${bayLabel}</text>`;
+  for (let pi = 0; pi < _D_PAIRS_PER_ROW; pi++) {
+    const cx = x + pi*_D_PAIR_W + _D_PAIR_W/2;
+    const topSeat = mirrored ? startSeat+(7-pi) : startSeat+pi;
+    const botSeat = mirrored ? startSeat+8+pi   : startSeat+(15-pi);
+    [[topSeat,0],[botSeat,1]].forEach(([sn, side]) => {
+      if (allowed && !allowed.has(sn)) return;
+      const cy = side === 0 ? y+_D_ROW_THICK/2-_D_CHAIR_OFFSET : y+_D_ROW_THICK/2+_D_CHAIR_OFFSET;
+      svg += _dChair(sn, cx, cy);
+      const numY = side === 0 ? cy-_D_CHAIR_R-4 : cy+_D_CHAIR_R+10;
+      svg += `<text x="${cx}" y="${numY}" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="${p.label}">#${sn}</text>`;
+    });
+  }
+  return svg;
+}
+function _dDrawWing(x, topY, startSeat, bayNumStart, mirrored, allowed) {
+  let svg = '';
+  for (let r = 0; r < 4; r++) svg += _dDrawHRow(x, topY+r*(_D_ROW_THICK+_D_ROW_GAP), startSeat+r*16, 'BAY '+(bayNumStart+r), mirrored, allowed);
+  return svg;
+}
+function _dDrawMidBay(x, topY, allowed) {
+  const p = _dPal(), pH = _D_MID_BAY_HEIGHT/_D_PAIRS_PER_MID; let svg = '';
+  svg += `<rect x="${x}" y="${topY}" width="${_D_MID_BAY_W}" height="${_D_MID_BAY_HEIGHT}" rx="6" fill="${p.desk}" stroke="${p.deskStr}" stroke-width="1"/>`;
+  svg += `<line x1="${x+_D_MID_BAY_W/2}" y1="${topY+4}" x2="${x+_D_MID_BAY_W/2}" y2="${topY+_D_MID_BAY_HEIGHT-4}" stroke="${p.spine}" stroke-width="2"/>`;
+  for (let pp = 1; pp < _D_PAIRS_PER_MID; pp++) { const ty = topY+pp*pH; svg += `<line x1="${x+4}" y1="${ty}" x2="${x+_D_MID_BAY_W-4}" y2="${ty}" stroke="${p.divider}" stroke-width="1" opacity="0.6"/>`; }
+  svg += `<text x="${x+_D_MID_BAY_W/2}" y="${topY-12}" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" letter-spacing="1.5" fill="${p.label}">BAY 5</text>`;
+  for (let pi = 0; pi < _D_PAIRS_PER_MID; pi++) {
+    const cy = topY+pi*pH+pH/2, ls = 65+pi, rs = 80-pi;
+    [[ls,0],[rs,1]].forEach(([sn, side]) => {
+      if (allowed && !allowed.has(sn)) return;
+      const cx = side === 0 ? x+_D_MID_BAY_W/2-_D_CHAIR_OFFSET : x+_D_MID_BAY_W/2+_D_CHAIR_OFFSET;
+      svg += _dChair(sn, cx, cy);
+      const numX = side === 0 ? cx-_D_CHAIR_R-3 : cx+_D_CHAIR_R+3;
+      svg += `<text x="${numX}" y="${cy-_D_CHAIR_R-2}" text-anchor="${side===0?'end':'start'}" font-family="DM Mono,monospace" font-size="8" fill="${p.label}">#${sn}</text>`;
+    });
+  }
+  return svg;
+}
+function _dDrawWalkway(x, topY, height, label) {
+  const p = _dPal();
+  let svg = `<rect x="${x}" y="${topY}" width="${_D_AISLE_W}" height="${height}" fill="${p.walkBg}" stroke="${p.walkStr}" stroke-width="1" stroke-dasharray="6,8" rx="4"/>`;
+  svg += `<text x="${x+_D_AISLE_W/2}" y="${topY+height/2+4}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" letter-spacing="2" fill="${p.walkText}" transform="rotate(-90 ${x+_D_AISLE_W/2} ${topY+height/2})">${label}</text>`;
+  return svg;
+}
+
+function deployBuildSvg(allowed) {
+  const leftX=_D_MARGIN_L, topY=_D_MARGIN_T, aisle1X=leftX+_D_ROW_LEN;
+  const midX=aisle1X+_D_AISLE_W, aisle2X=midX+_D_MID_BAY_W, rightX=aisle2X+_D_AISLE_W;
+  const totalW=rightX+_D_ROW_LEN+_D_MARGIN_L, totalH=topY+_D_WING_HEIGHT+30;
+  const svgEl = document.getElementById('deploySvg');
+  svgEl.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+  svgEl.style.width = totalW + 'px'; svgEl.style.height = totalH + 'px';
+  let svg = `<rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${_dPal().floor}" rx="10"/>`;
+  const showL = _deployWing === 'all' || _deployWing === 'left';
+  const showR = _deployWing === 'all' || _deployWing === 'right';
+  if (showL) svg += _dDrawWing(leftX, topY, 1, 1, false, allowed);
+  svg += _dDrawWalkway(aisle1X, topY, _D_WING_HEIGHT, 'WALKWAY');
+  svg += _dDrawWalkway(aisle2X, topY, _D_WING_HEIGHT, 'WALKWAY');
+  svg += _dDrawMidBay(midX, topY, allowed);
+  if (showR) svg += _dDrawWing(rightX, topY, 81, 6, true, allowed);
+  svgEl.innerHTML = svg;
+}
+
+function deployAllowedSet() {
+  if (_deployWing === 'left')  return new Set([...Array(64)].map((_,i)=>i+1).concat([65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80]));
+  if (_deployWing === 'right') return new Set([...Array(64)].map((_,i)=>i+81).concat([65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80]));
+  return null;
+}
+
+function deployRenderMap() {
+  _deployWing = document.getElementById('deploy-wing-select').value;
+  deployBuildSvg(deployAllowedSet());
+}
+
+function deploySelectSeat(n) {
+  _deploySelectedSeat = n;
+  deployBuildSvg(deployAllowedSet());
+  document.getElementById('deploy-selected-seat-num').textContent = 'Seat #' + n;
+  document.getElementById('deploy-selected-label').style.display = '';
+  const btn = document.getElementById('deploy-submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = '&#128640; Deploy to Seat #' + n;
+}
+
+/* -- Deploy mode toggle -- */
+function setDeployMode(mode) {
+  _deployMode = mode;
+  const cubBtn  = document.getElementById('deploy-mode-cubicle');
+  const empBtn  = document.getElementById('deploy-mode-employee');
+  const cubPanel = document.getElementById('deploy-cubicle-panel');
+  const empPanel = document.getElementById('deploy-employee-panel');
+  const submitBtn = document.getElementById('deploy-submit-btn');
+
+  if (mode === 'cubicle') {
+    cubBtn.style.cssText  = 'display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;transition:all .15s;';
+    empBtn.style.cssText  = 'display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);transition:all .15s;';
+    cubPanel.style.display = '';
+    empPanel.style.display = 'none';
+    // Reset submit button to seat state
+    if (_deploySelectedSeat !== null) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '&#128640; Deploy to Seat #' + _deploySelectedSeat;
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '&#128640; Deploy to Selected Seat';
+    }
+  } else {
+    empBtn.style.cssText  = 'display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;transition:all .15s;';
+    cubBtn.style.cssText  = 'display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);transition:all .15s;';
+    cubPanel.style.display = 'none';
+    empPanel.style.display = '';
+    // Reset submit button to employee state
+    if (_deploySelectedEmployee) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '&#128640; Deploy to ' + esc(_deploySelectedEmployee.name);
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '&#128640; Deploy to Selected Employee';
+    }
+    // Load employees if not loaded yet
+    if (_deploySubTab === 'user') {
+      if (!_deployUsers.length) _loadDeployUsers(); else _renderDeployPersonList(_deployUsers, 'user');
+    } else {
+      if (!_deployEmployees.length) _loadDeployEmployees(); else _renderDeployPersonList(_deployEmployees, 'employee');
+    }
+  }
+}
+
+/* -- Deploy sub-tab: 'employee' | 'user' -- */
+let _deploySubTab = 'employee';   // current sub-tab
+let _deployUsers  = [];           // cached system users
+
+function setDeploySubTab(tab) {
+  _deploySubTab = tab;
+  const empBtn  = document.getElementById('deploy-subtab-employee');
+  const userBtn = document.getElementById('deploy-subtab-user');
+  const active  = 'padding:5px 18px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--blue);color:#fff;transition:all .15s;';
+  const inactive= 'padding:5px 18px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);transition:all .15s;';
+  empBtn.style.cssText  = tab === 'employee' ? active : inactive;
+  userBtn.style.cssText = tab === 'user'     ? active : inactive;
+  // Clear search + selection when switching tabs
+  document.getElementById('deploy-emp-search').value = '';
+  _deploySelectedEmployee = null;
+  document.getElementById('deploy-emp-selected-wrap').style.display = 'none';
+  const btn = document.getElementById('deploy-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = tab === 'user' ? '&#128640; Deploy to Selected User' : '&#128640; Deploy to Selected Employee';
+  // Load & render the appropriate list
+  if (tab === 'user') {
+    if (!_deployUsers.length) { _loadDeployUsers(); } else { _renderDeployPersonList(_deployUsers, 'user'); }
+  } else {
+    if (!_deployEmployees.length) { _loadDeployEmployees(); } else { _renderDeployPersonList(_deployEmployees, 'employee'); }
+  }
+}
+
+async function _loadDeployEmployees() {
+  const listEl = document.getElementById('deploy-emp-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;">Loading employees\u2026</div>';
+  try {
+    const res = await api.getEmployees();
+    _deployEmployees = (res.data || []).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    _renderDeployPersonList(_deployEmployees, 'employee');
+  } catch (e) {
+    listEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--red);font-size:13px;">Failed to load employees.</div>';
+  }
+}
+
+async function _loadDeployUsers() {
+  const listEl = document.getElementById('deploy-emp-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;">Loading users\u2026</div>';
+  try {
+    const data = await auth.getUsers();
+    _deployUsers = (data || [])
+      .filter(u => u.status === 'active')
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    _renderDeployPersonList(_deployUsers, 'user');
+  } catch (e) {
+    listEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--red);font-size:13px;">Failed to load users.</div>';
+  }
+}
+
+function deployFilterEmployees() {
+  const q    = document.getElementById('deploy-emp-search').value.toLowerCase().trim();
+  const list = _deploySubTab === 'user' ? _deployUsers : _deployEmployees;
+  const filtered = q
+    ? list.filter(p =>
+        (p.name     || '').toLowerCase().includes(q) ||
+        (p.station  || '').toLowerCase().includes(q) ||
+        (p.position || '').toLowerCase().includes(q) ||
+        (p.role     || '').toLowerCase().includes(q))
+    : list;
+  _renderDeployPersonList(filtered, _deploySubTab);
+}
+
+/* Role badge colours */
+const _roleStyle = {
+  admin:   { bg:'rgba(155,115,247,0.15)', border:'rgba(155,115,247,0.3)', color:'#9b73f7' },
+  manager: { bg:'rgba(245,166,35,0.12)',  border:'rgba(245,166,35,0.3)',  color:'#f5a623' },
+  staff:   { bg:'rgba(41,182,232,0.12)',  border:'rgba(41,182,232,0.3)',  color:'#29b6e8' },
+  viewer:  { bg:'rgba(62,207,142,0.12)',  border:'rgba(62,207,142,0.3)',  color:'#3ecf8e' },
+};
+const _roleLabel = { admin:'Admin', manager:'Manager', staff:'Staff', viewer:'Supervisor' };
+
+function _roleBadge(role) {
+  const s = _roleStyle[role] || { bg:'var(--bg3)', border:'var(--border2)', color:'var(--muted2)' };
+  const l = _roleLabel[role] || role;
+  return `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${s.bg};border:1px solid ${s.border};color:${s.color};text-transform:uppercase;letter-spacing:.5px;">${esc(l)}</span>`;
+}
+
+function _renderDeployPersonList(list, type) {
+  const listEl = document.getElementById('deploy-emp-list');
+  if (!list.length) {
+    const label = type === 'user' ? 'users' : 'employees';
+    listEl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;">No ' + label + ' found.</div>';
+    return;
+  }
+
+  listEl.innerHTML = list.map(person => {
+    const isSelected = _deploySelectedEmployee && _deploySelectedEmployee._type === type && _deploySelectedEmployee.id === person.id;
+    const color = avatarColor(person.name || '');
+    const av    = initials(person.name || '');
+
+    let meta = '';
+    if (type === 'employee') {
+      // Employee: show station + seat_number + location
+      const parts = [];
+      if (person.station)     parts.push('<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted2);">' + esc(person.station) + '</span>');
+      if (person.seat_number) parts.push('<span style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;">Seat ' + esc(person.seat_number) + '</span>');
+      if (person.location_name) parts.push('<span style="font-size:11px;color:var(--muted);">' + esc(person.location_name) + '</span>');
+      if (person.employee_id) parts.push('<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);background:var(--bg3);padding:1px 6px;border-radius:4px;border:1px solid var(--border);">' + esc(person.employee_id) + '</span>');
+      meta = parts.join('');
+    } else {
+      // User: show role badge + position + employee_id
+      const parts = [];
+      parts.push(_roleBadge(person.role));
+      if (person.position) parts.push('<span style="font-size:11px;color:var(--muted2);">' + esc(person.position) + '</span>');
+      if (person.employee_id) parts.push('<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);background:var(--bg3);padding:1px 6px;border-radius:4px;border:1px solid var(--border);">' + esc(person.employee_id) + '</span>');
+      meta = parts.join('');
+    }
+
+    return `<div onclick="deploySelectEmployee(${person.id},'${type}')"
+      style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-left:3px solid ${isSelected ? 'var(--blue)' : 'transparent'};background:${isSelected ? 'var(--blue-dim)' : 'transparent'};transition:background .12s,border-color .12s;"
+      onmouseover="if(!${isSelected})this.style.background='rgba(255,255,255,0.03)'"
+      onmouseout="if(!${isSelected})this.style.background='transparent'">
+      <div style="width:36px;height:36px;border-radius:50%;background:${color};display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">${av}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(person.name || '')}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;align-items:center;">${meta}</div>
+      </div>
+      ${isSelected ? '<span style="color:var(--blue);font-size:18px;flex-shrink:0;">&#10003;</span>' : ''}
+    </div>`;
   }).join('');
-  box.style.display = '';
 }
 
-function selectEmployeeSuggestion(name) {
-  document.getElementById('deploy-employee-search').value = name;
-  document.getElementById('deploy-employee').value        = name;
-  document.getElementById('deploy-employee-suggestions').style.display = 'none';
-}
+function deploySelectEmployee(personId, type) {
+  const list   = type === 'user' ? _deployUsers : _deployEmployees;
+  const person = list.find(p => p.id === personId);
+  if (!person) return;
+  _deploySelectedEmployee = { ...person, _type: type };
 
-function onEmployeeSearchKey(e) {
-  if (e.key === 'Escape') document.getElementById('deploy-employee-suggestions').style.display = 'none';
+  // Re-render list to update highlight
+  const q = document.getElementById('deploy-emp-search').value.toLowerCase().trim();
+  const filtered = q
+    ? list.filter(p =>
+        (p.name     || '').toLowerCase().includes(q) ||
+        (p.station  || '').toLowerCase().includes(q) ||
+        (p.position || '').toLowerCase().includes(q) ||
+        (p.role     || '').toLowerCase().includes(q))
+    : list;
+  _renderDeployPersonList(filtered, type);
+
+  // Selection summary
+  const wrap = document.getElementById('deploy-emp-selected-wrap');
+  document.getElementById('deploy-emp-selected-name').textContent = person.name || '';
+  let subtitle = '';
+  if (type === 'employee') {
+    subtitle = person.station ? '@ ' + person.station + (person.seat_number ? '  Seat ' + person.seat_number : '') : '';
+  } else {
+    subtitle = (_roleLabel[person.role] || person.role) + (person.position ? '  \u2022  ' + person.position : '');
+  }
+  document.getElementById('deploy-emp-selected-station').textContent = subtitle;
+  wrap.style.display = 'flex';
+
+  // Enable submit
+  const btn = document.getElementById('deploy-submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = '&#128640; Deploy to ' + esc(person.name || 'Person');
 }
 
 async function openDeployModal(productId) {
   const p = allItems.find(x => x.id === productId);
   if (!p) return;
   deployProductId = productId;
+  _deploySelectedSeat = null;
+  _deploySelectedEmployee = null;
+  _deployWing = 'all';
+  _deployMode = 'cubicle';
+  _deploySubTab = 'employee';
+  _deployEmployees = [];
+  _deployUsers = [];
 
-  const isStaff = ApprovalFlow.isStaff();
-  document.getElementById('deploy-modal-title').textContent = isStaff ? 'Request Asset Deployment' : 'Deploy Asset';
-  document.getElementById('deploy-submit-btn').innerHTML    = isStaff ? '&#128640; Submit Request' : '&#128640; Deploy';
+  document.getElementById('deploy-item-name').value = p.name + ' (' + (p.serial_number || p.sku || '') + ')';
+  document.getElementById('deploy-wing-select').value = 'all';
+  document.getElementById('deploy-selected-label').style.display = 'none';
+  document.getElementById('deploy-selected-seat-num').textContent = '';
+  document.getElementById('deploy-emp-search').value = '';
+  document.getElementById('deploy-emp-selected-wrap').style.display = 'none';
 
-  document.getElementById('deploy-item-name').value       = p.name + ' (' + (p.serial_number || p.sku || '') + ')';
-  document.getElementById('deploy-employee-search').value = '';
-  document.getElementById('deploy-employee').value        = '';
-  document.getElementById('deploy-employee-suggestions').style.display = 'none';
-  document.getElementById('deploy-due').value             = '';
-  document.getElementById('deploy-notes').value           = '';
+  // Reset sub-tab buttons to default
+  const empTabBtn  = document.getElementById('deploy-subtab-employee');
+  const userTabBtn = document.getElementById('deploy-subtab-user');
+  if (empTabBtn)  empTabBtn.style.cssText  = 'padding:5px 18px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--blue);color:#fff;transition:all .15s;';
+  if (userTabBtn) userTabBtn.style.cssText = 'padding:5px 18px;border-radius:6px;font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);transition:all .15s;';
 
-  try {
-    if (!allEmployeesCache.length) {
-      const res = await api.getEmployees();
-      allEmployeesCache = res.data || [];
-    }
-  } catch (e) { showToast('Could not load employees: ' + e.message, 'error'); return; }
+  const btn = document.getElementById('deploy-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '&#128640; Deploy to Selected Seat';
+
+  // Reset mode UI to cubicle
+  setDeployMode('cubicle');
+
+  // Load product cache from the already-fetched allItems list
+  _deployProductCache = {};
+  for (const item of allItems) _deployProductCache[item.id] = item;
+  _dLoadAsgn();
 
   document.getElementById('deploy-modal').classList.add('open');
-  setTimeout(() => document.getElementById('deploy-employee-search').focus(), 100);
+  // Render after modal is visible so SVG gets correct dimensions
+  setTimeout(() => deployBuildSvg(deployAllowedSet()), 50);
 }
 
 function closeDeployModal() {
   document.getElementById('deploy-modal').classList.remove('open');
-  document.getElementById('deploy-employee-suggestions').style.display = 'none';
   deployProductId = null;
-  allEmployeesCache = [];
+  _deploySelectedSeat = null;
+  _deploySelectedEmployee = null;
 }
 
 async function submitDeployModal() {
-  const empName = document.getElementById('deploy-employee').value.trim();
-  const due     = document.getElementById('deploy-due').value;
-  const notes   = document.getElementById('deploy-notes').value.trim();
-
-  if (!empName) { showToast('Please select an employee', 'error'); return; }
   if (!deployProductId) return;
-
-  const emp        = allEmployeesCache.find(e => e.name === empName);
   const assignedBy = auth.currentUser?.name || 'Admin';
-  const asset      = allItems.find(x => x.id === deployProductId);
-  const payload    = {
+  const asset = allItems.find(x => x.id === deployProductId);
+
+  let assigneeName, notes;
+
+  if (_deployMode === 'employee') {
+    if (!_deploySelectedEmployee) return;
+    assigneeName = _deploySelectedEmployee.name;
+    notes = 'Deployed to employee: ' + assigneeName +
+      (_deploySelectedEmployee.station ? ' @ ' + _deploySelectedEmployee.station : '');
+  } else {
+    if (_deploySelectedSeat === null) return;
+    assigneeName = 'Seat #' + _deploySelectedSeat;
+    notes = 'Deployed to cubicle ' + assigneeName;
+  }
+
+  const payload = {
     product_id:    deployProductId,
-    assignee_name: empName,
+    assignee_name: assigneeName,
     assigned_by:   assignedBy,
-    due_back:      due || null,
-    location_id:   emp?.location_id || null,
-    notes:         notes || (emp?.station ? 'Station: ' + emp.station : null),
+    due_back:      null,
+    location_id:   null,
+    notes,
   };
 
   try {
-    // -- Approval flow for staff ------------------------------------------
     if (ApprovalFlow.isStaff()) {
       const flow = await ApprovalFlow.submit({
         action_type:   'create',
         resource_type: 'Assignment',
         resource_id:   null,
-        resource_name: (asset?.name || 'Asset') + ' ? ' + empName,
+        resource_name: (asset?.name || 'Asset') + ' \u2192 ' + assigneeName,
         payload,
-        notes: 'Deploy asset to ' + empName,
+        notes: 'Deploy asset to ' + assigneeName,
       });
       if (flow.queued) { closeDeployModal(); return; }
     }
-    // -- Admin / direct execute -------------------------------------------
     await api.createAssignment(payload);
-    try { localStorage.setItem('emp_dashboard_refresh', Date.now()); } catch(_) {}
-    showToast('Asset deployed to ' + empName, 'success');
+
+    // If cubicle mode, also persist to cubicle map localStorage
+    if (_deployMode === 'cubicle') {
+      _dLoadAsgn();
+      const k = _dKey(_deploySelectedSeat);
+      if (!_deployAsgn[k]) _deployAsgn[k] = [];
+      if (!_deployAsgn[k].includes(deployProductId)) _deployAsgn[k].push(deployProductId);
+      try { localStorage.setItem(_D_STORAGE_KEY, JSON.stringify(_deployAsgn)); } catch(_) {}
+    }
+
+    showToast('Asset deployed to ' + assigneeName, 'success');
     closeDeployModal();
     loadItems();
   } catch (e) {
     showToast(e.message.includes('cannot be checked out') ? 'This asset is already deployed or under repair.' : e.message, 'error');
   }
 }
-
-function onDmgStatusChange() {
-  const s = document.getElementById('damage-status').value;
-  document.getElementById('dmg-disposal-group').style.display = s === 'disposed' ? '' : 'none';
-  document.getElementById('dmg-donated-group').style.display  = s === 'donated'  ? '' : 'none';
-}
-
-async function submitDamageForm(e) {
-  e.preventDefault();
-  const form = e.target;
-  const data = {
-    product_id:      form.dataset.productId,
-    reported_by:     form.reported_by.value.trim(),
-    issue:           form.issue.value.trim(),
-    status:          form.status.value,
-    disposal_reason: form.disposal_reason ? form.disposal_reason.value.trim() : '',
-    donated_to:      form.donated_to      ? form.donated_to.value.trim()      : '',
-  };
-  const asset = allItems.find(x => String(x.id) === String(data.product_id));
+/* ------------------------------------------
+   RETURN ASSET (from View modal)
+------------------------------------------ */
+async function returnAssetInView(assignmentId, btnEl) {
+  if (!assignmentId) return;
+  const orig = btnEl ? btnEl.innerHTML : '';
+  if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = 'Returning&hellip;'; }
   try {
-    // -- Approval flow for staff ------------------------------------------
-    if (ApprovalFlow.isStaff()) {
-      const flow = await ApprovalFlow.submit({
-        action_type:   editingDamageId ? 'update' : 'create',
-        resource_type: 'Damage',
-        resource_id:   editingDamageId || null,
-        resource_name: asset?.name || ('Product #' + data.product_id),
-        payload:       data,
-        notes:         'Status report: ' + data.status,
-      });
-      if (flow.queued) { closeDamageModal(); return; }
-    }
-    // -- Admin / direct execute -------------------------------------------
-    if (editingDamageId) {
-      await api.updateDamage(editingDamageId, data);
-      showToast('Damage report updated', 'success');
-    } else {
-      await api.createDamage(data);
-      showToast('Damage reported', 'success');
-    }
-    closeDamageModal();
+    await api.returnAsset(assignmentId);
+    // Update local assignment cache so the modal re-renders correctly
+    allAssignments = allAssignments.filter(a => a.id !== assignmentId);
+    showToast('Asset returned successfully', 'success');
+    closeImageModal();
     loadItems();
-  } catch (e) { showToast(e.message, 'error'); }
+  } catch (e) {
+    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = orig; }
+    showToast(e.message.includes('already returned') ? 'Asset is already returned.' : e.message, 'error');
+  }
 }
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.getElementById('deploy-employee-suggestions').style.display = 'none';
-  }
-});
-// Close suggestion dropdown on blur
-document.addEventListener('click', e => {
-  const box = document.getElementById('deploy-employee-suggestions');
-  const inp = document.getElementById('deploy-employee-search');
-  if (box && inp && !box.contains(e.target) && e.target !== inp) {
-    box.style.display = 'none';
-  }
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-});
 
 /* ------------------------------------------
    GROUP EDIT MODAL
@@ -1431,11 +2143,11 @@ async function openGroupModal(ids, groupName) {
   if (!items.length) return;
   const rep = items[0];
 
-  document.getElementById('group-modal-title').textContent = 'Edit � ' + rep.name;
+  document.getElementById('group-modal-title').textContent = 'Edit ? ' + rep.name;
 
   // Populate shared fields from representative
   document.getElementById('ge-name').value  = rep.name || '';
-  document.getElementById('ge-brand').value = rep.brand_model || '';
+  document.getElementById('ge-brand').value = rep.brand || '';
   document.getElementById('ge-desc').value  = rep.description || '';
 
   // Populate category & supplier dropdowns
@@ -1461,7 +2173,9 @@ async function openGroupModal(ids, groupName) {
     const supHtml = '<option value="">-- None --</option>' +
       (supRes.data || []).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('');
     document.getElementById('ge-supplier').innerHTML = supHtml;
-    document.getElementById('ge-supplier').value     = rep.supplier_id || '';
+    // Pre-select by matching the stored supplier_name against the list
+    const matchedSup = (supRes.data || []).find(s => s.name === rep.supplier_name);
+    document.getElementById('ge-supplier').value = (matchedSup ? matchedSup.id : rep.supplier_id) || '';
   } catch (_) {}
 
   // Build per-unit serial rows
@@ -1538,7 +2252,7 @@ async function saveGroupEdit() {
 
   try {
     // Update shared fields on all units
-    const sharedPayload = { name, brand_model: brand, category_id: catId, supplier_id: supId, description: desc };
+    const sharedPayload = { name, brand, category_id: catId, supplier_id: supId, description: desc };
     await Promise.all(groupEditIds.map(id => api.updateProduct(id, sharedPayload)));
 
     // Update serial numbers individually where changed

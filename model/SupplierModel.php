@@ -173,8 +173,8 @@ class SupplierModel {
             $poId = (int) $this->db->lastInsertId();
 
             $itemStmt = $this->db->prepare(
-                'INSERT INTO purchase_order_items (po_id, product_name, sku, quantity, unit_price, total_price, category_id)
-                 VALUES (:po_id, :product_name, :sku, :quantity, :unit_price, :total_price, :category_id)'
+                'INSERT INTO purchase_order_items (po_id, product_name, brand, model, description, sku, quantity, unit_price, total_price, category_id)
+                 VALUES (:po_id, :product_name, :brand, :model, :description, :sku, :quantity, :unit_price, :total_price, :category_id)'
             );
             foreach ($items as $item) {
                 $qty   = (int)   $item['quantity'];
@@ -182,6 +182,9 @@ class SupplierModel {
                 $itemStmt->execute([
                     ':po_id'        => $poId,
                     ':product_name' => $item['product_name'],
+                    ':brand'        => $item['brand']       ?? $item['product_name'] ?? null,
+                    ':model'        => $item['model']        ?? null,
+                    ':description'  => $item['description']  ?? null,
                     ':sku'          => $item['sku']          ?? null,
                     ':quantity'     => $qty,
                     ':unit_price'   => $price,

@@ -45,6 +45,17 @@ class ProductController extends BaseController {
         if (!empty($_POST))           $body = array_merge($body, $_POST);
         if (!empty($_FILES['image'])) $body['image'] = $_FILES['image'];
 
+        // Validate and normalize deployed_date
+        if (!empty($body['deployed_date'])) {
+            $d = DateTime::createFromFormat('Y-m-d\TH:i', $body['deployed_date']);
+            if (!$d || $d->format('Y-m-d\TH:i') !== $body['deployed_date']) {
+                $this->respond(['error' => 'deployed_date is not a valid date-time (expected YYYY-MM-DDTHH:MM)'], 400);
+                return;
+            }
+        } else {
+            $body['deployed_date'] = null;
+        }
+
         $product = $this->service->create($body);
         $this->respond(['success' => true, 'data' => $product], 201);
     }
@@ -55,6 +66,15 @@ class ProductController extends BaseController {
         // Merge multipart fields and file
         if (!empty($_POST))           $body = array_merge($body, $_POST);
         if (!empty($_FILES['image'])) $body['image'] = $_FILES['image'];
+
+        // Validate deployed_date if present and non-empty
+        if (isset($body['deployed_date']) && $body['deployed_date'] !== '' && $body['deployed_date'] !== null) {
+            $d = DateTime::createFromFormat('Y-m-d\TH:i', $body['deployed_date']);
+            if (!$d || $d->format('Y-m-d\TH:i') !== $body['deployed_date']) {
+                $this->respond(['error' => 'deployed_date is not a valid date-time (expected YYYY-MM-DDTHH:MM)'], 400);
+                return;
+            }
+        }
 
         $product = $this->service->update($id, $body);
         $this->respond(['success' => true, 'data' => $product]);
