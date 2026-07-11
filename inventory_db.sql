@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 10, 2026 at 05:49 AM
+-- Generation Time: Jul 11, 2026 at 12:51 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -37,13 +37,31 @@ CREATE TABLE `approval_requests` (
   `resource_name` varchar(255) DEFAULT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
   `notes` text DEFAULT NULL,
-  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','approved','rejected','forwarded') NOT NULL DEFAULT 'pending',
   `reviewed_by` varchar(150) DEFAULT NULL,
   `review_notes` text DEFAULT NULL,
   `reviewed_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `approval_requests`
+--
+
+INSERT INTO `approval_requests` (`id`, `requested_by`, `user_id`, `action_type`, `resource_type`, `resource_id`, `resource_name`, `payload`, `notes`, `status`, `reviewed_by`, `review_notes`, `reviewed_at`, `created_at`, `updated_at`) VALUES
+(1, 'Zen', 2, 'create', 'asset_request', NULL, 'Zen', '{\"assignee\":\"Zen\",\"department\":\"\",\"location\":\"\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 10 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Headsets\",\"brand\":\"Keytech qawdq\",\"tag\":\"\",\"condition\":\"New\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'approved', 'Administrator', '', '2026-07-10 19:03:59', '2026-07-10 19:02:57', '2026-07-10 19:03:59'),
+(2, 'Zen', 2, 'create', 'asset_request', NULL, 'Zen', '{\"assignee\":\"Zen\",\"department\":\"\",\"location\":\"\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 10 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"121233123\",\"condition\":\"New\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'approved', 'Administrator', '', '2026-07-10 19:12:45', '2026-07-10 19:10:07', '2026-07-10 19:12:45'),
+(3, 'Zen', 2, 'delete', 'Assignment', 1, 'HAvit · return by Zen', '{\"assignment_id\":\"1\",\"product_id\":5,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-10 19:14:52', '2026-07-10 19:14:19', '2026-07-10 19:14:52'),
+(4, 'qwerty', 3, 'create', 'asset_request', NULL, 'qwerty', '{\"assignee\":\"qwerty\",\"department\":\"\",\"location\":\"\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 11 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Headsets\",\"brand\":\"SY SY-202\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'approved', 'Administrator', '', '2026-07-11 12:36:58', '2026-07-11 12:36:43', '2026-07-11 12:36:58'),
+(5, 'qwerty', 3, 'create', 'asset_request', NULL, 'qwerty', '{\"assignee\":\"qwerty\",\"department\":\"\",\"location\":\"Site 3 | San Carlos City, Dungganon Site\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 11 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Headsets\",\"brand\":\"SY SY-202\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'rejected', 'Administrator', '', '2026-07-11 13:02:50', '2026-07-11 13:02:18', '2026-07-11 13:02:50'),
+(6, 'qwerty', 3, 'create', 'asset_request', NULL, 'qwerty', '{\"assignee\":\"qwerty\",\"department\":\"\",\"location\":\"Site 3 | San Carlos City, Dungganon Site\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 11 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"21412312\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"name\":\"Headsets\",\"brand\":\"SY Headset\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'approved', 'Administrator', '', '2026-07-11 13:03:59', '2026-07-11 13:03:40', '2026-07-11 13:03:59'),
+(7, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"for work.\"}', 'for work.', 'rejected', 'Administrator', '', '2026-07-11 15:06:14', '2026-07-11 13:50:48', '2026-07-11 15:06:14'),
+(8, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"for work\"}', 'for work', 'approved', 'Administrator', '', '2026-07-11 15:16:29', '2026-07-11 15:06:46', '2026-07-11 15:16:29'),
+(9, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"ASDasdadasd\"}', 'ASDasdadasd', 'forwarded', 'Administrator', '', '2026-07-11 15:30:17', '2026-07-11 15:28:47', '2026-07-11 15:30:17'),
+(10, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaasa\"}', 'aaasa', 'forwarded', 'Administrator', '', '2026-07-11 16:06:26', '2026-07-11 15:31:04', '2026-07-11 16:06:26'),
+(11, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaaaaaa\"}', 'aaaaaaa', 'forwarded', 'Administrator', '', '2026-07-11 16:56:41', '2026-07-11 16:56:04', '2026-07-11 16:56:41'),
+(12, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"Ork\"}', 'Ork', 'rejected', 'Administrator', '', '2026-07-11 18:40:37', '2026-07-11 18:39:45', '2026-07-11 18:40:37');
 
 -- --------------------------------------------------------
 
@@ -66,6 +84,15 @@ CREATE TABLE `assignments` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `assignments`
+--
+
+INSERT INTO `assignments` (`id`, `product_id`, `assignee_name`, `assigned_by`, `assigned_at`, `due_back`, `returned_at`, `notes`, `location_id`, `status`, `created_at`, `updated_at`) VALUES
+(2, 13, 'qwerty', 'Administrator (recovery fix)', '2026-07-11 12:53:23', NULL, NULL, NULL, NULL, 'active', '2026-07-11 12:53:23', '2026-07-11 12:53:23'),
+(3, 1, 'Raven', 'System (recovery fix)', '2026-07-11 13:00:03', NULL, NULL, NULL, NULL, 'active', '2026-07-11 13:00:03', '2026-07-11 13:00:03'),
+(4, 4, 'qwerty', 'Admin', '2026-07-11 07:03:59', NULL, NULL, 'Asset Accountability', 2, 'active', '2026-07-11 13:03:59', '2026-07-11 13:03:59');
+
 -- --------------------------------------------------------
 
 --
@@ -84,6 +111,41 @@ CREATE TABLE `audit_logs` (
   `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `user_name`, `action`, `entity_type`, `entity_id`, `entity_name`, `description`, `meta`, `created_at`) VALUES
+(1, 1, 'Administrator', 'created', 'Asset', 1, 'Headset Keytech', 'Asset created: Headset Keytech', NULL, '2026-07-10 19:00:15'),
+(2, 2, 'Zen', 'pending', 'asset_request', NULL, 'Zen', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-10 19:02:57'),
+(3, 1, 'Administrator', 'approved', 'asset_request', NULL, 'Zen', 'Approved by Administrator: create on asset_request', NULL, '2026-07-10 19:03:59'),
+(4, 2, 'Zen', 'pending', 'asset_request', NULL, 'Zen', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-10 19:10:07'),
+(5, 1, 'Administrator', 'assigned', 'Asset', 5, 'HAvit', 'Assigned to Zen by Admin', NULL, '2026-07-10 19:12:45'),
+(6, 1, 'Administrator', 'approved', 'asset_request', NULL, 'Zen', 'Approved by Administrator: create on asset_request', NULL, '2026-07-10 19:12:45'),
+(7, 2, 'Zen', 'pending', 'Assignment', 1, 'HAvit · return by Zen', 'Delete request submitted by Zen — awaiting approval', NULL, '2026-07-10 19:14:19'),
+(8, 1, 'Administrator', 'approved', 'Assignment', 1, 'HAvit · return by Zen', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-10 19:14:52'),
+(9, 1, 'Administrator', 'created', 'Asset', 12, 'SY Speaker', 'Asset created: SY Speaker', NULL, '2026-07-11 12:27:23'),
+(10, 1, 'Administrator', 'created', 'Asset', 13, 'SY Headset', 'Asset created: SY Headset', NULL, '2026-07-11 12:35:51'),
+(11, 3, 'qwerty', 'pending', 'asset_request', NULL, 'qwerty', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 12:36:43'),
+(12, 1, 'Administrator', 'approved', 'asset_request', NULL, 'qwerty', 'Approved by Administrator: create on asset_request', NULL, '2026-07-11 12:36:58'),
+(13, 3, 'qwerty', 'pending', 'asset_request', NULL, 'qwerty', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 13:02:18'),
+(14, 1, 'Administrator', 'rejected', 'asset_request', NULL, 'qwerty', 'Rejected by Administrator: No reason given', NULL, '2026-07-11 13:02:50'),
+(15, 3, 'qwerty', 'pending', 'asset_request', NULL, 'qwerty', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 13:03:40'),
+(16, 1, 'Administrator', 'assigned', 'Asset', 4, 'HAvit', 'Assigned to qwerty by Admin', NULL, '2026-07-11 13:03:59'),
+(17, 1, 'Administrator', 'approved', 'asset_request', NULL, 'qwerty', 'Approved by Administrator: create on asset_request', NULL, '2026-07-11 13:03:59'),
+(18, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 13:50:48'),
+(19, 1, 'Administrator', 'rejected', 'Asset', NULL, 'HAvit asda', 'Rejected by Administrator: No reason given', NULL, '2026-07-11 15:06:14'),
+(20, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 15:06:46'),
+(21, 1, 'Administrator', 'approved', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator: create on Asset', NULL, '2026-07-11 15:16:29'),
+(22, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 15:28:47'),
+(23, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-11 15:30:17'),
+(24, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 15:31:04'),
+(25, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-11 16:06:26'),
+(26, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 16:56:04'),
+(27, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-11 16:56:41'),
+(28, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 18:39:45'),
+(29, 1, 'Administrator', 'rejected', 'Asset', NULL, 'HAvit asda', 'Rejected by Administrator: No reason given', NULL, '2026-07-11 18:40:37');
 
 -- --------------------------------------------------------
 
@@ -202,6 +264,39 @@ CREATE TABLE `notifications` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `for_role`, `for_user_id`, `type`, `title`, `body`, `link`, `is_read`, `meta`, `created_at`) VALUES
+(1, 'admin', NULL, 'submitted', 'New Account Pending Approval', 'Zen (zen) registered as Viewer and is awaiting your approval.', 'users.html', 1, '{\"user_id\":2,\"action\":\"registration\"}', '2026-07-10 19:01:43'),
+(2, 'staff', 2, 'approved', 'Account Approved!', 'Your account has been approved by an admin. You can now sign in.', NULL, 1, '{\"action\":\"account_approved\"}', '2026-07-10 19:01:58'),
+(3, 'admin', NULL, 'approval_submitted', 'New approval request from Zen', 'Create asset_request: Zen', 'approvals.html', 1, '{\"approval_id\":1,\"action_type\":\"create\"}', '2026-07-10 19:02:57'),
+(4, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Create Asset Request: Zen', 'requests.html', 1, '{\"approval_id\":1,\"decision\":\"approved\"}', '2026-07-10 19:03:59'),
+(5, 'admin', NULL, 'approval_submitted', 'New approval request from Zen', 'Create asset_request: Zen', 'approvals.html', 1, '{\"approval_id\":2,\"action_type\":\"create\"}', '2026-07-10 19:10:07'),
+(6, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Create Asset Request: Zen', 'requests.html', 1, '{\"approval_id\":2,\"decision\":\"approved\"}', '2026-07-10 19:12:45'),
+(7, 'admin', NULL, 'approval_submitted', 'New approval request from Zen', 'Delete Assignment: HAvit · return by Zen', 'approvals.html', 1, '{\"approval_id\":3,\"action_type\":\"delete\"}', '2026-07-10 19:14:19'),
+(8, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by Zen', 'requests.html', 1, '{\"approval_id\":3,\"decision\":\"approved\"}', '2026-07-10 19:14:52'),
+(9, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create asset_request: qwerty', 'approvals.html', 1, '{\"approval_id\":4,\"action_type\":\"create\"}', '2026-07-11 12:36:43'),
+(10, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Create Asset Request: qwerty', 'requests.html', 1, '{\"approval_id\":4,\"decision\":\"approved\"}', '2026-07-11 12:36:58'),
+(11, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create asset_request: qwerty', 'approvals.html', 1, '{\"approval_id\":5,\"action_type\":\"create\"}', '2026-07-11 13:02:18'),
+(12, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Create Asset Request: qwerty', 'requests.html', 1, '{\"approval_id\":5,\"decision\":\"rejected\"}', '2026-07-11 13:02:50'),
+(13, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create asset_request: qwerty', 'approvals.html', 1, '{\"approval_id\":6,\"action_type\":\"create\"}', '2026-07-11 13:03:40'),
+(14, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Create Asset Request: qwerty', 'requests.html', 1, '{\"approval_id\":6,\"decision\":\"approved\"}', '2026-07-11 13:03:59'),
+(15, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":7,\"action_type\":\"create\"}', '2026-07-11 13:50:48'),
+(16, 'admin', NULL, 'approval_request', 'New Asset Request', 'qwerty has requested: HAvit asda', 'approvals.html', 1, '{\"approval_id\":7,\"resource_type\":\"Asset\"}', '2026-07-11 13:50:48'),
+(17, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Create Asset: HAvit asda', 'requests.html', 1, '{\"approval_id\":7,\"decision\":\"rejected\"}', '2026-07-11 15:06:14'),
+(18, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":8,\"action_type\":\"create\"}', '2026-07-11 15:06:46'),
+(19, 'staff', 3, 'approval_approved', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":8,\"decision\":\"approved\"}', '2026-07-11 15:16:29'),
+(20, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":9,\"action_type\":\"create\"}', '2026-07-11 15:28:47'),
+(21, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":9,\"decision\":\"forwarded\"}', '2026-07-11 15:30:17'),
+(22, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":10,\"action_type\":\"create\"}', '2026-07-11 15:31:04'),
+(23, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":10,\"decision\":\"forwarded\"}', '2026-07-11 16:06:26'),
+(24, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":11,\"action_type\":\"create\"}', '2026-07-11 16:56:04'),
+(25, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":11,\"decision\":\"forwarded\"}', '2026-07-11 16:56:41'),
+(26, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":12,\"action_type\":\"create\"}', '2026-07-11 18:39:45'),
+(27, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Create Asset: HAvit asda', 'requests.html', 1, '{\"approval_id\":12,\"decision\":\"rejected\"}', '2026-07-11 18:40:37');
+
 -- --------------------------------------------------------
 
 --
@@ -234,6 +329,24 @@ CREATE TABLE `products` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `products`
+--
+
+INSERT INTO `products` (`id`, `name`, `sku`, `brand_model`, `brand`, `model`, `assigned_employee`, `assigned_employee_id`, `description`, `category_id`, `supplier_id`, `supplier_name`, `purchase_date`, `deployed_date`, `location_id`, `quantity`, `asset_status`, `image_path`, `serial_number`, `po_id`, `po_item_id`, `created_at`, `updated_at`) VALUES
+(1, 'Headset Keytech', '1212qdqad', 'Keytech qawdq', 'Keytech', 'qawdq', 'Raven', '12312', '', 21, NULL, 'Eo', '2026-07-10', '2026-07-10 19:00:00', 2, 1, 'assigned', NULL, NULL, NULL, NULL, '2026-07-10 19:00:15', '2026-07-11 13:00:03'),
+(2, 'HAvit', 'qwdcxzasdzasdd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'qwdcxzasdzasdd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(3, 'HAvit', 'asdascasd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'asdascasd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(4, 'HAvit', '21412312', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, '21412312', 1, 1, '2026-07-10 19:07:23', '2026-07-11 13:03:59'),
+(5, 'HAvit', '121233123', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, '121233123', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:14:52'),
+(6, 'HAvit', 'sdfsdfqww', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'sdfsdfqww', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(7, 'HAvit', 'wedfwer', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'wedfwer', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(8, 'HAvit', 'werwerwersd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'werwerwersd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(9, 'HAvit', 'werwerwddfsdfv', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'werwerwddfsdfv', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(10, 'HAvit', 'cvbvfefv', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'cvbvfefv', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(11, 'HAvit', 'swsdfvcxdefd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'swsdfvcxdefd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(13, 'SY Headset', 'ASD1233', 'SY SY-202', 'SY', 'SY-202', '', '', '', 21, NULL, 'Eo', '2026-07-10', '2026-07-11 12:35:00', 1, 1, 'assigned', NULL, NULL, NULL, NULL, '2026-07-11 12:35:51', '2026-07-11 12:53:23');
+
 -- --------------------------------------------------------
 
 --
@@ -257,6 +370,13 @@ CREATE TABLE `purchase_orders` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `purchase_orders`
+--
+
+INSERT INTO `purchase_orders` (`id`, `po_number`, `supplier_id`, `order_date`, `expected_date`, `total_amount`, `status`, `notes`, `location_id`, `created_by`, `received_by`, `received_date`, `created_at`, `updated_at`) VALUES
+(1, 'PO-20260710-0001', 1, '2026-07-10', '2026-07-10', 12000.00, 'received', NULL, 2, 'Administrator', 'Administrator', '2026-07-10 19:07:22', '2026-07-10 19:06:36', '2026-07-10 19:07:22');
+
 -- --------------------------------------------------------
 
 --
@@ -277,6 +397,13 @@ CREATE TABLE `purchase_order_items` (
   `total_price` decimal(12,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `purchase_order_items`
+--
+
+INSERT INTO `purchase_order_items` (`id`, `po_id`, `product_name`, `brand`, `model`, `description`, `sku`, `category_id`, `quantity`, `unit_price`, `total_price`, `created_at`) VALUES
+(1, 1, 'HAvit', 'HAvit', 'asda', 'HAvit Keyboard', NULL, 10, 10, 1200.00, 12000.00, '2026-07-10 19:06:36');
 
 -- --------------------------------------------------------
 
@@ -318,6 +445,13 @@ CREATE TABLE `suppliers` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `suppliers`
+--
+
+INSERT INTO `suppliers` (`id`, `name`, `contact_name`, `email`, `phone`, `address`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Eo', 'zen', 'zen@gmail.com', '09986789', 'dsasda', 'active', '2026-07-10 18:58:29', '2026-07-10 18:58:29');
 
 -- --------------------------------------------------------
 
@@ -372,7 +506,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `employee_id`, `username`, `password`, `role`, `status`, `position`, `email`, `contact_number`, `created_at`) VALUES
-(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, NULL, NULL, '2026-05-12 22:52:48');
+(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, NULL, NULL, '2026-05-12 22:52:48'),
+(2, 'Zen', 'asdgasc7a8sczen', 'zen', '$2y$12$7Tw3S.JVmFtQzzmlVu9sXOjukjyvy9DydZbSf1clZATBF6OVIIwLC', 'viewer', 'active', 'Team Leader', 'zen@mail.com', '098788909876', '2026-07-10 11:01:43'),
+(3, 'qwerty', 'qwerty123', 'qwerty', '$2y$12$L8enlSEALS/w1E6oNYRVee9Us/nGBbeFjxMQvzvXUBe39GDOuhC7y', 'viewer', 'active', 'Team Leader', 'qwerty@mail.com', '0956789467', '2026-07-11 03:33:34');
 
 --
 -- Indexes for dumped tables
@@ -522,19 +658,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `approval_requests`
 --
 ALTER TABLE `approval_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -564,25 +700,25 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
 --
 ALTER TABLE `purchase_orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `purchase_order_items`
 --
 ALTER TABLE `purchase_order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `recurring_requests`
@@ -594,7 +730,7 @@ ALTER TABLE `recurring_requests`
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `team_structure`
@@ -612,7 +748,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
