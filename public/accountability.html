@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
@@ -16,6 +16,9 @@
     (function() {
       if (new URLSearchParams(window.location.search).get('modal') !== '1') return;
       document.documentElement.setAttribute('data-modal-embed', '1');
+      if (new URLSearchParams(window.location.search).get('readonly') === '1') {
+        document.documentElement.setAttribute('data-readonly', '1');
+      }
       try {
         const _origReplace = window.location.replace.bind(window.location);
         Object.defineProperty(window.location, 'replace', {
@@ -34,6 +37,18 @@
     html[data-modal-embed="1"] aside.sidebar,
     html[data-modal-embed="1"] .topbar { display: none !important; }
     html[data-modal-embed="1"] .main   { margin-left: 0 !important; }
+    /* Read-only mode: hide all interactive chrome */
+    html[data-readonly="1"] .prefill-bar,
+    html[data-readonly="1"] #modal-action-bar,
+    html[data-readonly="1"] .btn-submit,
+    html[data-readonly="1"] .btn-print,
+    html[data-readonly="1"] .topbar-actions { display: none !important; }
+    html[data-readonly="1"] .ic-arrow { display: none !important; }
+    html[data-readonly="1"] .ic-display { cursor: default !important; pointer-events: none !important; }
+    html[data-readonly="1"] input[type="text"],
+    html[data-readonly="1"] input[type="date"],
+    html[data-readonly="1"] textarea { pointer-events: none !important; background: transparent !important; border-color: transparent !important; cursor: default !important; }
+    html[data-readonly="1"] .ic-dropdown { display: none !important; }
   </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -100,7 +115,7 @@
     .asset-table thead th { background: #f0f0f0; font-weight: 700; font-size: 11px; text-align: center; color: #111; line-height: 1.3; word-break: normal; white-space: normal; }
     .asset-table thead th:first-child { text-align: left; }
     .asset-table tbody td.asset-type-cell { font-weight: 600; color: #111; white-space: nowrap; background: #fafafa; padding: 3px 5px; }
-    .asset-table tbody td input[type="text"] { border: none; background: transparent; color: #111; font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; padding: 1px 2px; outline: none; width: 100%; }
+    .asset-table tbody td input[type="text"] { border: none; background: transparent; color: #000; font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; padding: 1px 2px; outline: none; width: 100%; }
     .asset-table tbody td input[type="text"]:focus { border-bottom: 1px solid #29b6e8; }
 
     /* -- Custom inline combo -- */
@@ -109,12 +124,12 @@
       display: flex; align-items: center; justify-content: space-between;
       gap: 3px; cursor: pointer; border-bottom: 1px solid #bbb;
       padding: 2px 2px 1px; min-height: 18px; min-width: 0; user-select: none;
-      font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; color: #111;
+      font-size: 11.5px; font-family: Arial, 'DM Sans', sans-serif; color: #000;
     }
     .ic-display:hover { border-bottom-color: #29b6e8; }
     .ic-display.open  { border-bottom-color: #29b6e8; }
-    .ic-display.empty .ic-val { color: #999; font-style: italic; min-width: 4px; }
-    .ic-val   { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ic-display.empty .ic-val { color: #666; font-style: italic; min-width: 4px; }
+    .ic-val   { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #000; }
     .ic-arrow { font-size: 8px; color: #888; flex-shrink: 0; transition: transform .15s; }
     .ic-display.open .ic-arrow { transform: rotate(180deg); }
     .ic-dropdown {
@@ -157,8 +172,8 @@
         line-height: inherit !important;
       }
       .ic-display.ic-locked { opacity: 1 !important; }
-      .ic-display.empty .ic-val { color: #111 !important; font-style: normal !important; }
-      .ic-val { white-space: normal !important; overflow: visible !important; }
+      .ic-display.empty .ic-val { color: #000 !important; font-style: normal !important; }
+      .ic-val { white-space: normal !important; overflow: visible !important; color: #000 !important; }
     }
     .policy-section { margin-bottom: 14px; font-size: 11.5px; line-height: 1.55; color: #111; }
     .policy-heading { font-weight: 700; font-size: 12px; margin-bottom: 7px; color: #111; }
@@ -393,7 +408,7 @@
           <thead>
             <tr>
               <th style="width:16%">Asset Type</th>
-              <th style="width:20%">Brand/Model</th>
+              <th style="width:20%">Brand &amp; Model</th>
               <th style="width:16%">Serial Number</th>
               <th style="width:14%">Condition at<br>Issuance</th>
               <th style="width:18%">Value at the Time<br>of Purchase</th>
@@ -533,7 +548,7 @@
   <script src="js/sidebar.js?v=77"></script>
   <script src="js/toast.js?v=2"></script>
   <script>
-    const FIXED_ASSET_TYPES = ['Laptop','Mobile Device','Headset','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+    const FIXED_ASSET_TYPES = ['Laptop','Mobile Device','Keyboard','Other Equipment','ID & Lanyard','Access Badge/RFID'];
     const ASSET_ROWS = FIXED_ASSET_TYPES.length;
 
     let _categories = [], _products = [], _productsByCategory = {};
@@ -614,80 +629,89 @@
         const isAvailable = statusVal === 'available' || statusVal === '';
         const isCurrent   = currentSn && (p.serial_number || '').trim() === (currentSn || '').trim();
         const hasSn       = (p.serial_number || '').trim() !== '';
-        return brandMatch && hasSn && (isAvailable || isCurrent);
+        // isCurrent bypasses brandMatch so a pre-filled serial always appears
+        return hasSn && (isCurrent || (brandMatch && isAvailable));
       });
       return [...new Set(filtered.map(p => (p.serial_number || '').trim()).filter(Boolean))].sort();
     }
 
     /* -- Custom inline combo widget -- */
-    function makeCombo({ id, options: _initOptions, value, placeholder, bold, onChange }) {
-      // Mutable options reference � both openDropdown and _refresh share this
+    function makeCombo({ id, options: _initOptions, value, placeholder, bold, onChange, searchable }) {
       let _optionsFn = _initOptions;
-
       const hasVal = value && value !== '';
       const displayText = hasVal ? value : placeholder;
-
       const wrap = document.createElement('div');
       wrap.className = 'ic-wrap';
-      wrap.innerHTML = `
-        <div class="ic-display${hasVal ? '' : ' empty'}" id="${id}-display" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">
-          <span class="ic-val" style="${bold ? 'font-weight:600;' : ''}">${esc(displayText)}</span>
-          <span class="ic-arrow">&#9660;</span>
-        </div>
-        <input type="hidden" id="${id}" value="${esc(value || '')}">`;
-
-      // Dropdown lives on body so it escapes any overflow:hidden ancestor
+      wrap.innerHTML =
+        '<div class="ic-display' + (hasVal ? '' : ' empty') + '" id="' + id + '-display" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">' +
+        '<span class="ic-val" style="color:#000;' + (bold ? 'font-weight:600;' : '') + '">' + esc(displayText) + '</span>' +
+        '<span class="ic-arrow">&#9660;</span></div>' +
+        '<input type="hidden" id="' + id + '" value="' + esc(value || '') + '">';
       const dropdown = document.createElement('div');
       dropdown.className = 'ic-dropdown';
-      dropdown.id = `${id}-dropdown`;
+      dropdown.id = id + '-dropdown';
       dropdown.setAttribute('role', 'listbox');
+      let searchInput = null;
+      if (searchable) {
+        searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search...';
+        searchInput.style.cssText = 'width:100%;box-sizing:border-box;border:none;border-bottom:1px solid #ddd;padding:5px 8px;font-size:11px;font-family:Arial,sans-serif;outline:none;color:#111;background:#fff;';
+        dropdown.appendChild(searchInput);
+        searchInput.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+        searchInput.addEventListener('input', function() {
+          var q = searchInput.value.toLowerCase();
+          var opts = _optionsFn();
+          var filtered = q ? opts.filter(function(o) { return o.toLowerCase().indexOf(q) !== -1; }) : opts;
+          renderOptions(filtered, hidden.value);
+        });
+      }
       document.body.appendChild(dropdown);
-
-      const display  = wrap.querySelector('.ic-display');
-      const hidden   = wrap.querySelector(`#${id}`);
-      const valSpan  = wrap.querySelector('.ic-val');
-
-      function populateDropdown(opts, current) {
-        dropdown.innerHTML = '';
+      const display = wrap.querySelector('.ic-display');
+      const hidden  = wrap.querySelector('#' + id);
+      const valSpan = wrap.querySelector('.ic-val');
+      function renderOptions(opts, current) {
+        var toRemove = dropdown.querySelectorAll('.ic-option, .ic-empty');
+        toRemove.forEach(function(n) { n.remove(); });
         if (!opts.length) {
-          dropdown.innerHTML = `<div class="ic-empty">No options</div>`;
+          var empty = document.createElement('div');
+          empty.className = 'ic-empty';
+          empty.textContent = 'No options';
+          dropdown.appendChild(empty);
           return;
         }
-        // Only add blank row if there's a non-empty placeholder label
-        if (placeholder) {
-          const ph = document.createElement('div');
+        if (placeholder && !searchable) {
+          var ph = document.createElement('div');
           ph.className = 'ic-option placeholder' + (!current ? ' selected' : '');
           ph.textContent = placeholder;
           ph.dataset.value = '';
           dropdown.appendChild(ph);
         }
-        opts.forEach(opt => {
-          const el = document.createElement('div');
+        opts.forEach(function(opt) {
+          var el = document.createElement('div');
           el.className = 'ic-option' + (opt === current ? ' selected' : '');
           el.textContent = opt;
           el.dataset.value = opt;
           dropdown.appendChild(el);
         });
       }
-
+      function populateDropdown(opts, current) { renderOptions(opts, current); }
       function openDropdown() {
-        // Close all other open dropdowns first
-        document.querySelectorAll('.ic-dropdown.open').forEach(d => {
+        document.querySelectorAll('.ic-dropdown.open').forEach(function(d) {
           if (d !== dropdown) {
             d.classList.remove('open');
-            d.previousElementSibling?.classList.remove('open');
-            d.previousElementSibling?.setAttribute('aria-expanded', 'false');
+            if (d.previousElementSibling) d.previousElementSibling.classList.remove('open');
+            if (d.previousElementSibling) d.previousElementSibling.setAttribute('aria-expanded', 'false');
           }
         });
-        populateDropdown(_optionsFn(), hidden.value);   // always uses latest _optionsFn
-        // Position using fixed coords so it escapes table overflow:hidden
+        if (searchInput) searchInput.value = '';
+        populateDropdown(_optionsFn(), hidden.value);
         function positionDropdown() {
-          const rect = display.getBoundingClientRect();
+          var rect = display.getBoundingClientRect();
           dropdown.style.left  = rect.left + 'px';
           dropdown.style.width = Math.max(rect.width + 12, 120) + 'px';
-          const spaceBelow = window.innerHeight - rect.bottom;
-          const dropH = Math.min(160, 200);
-          if (spaceBelow >= dropH + 4 || spaceBelow >= 80) {
+          var spaceBelow = window.innerHeight - rect.bottom;
+          if (spaceBelow >= 84 || spaceBelow >= 80) {
             dropdown.style.top    = (rect.bottom + 2) + 'px';
             dropdown.style.bottom = '';
           } else {
@@ -702,10 +726,13 @@
         dropdown.classList.add('open');
         display.classList.add('open');
         display.setAttribute('aria-expanded', 'true');
-        const sel = dropdown.querySelector('.selected');
-        if (sel) sel.scrollIntoView({ block: 'nearest' });
+        if (searchInput) {
+          setTimeout(function() { searchInput.focus(); }, 30);
+        } else {
+          var sel = dropdown.querySelector('.selected');
+          if (sel) sel.scrollIntoView({ block: 'nearest' });
+        }
       }
-
       function closeDropdown() {
         if (dropdown._repositionFn) {
           window.removeEventListener('scroll', dropdown._repositionFn, { capture: true });
@@ -716,64 +743,56 @@
         display.classList.remove('open');
         display.setAttribute('aria-expanded', 'false');
       }
-
       function selectValue(val) {
         hidden.value = val;
-        const isEmpty = !val;
+        var isEmpty = !val;
         valSpan.textContent = isEmpty ? placeholder : val;
         valSpan.style.fontWeight = (!isEmpty && bold) ? '600' : '';
+        valSpan.style.color = '#000';
         display.classList.toggle('empty', isEmpty);
         closeDropdown();
         if (wrap._onChange) wrap._onChange(val);
       }
-
-      let focusIdx = -1;
-      display.addEventListener('keydown', e => {
-        const items = [...dropdown.querySelectorAll('.ic-option')];
+      var focusIdx = -1;
+      display.addEventListener('keydown', function(e) {
+        var items = Array.from(dropdown.querySelectorAll('.ic-option'));
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dropdown.classList.contains('open') ? (items[focusIdx] && selectValue(items[focusIdx].dataset.value)) : openDropdown(); }
-        else if (e.key === 'ArrowDown') { e.preventDefault(); if (!dropdown.classList.contains('open')) openDropdown(); focusIdx = Math.min(focusIdx + 1, items.length - 1); items.forEach((el,j) => el.classList.toggle('focused', j === focusIdx)); items[focusIdx]?.scrollIntoView({ block: 'nearest' }); }
-        else if (e.key === 'ArrowUp')   { e.preventDefault(); focusIdx = Math.max(focusIdx - 1, 0); items.forEach((el,j) => el.classList.toggle('focused', j === focusIdx)); items[focusIdx]?.scrollIntoView({ block: 'nearest' }); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); if (!dropdown.classList.contains('open')) openDropdown(); focusIdx = Math.min(focusIdx + 1, items.length - 1); items.forEach(function(el,j) { el.classList.toggle('focused', j === focusIdx); }); if (items[focusIdx]) items[focusIdx].scrollIntoView({ block: 'nearest' }); }
+        else if (e.key === 'ArrowUp')   { e.preventDefault(); focusIdx = Math.max(focusIdx - 1, 0); items.forEach(function(el,j) { el.classList.toggle('focused', j === focusIdx); }); if (items[focusIdx]) items[focusIdx].scrollIntoView({ block: 'nearest' }); }
         else if (e.key === 'Escape')    { closeDropdown(); }
       });
-
-      dropdown.addEventListener('mousedown', e => {
+      dropdown.addEventListener('mousedown', function(e) {
         e.preventDefault();
-        const opt = e.target.closest('.ic-option');
+        var opt = e.target.closest('.ic-option');
         if (opt) selectValue(opt.dataset.value);
       });
-
-      // _refresh: update the options function AND reset the displayed value
-      wrap._refresh = (newOptionsFn, newValue) => {
-        _optionsFn = newOptionsFn;            // update the shared reference
+      wrap._refresh = function(newOptionsFn, newValue) {
+        _optionsFn = newOptionsFn;
         selectValue(newValue !== undefined ? newValue : '');
         if (dropdown.classList.contains('open')) populateDropdown(_optionsFn(), hidden.value);
       };
-      wrap._getValue  = () => hidden.value;
-      wrap._selectVal = (v) => selectValue(v);
-      wrap._onChange  = null;                 // set by wireRowEvents
-
-      let _locked = false;
-      wrap._lock = () => {
+      wrap._getValue  = function() { return hidden.value; };
+      wrap._selectVal = function(v) { selectValue(v); };
+      wrap._onChange  = null;
+      var _locked = false;
+      wrap._lock = function() {
         _locked = true;
         display.classList.add('ic-locked');
         display.setAttribute('tabindex', '-1');
       };
-      wrap._unlock = () => {
+      wrap._unlock = function() {
         _locked = false;
         display.classList.remove('ic-locked');
         display.setAttribute('tabindex', '0');
       };
-      wrap._isLocked = () => _locked;
-
-      display.addEventListener('click', e => {
+      wrap._isLocked = function() { return _locked; };
+      display.addEventListener('click', function(e) {
         e.stopPropagation();
         if (_locked) return;
         dropdown.classList.contains('open') ? closeDropdown() : openDropdown();
       });
-
       return wrap;
     }
-    
 
     // Close all combos when clicking outside
     document.addEventListener('click', () => {
@@ -800,47 +819,25 @@
     }
 
     function wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp) {
-      // Category ? refresh brands (live), reset serial but keep unlocked so all SNs are visible
+      // Category → refresh brands (live)
       typeCombo._onChange = (cat) => {
-        // Always pass a live function so _optionsFn stays current
         brandCombo._refresh(() => getBrandsForCategory(typeCombo._getValue()), '');
-        // Show all available serials for the category (no brand filter yet)
-        snCombo._unlock();
-        snCombo._refresh(
-          () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), ''),
-          ''
-        );
       };
 
       brandCombo._onChange = (brand) => {
         const cat = typeCombo._getValue();
-        // When brand is selected (or cleared), update SN list � always unlocked
-        snCombo._unlock();
-        snCombo._refresh(
-          () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), ''),
-          ''
-        );
         if (!brand) return;
-        // Auto-select if only one serial available
+        // Auto-fill condition/value if only one serial available for this brand
         const serials = getAvailableSerials(cat, brand, '');
         if (serials.length === 1) {
-          snCombo._selectVal(serials[0]);
+          const snInp = document.getElementById(`asset-sn-${i}`);
+          if (snInp && !snInp.value) snInp.value = serials[0];
           const prod = getProductsForCategory(cat).find(p =>
             (p.brand_model || '').trim() === brand &&
             (p.serial_number || '').trim() === serials[0]
           );
           if (prod) autofillFromProduct(prod, condCombo, valInp);
         }
-      };
-
-      snCombo._onChange = (sn) => {
-        const cat   = typeCombo._getValue();
-        const brand = brandCombo._getValue();
-        const prod  = getProductsForCategory(cat).find(p =>
-          (p.brand_model || '').trim() === brand &&
-          (p.serial_number || '').trim() === sn
-        );
-        if (prod) autofillFromProduct(prod, condCombo, valInp);
       };
     }
 
@@ -874,8 +871,8 @@
           });
           return match ? (match.name || match.category_name) : assetType;
         })();
-        const brand  = matched ? (matched.brand_model || matched.brand || matched.product_name || '') : '';
-        const sn     = matched ? (matched.serial_number || matched.asset_tag || '') : '';
+        const brand  = matched ? (matched.brand_model || '') : '';
+        const sn     = matched ? (matched.serial_number || matched.product_sku || '') : '';
         const cond   = matched ? (matched.condition || '') : '';
         const val    = matched ? (matched.value || matched.unit_price || '') : '';
         const rem    = matched ? (matched.remarks || '') : '';
@@ -883,11 +880,11 @@
         const COND_OPTS = ['New','Good','Fair','Poor','Damaged'];
 
         const tr = document.createElement('tr');
-        // Build cells � combos will be appended after
+        // Build cells — combos will be appended after
         tr.innerHTML = `
           <td class="asset-type-cell" id="td-type-${i}" style="padding:3px 5px;"></td>
           <td id="td-brand-${i}" style="padding:3px 5px;"></td>
-          <td id="td-sn-${i}"    style="padding:3px 5px;"></td>
+          <td style="padding:3px 5px;"><input type="text" id="asset-sn-${i}" value="${esc(String(sn))}" style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;padding:1px 2px;outline:none;width:100%;"></td>
           <td id="td-cond-${i}"  style="padding:3px 5px;"></td>
           <td><input type="text" id="asset-val-${i}" value="${esc(String(val))}"></td>
           <td><input type="text" id="asset-rem-${i}" value="${esc(String(rem))}"></td>`;
@@ -913,20 +910,10 @@
           value: brand,
           placeholder: '',
           bold: false,
-          onChange: null
+          onChange: null,
+          searchable: true,
         });
         tr.querySelector(`#td-brand-${i}`).appendChild(brandCombo);
-
-        // Serial combo
-        const snCombo = makeCombo({
-          id: `asset-sn-${i}`,
-          options: () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), sn),
-          value: sn,
-          placeholder: '',
-          bold: false,
-          onChange: null
-        });
-        tr.querySelector(`#td-sn-${i}`).appendChild(snCombo);
 
         // Condition combo
         const condCombo = makeCombo({
@@ -939,11 +926,8 @@
         });
         tr.querySelector(`#td-cond-${i}`).appendChild(condCombo);
 
-        wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp);
+        wireRowEvents(i, typeCombo, brandCombo, null, condCombo, valInp);
 
-        // Unlock SN whenever a type is selected so all available serials are accessible.
-        // Only lock if there is no resolved type (no category context yet).
-        if (!resolvedType) snCombo._lock();
       });
     }
 
@@ -1075,6 +1059,64 @@
       } else {
         const me = auth.currentUser;
         if (me) { const match=_assigneeList.find(a=>a.name.toLowerCase()===me.name.toLowerCase()); if(match)selectAssignee(match); else { document.getElementById('field-fullname').value=me.name||''; document.getElementById('assignee-search').value=me.name||''; document.getElementById('field-empid').value=me.employee_id||''; document.getElementById('field-role').value=_roleDisplay(me); document.getElementById('field-contact').value=me.contact_number||''; document.getElementById('field-email').value=me.email||''; document.getElementById('prefill-hint').textContent=`Pre-filled with your profile, ${me.name}.`; } }
+      }
+
+      // Read-only mode: lock all combo widgets after build
+      if (new URLSearchParams(window.location.search).get('readonly') === '1') {
+        // Override asset rows with the specifically requested asset (brand/model/category)
+        const qp        = new URLSearchParams(window.location.search);
+        const reqBrand  = qp.get('brand')    || '';
+        const reqModel  = qp.get('model')    || '';
+        const reqCat    = qp.get('category') || '';
+        const reqSerial = qp.get('serial')   || '';
+        const hasAssignee = !!qp.get('assignee');
+
+        // Only override with syntheticAsset when there's no real assignee loaded —
+        // if an assignee is present, their actual deployed assets (with serial numbers)
+        // were already built by selectAssignee() above, so don't overwrite them.
+        if (!hasAssignee && (reqBrand || reqModel || reqCat)) {
+          // Build a synthetic asset entry for the requested item.
+          const syntheticAsset = [{
+            category_name: reqCat,
+            asset_name:    reqCat,
+            brand_model:   [reqBrand, reqModel].filter(Boolean).join(' '),
+            brand:         reqBrand,
+            model:         reqModel,
+            serial_number: reqSerial,
+            product_sku:   reqSerial,
+            condition:     '',
+            value:         '',
+            remarks:       '',
+          }];
+          // If category doesn't match a fixed type, inject it as a 1-row override
+          // by temporarily adding a virtual fixed type
+          const catLower = reqCat.toLowerCase();
+          const matchesFixed = FIXED_ASSET_TYPES.some(t =>
+            t.toLowerCase() === catLower ||
+            catLower.includes(t.toLowerCase().split(' ')[0]) ||
+            t.toLowerCase().includes(catLower.split(' ')[0])
+          );
+          if (!matchesFixed && reqCat) {
+            // Temporarily add the category as a fixed type so it gets its own row
+            FIXED_ASSET_TYPES.push(reqCat);
+          }
+          buildAssetRows(syntheticAsset);
+          // Remove the temporary entry if we added one
+          if (!matchesFixed && reqCat) {
+            FIXED_ASSET_TYPES.pop();
+          }
+        }
+
+        // Lock all combos
+        document.querySelectorAll('.ic-display').forEach(d => {
+          d.classList.add('ic-locked');
+          d.setAttribute('tabindex', '-1');
+        });
+        // Disable plain text inputs in the form
+        document.querySelectorAll('.info-grid input, .asset-table input').forEach(inp => {
+          inp.setAttribute('readonly', 'readonly');
+          inp.style.pointerEvents = 'none';
+        });
       }
     }});
 

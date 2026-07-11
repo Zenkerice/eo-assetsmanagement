@@ -93,7 +93,7 @@ class ApprovalService {
             if ($decision === 'approved' && $req['status'] === 'approved'
                 && strtolower($req['resource_type']) === 'assignment'
                 && $req['action_type'] === 'create') {
-                $result = $this->execute($req);
+                $result = $this->execute($req, $reviewedBy);
                 return [
                     'request' => $this->model->findById($id),
                     'result'  => $result,
@@ -102,34 +102,49 @@ class ApprovalService {
             }
             throw new RuntimeException('Request has already been reviewed', 409);
         }
-        if (!in_array($decision, ['approved', 'rejected'], true)) {
-            throw new InvalidArgumentException('Decision must be "approved" or "rejected"');
+        if (!in_array($decision, ['approved', 'rejected', 'forwarded'], true)) {
+            throw new InvalidArgumentException('Decision must be "approved", "rejected", or "forwarded"');
         }
 
         $result   = null;
         $resource = $req['resource_name'] ?? $req['resource_type'];
         $action   = ucfirst($req['action_type']);
 
+        // Asset-type requests from the request form are "forwarded to requestor" —
+        // skip execute() since the payload is a request form, not a product creation payload.
+        $isAssetForward = $req['resource_type'] === 'Asset' && $decision === 'forwarded';
+
         if ($decision === 'approved') {
-            $result = $this->execute($req);
-            $this->model->review($id, $decision, $reviewedBy, $reviewNotes);
+            $result = $this->execute($req, $reviewedBy);
+            $this->model->review($id, 'approved', $reviewedBy, $reviewNotes);
             AuditLogService::log('approved', $req['resource_type'], $req['resource_id'], $req['resource_name'],
                 'Approved by ' . $reviewedBy . ': ' . $req['action_type'] . ' on ' . $req['resource_type']);
+        } elseif ($decision === 'forwarded') {
+            $this->model->review($id, 'forwarded', $reviewedBy, $reviewNotes);
+            AuditLogService::log('forwarded', $req['resource_type'], $req['resource_id'], $req['resource_name'],
+                'Forwarded to requestor by ' . $reviewedBy);
         } else {
-            $this->model->review($id, $decision, $reviewedBy, $reviewNotes);
+            $this->model->review($id, 'rejected', $reviewedBy, $reviewNotes);
             AuditLogService::log('rejected', $req['resource_type'], $req['resource_id'], $req['resource_name'],
                 'Rejected by ' . $reviewedBy . ': ' . ($reviewNotes ?: 'No reason given'));
         }
 
         // Notify the staff member who submitted the request
-        $notifType  = $decision === 'approved' ? 'approval_approved' : 'approval_rejected';
-        $notifTitle = $decision === 'approved'
-            ? "✅ Your request was approved"
-            : "✖ Your request was rejected";
+        $isAssetForward = $decision === 'forwarded';
+        $notifType  = match($decision) {
+            'approved'  => 'approval_approved',
+            'rejected'  => 'approval_rejected',
+            'forwarded' => 'approval_forwarded',
+            default     => 'approval_approved',
+        };
+        $notifTitle = $isAssetForward
+            ? "📋 Asset Form Confirmation"
+            : ($decision === 'approved' ? "✅ Your request was approved" : "✖ Your request was rejected");
 
         $friendlyType = $req['resource_type'] === 'asset_request' ? 'Asset Request' : $req['resource_type'];
-        $notifBody  = "{$action} {$friendlyType}: {$resource}"
-            . ($reviewNotes ? " — \"{$reviewNotes}\"" : '');
+        $notifBody  = $isAssetForward
+            ? "Your asset request for \"{$resource}\" requires your confirmation. Please review and sign the accountability form."
+            : ("{$action} {$friendlyType}: {$resource}" . ($reviewNotes ? " — \"{$reviewNotes}\"" : ''));
 
         $this->notif->create([
             'for_role'    => 'staff',
@@ -137,7 +152,7 @@ class ApprovalService {
             'type'        => $notifType,
             'title'       => $notifTitle,
             'body'        => $notifBody,
-            'link'        => 'requests.html',
+            'link'        => $isAssetForward ? 'requests.html?tab=myrequests' : 'requests.html',
             'meta'        => ['approval_id' => $id, 'decision' => $decision],
         ]);
 
@@ -149,7 +164,7 @@ class ApprovalService {
 
     // ── Execute approved action ───────────────────────────────────────────────
 
-    private function execute(array $req): mixed {
+    private function execute(array $req, string $reviewedBy = 'Admin'): mixed {
         $payload      = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
         $resourceType = $req['resource_type'];
         $resourceId   = $req['resource_id'] ? (int)$req['resource_id'] : null;
@@ -158,9 +173,35 @@ class ApprovalService {
         switch ($resourceType) {
             case 'Asset': case 'product': case 'products':
                 require_once __DIR__ . '/ProductService.php';
+                require_once __DIR__ . '/AssignmentService.php';
                 $svc = new ProductService();
+                if ($actionType === 'create') {
+                    $product = $svc->create($payload);
+                    // If the asset was created with an assigned employee, also create
+                    // an assignment record so it appears in the employee's "My Assets".
+                    $assigneeName = trim($payload['assigned_employee'] ?? '');
+                    if ($assigneeName !== '' && !empty($product['id'])) {
+                        try {
+                            $assignSvc = new AssignmentService();
+                            // Use deployed_date from the payload as assigned_at if provided
+                            $deployedAt = !empty($payload['deployed_date'])
+                                ? (new \DateTime($payload['deployed_date']))->format('Y-m-d H:i:s')
+                                : null;
+                            $assignSvc->create([
+                                'product_id'    => (int)$product['id'],
+                                'assignee_name' => $assigneeName,
+                                'assigned_by'   => $reviewedBy,
+                                'location_id'   => !empty($payload['location_id']) ? (int)$payload['location_id'] : null,
+                                'notes'         => null,
+                                ...($deployedAt ? ['assigned_at' => $deployedAt] : []),
+                            ], skipAvailabilityCheck: true);
+                        } catch (\Exception $e) {
+                            // Non-fatal — the product was created; assignment is best-effort.
+                        }
+                    }
+                    return $product;
+                }
                 return match($actionType) {
-                    'create' => $svc->create($payload),
                     'update' => $svc->update($resourceId, $payload),
                     'delete' => $svc->delete($resourceId),
                     default  => null,
@@ -271,9 +312,28 @@ class ApprovalService {
                             $product = $productModel->findBySerial($assetTag);
                         }
                     }
+                    // Also try to parse a serial/SKU out of the brand field
+                    // (the accountability form puts brand+serial together, e.g. "SY SY-202")
+                    if (!$product) {
+                        $assetBrand = trim($asset['brand'] ?? '');
+                        if ($assetBrand !== '') {
+                            // Each space-delimited token could be a serial number or SKU
+                            foreach (explode(' ', $assetBrand) as $token) {
+                                $token = trim($token);
+                                if ($token === '') continue;
+                                $product = $productModel->findBySku($token);
+                                if (!$product) $product = $productModel->findBySerial($token);
+                                if ($product) break;
+                            }
+                        }
+                    }
                     if (!$product) {
                         $matches = $productModel->findByName($assetName);
                         $product = $matches[0] ?? null;
+                    }
+                    // Last resort: partial name match (e.g. "Headsets" → "SY Headset")
+                    if (!$product) {
+                        $product = $productModel->findByPartialName($assetName);
                     }
                     if (!$product) continue; // product not found in inventory — skip
 

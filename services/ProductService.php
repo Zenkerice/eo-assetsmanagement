@@ -15,6 +15,9 @@ class ProductService {
     }
 
     public function getAll(): array {
+        // Auto-sync asset_status for any product that has an active assignment
+        // but is still marked 'available' (can happen after imports or manual edits).
+        $this->model->syncStatusFromAssignments();
         return $this->model->findAll();
     }
 

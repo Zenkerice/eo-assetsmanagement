@@ -34,6 +34,7 @@ class AssignmentModel {
                     p.name          AS product_name,
                     p.sku           AS product_sku,
                     p.serial_number AS serial_number,
+                    p.brand_model   AS brand_model,
                     p.image_path    AS product_image,
                     p.asset_status,
                     c.name          AS category_name,
@@ -58,6 +59,7 @@ class AssignmentModel {
                     p.image_path  AS product_image,
                     p.asset_status,
                     p.serial_number,
+                    p.brand_model AS brand_model,
                     c.name        AS category_name,
                     COALESCE(la.name, lp.name) AS location_name
              FROM assignments a

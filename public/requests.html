@@ -121,6 +121,7 @@
     .pill.pending{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
     .pill.approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
     .pill.rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)}
+    .pill.forwarded{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)}
     .pill.urgent{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)}
     .pill.normal{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)}
     .pill.low{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
@@ -339,6 +340,7 @@
     <button class="brand-context-link" id="btn-myassets" type="button">My assets</button>
     <button class="brand-context-link" id="btn-return" type="button">Return</button>
     <button class="brand-context-link" id="btn-onbehalf" type="button">On behalf</button>
+    <button class="brand-context-link" id="btn-myrequests" type="button">My Requests</button>
   </div>
   <div class="req-header-right topbar-actions" id="header-right" style="visibility:hidden;">
     <div class="user-chip">
@@ -369,7 +371,7 @@
         </div>
         <button class="btn btn-primary" style="width:auto;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;font-size:13px;flex-shrink:0;margin-top:2px;" onclick="_openRequestFormModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Request Form
+          Request Asset
         </button>
       </div>
       <div style="margin-bottom:20px"></div>
@@ -441,6 +443,34 @@
           frameborder="0"
           scrolling="yes">
         </iframe>
+      </div>
+    </div>
+
+    <!-- MY REQUESTS -->
+    <div class="portal-panel" id="ppanel-myrequests">
+      <h2 class="portal-panel-title">My Requests</h2>
+      <p class="portal-panel-sub">Asset requests you've submitted</p>
+
+      <!-- Stats -->
+      <div class="portal-stats" style="margin-bottom:20px;">
+        <div class="portal-stat"><div class="portal-stat-label">Pending</div><div class="portal-stat-val" id="mr-stat-pending">·</div></div>
+        <div class="portal-stat"><div class="portal-stat-label">Approved</div><div class="portal-stat-val" id="mr-stat-approved" style="color:var(--green)">·</div></div>
+      </div>
+
+      <!-- Filter -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <select id="mr-filter-status" onchange="_mrRender()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;cursor:pointer;flex:1;">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="forwarded">Waiting for confirmation</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Declined</option>
+        </select>
+      </div>
+
+      <!-- List -->
+      <div id="mr-list" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading…</div>
       </div>
     </div>
 
@@ -926,6 +956,7 @@
 <script src="js/auth.js?v=9"></script>
 <script src="js/toast.js?v=2"></script>
 <script src="js/sidebar.js?v=77"></script>
+<script src="js/approval_flow.js?v=2"></script>
 <script>
 const roleLabels = { admin: 'Admin', manager: 'Manager', staff: 'Staff', viewer: 'Supervisor' };
 let allRequests = [];
@@ -973,6 +1004,7 @@ auth.initPage({
     const _tab = new URLSearchParams(window.location.search).get('tab');
     if (_tab === 'return')         showSection('return');
     else if (_tab === 'onbehalf')  showSection('onbehalf');
+    else if (_tab === 'myrequests') showSection('myrequests');
     else                           showSection('myassets'); // default
   }
 });
@@ -1738,10 +1770,11 @@ let _currentSection = 'asset-requests';
 
 function showSection(section) {
   _currentSection = section;
-  const isMyAssets  = section === 'myassets';
-  const isReturn    = section === 'return';
-  const isOnBehalf  = section === 'onbehalf';
-  const isPortal    = isMyAssets || isReturn || isOnBehalf;
+  const isMyAssets   = section === 'myassets';
+  const isReturn     = section === 'return';
+  const isOnBehalf   = section === 'onbehalf';
+  const isMyRequests = section === 'myrequests';
+  const isPortal     = isMyAssets || isReturn || isOnBehalf || isMyRequests;
 
   // Toggle content panels · portal section always shown, others hidden
   document.getElementById('portal-section').style.display      = isPortal ? '' : 'none';
@@ -1749,15 +1782,18 @@ function showSection(section) {
   document.getElementById('po-section').style.display          = 'none';
 
   // Active tab indicator on top nav buttons
-  ['btn-myassets','btn-return','btn-onbehalf'].forEach(id => {
+  ['btn-myassets','btn-return','btn-onbehalf','btn-myrequests'].forEach(id => {
     document.getElementById(id).classList.remove('active');
   });
-  const activeBtn = isReturn ? 'btn-return' : isOnBehalf ? 'btn-onbehalf' : 'btn-myassets';
+  const activeBtn = isReturn ? 'btn-return'
+    : isOnBehalf   ? 'btn-onbehalf'
+    : isMyRequests ? 'btn-myrequests'
+    : 'btn-myassets';
   document.getElementById(activeBtn).classList.add('active');
 
   // Switch the portal sub-tab
   if (isPortal) {
-    const tabKey = isReturn ? 'return' : isOnBehalf ? 'onbehalf' : 'myassets';
+    const tabKey = isReturn ? 'return' : isOnBehalf ? 'onbehalf' : isMyRequests ? 'myrequests' : 'myassets';
     switchPortalTab(tabKey);
     if (!_portalLoaded) loadPortalSection();
   }
@@ -1767,6 +1803,7 @@ function showSection(section) {
 document.getElementById('btn-myassets').addEventListener('click', () => showSection('myassets'));
 document.getElementById('btn-return').addEventListener('click', () => showSection('return'));
 document.getElementById('btn-onbehalf').addEventListener('click', () => showSection('onbehalf'));
+document.getElementById('btn-myrequests').addEventListener('click', () => showSection('myrequests'));
 document.getElementById('btn-new-po-req').addEventListener('click', openNewPoModal);
 
 /* ------------------------------------------------------
@@ -2277,36 +2314,431 @@ async function loadPortalSection() {
 }
 
 // -- Request Form Modal ------------------------------------------------
-function _openRequestFormModal() {
+let _rfAllAssets = [];
+
+async function _openRequestFormModal() {
   const user = auth.currentUser;
-  const params = new URLSearchParams();
-  if (user?.name) params.set('assignee', user.name);
-  params.set('modal', '1');
-  const iframe = document.getElementById('request-form-iframe');
-  iframe.src = 'accountability.html?' + params.toString();
+  const isAdmin = user && user.role !== 'staff' && user.role !== 'viewer';
+
+  const shell   = document.getElementById('request-form-shell');
+  const body    = document.getElementById('request-form-body');
+  const footer  = body ? body.nextElementSibling : null;
+  const iframe  = document.getElementById('request-form-iframe');
+
+  if (isAdmin) {
+    // Admin: show iframe, hide custom form
+    if (body)   body.style.display   = 'none';
+    if (footer) footer.style.display = 'none';
+    iframe.style.display = 'flex';
+    shell.style.maxWidth = '900px';
+    shell.style.height   = '92vh';
+    const params = new URLSearchParams();
+    if (user?.name) params.set('assignee', user.name);
+    params.set('modal', '1');
+    iframe.src = 'accountability.html?' + params.toString();
+  } else {
+    // Non-admin: show custom form
+    if (body)   body.style.display   = 'flex';
+    if (footer) footer.style.display = 'flex';
+    iframe.style.display = 'none';
+    shell.style.maxWidth = '560px';
+    shell.style.height   = 'fit-content';
+
+    // Pre-fill requestor info from current user
+    const nameEl   = document.getElementById('rf-name');
+    const empidEl  = document.getElementById('rf-empid');
+    if (nameEl)  nameEl.value  = user?.name  || '';
+    if (empidEl) empidEl.value = user?.employee_id || user?.username || '';
+
+    // Reset brand/model selection
+    _rfClearBrand();
+    _rfClearModel();
+    const brandSearchEl = document.getElementById('rf-brand-search');
+    const modelSearchEl = document.getElementById('rf-model-search');
+    if (brandSearchEl) brandSearchEl.value = '';
+    if (modelSearchEl) { modelSearchEl.value = ''; modelSearchEl.disabled = true; modelSearchEl.style.opacity = '.5'; modelSearchEl.style.cursor = 'not-allowed'; modelSearchEl.placeholder = 'Select a brand first…'; }
+    const descEl = document.getElementById('rf-description');
+    if (descEl) descEl.value = '';
+
+    // Load locations + categories in parallel
+    try {
+      const [locRes, catRes] = await Promise.all([api.getLocations(), api.getCategories()]);
+
+      const locSel = document.getElementById('rf-location');
+      if (locSel) {
+        locSel.innerHTML = '<option value="">-- Select Location --</option>' +
+          (locRes.data || []).map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+      }
+
+      const cats   = (catRes.data || []).filter(c => !c.parent_id);
+      const catSel = document.getElementById('rf-category');
+      if (catSel) {
+        catSel.innerHTML = '<option value="">-- All Categories --</option>' +
+          cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+      }
+    } catch(_) {}
+
+    // Load available assets for brand/model search
+    try {
+      const prodRes  = await api.getProducts();
+      _rfAllAssets   = (prodRes.data || []).filter(p => p.asset_status === 'available');
+    } catch(_) { _rfAllAssets = []; }
+
+    _rfFilterBrands(false);
+  }
+
   document.getElementById('request-form-modal').classList.add('open');
+}
+
+// ── Brand helpers ──────────────────────────────────────────────────────────
+function _rfFilterBrands(show = true) {
+  const catId = (document.getElementById('rf-category')?.value || '').trim();
+  const query = (document.getElementById('rf-brand-search')?.value || '').toLowerCase().trim();
+  let pool    = _rfAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === catId);
+  // Unique brands from pool
+  const brands = [...new Set(pool.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+  const filtered = query ? brands.filter(b => b.toLowerCase().includes(query)) : brands;
+
+  const dd = document.getElementById('rf-brand-dropdown');
+  if (!dd) return;
+  if (filtered.length === 0) {
+    dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No brands found</div>';
+  } else {
+    dd.innerHTML = filtered.map(b =>
+      `<div onclick="_rfSelectBrand('${b.replace(/'/g,"\\'")}') "
+        style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s;"
+        onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''"
+      >${esc(b)}</div>`
+    ).join('');
+  }
+  if (show) _rfShowBrandDropdown();
+}
+
+function _rfShowBrandDropdown() {
+  const dd = document.getElementById('rf-brand-dropdown');
+  if (dd) dd.style.display = 'block';
+}
+function _rfHideBrandDropdown() {
+  const dd = document.getElementById('rf-brand-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+function _rfSelectBrand(brand) {
+  const inp  = document.getElementById('rf-brand-search');
+  const pill = document.getElementById('rf-brand-selected');
+  const lbl  = document.getElementById('rf-brand-selected-label');
+  if (inp)  inp.value = '';
+  if (lbl)  lbl.textContent = brand;
+  if (pill) pill.style.display = 'flex';
+  _rfHideBrandDropdown();
+  // Enable model search
+  const modelInp = document.getElementById('rf-model-search');
+  if (modelInp) {
+    modelInp.disabled    = false;
+    modelInp.style.opacity = '1';
+    modelInp.style.cursor  = 'text';
+    modelInp.placeholder   = 'Search model…';
+    modelInp.value         = '';
+  }
+  _rfClearModel(false);
+  _rfFilterModels(false);
+}
+function _rfClearBrand(resetModel = true) {
+  const pill = document.getElementById('rf-brand-selected');
+  if (pill) pill.style.display = 'none';
+  if (resetModel) {
+    _rfClearModel();
+    const modelInp = document.getElementById('rf-model-search');
+    if (modelInp) {
+      modelInp.disabled    = true;
+      modelInp.style.opacity = '.5';
+      modelInp.style.cursor  = 'not-allowed';
+      modelInp.placeholder   = 'Select a brand first…';
+      modelInp.value         = '';
+    }
+  }
+}
+function _rfGetSelectedBrand() {
+  const lbl = document.getElementById('rf-brand-selected-label');
+  return lbl?.textContent?.trim() || null;
+}
+
+// ── Model helpers ──────────────────────────────────────────────────────────
+function _rfFilterModels(show = true) {
+  const catId = (document.getElementById('rf-category')?.value || '').trim();
+  const brand = _rfGetSelectedBrand();
+  const query = (document.getElementById('rf-model-search')?.value || '').toLowerCase().trim();
+  let pool    = _rfAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === catId);
+  if (brand) pool = pool.filter(p => (p.brand || '').trim().toLowerCase() === brand.toLowerCase());
+  const models = [...new Set(pool.map(p => (p.model || '').trim()).filter(Boolean))].sort();
+  const filtered = query ? models.filter(m => m.toLowerCase().includes(query)) : models;
+
+  const dd = document.getElementById('rf-model-dropdown');
+  if (!dd) return;
+  if (filtered.length === 0) {
+    dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
+  } else {
+    dd.innerHTML = filtered.map(m =>
+      `<div onclick="_rfSelectModel('${m.replace(/'/g,"\\'")}') "
+        style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s;"
+        onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''"
+      >${esc(m)}</div>`
+    ).join('');
+  }
+  if (show) _rfShowModelDropdown();
+}
+
+function _rfShowModelDropdown() {
+  const dd = document.getElementById('rf-model-dropdown');
+  if (dd) dd.style.display = 'block';
+}
+function _rfHideModelDropdown() {
+  const dd = document.getElementById('rf-model-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+function _rfSelectModel(model) {
+  const inp  = document.getElementById('rf-model-search');
+  const pill = document.getElementById('rf-model-selected');
+  const lbl  = document.getElementById('rf-model-selected-label');
+  if (inp)  inp.value = '';
+  if (lbl)  lbl.textContent = model;
+  if (pill) pill.style.display = 'flex';
+  _rfHideModelDropdown();
+}
+function _rfClearModel(resetPill = true) {
+  if (resetPill) {
+    const pill = document.getElementById('rf-model-selected');
+    if (pill) pill.style.display = 'none';
+  }
+}
+function _rfGetSelectedModel() {
+  const lbl = document.getElementById('rf-model-selected-label');
+  return lbl?.textContent?.trim() || null;
+}
+
+async function _submitNonAdminRequest() {
+  const name   = (document.getElementById('rf-name')?.value  || '').trim();
+  const empid  = (document.getElementById('rf-empid')?.value || '').trim();
+  const locSel2 = document.getElementById('rf-location');
+  const locId  = locSel2?.value || '';
+  const locName= locSel2?.options[locSel2.selectedIndex]?.text || '';
+  const catSel = document.getElementById('rf-category');
+  const catId  = catSel?.value || '';
+  const catName= catSel?.options[catSel.selectedIndex]?.text || '';
+  const brand  = _rfGetSelectedBrand() || '';
+  const model  = _rfGetSelectedModel() || '';
+  const desc   = (document.getElementById('rf-description')?.value || '').trim();
+
+  if (!name) { showToast("Requestor's name is required.", 'error'); return; }
+  if (!desc && !brand) { showToast('Please select a brand or provide a description.', 'error'); return; }
+
+  const btn = document.getElementById('rf-submit-btn');
+  if (btn) btn.disabled = true;
+
+  const resourceName = [brand, model].filter(Boolean).join(' ') ||
+    (catName && catName !== '-- All Categories --' ? catName : 'Asset');
+
+  try {
+    await ApprovalFlow.submit({
+      action_type:   'create',
+      resource_type: 'Asset',
+      resource_id:   null,
+      resource_name: resourceName,
+      payload: {
+        requestor_name:        name,
+        requestor_id:          empid,
+        requestor_location:    locName !== '-- Select Location --' ? locName : '',
+        requestor_location_id: locId || null,
+        category_id:           catId  || null,
+        category_name:         (catName !== '-- All Categories --' ? catName : null),
+        brand:                 brand  || null,
+        model:                 model  || null,
+        description:           desc,
+      },
+      notes: desc,
+    });
+    _closeRequestFormModal();
+  } catch(e) {
+    showToast(e.message || 'Failed to submit request.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// -- My Requests panel ------------------------------------------------
+let _mrData = [];
+
+async function _mrLoad() {
+  const list = document.getElementById('mr-list');
+  if (list) list.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading…</div>';
+  try {
+    const res = await api.getApprovals();
+    _mrData = (res.data || []).filter(r => r.resource_type === 'Asset');
+    _mrRender();
+  } catch(e) {
+    if (list) list.innerHTML = `<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">${esc(e.message)}</div>`;
+  }
+}
+
+function _mrRender() {
+  const statusFilter = document.getElementById('mr-filter-status')?.value || '';
+  const rows = statusFilter ? _mrData.filter(r => r.status === statusFilter) : _mrData;
+
+  // Stats
+  const pending  = _mrData.filter(r => r.status === 'pending').length;
+  const approved = _mrData.filter(r => r.status === 'approved').length;
+  const pendingEl  = document.getElementById('mr-stat-pending');
+  const approvedEl = document.getElementById('mr-stat-approved');
+  if (pendingEl)  pendingEl.textContent  = pending;
+  if (approvedEl) approvedEl.textContent = approved;
+
+  const list = document.getElementById('mr-list');
+  if (!list) return;
+
+  if (!rows.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">No requests found.</div>';
+    return;
+  }
+
+  const statusStyle = {
+    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '⏳ Pending' },
+    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
+    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
+    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
+  };
+
+  list.innerHTML = rows.map(r => {
+    const s    = statusStyle[r.status] || statusStyle.pending;
+    const payload = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
+    const brand = payload.brand || '';
+    const model = payload.model || '';
+    const cat   = payload.category_name || '';
+    const sub   = [brand, model, cat].filter(Boolean).join(' · ') || r.resource_name || r.resource_type;
+    const date  = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+    const reviewNote = r.review_notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;">"${esc(r.review_notes)}"</div>` : '';
+    return `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:38px;height:38px;border-radius:9px;background:${s.bg};border:1px solid ${s.border};display:grid;place-items:center;flex-shrink:0;font-size:16px;">📋</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.resource_name || 'Asset Request')}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${esc(sub)}</div>
+          ${reviewNote}
+        </div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span style="display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${s.label}</span>
+          <div style="font-size:11px;color:var(--muted);">${esc(date)}</div>
+          <button onclick="_mrOpenView(${r.id})" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 10px;cursor:pointer;transition:all .15s;"
+            onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+            onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
+          >View</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function _mrOpenView(id) {
+  const r = _mrData.find(x => x.id === id);
+  if (!r) return;
+
+  const payload  = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
+  const statusStyle = {
+    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '⏳ Pending' },
+    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
+    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
+    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
+  };
+  const s    = statusStyle[r.status] || statusStyle.pending;
+
+  const shell     = document.getElementById('mr-view-shell');
+  const titleEl   = document.getElementById('mr-view-title');
+  const body      = document.getElementById('mr-view-body');
+  const iframe    = document.getElementById('mr-view-iframe');
+
+  if (r.status === 'forwarded') {
+    // Show accountability form iframe
+    titleEl.textContent = 'Asset Accountability Form';
+    body.style.display   = 'none';
+    iframe.style.display = 'block';
+    shell.style.maxWidth  = '900px';
+    shell.style.maxHeight = '94vh';
+    shell.style.overflow  = 'hidden';
+
+    const params = new URLSearchParams();
+    params.set('modal', '1');
+    params.set('readonly', '1');
+    // Support both field name conventions used by different request forms
+    const assigneeName = payload.requestor_name || payload.assignee_name || r.requested_by || '';
+    if (assigneeName)               params.set('assignee',  assigneeName);
+    if (payload.requestor_id)       params.set('empid',     payload.requestor_id);
+    if (payload.requestor_location) params.set('location',  payload.requestor_location);
+    if (payload.brand)              params.set('brand',     payload.brand);
+    if (payload.model)              params.set('model',     payload.model);
+    if (payload.category_name)      params.set('category',  payload.category_name);
+    // serial_number may be stored as sku depending on which field was filled
+    const reqSerial = payload.serial_number || payload.sku || '';
+    if (reqSerial)                  params.set('serial',    reqSerial);
+    iframe.src = 'accountability.html?' + params.toString();
+  } else {
+    // Show plain details
+    titleEl.textContent  = 'Request Details';
+    body.style.display   = 'flex';
+    iframe.style.display = 'none';
+    iframe.src           = '';
+    shell.style.maxWidth  = '500px';
+    shell.style.maxHeight = '90vh';
+    shell.style.overflow  = 'auto';
+
+    const date = r.created_at ? new Date(r.created_at).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
+
+    function row(label, value) {
+      if (!value) return '';
+      return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);min-width:130px;padding-top:1px;">${label}</div>
+        <div style="font-size:13px;color:var(--text);flex:1;line-height:1.5;word-break:break-word;">${value}</div>
+      </div>`;
+    }
+
+    body.innerHTML = `
+      <div style="margin-bottom:18px;">
+        <span style="display:inline-flex;align-items:center;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${s.label}</span>
+      </div>
+      ${row('Asset Requested', esc(r.resource_name || '—'))}
+      ${row('Category',        esc(payload.category_name || '—'))}
+      ${row('Brand',           esc(payload.brand  || '—'))}
+      ${row('Model',           esc(payload.model  || '—'))}
+      ${row('Requestor Name',  esc(payload.requestor_name || r.requested_by || '—'))}
+      ${row('Requestor ID',    esc(payload.requestor_id   || '—'))}
+      ${row('Location',        esc(payload.requestor_location || '—'))}
+      ${row('Description',     esc(payload.description || r.notes || '—'))}
+      ${row('Submitted',       esc(date))}
+      ${r.reviewed_by  ? row('Reviewed By', esc(r.reviewed_by)) : ''}
+      ${r.review_notes ? row('Review Notes', `<span style="font-style:italic;color:${r.status === 'rejected' ? 'var(--red)' : 'var(--muted2)'};">"${esc(r.review_notes)}"</span>`) : ''}
+      <div style="height:4px;"></div>
+    `;
+  }
+
+  document.getElementById('mr-view-modal').classList.add('open');
+}
+
+function _mrCloseView() {
+  document.getElementById('mr-view-modal').classList.remove('open');
+  setTimeout(() => {
+    const iframe = document.getElementById('mr-view-iframe');
+    if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+    const shell = document.getElementById('mr-view-shell');
+    if (shell)  { shell.style.maxWidth = '500px'; shell.style.maxHeight = '90vh'; shell.style.overflow = 'auto'; }
+  }, 300);
 }
 
 function _closeRequestFormModal() {
   document.getElementById('request-form-modal').classList.remove('open');
-  // Clear iframe src so it doesn't keep running in background
-  setTimeout(() => { document.getElementById('request-form-iframe').src = ''; }, 300);
+  setTimeout(() => {
+    const iframe = document.getElementById('request-form-iframe');
+    iframe.src = '';
+    iframe.style.display = 'none';
+  }, 300);
 }
-
-function _submitRequestForm() {
-  const iframe = document.getElementById('request-form-iframe');
-  if (!iframe.contentWindow) return;
-  // Tell the iframe to trigger its submit button
-  iframe.contentWindow.postMessage({ type: 'SUBMIT_REQUEST_FORM' }, '*');
-}
-
-// Listen for messages from the iframe (e.g. form submitted successfully)
-window.addEventListener('message', function(e) {
-  if (e.data && e.data.type === 'REQUEST_FORM_SUBMITTED') {
-    _closeRequestFormModal();
-    showSuccessModal('Request Submitted', 'Your request form has been submitted successfully.');
-  }
-});
 
 // -- Portal tab switcher -----------------------------------------------
 function switchPortalTab(tab) {
@@ -2328,13 +2760,16 @@ function switchPortalTab(tab) {
   if (shell) shell.classList.toggle('wide', tab === 'onbehalf');
 
   // Reflect active state on the top nav buttons
-  ['btn-myassets','btn-return','btn-onbehalf'].forEach(id => {
+  ['btn-myassets','btn-return','btn-onbehalf','btn-myrequests'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
-  const map = { myassets: 'btn-myassets', return: 'btn-return', onbehalf: 'btn-onbehalf' };
+  const map = { myassets: 'btn-myassets', return: 'btn-return', onbehalf: 'btn-onbehalf', myrequests: 'btn-myrequests' };
   const activeBtn = document.getElementById(map[tab]);
   if (activeBtn) activeBtn.classList.add('active');
+
+  // Load My Requests data when that tab is opened
+  if (tab === 'myrequests') _mrLoad();
 }
 
 // -- Asset status helper -----------------------------------------------
@@ -2637,55 +3072,134 @@ async function submitOnBehalf() {
 
 
 </script>
-<!-- -- Request Form Modal (iframe embed) -- -->
-<div class="modal-overlay" id="request-form-modal" style="z-index:300;padding:0;">
-  <div style="
-    background:var(--bg2);
-    border:1px solid var(--border2);
-    border-radius:var(--radius);
-    width:100%;
-    max-width:900px;
-    height:92vh;
-    display:flex;
-    flex-direction:column;
-    box-shadow:0 24px 80px rgba(0,0,0,.6);
-    animation:modalIn .2s ease;
-    overflow:hidden;
-  ">
-    <!-- Modal header with Submit button -->
-    <div style="
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:16px 24px;
-      border-bottom:1px solid var(--border);
-      flex-shrink:0;
-      background:var(--bg2);
-    ">
+<!-- -- My Request View Modal -- -->
+<div class="modal-overlay" id="mr-view-modal" style="z-index:310;padding:20px;">
+  <div id="mr-view-shell" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;">Request Form</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17" style="color:var(--blue)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span id="mr-view-title" style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;">Request Details</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <button
-          onclick="_closeRequestFormModal()"
-          style="
-            background:var(--bg3);border:1px solid var(--border2);
-            color:var(--muted2);width:30px;height:30px;border-radius:6px;
-            font-size:16px;cursor:pointer;display:grid;place-items:center;
-            transition:all .15s;
-          "
+        <button onclick="_mrCloseView()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;"
           onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
           onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
         >&#10005;</button>
       </div>
     </div>
-    <!-- iframe body -->
-    <iframe
-      id="request-form-iframe"
-      src=""
-      style="flex:1;border:none;width:100%;background:var(--bg);"
-    ></iframe>
+    <!-- Details body (plain view) -->
+    <div id="mr-view-body" style="padding:22px 24px;display:flex;flex-direction:column;gap:0;"></div>
+    <!-- Accountability form iframe (forwarded requests) -->
+    <iframe id="mr-view-iframe" src="" style="display:none;flex:1;border:none;width:100%;background:#f4f6f9;min-height:600px;" frameborder="0"></iframe>
+  </div>
+</div>
+
+<!-- -- Request Form Modal (iframe embed for admin / custom form for non-admin) -- -->
+<div class="modal-overlay" id="request-form-modal" style="z-index:300;padding:20px;">
+  <div style="
+    background:var(--bg2);
+    border:1px solid var(--border2);
+    border-radius:var(--radius);
+    width:100%;
+    max-width:560px;
+    max-height:92vh;
+    display:flex;
+    flex-direction:column;
+    height:fit-content;
+    box-shadow:0 24px 80px rgba(0,0,0,.6);
+    animation:modalIn .2s ease;
+    overflow:hidden;
+  " id="request-form-shell">
+    <!-- Modal header -->
+    <div style="
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 24px;border-bottom:1px solid var(--border);
+      flex-shrink:0;background:var(--bg2);
+    ">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;">Request Asset</span>
+      </div>
+      <button onclick="_closeRequestFormModal()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:all .15s;"
+        onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+        onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
+      >&#10005;</button>
+    </div>
+
+    <!-- Non-admin request form -->
+    <div id="request-form-body" style="padding:16px 24px;overflow-y:auto;flex:0 0 auto;display:flex;flex-direction:column;gap:10px;">
+      <!-- Requestor's Name -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Name</label>
+        <input id="rf-name" type="text" placeholder="Full name" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
+      </div>
+      <!-- Requestor's ID -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's ID</label>
+        <input id="rf-empid" type="text" placeholder="Employee ID" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
+      </div>
+      <!-- Requestor's Location -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Location</label>
+        <select id="rf-location" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+          <option value="">-- Select Location --</option>
+        </select>
+      </div>
+      <!-- Category -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Category</label>
+        <select id="rf-category" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" onchange="_rfClearBrand();_rfFilterBrands(false)">
+          <option value="">-- All Categories --</option>
+        </select>
+      </div>
+      <!-- Brand search -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Brand <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
+        <div style="position:relative;">
+          <input id="rf-brand-search" type="text" placeholder="Search brand…" autocomplete="off"
+            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;"
+            onfocus="this.style.borderColor='var(--blue)';_rfShowBrandDropdown()"
+            onblur="this.style.borderColor='var(--border2)';setTimeout(_rfHideBrandDropdown,180)"
+            oninput="_rfFilterBrands()" />
+          <div id="rf-brand-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:3px;"></div>
+        </div>
+        <div id="rf-brand-selected" style="display:none;margin-top:6px;background:rgba(41,182,232,0.1);border:1px solid rgba(41,182,232,0.25);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--blue);align-items:center;justify-content:space-between;">
+          <span id="rf-brand-selected-label"></span>
+          <button onclick="_rfClearBrand()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;" title="Clear">&#10005;</button>
+        </div>
+      </div>
+      <!-- Model search -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Model <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
+        <div style="position:relative;">
+          <input id="rf-model-search" type="text" placeholder="Select a brand first…" autocomplete="off" disabled
+            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;opacity:.5;cursor:not-allowed;"
+            onfocus="this.style.borderColor='var(--blue)';_rfShowModelDropdown()"
+            onblur="this.style.borderColor='var(--border2)';setTimeout(_rfHideModelDropdown,180)"
+            oninput="_rfFilterModels()" />
+          <div id="rf-model-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:3px;"></div>
+        </div>
+        <div id="rf-model-selected" style="display:none;margin-top:6px;background:rgba(41,182,232,0.1);border:1px solid rgba(41,182,232,0.25);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--blue);align-items:center;justify-content:space-between;">
+          <span id="rf-model-selected-label"></span>
+          <button onclick="_rfClearModel()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;" title="Clear">&#10005;</button>
+        </div>
+      </div>
+      <!-- Description -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description / Notes</label>
+        <textarea id="rf-description" rows="3" placeholder="Reason for request or additional notes…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;resize:vertical;line-height:1.5;min-height:80px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+      </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div style="padding:10px 24px 14px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:var(--bg2);">
+      <button onclick="_closeRequestFormModal()" class="btn btn-ghost" style="flex:0 0 auto;">Cancel</button>
+      <button onclick="_submitNonAdminRequest()" id="rf-submit-btn" class="btn btn-primary" style="flex:0 0 auto;padding-left:24px;padding-right:24px;">Submit Request</button>
+    </div>
+
+    <!-- iframe body (admin only, hidden by default) -->
+    <iframe id="request-form-iframe" src="" style="display:none;flex:1;border:none;width:100%;background:var(--bg);"></iframe>
   </div>
 </div>
 

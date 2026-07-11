@@ -1017,6 +1017,11 @@ async function openModal(id = null) {
     document.getElementById('modal-title').textContent = isStaff ? 'Request New Asset' : 'Add Asset';
   }
   document.getElementById('submit-btn').textContent = isStaff ? 'Submit Request' : (id ? 'Save Asset' : 'Save Asset');
+
+  // Staff (non-admin) users do not see the request form
+  const formBody = document.querySelector('#modal .form-body');
+  if (formBody) formBody.style.display = isStaff ? 'none' : '';
+
   await populateDropdowns();
   if (id) {
     try {
@@ -1186,7 +1191,7 @@ async function submitForm(e) {
       await api.createProduct(fd);
       showToast('Asset created', 'success');
       closeModal();
-      loadItems();
+      await loadItems();
     }
   } catch (e) { showToast(e.message, 'error'); }
 }

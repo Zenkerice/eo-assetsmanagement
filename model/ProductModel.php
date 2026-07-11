@@ -22,6 +22,29 @@ class ProductModel {
         return $stmt->fetchAll();
     }
 
+    /**
+     * Keep asset_status in sync with the assignments table:
+     * - Products that have an active assignment but are not 'assigned' → set to 'assigned'
+     * - Products that have no active assignment but are 'assigned' → set back to 'available'
+     * This corrects drift caused by imports, manual DB edits, or legacy data.
+     */
+    public function syncStatusFromAssignments(): void {
+        // Mark as assigned where an active assignment exists but status differs
+        $this->db->exec(
+            "UPDATE products p
+             INNER JOIN assignments a ON a.product_id = p.id AND a.status = 'active'
+             SET p.asset_status = 'assigned'
+             WHERE p.asset_status != 'assigned'"
+        );
+        // Revert to available where no active assignment exists but product says assigned
+        $this->db->exec(
+            "UPDATE products p
+             LEFT JOIN assignments a ON a.product_id = p.id AND a.status = 'active'
+             SET p.asset_status = 'available'
+             WHERE p.asset_status = 'assigned' AND a.id IS NULL"
+        );
+    }
+
     public function findById(int $id): array|false {
         $stmt = $this->db->prepare(
             'SELECT p.*, c.name AS category_name,
@@ -64,8 +87,8 @@ class ProductModel {
 
     public function create(array $data): int {
         $stmt = $this->db->prepare(
-            'INSERT INTO products (name, sku, brand_model, brand, model, description, category_id, supplier_id, supplier_name, location_id, quantity, image_path, serial_number, po_id, po_item_id, assigned_employee, assigned_employee_id, purchase_date, deployed_date)
-             VALUES (:name, :sku, :brand_model, :brand, :model, :description, :category_id, :supplier_id, :supplier_name, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id, :assigned_employee, :assigned_employee_id, :purchase_date, :deployed_date)'
+            'INSERT INTO products (name, sku, brand_model, brand, model, description, category_id, supplier_id, supplier_name, location_id, quantity, image_path, serial_number, po_id, po_item_id, assigned_employee, assigned_employee_id, purchase_date, deployed_date, asset_status)
+             VALUES (:name, :sku, :brand_model, :brand, :model, :description, :category_id, :supplier_id, :supplier_name, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id, :assigned_employee, :assigned_employee_id, :purchase_date, :deployed_date, :asset_status)'
         );
         $stmt->execute([
             ':name'                 => $data['name'],
@@ -87,6 +110,7 @@ class ProductModel {
             ':assigned_employee_id' => $data['assigned_employee_id'] ?? null,
             ':purchase_date'        => !empty($data['purchase_date']) ? $data['purchase_date'] : null,
             ':deployed_date'        => !empty($data['deployed_date']) ? $data['deployed_date'] : null,
+            ':asset_status'         => !empty($data['asset_status'])  ? $data['asset_status']  : 'available',
         ]);
         return (int) $this->db->lastInsertId();
     }
@@ -104,6 +128,27 @@ class ProductModel {
         );
         $stmt->execute([$name]);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Partial name match — used as a last-resort lookup when the exact name
+     * from the request form doesn't match any product (e.g. "Headsets" vs "SY Headset").
+     * Returns the first available (or any) product whose name contains the search term
+     * or whose name is contained within the search term.
+     */
+    public function findByPartialName(string $name): array|false {
+        $stmt = $this->db->prepare(
+            'SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             LEFT JOIN suppliers  s ON p.supplier_id  = s.id
+             WHERE p.name LIKE ? OR ? LIKE CONCAT(\'%\', p.name, \'%\')
+             ORDER BY p.asset_status = \'available\' DESC, p.id ASC
+             LIMIT 1'
+        );
+        $stmt->execute(['%' . $name . '%', $name]);
+        return $stmt->fetch() ?: false;
     }
 
     /** Find all products created from a specific PO */

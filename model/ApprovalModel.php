@@ -21,7 +21,7 @@ class ApprovalModel {
               `resource_name` VARCHAR(255)  DEFAULT NULL,
               `payload`       JSON          DEFAULT NULL,
               `notes`         TEXT          DEFAULT NULL,
-              `status`        ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+              `status`        ENUM('pending','approved','rejected','forwarded') NOT NULL DEFAULT 'pending',
               `reviewed_by`   VARCHAR(150)  DEFAULT NULL,
               `review_notes`  TEXT          DEFAULT NULL,
               `reviewed_at`   DATETIME      DEFAULT NULL,
@@ -34,6 +34,10 @@ class ApprovalModel {
               KEY `idx_created_at`    (`created_at`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+        // Ensure 'forwarded' is in the enum for existing tables
+        try {
+            $this->db->exec("ALTER TABLE approval_requests MODIFY COLUMN status ENUM('pending','approved','rejected','forwarded') NOT NULL DEFAULT 'pending'");
+        } catch (\PDOException $e) { /* already updated */ }
     }
 
     public function create(array $data): int {
