@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=10" />
+  <link rel="stylesheet" href="css/theme.css?v=11" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Assets - EmpireOne</title>
@@ -135,10 +135,30 @@
     .receipt-zone-text{display:flex;flex-direction:column;gap:2px}
     .receipt-zone-primary{font-size:13px;font-weight:500;color:var(--text)}
     .receipt-zone-secondary{font-size:11px;color:var(--muted)}
-    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
-    .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
-    .toast.error{border-color:var(--red);color:var(--red)}
-    .toast.success{border-color:var(--green);color:var(--green)}
+    /* toast styles live in theme.css */
+
+    /* Staff request modal — amber accent header */
+    .modal-header-staff {
+      border-bottom-color: rgba(245,166,35,.25) !important;
+      background: linear-gradient(135deg, rgba(245,166,35,.07) 0%, transparent 60%) !important;
+    }
+    .modal-header-staff h3::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: var(--amber);
+      border-radius: 2px;
+      margin-right: 10px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .modal-header-staff h3 {
+      display: flex;
+      align-items: center;
+      color: var(--amber) !important;
+    }
+    [data-theme="light"] .modal-header-staff h3 { color: #d97706 !important; }
 
   </style>
 </head>
@@ -585,7 +605,7 @@
 </div>
 <script src="js/api.js?v=24"></script>
 <script src="js/auth.js?v=9"></script>
-<script src="js/toast.js?v=2"></script>
+<script src="js/toast.js?v=3"></script>
 <script src="js/sidebar.js?v=77"></script>
 <script src="js/approval_flow.js?v=2"></script>
 <script>
@@ -833,7 +853,7 @@ function renderTable(data) {
       '<td><div class="cat-cell">' + catIcon + '<div>' + catNameHtml + (isDamaged && filterCatId ? '<div class="damage-badge">&#9888; not working</div>' : '') + '</div></div></td>' +
       nameCell +
       '<td style="font-size:13px;color:var(--muted2);">' + esc(p.brand || '--') + '</td>' +
-      '<td><span class="sku-chip' + (isDamaged ? ' damaged' : '') + '">' + esc(p.sku) + '</span></td>' +
+      '<td><span class="sku-chip' + (isDamaged ? ' damaged' : '') + '">' + esc(p.serial_number || p.sku) + '</span></td>' +
       '<td>' + supplierHtml + '</td>' +
       '<td style="text-align:center;"><span class="qty-pill">' + (p.quantity ?? 0) + '</span></td>' +
       '<td>' + assignedHtml + '</td>' +
@@ -1022,13 +1042,19 @@ async function openModal(id = null) {
   const formBody = document.querySelector('#modal .form-body');
   if (formBody) formBody.style.display = isStaff ? 'none' : '';
 
+  // Visual accent: amber header bar for staff request mode, default for admin
+  const modalHeader = document.querySelector('#modal .modal-header');
+  if (modalHeader) {
+    modalHeader.classList.toggle('modal-header-staff', isStaff);
+  }
+
   await populateDropdowns();
   if (id) {
     try {
       const res = await api.getProduct(id);
       const p   = res.data;
       form.name.value        = p.name;
-      form.sku.value         = p.sku;
+      form.sku.value         = p.serial_number || p.sku;
       if (form.description) form.description.value = p.description || '';
       const brandInp = document.getElementById('item-brand');
       if (brandInp) brandInp.value = p.brand || '';
@@ -1045,9 +1071,17 @@ async function openModal(id = null) {
       const ddInput = document.getElementById('item-deployed-date');
       if (ddInput) ddInput.value = p.deployed_date ? p.deployed_date.substring(0, 16) : '';
       const empInp = document.getElementById('item-assigned-employee');
-      if (empInp) empInp.value = p.assigned_employee || '';
       const empIdInp = document.getElementById('item-employee-id');
-      if (empIdInp) empIdInp.value = p.assigned_employee_id || '';
+      // Prefer active assignment record over stored product fields —
+      // the product's assigned_employee may be stale if deployed via the approval flow.
+      const activeAsgn = allAssignments.find(a => a.product_id === p.id);
+      const resolvedEmpName = (activeAsgn && activeAsgn.assignee_name)
+        ? activeAsgn.assignee_name
+        : (p.assigned_employee || '');
+      const resolvedEmpId = (resolvedEmpName ? getAssigneeEmpId(resolvedEmpName) : '')
+        || p.assigned_employee_id || '';
+      if (empInp)   empInp.value   = resolvedEmpName;
+      if (empIdInp) empIdInp.value = resolvedEmpId;
     } catch (e) { showToast(e.message, 'error'); return; }
   }
 
@@ -1136,6 +1170,7 @@ async function submitForm(e) {
   const fd = new FormData();
   fd.append('name',                form.name.value.trim());
   fd.append('sku',                 form.sku.value.trim());
+  fd.append('serial_number',       form.sku.value.trim());
   fd.append('model',               document.getElementById('item-model') ? document.getElementById('item-model').value.trim() : '');
   fd.append('description',         form.description ? form.description.value.trim() : '');
   fd.append('supplier_name',       document.getElementById('item-supplier') ? document.getElementById('item-supplier').value.trim() : '');
@@ -1199,6 +1234,21 @@ async function submitForm(e) {
 function viewItem(id) {
   viewingProductId = id;
   viewingGroupIds  = null;
+  // Refresh assignments + product status before rendering so Availability is current
+  Promise.all([
+    api.getAssignments().then(r => { allAssignments = (r.data || []).filter(a => a.status === 'active'); }).catch(() => {}),
+    api.getProducts().then(r => {
+      if (r.data) {
+        r.data.forEach(fresh => {
+          const idx = allItems.findIndex(x => x.id === fresh.id);
+          if (idx !== -1) allItems[idx] = { ...allItems[idx], ...fresh };
+        });
+      }
+    }).catch(() => {}),
+  ]).finally(() => _renderViewItem(id));
+}
+
+function _renderViewItem(id) {
   const p = allItems.find(x => x.id === id);
   if (!p) return;
   document.getElementById('image-modal-title').textContent = p.name;
@@ -1211,7 +1261,7 @@ function viewItem(id) {
   document.getElementById('view-serials-row').style.display = 'none';
   document.getElementById('view-actions-row').style.display = '';
 
-  document.getElementById('view-sku').textContent = p.sku || '--';
+  document.getElementById('view-sku').textContent = p.serial_number || p.sku || '--';
 
   // Date Received from PO
   const po = p.po_id ? allPOs[p.po_id] : null;
@@ -1263,6 +1313,21 @@ function viewItem(id) {
 function viewGroupedItems(ids) {
   viewingGroupIds  = ids;
   viewingProductId = null;
+  // Refresh assignments + product status before rendering so Availability is current
+  Promise.all([
+    api.getAssignments().then(r => { allAssignments = (r.data || []).filter(a => a.status === 'active'); }).catch(() => {}),
+    api.getProducts().then(r => {
+      if (r.data) {
+        r.data.forEach(fresh => {
+          const idx = allItems.findIndex(x => x.id === fresh.id);
+          if (idx !== -1) allItems[idx] = { ...allItems[idx], ...fresh };
+        });
+      }
+    }).catch(() => {}),
+  ]).finally(() => _renderViewGroupedItems(ids));
+}
+
+function _renderViewGroupedItems(ids) {
   const items = ids.map(id => allItems.find(x => x.id === id)).filter(Boolean);
   if (!items.length) return;
   const rep = items[0];
@@ -1316,13 +1381,21 @@ function viewGroupedItems(ids) {
     const assigneeEid = assignee ? getAssigneeEmpId(assignee) : '';
     const isDamaged  = !!damage;
 
+    // Resolve the best assignee name + employee ID for the Availability column
+    const availAssigneeName = assignee || p.assigned_employee || null;
+    const availAssigneeEid  = assigneeEid
+      || (p.assigned_employee_id ? p.assigned_employee_id : '')
+      || (availAssigneeName ? getAssigneeEmpId(availAssigneeName) : '');
+
     let statusHtml;
     if (isDamaged) {
       statusHtml = '<span class="serial-status damaged">&#9888; Damaged</span>';
-    } else if (assignee) {
-      statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
-    } else if (p.assigned_employee) {
-      statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
+    } else if (availAssigneeName) {
+      statusHtml = '<span class="serial-status assigned" style="display:inline-flex;align-items:center;gap:5px;max-width:100%;overflow:hidden;">'
+        + '&#128100; <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(availAssigneeName) + (availAssigneeEid ? ' #' + esc(availAssigneeEid) : '') + '">'
+        + esc(availAssigneeName)
+        + (availAssigneeEid ? ' <span style="font-family:\'DM Mono\',monospace;font-size:10px;opacity:.7;">#' + esc(availAssigneeEid) + '</span>' : '')
+        + '</span></span>';
     } else if (p.asset_status === 'assigned') {
       statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
     } else {

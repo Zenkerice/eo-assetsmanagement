@@ -3,7 +3,7 @@
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=10" />
+  <link rel="stylesheet" href="css/theme.css?v=11" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
@@ -546,7 +546,7 @@
     }
   </script>
   <script src="js/sidebar.js?v=77"></script>
-  <script src="js/toast.js?v=2"></script>
+  <script src="js/toast.js?v=3"></script>
   <script>
     const FIXED_ASSET_TYPES = ['Laptop','Mobile Device','Keyboard','Other Equipment','ID & Lanyard','Access Badge/RFID'];
     const ASSET_ROWS = FIXED_ASSET_TYPES.length;
@@ -1091,16 +1091,37 @@
       // Save ALL 6 rows by position — including empty ones — so the display can
       // reconstruct the exact table the admin filled in (including renamed rows).
       for (let i = 0; i < ASSET_ROWS; i++) {
-        const brand = (document.getElementById(`asset-brand-${i}`)?.value || '').trim();
+        const brandModel = (document.getElementById(`asset-brand-${i}`)?.value || '').trim();
         const sn    = (document.getElementById(`asset-sn-${i}`)?.value   || '').trim();
         const type  = (document.getElementById(`asset-type-${i}`)?.value || FIXED_ASSET_TYPES[i]).trim();
         const cond  = (document.getElementById(`asset-cond-${i}`)?.value || '').trim();
         const val   = (document.getElementById(`asset-val-${i}`)?.value  || '').trim();
         const rem   = (document.getElementById(`asset-rem-${i}`)?.value  || '').trim();
+
+        // Resolve separate brand / model from the catalog so the approval view
+        // can display them in their respective columns.
+        let resolvedBrand = brandModel;
+        let resolvedModel = '';
+        let resolvedCategoryName = type;
+        if (brandModel) {
+          const prod = _products.find(p =>
+            (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').trim() === brandModel
+          );
+          if (prod) {
+            resolvedBrand        = prod.brand        || brandModel;
+            resolvedModel        = prod.model        || '';
+            resolvedCategoryName = prod.category_name || type;
+          }
+        }
+
         assets.push({
-          rowIndex:     i,
-          originalType: FIXED_ASSET_TYPES[i],
-          name: type, brand, tag: sn, condition: cond, value: val, remarks: rem
+          rowIndex:      i,
+          originalType:  FIXED_ASSET_TYPES[i],
+          name:          type,
+          brand:         resolvedBrand,
+          model:         resolvedModel,
+          category_name: resolvedCategoryName,
+          tag: sn, condition: cond, value: val, remarks: rem
         });
       }
       return {

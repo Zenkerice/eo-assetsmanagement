@@ -61,6 +61,9 @@ class AssignmentService {
         }
 
         $id = $this->model->create($data);
+        // Retire any pre-existing active assignments for this product (stale duplicates
+        // created by prior bugs) so the product is only ever shown once.
+        $this->model->retireStaleActive($productId, $id);
         // Update product status to 'assigned'
         $this->productModel->update($productId, ['asset_status' => 'assigned']);
         $a = $this->getById($id);

@@ -47,7 +47,18 @@ class AssignmentModel {
              WHERE a.status = \'active\'
              ORDER BY a.assigned_at DESC'
         );
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+
+        // Deduplicate: one active assignment per product (keep the most recent).
+        $seen = [];
+        $unique = [];
+        foreach ($rows as $row) {
+            $pid = (int)$row['product_id'];
+            if (isset($seen[$pid])) continue;
+            $seen[$pid] = true;
+            $unique[] = $row;
+        }
+        return $unique;
     }
 
     /** Assignments for a specific assignee name (active only) */
@@ -71,7 +82,20 @@ class AssignmentModel {
              ORDER BY a.assigned_at DESC'
         );
         $stmt->execute([$name]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+
+        // Deduplicate: keep only the most-recent active assignment per product.
+        // Multiple active rows for the same product can occur when skipAvailabilityCheck
+        // is used during approval flows; we surface only one to avoid confusing the user.
+        $seen = [];
+        $unique = [];
+        foreach ($rows as $row) {
+            $pid = (int)$row['product_id'];
+            if (isset($seen[$pid])) continue;
+            $seen[$pid] = true;
+            $unique[] = $row;
+        }
+        return $unique;
     }
 
     public function findByProduct(int $productId): array {
@@ -111,6 +135,20 @@ class AssignmentModel {
         );
         $stmt->execute([$id]);
         return $stmt->fetch();
+    }
+
+    /**
+     * Mark all OTHER active assignments for the same product as returned,
+     * keeping only the newly-created one ($keepId). This cleans up duplicate
+     * active rows that can arise when skipAvailabilityCheck is used.
+     */
+    public function retireStaleActive(int $productId, int $keepId): void {
+        $stmt = $this->db->prepare(
+            "UPDATE assignments
+             SET status = 'returned', returned_at = NOW()
+             WHERE product_id = ? AND status = 'active' AND id != ?"
+        );
+        $stmt->execute([$productId, $keepId]);
     }
 
     public function create(array $data): int {

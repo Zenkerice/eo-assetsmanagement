@@ -176,47 +176,79 @@ class ApprovalService {
             ]];
         }
 
+        // Build a set of product_ids already actively assigned to this person so we
+        // never re-deploy a pre-filled row that represents an existing assignment.
+        $existingProductIds = [];
+        foreach ($assignSvc->getByAssigneeName($resolvedAssignee) as $er) {
+            $existingProductIds[(int)$er['product_id']] = true;
+        }
+
         foreach ($assets as $asset) {
-            $assetName = trim($asset['name'] ?? $req['resource_name'] ?? '');
-            $assetTag  = trim($asset['tag']  ?? $payload['serial_number'] ?? $payload['sku'] ?? '');
+            $assetName  = trim($asset['name']  ?? $req['resource_name'] ?? '');
+            $assetTag   = trim($asset['tag']   ?? $payload['serial_number'] ?? $payload['sku'] ?? '');
             $assetBrand = trim($asset['brand'] ?? $payload['brand'] ?? '');
+
+            // Skip rows with no identifying information — empty rows from the
+            // accountability form that the admin left blank.
+            if ($assetTag === '' && $assetBrand === '') continue;
 
             $product = null;
 
-            // 1. Try serial / SKU tag
+            // Helper: PDO fetch() returns false on no match; ?? only skips null,
+            // so we normalise false → null before assigning.
+            $fetch = static function($result) {
+                return ($result !== false && $result !== null) ? $result : null;
+            };
+
+            // 1. Try serial / SKU tag (explicit tag takes highest priority)
             if ($assetTag !== '') {
-                $product = $productModel->findBySku($assetTag)
-                        ?? $productModel->findBySerial($assetTag);
+                $product = $fetch($productModel->findBySku($assetTag))
+                        ?? $fetch($productModel->findBySerial($assetTag));
             }
-            // 2. Try tokens in brand field
-            if (!$product && $assetBrand !== '') {
-                foreach (explode(' ', $assetBrand) as $token) {
-                    $token = trim($token);
-                    if ($token === '') continue;
-                    $product = $productModel->findBySku($token)
-                            ?? $productModel->findBySerial($token);
-                    if ($product) break;
+
+            // 2. Brand field as a serial — only when it has no spaces (i.e. looks
+            // like a SKU/serial code, not a descriptive brand name).
+            if (!$product && $assetBrand !== '' && strpos($assetBrand, ' ') === false) {
+                $product = $fetch($productModel->findBySku($assetBrand))
+                        ?? $fetch($productModel->findBySerial($assetBrand));
+            }
+
+            // 3. Exact name match — available products only to avoid phantom deployments.
+            if (!$product && $assetName !== '') {
+                foreach ($productModel->findByName($assetName) as $m) {
+                    if ($m['asset_status'] === 'available') { $product = $m; break; }
+                }
+                // Allow any status only when an explicit tag was also provided
+                if (!$product && $assetTag !== '') {
+                    $matches = $productModel->findByName($assetName);
+                    if (!empty($matches)) $product = $matches[0];
                 }
             }
-            // 3. Exact name match
-            if (!$product && $assetName !== '') {
-                $matches = $productModel->findByName($assetName);
-                $product = $matches[0] ?? null;
-            }
-            // 4. Category-filtered name search
+
+            // 4. Category-filtered search — last resort, available units only.
             if (!$product) {
-                $catId = !empty($payload['category_id']) ? (int)$payload['category_id'] : null;
+                $catId = !empty($asset['category_id'])
+                    ? (int)$asset['category_id']
+                    : (!empty($payload['category_id']) ? (int)$payload['category_id'] : null);
                 if ($catId) {
                     $candidates = $productModel->findAvailableByCategory($catId);
                     $product = $candidates[0] ?? null;
                 }
             }
-            // 5. Partial name match
+
+            // 5. Partial name match — available units only.
             if (!$product && $assetName !== '') {
-                $product = $productModel->findByPartialName($assetName);
+                $candidate = $fetch($productModel->findByPartialName($assetName));
+                if ($candidate && ($candidate['asset_status'] === 'available' || $assetTag !== '')) {
+                    $product = $candidate;
+                }
             }
 
-            if (!$product) continue; // no matching product in inventory — skip
+            if (!$product) continue; // no matching product — skip
+
+            // Skip products already actively assigned to this person — these are
+            // pre-filled rows from existing assignments and must not be re-deployed.
+            if (isset($existingProductIds[(int)$product['id']])) continue;
 
             try {
                 $assignment = $assignSvc->create([
@@ -453,41 +485,49 @@ class ApprovalService {
                 $created  = [];
 
                 foreach ($assets as $asset) {
-                    $assetName = trim($asset['name'] ?? '');
-                    $assetTag  = trim($asset['tag']  ?? '');
-                    if ($assetName === '') continue;
+                    $assetName  = trim($asset['name']  ?? '');
+                    $assetTag   = trim($asset['tag']   ?? '');
+                    $assetBrand = trim($asset['brand'] ?? '');
 
-                    // Try to find the product by serial number first, then by name
+                    // Skip rows that carry no identifying data (tag, brand, or name).
+                    if ($assetTag === '' && $assetBrand === '' && $assetName === '') continue;
+
+                    // PDO fetch() returns false on no match; normalise to null.
+                    $fetch = static function($r) { return ($r !== false && $r !== null) ? $r : null; };
+
+                    // 1. Try serial / SKU tag (explicit tag takes highest priority)
                     $product = null;
                     if ($assetTag !== '') {
-                        $product = $productModel->findBySku($assetTag);
-                        if (!$product) {
-                            $product = $productModel->findBySerial($assetTag);
-                        }
+                        $product = $fetch($productModel->findBySku($assetTag))
+                                ?? $fetch($productModel->findBySerial($assetTag));
                     }
-                    // Also try to parse a serial/SKU out of the brand field
-                    // (the accountability form puts brand+serial together, e.g. "SY SY-202")
-                    if (!$product) {
-                        $assetBrand = trim($asset['brand'] ?? '');
-                        if ($assetBrand !== '') {
-                            // Each space-delimited token could be a serial number or SKU
-                            foreach (explode(' ', $assetBrand) as $token) {
-                                $token = trim($token);
-                                if ($token === '') continue;
-                                $product = $productModel->findBySku($token);
-                                if (!$product) $product = $productModel->findBySerial($token);
-                                if ($product) break;
-                            }
-                        }
+
+                    // 2. Brand field as serial — only when it has no spaces.
+                    if (!$product && $assetBrand !== '' && strpos($assetBrand, ' ') === false) {
+                        $product = $fetch($productModel->findBySku($assetBrand))
+                                ?? $fetch($productModel->findBySerial($assetBrand));
                     }
-                    if (!$product) {
+
+                    // 3. Exact name match — available products only to avoid phantom deployments.
+                    if (!$product && $assetName !== '') {
                         $matches = $productModel->findByName($assetName);
-                        $product = $matches[0] ?? null;
+                        foreach ($matches as $m) {
+                            if ($m['asset_status'] === 'available') { $product = $m; break; }
+                        }
+                        // Allow any status only when an explicit tag was also provided
+                        if (!$product && $assetTag !== '' && !empty($matches)) {
+                            $product = $matches[0];
+                        }
                     }
-                    // Last resort: partial name match (e.g. "Headsets" → "SY Headset")
-                    if (!$product) {
+
+                    // 4. Partial name match — available units only
+                    if (!$product && $assetName !== '') {
                         $product = $productModel->findByPartialName($assetName);
+                        if ($product && $product['asset_status'] !== 'available' && $assetTag === '') {
+                            $product = null;
+                        }
                     }
+
                     if (!$product) continue; // product not found in inventory — skip
 
                     try {

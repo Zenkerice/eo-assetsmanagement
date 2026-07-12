@@ -1,9 +1,9 @@
-﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=10" />
+  <link rel="stylesheet" href="css/theme.css?v=11" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Asset Requests - EmpireOne</title>
@@ -178,7 +178,29 @@
     .detail-row:last-child{border-bottom:none}
     .detail-key{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);min-width:120px}
     .detail-val{font-size:13px;color:var(--text);flex:1;line-height:1.5;word-break:break-word}
-    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
+    /* toast styles live in theme.css */
+
+    /* Staff request modal header accent */
+    .modal-header-staff {
+      border-bottom-color: rgba(245,166,35,.22) !important;
+      background: linear-gradient(135deg, rgba(245,166,35,.07) 0%, transparent 60%) !important;
+    }
+    .modal-header-staff h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--amber) !important;
+    }
+    .modal-header-staff h3::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: var(--amber);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    [data-theme="light"] .modal-header-staff h3 { color: #d97706 !important; }
     @media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.page,.req-header{padding-left:20px;padding-right:20px}.form-row{grid-template-columns:1fr}}
     /* -- PO Item rows -- */
     .po-item-row{display:grid;grid-template-columns:1.2fr 2fr 1fr 1fr auto;gap:8px;align-items:start;margin-bottom:8px;padding:10px 10px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);}
@@ -772,9 +794,14 @@
 <!-- New Request Modal -->
 <div class="modal-overlay" id="new-modal">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-header modal-header-staff">
       <h3 id="new-modal-title">New Asset Request</h3>
       <button class="modal-close" onclick="closeModal('new-modal')">&times;</button>
+    </div>
+    <!-- Staff info banner -->
+    <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 24px 2px;padding:11px 14px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.22);border-radius:9px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span style="font-size:12px;color:var(--amber);line-height:1.5;">Your request will be reviewed by an admin before any changes are made.</span>
     </div>
     <div class="modal-body">
 
@@ -988,7 +1015,7 @@
 
 <script src="js/api.js?v=26"></script>
 <script src="js/auth.js?v=9"></script>
-<script src="js/toast.js?v=2"></script>
+<script src="js/toast.js?v=3"></script>
 <script src="js/sidebar.js?v=77"></script>
 <script src="js/approval_flow.js?v=2"></script>
 <script>
