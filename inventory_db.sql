@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 11, 2026 at 12:51 PM
+-- Generation Time: Jul 12, 2026 at 03:43 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -58,10 +58,28 @@ INSERT INTO `approval_requests` (`id`, `requested_by`, `user_id`, `action_type`,
 (6, 'qwerty', 3, 'create', 'asset_request', NULL, 'qwerty', '{\"assignee\":\"qwerty\",\"department\":\"\",\"location\":\"Site 3 | San Carlos City, Dungganon Site\",\"purpose\":\"Asset Accountability\",\"date_deployed\":\"07 \\/ 11 \\/ 2026\",\"expected_return\":\"\",\"remarks\":\"\",\"assets\":[{\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"21412312\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"name\":\"Headsets\",\"brand\":\"SY Headset\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}]}', 'Asset Accountability', 'approved', 'Administrator', '', '2026-07-11 13:03:59', '2026-07-11 13:03:40', '2026-07-11 13:03:59'),
 (7, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"for work.\"}', 'for work.', 'rejected', 'Administrator', '', '2026-07-11 15:06:14', '2026-07-11 13:50:48', '2026-07-11 15:06:14'),
 (8, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"for work\"}', 'for work', 'approved', 'Administrator', '', '2026-07-11 15:16:29', '2026-07-11 15:06:46', '2026-07-11 15:16:29'),
-(9, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"ASDasdadasd\"}', 'ASDasdadasd', 'forwarded', 'Administrator', '', '2026-07-11 15:30:17', '2026-07-11 15:28:47', '2026-07-11 15:30:17'),
-(10, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaasa\"}', 'aaasa', 'forwarded', 'Administrator', '', '2026-07-11 16:06:26', '2026-07-11 15:31:04', '2026-07-11 16:06:26'),
-(11, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaaaaaa\"}', 'aaaaaaa', 'forwarded', 'Administrator', '', '2026-07-11 16:56:41', '2026-07-11 16:56:04', '2026-07-11 16:56:41'),
-(12, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"Ork\"}', 'Ork', 'rejected', 'Administrator', '', '2026-07-11 18:40:37', '2026-07-11 18:39:45', '2026-07-11 18:40:37');
+(9, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"ASDasdadasd\"}', 'ASDasdadasd', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 14:36:48', '2026-07-11 15:28:47', '2026-07-12 14:36:48'),
+(10, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaasa\"}', 'aaasa', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 14:36:28', '2026-07-11 15:31:04', '2026-07-12 14:36:28'),
+(11, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"aaaaaaa\"}', 'aaaaaaa', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 14:36:20', '2026-07-11 16:56:04', '2026-07-12 14:36:20'),
+(12, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"Ork\"}', 'Ork', 'rejected', 'Administrator', '', '2026-07-11 18:40:37', '2026-07-11 18:39:45', '2026-07-11 18:40:37'),
+(13, 'qwerty', 3, 'delete', 'Assignment', 7, 'HAvit · return by qwerty', '{\"assignment_id\":\"7\",\"product_id\":5,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'rejected', 'Administrator', '', '2026-07-12 14:49:16', '2026-07-12 14:37:23', '2026-07-12 14:49:16'),
+(14, 'qwerty', 3, 'delete', 'Assignment', 7, 'HAvit · return by qwerty', '{\"assignment_id\":\"7\",\"product_id\":5,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 14:48:49', '2026-07-12 14:37:30', '2026-07-12 14:48:49'),
+(15, 'qwerty', 3, 'delete', 'Assignment', 5, 'HAvit · return by qwerty', '{\"assignment_id\":\"5\",\"product_id\":2,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 14:48:48', '2026-07-12 14:37:34', '2026-07-12 14:48:48'),
+(16, 'qwerty', 3, 'delete', 'Assignment', 6, 'HAvit · return by qwerty', '{\"assignment_id\":\"6\",\"product_id\":3,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 14:48:44', '2026-07-12 14:37:36', '2026-07-12 14:48:44'),
+(17, 'qwerty', 3, 'delete', 'Assignment', 4, 'HAvit · return by qwerty', '{\"assignment_id\":\"4\",\"product_id\":4,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 14:48:35', '2026-07-12 14:37:39', '2026-07-12 14:48:35'),
+(18, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-UV1A\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"for work.\"}', 'for work.', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 14:49:36', '2026-07-12 14:45:27', '2026-07-12 14:49:36'),
+(19, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-3CMT\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"\"}', NULL, 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 15:04:10', '2026-07-12 14:57:37', '2026-07-12 15:04:10'),
+(20, 'qwerty', 3, 'delete', 'Assignment', 2, 'SY Headset · return by qwerty', '{\"return_id\":\"RET-20260712-SRUA\",\"assignment_id\":\"2\",\"product_id\":13,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"not needed.\"}', 'Return request: good · not needed.', 'approved', 'Administrator', '', '2026-07-12 15:12:54', '2026-07-12 15:11:39', '2026-07-12 15:12:54'),
+(21, 'qwerty', 3, 'delete', 'Assignment', 9, 'HAvit · return by qwerty', '{\"return_id\":\"RET-20260712-N2UF\",\"assignment_id\":\"9\",\"product_id\":3,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'rejected', 'Administrator', '', '2026-07-12 15:19:25', '2026-07-12 15:19:08', '2026-07-12 15:19:25'),
+(22, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-DMFM\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"requestor_location_id\":\"2\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"description\":\"needed\"}', 'needed', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 15:29:36', '2026-07-12 15:20:07', '2026-07-12 15:29:36'),
+(23, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-NW6J\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"requestor_location_id\":\"2\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"quantity\":2,\"description\":\"\"}', NULL, 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 16:43:30', '2026-07-12 15:31:02', '2026-07-12 16:43:30'),
+(24, 'qwerty', 3, 'delete', 'Assignment', 11, 'HAvit · return by qwerty', '{\"return_id\":\"RET-20260712-O63S\",\"assignment_id\":\"11\",\"product_id\":5,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 16:44:12', '2026-07-12 16:43:46', '2026-07-12 16:44:12'),
+(25, 'qwerty', 3, 'delete', 'Assignment', 10, 'HAvit · return by qwerty', '{\"return_id\":\"RET-20260712-I0DO\",\"assignment_id\":\"10\",\"product_id\":4,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 16:44:10', '2026-07-12 16:43:49', '2026-07-12 16:44:10'),
+(26, 'qwerty', 3, 'delete', 'Assignment', 9, 'HAvit · return by qwerty', '{\"return_id\":\"RET-20260712-8I8J\",\"assignment_id\":\"9\",\"product_id\":3,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-12 16:44:09', '2026-07-12 16:43:52', '2026-07-12 16:44:09'),
+(27, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-CG9B\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"requestor_location_id\":\"2\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"quantity\":2,\"description\":\"\",\"assets\":[{\"name\":\"Keyboard\",\"brand\":\"HAvit asda\",\"tag\":\"121233123\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"qwdcxzasdzasdd\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"admin_assignee\":\"qwerty\",\"admin_empid\":\"qwerty123\",\"admin_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 12 \\/ 2026\"}', NULL, 'forwarded', 'Administrator', '', '2026-07-12 16:45:36', '2026-07-12 16:44:43', '2026-07-12 16:45:36'),
+(28, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-41RE\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"requestor_location_id\":\"2\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"quantity\":2,\"description\":\"\",\"assets\":[{\"name\":\"Keyboard\",\"brand\":\"HAvit asda\",\"tag\":\"121233123\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"qwdcxzasdzasdd\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"admin_assignee\":\"qwerty\",\"admin_empid\":\"qwerty123\",\"admin_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 12 \\/ 2026\"}', NULL, 'forwarded', 'Administrator', '', '2026-07-12 17:01:38', '2026-07-12 17:01:14', '2026-07-12 17:01:38'),
+(29, 'qwerty', 3, 'create', 'Asset', NULL, 'HAvit asda', '{\"request_id\":\"REQ-20260712-A14M\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"requestor_location_id\":\"2\",\"category_id\":\"10\",\"category_name\":\"Keyboards\",\"brand\":\"HAvit\",\"model\":\"asda\",\"quantity\":2,\"description\":\"\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Laptop\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"Keyboard\",\"brand\":\"HAvit asda\",\"tag\":\"121233123\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"qwdcxzasdzasdd\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"admin_assignee\":\"qwerty\",\"admin_empid\":\"qwerty123\",\"admin_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 12 \\/ 2026\"}', NULL, 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 19:15:05', '2026-07-12 19:13:02', '2026-07-12 19:15:05'),
+(30, 'qwerty', 3, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260712-AMCJ\",\"requestor_name\":\"qwerty\",\"requestor_id\":\"qwerty123\",\"requestor_location\":\"\",\"requestor_location_id\":null,\"category_id\":21,\"category_name\":\"Headsets\",\"brand\":\"SY\",\"model\":\"SY-202\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Headsets\",\"brand\":\"SY SY-202\",\"tag\":\"ASD1233\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure XPS 15\",\"tag\":\"HJKG1\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"asdascasd\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Keyboards\",\"brand\":\"HAvit asda\",\"tag\":\"cvbvfefv\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"For setting up.\",\"admin_assignee\":\"qwerty\",\"admin_empid\":\"qwerty123\",\"admin_location\":\"Site 4 | San Carlos City, Pantalan Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 12 \\/ 2026\"}', 'For setting up.', 'approved', 'qwerty', 'Confirmed by requestor', '2026-07-12 21:39:49', '2026-07-12 20:28:08', '2026-07-12 21:39:49');
 
 -- --------------------------------------------------------
 
@@ -89,9 +107,18 @@ CREATE TABLE `assignments` (
 --
 
 INSERT INTO `assignments` (`id`, `product_id`, `assignee_name`, `assigned_by`, `assigned_at`, `due_back`, `returned_at`, `notes`, `location_id`, `status`, `created_at`, `updated_at`) VALUES
-(2, 13, 'qwerty', 'Administrator (recovery fix)', '2026-07-11 12:53:23', NULL, NULL, NULL, NULL, 'active', '2026-07-11 12:53:23', '2026-07-11 12:53:23'),
 (3, 1, 'Raven', 'System (recovery fix)', '2026-07-11 13:00:03', NULL, NULL, NULL, NULL, 'active', '2026-07-11 13:00:03', '2026-07-11 13:00:03'),
-(4, 4, 'qwerty', 'Admin', '2026-07-11 07:03:59', NULL, NULL, 'Asset Accountability', 2, 'active', '2026-07-11 13:03:59', '2026-07-11 13:03:59');
+(8, 2, 'qwerty', 'Administrator', '2026-07-12 08:49:36', NULL, NULL, 'for work.', 2, 'active', '2026-07-12 14:49:36', '2026-07-12 14:49:36'),
+(12, 3, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(13, 5, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(14, 2, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(15, 4, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(16, 6, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(17, 7, 'qwerty', 'Administrator', '2026-07-12 13:15:05', NULL, NULL, NULL, 2, 'active', '2026-07-12 19:15:05', '2026-07-12 19:15:05'),
+(18, 13, 'qwerty', 'Administrator', '2026-07-12 15:39:49', NULL, NULL, 'For setting up.', 1, 'active', '2026-07-12 21:39:49', '2026-07-12 21:39:49'),
+(19, 14, 'qwerty', 'Administrator', '2026-07-12 15:39:49', NULL, NULL, 'For setting up.', 1, 'active', '2026-07-12 21:39:49', '2026-07-12 21:39:49'),
+(20, 3, 'qwerty', 'Administrator', '2026-07-12 15:39:49', NULL, NULL, 'For setting up.', 2, 'active', '2026-07-12 21:39:49', '2026-07-12 21:39:49'),
+(21, 10, 'qwerty', 'Administrator', '2026-07-12 15:39:49', NULL, NULL, 'For setting up.', 2, 'active', '2026-07-12 21:39:49', '2026-07-12 21:39:49');
 
 -- --------------------------------------------------------
 
@@ -145,7 +172,80 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `user_name`, `action`, `entity_type`,
 (26, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 16:56:04'),
 (27, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-11 16:56:41'),
 (28, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-11 18:39:45'),
-(29, 1, 'Administrator', 'rejected', 'Asset', NULL, 'HAvit asda', 'Rejected by Administrator: No reason given', NULL, '2026-07-11 18:40:37');
+(29, 1, 'Administrator', 'rejected', 'Asset', NULL, 'HAvit asda', 'Rejected by Administrator: No reason given', NULL, '2026-07-11 18:40:37'),
+(30, 3, 'qwerty', 'assigned', 'Asset', 2, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 14:36:20'),
+(31, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 14:36:20'),
+(32, 3, 'qwerty', 'assigned', 'Asset', 3, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 14:36:28'),
+(33, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 14:36:28'),
+(34, 3, 'qwerty', 'assigned', 'Asset', 5, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 14:36:48'),
+(35, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 14:36:48'),
+(36, 3, 'qwerty', 'pending', 'Assignment', 7, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:37:23'),
+(37, 3, 'qwerty', 'pending', 'Assignment', 7, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:37:30'),
+(38, 3, 'qwerty', 'pending', 'Assignment', 5, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:37:34'),
+(39, 3, 'qwerty', 'pending', 'Assignment', 6, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:37:36'),
+(40, 3, 'qwerty', 'pending', 'Assignment', 4, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:37:39'),
+(41, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:45:27'),
+(42, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 14:48:28'),
+(43, 1, 'Administrator', 'approved', 'Assignment', 4, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 14:48:35'),
+(44, 1, 'Administrator', 'approved', 'Assignment', 6, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 14:48:44'),
+(45, 1, 'Administrator', 'approved', 'Assignment', 5, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 14:48:48'),
+(46, 1, 'Administrator', 'approved', 'Assignment', 7, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 14:48:49'),
+(47, 1, 'Administrator', 'rejected', 'Assignment', 7, 'HAvit · return by qwerty', 'Rejected by Administrator: No reason given', NULL, '2026-07-12 14:49:16'),
+(48, 3, 'qwerty', 'assigned', 'Asset', 2, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 14:49:36'),
+(49, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 14:49:36'),
+(50, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 14:57:37'),
+(51, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 14:58:02'),
+(52, 3, 'qwerty', 'assigned', 'Asset', 3, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 15:04:10'),
+(53, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 15:04:10'),
+(54, 3, 'qwerty', 'pending', 'Assignment', 2, 'SY Headset · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 15:11:39'),
+(55, 1, 'Administrator', 'approved', 'Assignment', 2, 'SY Headset · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 15:12:54'),
+(56, 3, 'qwerty', 'pending', 'Assignment', 9, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 15:19:08'),
+(57, 1, 'Administrator', 'rejected', 'Assignment', 9, 'HAvit · return by qwerty', 'Rejected by Administrator: No reason given', NULL, '2026-07-12 15:19:25'),
+(58, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 15:20:07'),
+(59, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 15:21:50'),
+(60, 3, 'qwerty', 'assigned', 'Asset', 4, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 15:29:36'),
+(61, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 15:29:36'),
+(62, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 15:31:02'),
+(63, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 15:41:11'),
+(64, 3, 'qwerty', 'assigned', 'Asset', 5, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 16:43:30'),
+(65, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 16:43:30'),
+(66, 3, 'qwerty', 'pending', 'Assignment', 11, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 16:43:46'),
+(67, 3, 'qwerty', 'pending', 'Assignment', 10, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 16:43:49'),
+(68, 3, 'qwerty', 'pending', 'Assignment', 9, 'HAvit · return by qwerty', 'Delete request submitted by qwerty — awaiting approval', NULL, '2026-07-12 16:43:52'),
+(69, 1, 'Administrator', 'approved', 'Assignment', 9, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 16:44:09'),
+(70, 1, 'Administrator', 'approved', 'Assignment', 10, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 16:44:10'),
+(71, 1, 'Administrator', 'approved', 'Assignment', 11, 'HAvit · return by qwerty', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-12 16:44:12'),
+(72, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 16:44:43'),
+(73, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 16:45:36'),
+(74, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 17:01:14'),
+(75, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 17:01:38'),
+(76, 3, 'qwerty', 'pending', 'Asset', NULL, 'HAvit asda', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 19:13:02'),
+(77, 1, 'Administrator', 'updated', 'Asset', NULL, 'HAvit asda', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 19:13:25'),
+(78, 3, 'qwerty', 'assigned', 'Asset', 3, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(79, 3, 'qwerty', 'assigned', 'Asset', 5, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(80, 3, 'qwerty', 'assigned', 'Asset', 2, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(81, 3, 'qwerty', 'assigned', 'Asset', 4, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(82, 3, 'qwerty', 'assigned', 'Asset', 6, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(83, 3, 'qwerty', 'assigned', 'Asset', 7, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 19:15:05'),
+(84, 3, 'qwerty', 'approved', 'Asset', NULL, 'HAvit asda', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 19:15:05'),
+(85, 1, 'Administrator', 'created', 'Asset', 14, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(86, 1, 'Administrator', 'created', 'Asset', 15, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(87, 1, 'Administrator', 'created', 'Asset', 16, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(88, 1, 'Administrator', 'created', 'Asset', 17, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(89, 1, 'Administrator', 'created', 'Asset', 18, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(90, 1, 'Administrator', 'created', 'Asset', 19, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(91, 1, 'Administrator', 'created', 'Asset', 20, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(92, 1, 'Administrator', 'created', 'Asset', 21, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(93, 1, 'Administrator', 'created', 'Asset', 22, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(94, 1, 'Administrator', 'created', 'Asset', 23, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-12 19:22:18'),
+(95, 3, 'qwerty', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by qwerty — awaiting approval', NULL, '2026-07-12 20:28:08'),
+(96, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 20:38:02'),
+(97, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-12 21:39:18'),
+(98, 3, 'qwerty', 'assigned', 'Asset', 13, 'SY Headset', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 21:39:49'),
+(99, 3, 'qwerty', 'assigned', 'Asset', 14, 'Secure UPS', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 21:39:49'),
+(100, 3, 'qwerty', 'assigned', 'Asset', 3, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 21:39:49'),
+(101, 3, 'qwerty', 'assigned', 'Asset', 10, 'HAvit', 'Assigned to qwerty by Administrator', NULL, '2026-07-12 21:39:49'),
+(102, 3, 'qwerty', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Asset confirmed and assigned to qwerty', NULL, '2026-07-12 21:39:49');
 
 -- --------------------------------------------------------
 
@@ -295,7 +395,60 @@ INSERT INTO `notifications` (`id`, `for_role`, `for_user_id`, `type`, `title`, `
 (24, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":11,\"action_type\":\"create\"}', '2026-07-11 16:56:04'),
 (25, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":11,\"decision\":\"forwarded\"}', '2026-07-11 16:56:41'),
 (26, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":12,\"action_type\":\"create\"}', '2026-07-11 18:39:45'),
-(27, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Create Asset: HAvit asda', 'requests.html', 1, '{\"approval_id\":12,\"decision\":\"rejected\"}', '2026-07-11 18:40:37');
+(27, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Create Asset: HAvit asda', 'requests.html', 1, '{\"approval_id\":12,\"decision\":\"rejected\"}', '2026-07-11 18:40:37'),
+(28, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":11}', '2026-07-12 14:36:20'),
+(29, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":10}', '2026-07-12 14:36:28'),
+(30, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":9}', '2026-07-12 14:36:48'),
+(31, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":13,\"action_type\":\"delete\"}', '2026-07-12 14:37:23'),
+(32, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":14,\"action_type\":\"delete\"}', '2026-07-12 14:37:30'),
+(33, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":15,\"action_type\":\"delete\"}', '2026-07-12 14:37:34'),
+(34, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":16,\"action_type\":\"delete\"}', '2026-07-12 14:37:36'),
+(35, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":17,\"action_type\":\"delete\"}', '2026-07-12 14:37:39'),
+(36, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":18,\"action_type\":\"create\"}', '2026-07-12 14:45:27'),
+(37, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":18,\"decision\":\"forwarded\"}', '2026-07-12 14:48:28'),
+(38, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":17,\"decision\":\"approved\"}', '2026-07-12 14:48:35'),
+(39, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":16,\"decision\":\"approved\"}', '2026-07-12 14:48:44'),
+(40, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":15,\"decision\":\"approved\"}', '2026-07-12 14:48:48'),
+(41, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":14,\"decision\":\"approved\"}', '2026-07-12 14:48:49'),
+(42, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":13,\"decision\":\"rejected\"}', '2026-07-12 14:49:16'),
+(43, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":18}', '2026-07-12 14:49:36'),
+(44, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"HAvit asda\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 1, '{\"approval_id\":18,\"confirmed_by\":\"qwerty\"}', '2026-07-12 14:49:36'),
+(45, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":19,\"action_type\":\"create\"}', '2026-07-12 14:57:37'),
+(46, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":19,\"decision\":\"forwarded\"}', '2026-07-12 14:58:02'),
+(47, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":19}', '2026-07-12 15:04:10'),
+(48, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"HAvit asda\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 1, '{\"approval_id\":19,\"confirmed_by\":\"qwerty\"}', '2026-07-12 15:04:10'),
+(49, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: SY Headset · return by qwerty', 'approvals.html', 1, '{\"approval_id\":20,\"action_type\":\"delete\"}', '2026-07-12 15:11:39'),
+(50, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: SY Headset · return by qwerty', 'requests.html', 1, '{\"approval_id\":20,\"decision\":\"approved\"}', '2026-07-12 15:12:54'),
+(51, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":21,\"action_type\":\"delete\"}', '2026-07-12 15:19:08'),
+(52, 'staff', 3, 'approval_rejected', '✖ Your request was rejected', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 1, '{\"approval_id\":21,\"decision\":\"rejected\"}', '2026-07-12 15:19:25'),
+(53, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":22,\"action_type\":\"create\"}', '2026-07-12 15:20:07'),
+(54, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":22,\"decision\":\"forwarded\"}', '2026-07-12 15:21:50'),
+(55, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":22}', '2026-07-12 15:29:36'),
+(56, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"HAvit asda\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 1, '{\"approval_id\":22,\"confirmed_by\":\"qwerty\"}', '2026-07-12 15:29:36'),
+(57, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":23,\"action_type\":\"create\"}', '2026-07-12 15:31:02'),
+(58, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":23,\"decision\":\"forwarded\"}', '2026-07-12 15:41:11'),
+(59, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":23}', '2026-07-12 16:43:30'),
+(60, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"HAvit asda\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 0, '{\"approval_id\":23,\"confirmed_by\":\"qwerty\"}', '2026-07-12 16:43:30'),
+(61, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 0, '{\"approval_id\":24,\"action_type\":\"delete\"}', '2026-07-12 16:43:46'),
+(62, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 1, '{\"approval_id\":25,\"action_type\":\"delete\"}', '2026-07-12 16:43:49'),
+(63, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Delete Assignment: HAvit · return by qwerty', 'approvals.html', 0, '{\"approval_id\":26,\"action_type\":\"delete\"}', '2026-07-12 16:43:52'),
+(64, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 0, '{\"approval_id\":26,\"decision\":\"approved\"}', '2026-07-12 16:44:09'),
+(65, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 0, '{\"approval_id\":25,\"decision\":\"approved\"}', '2026-07-12 16:44:10'),
+(66, 'staff', 3, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: HAvit · return by qwerty', 'requests.html', 0, '{\"approval_id\":24,\"decision\":\"approved\"}', '2026-07-12 16:44:12'),
+(67, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":27,\"action_type\":\"create\"}', '2026-07-12 16:44:43'),
+(68, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":27,\"decision\":\"forwarded\"}', '2026-07-12 16:45:36'),
+(69, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":28,\"action_type\":\"create\"}', '2026-07-12 17:01:14'),
+(70, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":28,\"decision\":\"forwarded\"}', '2026-07-12 17:01:38'),
+(71, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: HAvit asda', 'approvals.html', 1, '{\"approval_id\":29,\"action_type\":\"create\"}', '2026-07-12 19:13:02'),
+(72, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"HAvit asda\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":29,\"decision\":\"forwarded\"}', '2026-07-12 19:13:25'),
+(73, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"HAvit asda\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":29}', '2026-07-12 19:15:05'),
+(74, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"HAvit asda\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 0, '{\"approval_id\":29,\"confirmed_by\":\"qwerty\"}', '2026-07-12 19:15:05'),
+(75, 'admin', NULL, 'approval_submitted', 'New approval request from qwerty', 'Create Asset: Secure XPS 15', 'approvals.html', 1, '{\"approval_id\":30,\"action_type\":\"create\"}', '2026-07-12 20:28:08'),
+(76, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":30,\"decision\":\"forwarded\"}', '2026-07-12 20:38:02'),
+(77, 'admin', NULL, 'asset_changed', '✏️ Asset request changes by qwerty', '\"Secure XPS 15\" — qwerty has updated their asset request details. Please review and re-approve.', 'approvals.html', 1, '{\"approval_id\":30,\"changed_by\":\"qwerty\"}', '2026-07-12 21:38:34'),
+(78, 'staff', 3, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":30,\"decision\":\"forwarded\"}', '2026-07-12 21:39:18'),
+(79, 'staff', 3, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"Secure XPS 15\". It is now listed in your assets.', 'requests.html?tab=myassets', 0, '{\"approval_id\":30}', '2026-07-12 21:39:49'),
+(80, 'admin', NULL, 'asset_confirmed', '🖨️ Asset confirmed by qwerty', '\"Secure XPS 15\" has been confirmed by qwerty. You may now print the accountability form.', 'approvals.html', 0, '{\"approval_id\":30,\"confirmed_by\":\"qwerty\"}', '2026-07-12 21:39:49');
 
 -- --------------------------------------------------------
 
@@ -335,17 +488,27 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`id`, `name`, `sku`, `brand_model`, `brand`, `model`, `assigned_employee`, `assigned_employee_id`, `description`, `category_id`, `supplier_id`, `supplier_name`, `purchase_date`, `deployed_date`, `location_id`, `quantity`, `asset_status`, `image_path`, `serial_number`, `po_id`, `po_item_id`, `created_at`, `updated_at`) VALUES
 (1, 'Headset Keytech', '1212qdqad', 'Keytech qawdq', 'Keytech', 'qawdq', 'Raven', '12312', '', 21, NULL, 'Eo', '2026-07-10', '2026-07-10 19:00:00', 2, 1, 'assigned', NULL, NULL, NULL, NULL, '2026-07-10 19:00:15', '2026-07-11 13:00:03'),
-(2, 'HAvit', 'qwdcxzasdzasdd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'qwdcxzasdzasdd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
-(3, 'HAvit', 'asdascasd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'asdascasd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
-(4, 'HAvit', '21412312', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, '21412312', 1, 1, '2026-07-10 19:07:23', '2026-07-11 13:03:59'),
-(5, 'HAvit', '121233123', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, '121233123', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:14:52'),
-(6, 'HAvit', 'sdfsdfqww', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'sdfsdfqww', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
-(7, 'HAvit', 'wedfwer', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'wedfwer', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(2, 'HAvit', 'qwdcxzasdzasdd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, 'qwdcxzasdzasdd', 1, 1, '2026-07-10 19:07:23', '2026-07-12 14:49:36'),
+(3, 'HAvit', 'asdascasd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, 'asdascasd', 1, 1, '2026-07-10 19:07:23', '2026-07-12 19:15:05'),
+(4, 'HAvit', '21412312', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, '21412312', 1, 1, '2026-07-10 19:07:23', '2026-07-12 19:15:05'),
+(5, 'HAvit', '121233123', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, '121233123', 1, 1, '2026-07-10 19:07:23', '2026-07-12 19:15:05'),
+(6, 'HAvit', 'sdfsdfqww', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, 'sdfsdfqww', 1, 1, '2026-07-10 19:07:23', '2026-07-12 19:15:05'),
+(7, 'HAvit', 'wedfwer', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, 'wedfwer', 1, 1, '2026-07-10 19:07:23', '2026-07-12 19:15:05'),
 (8, 'HAvit', 'werwerwersd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'werwerwersd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
 (9, 'HAvit', 'werwerwddfsdfv', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'werwerwddfsdfv', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
-(10, 'HAvit', 'cvbvfefv', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'cvbvfefv', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
+(10, 'HAvit', 'cvbvfefv', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'assigned', NULL, 'cvbvfefv', 1, 1, '2026-07-10 19:07:23', '2026-07-12 21:39:49'),
 (11, 'HAvit', 'swsdfvcxdefd', 'HAvit asda', 'HAvit', 'asda', NULL, NULL, 'HAvit Keyboard', 10, 1, NULL, '2026-07-10', NULL, 2, 1, 'available', NULL, 'swsdfvcxdefd', 1, 1, '2026-07-10 19:07:23', '2026-07-10 19:07:23'),
-(13, 'SY Headset', 'ASD1233', 'SY SY-202', 'SY', 'SY-202', '', '', '', 21, NULL, 'Eo', '2026-07-10', '2026-07-11 12:35:00', 1, 1, 'assigned', NULL, NULL, NULL, NULL, '2026-07-11 12:35:51', '2026-07-11 12:53:23');
+(13, 'SY Headset', 'ASD1233', 'SY SY-202', 'SY', 'SY-202', '', '', '', 21, NULL, 'Eo', '2026-07-10', '2026-07-11 12:35:00', 1, 1, 'assigned', NULL, NULL, NULL, NULL, '2026-07-11 12:35:51', '2026-07-12 21:39:49'),
+(14, 'Secure UPS', 'IMP-MRHPES4P-9PCC1H', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-15', NULL, 1, 1, 'assigned', NULL, 'HJKG1', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 21:39:49'),
+(15, 'Secure UPS', 'IMP-MRHPES5O-0HTP0I', 'Secure XPS 16', 'Secure', 'XPS 16', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-16', NULL, 1, 1, 'lost', NULL, 'HJKG2', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(16, 'Secure UPS', 'IMP-MRHPES6Q-GPANDY', 'Secure XPS 17', 'Secure', 'XPS 17', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-17', NULL, 1, 1, 'spare', NULL, 'HJKG3', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(17, 'Secure UPS', 'IMP-MRHPES7F-PA54XK', 'Secure XPS 18', 'Secure', 'XPS 18', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-18', NULL, 1, 1, 'available', NULL, 'HJKG4', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(18, 'Secure UPS', 'IMP-MRHPES82-CMJFA8', 'Secure XPS 19', 'Secure', 'XPS 19', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-19', NULL, 1, 1, 'damaged', NULL, 'HJKGw5', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(19, 'Secure UPS', 'IMP-MRHPES91-ZF0AVS', 'Secure XPS 20', 'Secure', 'XPS 20', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-20', NULL, 2, 1, 'available', NULL, 'HJKG6', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(20, 'Secure UPS', 'IMP-MRHPES9Z-CY6Z39', 'Secure XPS 21', 'Secure', 'XPS 21', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-21', NULL, 2, 1, 'spare', NULL, 'HJKG7', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(21, 'Secure UPS', 'IMP-MRHPESAY-HRLCBW', 'Secure XPS 22', 'Secure', 'XPS 22', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-22', NULL, 2, 1, 'available', NULL, 'HJKG8', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(22, 'Secure UPS', 'IMP-MRHPESBO-F10CD7', 'Secure XPS 23', 'Secure', 'XPS 23', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-23', NULL, 2, 1, 'available', NULL, 'HJKG9', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18'),
+(23, 'Secure UPS', 'IMP-MRHPESCC-VA2B7L', 'Secure XPS 24', 'Secure', 'XPS 24', '', '', 'Secure UPS', 22, 1, NULL, '2025-01-24', NULL, 2, 1, 'available', NULL, 'HJKG10', NULL, NULL, '2026-07-12 19:22:18', '2026-07-12 19:22:18');
 
 -- --------------------------------------------------------
 
@@ -658,19 +821,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `approval_requests`
 --
 ALTER TABLE `approval_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -700,13 +863,13 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`

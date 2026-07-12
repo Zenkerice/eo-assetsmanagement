@@ -210,6 +210,7 @@
     .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
     .toast.error{border-color:var(--red);color:var(--red)}
     .toast.success{border-color:var(--green);color:var(--green)}
+    #toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 
   </style>
 </head>
@@ -287,6 +288,7 @@
             <tr>
               <th>#</th>
               <th>Requested By</th>
+              <th>Request ID</th>
               <th>Action</th>
               <th>Resource</th>
               <th>Notes</th>
@@ -296,7 +298,7 @@
             </tr>
           </thead>
           <tbody id="approval-table">
-            <tr><td colspan="8"><div class="empty-state">Loading&hellip;</div></td></tr>
+            <tr><td colspan="9"><div class="empty-state">Loading&hellip;</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -322,6 +324,7 @@
     <div class="modal-actions" id="review-modal-actions">
       <button class="btn btn-success" id="btn-approve" onclick="submitReview('approved')">&#10003; Approve</button>
       <button class="btn btn-danger"  id="btn-reject"  onclick="submitReview('rejected')">&#10007; Reject</button>
+      <button class="btn btn-ghost"   id="btn-view-form" onclick="_openFormFromReviewModal()" style="display:none;">&#128424; View Form</button>
       <button class="btn btn-ghost"   onclick="closeReviewModal()">Cancel</button>
     </div>
   </div>
@@ -410,34 +413,43 @@ function fmtDate(s) {
 
 /* -- Human-readable field labels -- */
 const _fieldLabels = {
-  product_id:     'Asset',
-  assignee_name:  'Assignee',
-  assigned_by:    'Assigned By',
-  due_back:       'Due Back',
-  location_id:    'Location',
-  category_id:    'Category',
-  supplier_id:    'Supplier',
-  notes:          'Notes',
-  name:           'Name',
-  sku:            'Serial No.',
-  brand_model:    'Brand / Model',
-  quantity:       'Quantity',
-  description:    'Description',
-  reported_by:    'Reported By',
-  issue:          'Issue',
-  status:         'Status',
-  disposal_reason:'Disposal Reason',
-  donated_to:     'Donated To',
-  contact_name:   'Contact',
-  email:          'Email',
-  phone:          'Phone',
-  address:        'Address',
+  product_id:            'Asset',
+  assignee_name:         'Assignee',
+  assigned_by:           'Assigned By',
+  due_back:              'Due Back',
+  location_id:           'Location',
+  supplier_id:           'Supplier',
+  notes:                 'Notes',
+  name:                  'Name',
+  sku:                   'Serial No.',
+  brand_model:           'Brand / Model',
+  quantity:              'Quantity',
+  description:           'Description',
+  reported_by:           'Reported By',
+  issue:                 'Issue',
+  status:                'Status',
+  disposal_reason:       'Disposal Reason',
+  donated_to:            'Donated To',
+  contact_name:          'Contact',
+  email:                 'Email',
+  phone:                 'Phone',
+  address:               'Address',
+  requestor_name:        'Requestor Name',
+  requestor_id:          'Requestor ID',
+  requestor_location:    'Location',
+  request_id:            'Request ID',
 };
 
 /* -- Render payload as a clean key-value table -- */
 
-// Fields to skip entirely ? internal IDs or system fields not useful to humans
-const _skipFields = new Set(['_method', 'image', 'image_path', 'po_id', 'po_item_id', 'updated_at', 'created_at']);
+// Fields to skip entirely — internal IDs, system fields, or fields shown elsewhere
+const _skipFields = new Set([
+  '_method', 'image', 'image_path', 'po_id', 'po_item_id', 'updated_at', 'created_at',
+  // Shown in the header section already or redundant
+  'requestor_location_id', 'admin_assignee', 'admin_empid', 'admin_location',
+  // Replaced by the Assets table
+  'category_id', 'category_name', 'brand', 'model',
+]);
 
 // Status value ? color
 const _statusColors = {
@@ -463,11 +475,34 @@ function _renderPayload(payload) {
     let resolved = v;
     if (k === 'product_id'  && v) resolved = _productsCache[v]   || v;
     if (k === 'location_id' && v) resolved = _locationsCache[v]  || v;
-    if (k === 'category_id' && v) resolved = _categoriesCache[v] || v;
     if (k === 'supplier_id' && v) resolved = _suppliersCache[v]  || v;
 
     let valHtml;
-    if (k === 'status' && _statusColors[String(v)]) {
+
+    // assets array → formatted table
+    if (k === 'assets' && Array.isArray(v) && v.length) {
+      const filled = v.filter(a => a.brand || a.model || a.category_name);
+      if (!filled.length) return '';
+      const tableRows = filled.map((a, i) => `
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:7px 10px;font-size:12px;color:var(--muted2);font-family:'DM Mono',monospace;font-weight:600;white-space:nowrap;">${i + 1}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(a.category_name || '—')}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(a.brand || '—')}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(a.model || '—')}</td>
+        </tr>`).join('');
+      valHtml = `
+        <table style="width:100%;border-collapse:collapse;background:var(--bg3);border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.04);">
+              <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">#</th>
+              <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Category</th>
+              <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Brand</th>
+              <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Model</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>`;
+    } else if (k === 'status' && _statusColors[String(v)]) {
       const sc = _statusColors[String(v)];
       valHtml = `<span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${sc.bg};color:${sc.color};">${esc(String(v))}</span>`;
     } else if (typeof resolved === 'boolean') {
@@ -477,7 +512,6 @@ function _renderPayload(payload) {
     } else if (typeof resolved === 'number') {
       valHtml = `<span class="pv-num">${esc(String(resolved))}</span>`;
     } else {
-      // Format YYYY-MM-DD dates
       const dateMatch = String(resolved).match(/^(\d{4}-\d{2}-\d{2})$/);
       if (dateMatch) {
         const d   = new Date(resolved + 'T00:00:00');
@@ -487,12 +521,15 @@ function _renderPayload(payload) {
         valHtml = `<span class="pv-str">${esc(String(resolved))}</span>`;
       }
     }
+
+    if (!valHtml) return '';
     return `<tr>
       <td class="payload-key">${esc(label)}</td>
       <td class="payload-val">${valHtml}</td>
     </tr>`;
-  }).join('');
+  }).filter(Boolean).join('');
 
+  if (!rows) return '<span style="color:var(--muted);font-size:12px;">No payload data.</span>';
   return `<table class="payload-table">${rows}</table>`;
 }
 
@@ -585,7 +622,7 @@ function renderTable() {
   const tbody = document.getElementById('approval-table');
   if (!data.length) {
     const labels = { pending: 'pending', forwarded: 'awaiting confirmation', approved: 'approved', rejected: 'rejected' };
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No ${labels[currentTab] || currentTab} requests found.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No ${labels[currentTab] || currentTab} requests found.</div></td></tr>`;
     return;
   }
 
@@ -627,6 +664,7 @@ function renderTable() {
     return `<tr>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">#${r.id}</td>
       <td style="font-weight:500">${esc(r.requested_by)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);white-space:nowrap;">${(() => { try { const p = JSON.parse(r.payload || '{}'); return esc(p.request_id || p.return_id || '—'); } catch { return '—'; } })()}</td>
       <td><span class="pill" style="${actionStyle};text-transform:capitalize">${esc(r.action_type)}</span></td>
       <td>
         <span class="pill pill-resource">${esc(r.resource_type)}</span>
@@ -661,6 +699,11 @@ function openDetailModal(id) {
   document.getElementById('review-notes-group').style.display = isPending ? '' : 'none';
   document.getElementById('review-notes').value = '';
 
+  // Show "View Form" for Asset requests that have been approved or forwarded
+  const isAssetType = r.resource_type === 'Asset' || r.resource_type === 'asset_request';
+  const hasForm     = isAssetType && (r.status === 'approved' || r.status === 'forwarded');
+  document.getElementById('btn-view-form').style.display = hasForm ? '' : 'none';
+
   const payload = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
 
   const actionColors = {
@@ -680,6 +723,7 @@ function openDetailModal(id) {
     <div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px;">
       <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val"><span class="pill ${r.status}">${r.status === 'forwarded' ? 'Waiting for confirmation' : r.status}</span></div></div>
       <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
+      ${(payload.request_id || payload.return_id) ? `<div class="detail-row"><div class="detail-key">Request ID</div><div class="detail-val" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.4px;">${esc(payload.request_id || payload.return_id)}</div></div>` : ''}
       <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${actionStyle};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
       <div class="detail-row"><div class="detail-key">Resource</div><div class="detail-val"><span class="pill pill-resource">${esc(r.resource_type)}</span>${r.resource_name ? ' <span style="font-size:13px;color:var(--muted2);">' + esc(r.resource_name) + '</span>' : ''}</div></div>
       <div class="detail-row"><div class="detail-key">Notes</div><div class="detail-val" style="color:var(--muted2);">${esc(r.notes || '—')}</div></div>
@@ -693,6 +737,17 @@ function openDetailModal(id) {
 }
 
 /* -- Request Form Preview Modal -------------------------------------------- */
+
+function _openFormFromReviewModal() {
+  if (!reviewingId) return;
+  const r = allRequests.find(x => x.id === reviewingId);
+  if (!r) return;
+  const p = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
+  closeReviewModal();
+  // For forwarded requests, open in readonly mode (already sent to staff — just viewing)
+  // For other statuses (approved), open in view-only mode with no actions
+  _openAssetAccIframe(r, p, false);
+}
 
 function openRfModal(id, showActions) {
   const r = allRequests.find(x => x.id === id);
@@ -736,12 +791,34 @@ function openRfModal(id, showActions) {
   const FIXED_TYPES = ['Laptop','Mobile Device','Headset','Other Equipment','ID & Lanyard','Access Badge/RFID'];
   const submittedAssets = Array.isArray(p.assets) ? p.assets : [];
 
-  const rows = FIXED_TYPES.map(typeLabel => {
-    const m = submittedAssets.find(a => {
-      const n = (a.name || a.category || '').toLowerCase();
-      const t = typeLabel.toLowerCase();
-      return n === t || n.includes(t.split(' ')[0]) || t.includes((n||'').split(' ')[0]);
-    });
+  // Split into positional (new format with rowIndex) and legacy (no rowIndex)
+  const byRowIdx = {};
+  const legacyAssets = [];
+  submittedAssets.forEach(a => {
+    if (a.rowIndex != null) byRowIdx[a.rowIndex] = a;
+    else legacyAssets.push(a);
+  });
+  const usedLegacy = new Set();
+
+  // For legacy assets (no rowIndex): match to fixed rows by category name only.
+  // Never guess an unknown position — show data only where we're sure it belongs.
+  const legacyMap = {};
+  FIXED_TYPES.forEach((typeLabel, i) => {
+    if (byRowIdx[i] != null) return;
+    const t = typeLabel.toLowerCase();
+    for (let ai = 0; ai < legacyAssets.length; ai++) {
+      if (usedLegacy.has(ai)) continue;
+      const n = (legacyAssets[ai].name || legacyAssets[ai].category || '').toLowerCase();
+      if (n === t || n.includes(t.split(' ')[0]) || t.includes((n||'').split(' ')[0])) {
+        legacyMap[i] = legacyAssets[ai];
+        usedLegacy.add(ai);
+        break;
+      }
+    }
+  });
+
+  const rows = FIXED_TYPES.map((typeLabel, i) => {
+    const m = byRowIdx[i] != null ? byRowIdx[i] : (legacyMap[i] || null);
     return {
       type:  m ? (m.name  || typeLabel) : typeLabel,
       brand: m ? (m.brand || '')        : '',
@@ -750,15 +827,6 @@ function openRfModal(id, showActions) {
       val:   m ? (m.value || '')        : '',
       rem:   m ? (m.remarks || '')      : '',
     };
-  });
-  // Extra assets beyond fixed 6
-  submittedAssets.forEach(a => {
-    const n = (a.name || a.category || '').toLowerCase();
-    const covered = FIXED_TYPES.some(t => {
-      const tl = t.toLowerCase();
-      return n === tl || n.includes(tl.split(' ')[0]) || tl.includes((n||'').split(' ')[0]);
-    });
-    if (!covered) rows.push({ type: a.name || a.category || '', brand: a.brand || '', sn: a.tag || a.serial_number || '', cond: a.condition || '', val: a.value || '', rem: a.remarks || '' });
   });
 
   const assetRowsHtml = rows.map(a => `
@@ -952,9 +1020,36 @@ function _openAssetAccIframe(r, p, showActions) {
   // Build query params from request payload
   const params = new URLSearchParams();
   params.set('modal', '1');
-  if (p.requestor_name)     params.set('assignee',  p.requestor_name);
-  if (p.requestor_id)       params.set('empid',     p.requestor_id);
-  if (p.requestor_location) params.set('location',  p.requestor_location);
+
+  // For already-forwarded/approved requests viewed by admin, open as readonly
+  // so they see exactly what was sent to the staff member
+  const isForwardedOrApproved = r.status === 'forwarded' || (r.status === 'approved' && !isPending);
+  if (isForwardedOrApproved) {
+    params.set('readonly', '1');
+    // Pass the admin-filled assignee info
+    const assigneeName = p.admin_assignee || p.requestor_name || r.requested_by || '';
+    if (assigneeName) params.set('assignee', assigneeName);
+    const empId = p.admin_empid || p.requestor_id || '';
+    if (empId)        params.set('empid',    empId);
+    const location = p.admin_location || p.requestor_location || '';
+    if (location)     params.set('location', location);
+    // Pass admin-filled assets array so the form shows exactly what was sent
+    if (Array.isArray(p.assets) && p.assets.length) {
+      params.set('assets', JSON.stringify(p.assets));
+    } else {
+      // Fallback: legacy single-asset fields
+      if (p.brand)         params.set('brand',    p.brand);
+      if (p.model)         params.set('model',    p.model);
+      if (p.category_name) params.set('category', p.category_name);
+      const serial = p.serial_number || p.sku || '';
+      if (serial)          params.set('serial',   serial);
+    }
+  } else {
+    // Pending — admin fills the form (editable, no readonly)
+    if (p.requestor_name)     params.set('assignee',  p.requestor_name);
+    if (p.requestor_id)       params.set('empid',     p.requestor_id);
+    if (p.requestor_location) params.set('location',  p.requestor_location);
+  }
 
   iframe.src = 'accountability.html?' + params.toString();
   modal.classList.add('open');
@@ -966,6 +1061,42 @@ async function _submitAssetAccApproval(decision) {
   const approveBtn = document.getElementById('asset-acc-approve');
   approveBtn.disabled = true;
   try {
+    // Before forwarding, read the admin-filled form data from the iframe
+    // and patch the approval payload so the non-admin sees the same assets
+    if (decision === 'forwarded') {
+      const iframeWin = document.getElementById('asset-acc-iframe')?.contentWindow;
+      if (!iframeWin || typeof iframeWin.getFormAssets !== 'function') {
+        showToast('Form not ready — please wait a moment and try again.', 'error');
+        approveBtn.disabled = false;
+        return;
+      }
+      const formData  = iframeWin.getFormAssets();
+      const existing  = allRequests.find(x => x.id === reviewingId);
+      const oldPayload = (() => { try { return JSON.parse(existing?.payload || '{}'); } catch { return {}; } })();
+      const newPayload = {
+        ...oldPayload,
+        assets:             formData.assets,
+        admin_assignee:     formData.assignee  || oldPayload.requestor_name  || '',
+        admin_empid:        formData.empid     || oldPayload.requestor_id    || '',
+        admin_location:     formData.location  || oldPayload.requestor_location || '',
+        admin_dept:         formData.dept      || '',
+        admin_date:         formData.date      || '',
+      };
+      // Patch the payload on the server before the status change
+      const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + reviewingId + '?action=patch_payload', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload: newPayload }),
+      });
+      if (!patchRes.ok) {
+        const errData = await patchRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to save asset data — please try again.');
+      }
+      // Update local cache so subsequent reads in the same session see the new payload
+      if (existing) existing.payload = JSON.stringify(newPayload);
+    }
+
     await api.reviewApproval(reviewingId, { decision, review_notes: notes });
     showToast(decision === 'forwarded' ? 'Forwarded to requestor' : decision === 'approved' ? 'Request approved' : 'Request rejected',
       decision === 'rejected' ? 'error' : 'success');
@@ -974,7 +1105,6 @@ async function _submitAssetAccApproval(decision) {
     if (window.refreshSidebar) refreshSidebar();
   } catch (e) {
     showToast(e.message, 'error');
-  } finally {
     approveBtn.disabled = false;
   }
 }

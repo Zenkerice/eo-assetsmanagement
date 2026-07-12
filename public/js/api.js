@@ -100,6 +100,7 @@ const api = {
   submitApproval:      (data)   => request('POST', 'approvals', data),
   reviewApproval:      (id, d)  => request('PUT',  `approvals/${id}`, d),
   cancelApproval:      (id)     => request('DELETE', `approvals/${id}`),
+  confirmApproval:     (id)     => request('POST', `approvals/${id}?action=confirm`, {}),
 
   // ── Notifications ──────────────────────────────────────────────────────────
   getNotifications:    ()       => request('GET', 'notifications'),

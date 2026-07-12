@@ -180,4 +180,17 @@ class ProductModel {
         $stmt = $this->db->prepare('DELETE FROM products WHERE id = ?');
         return $stmt->execute([$id]);
     }
+
+    /** Find available products in a given category (for confirming forwarded requests) */
+    public function findAvailableByCategory(int $categoryId): array {
+        $stmt = $this->db->prepare(
+            "SELECT p.*, c.name AS category_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             WHERE p.category_id = ? AND p.asset_status = 'available'
+             ORDER BY p.id ASC"
+        );
+        $stmt->execute([$categoryId]);
+        return $stmt->fetchAll();
+    }
 }

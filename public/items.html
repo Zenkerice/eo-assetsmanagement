@@ -1370,8 +1370,9 @@ function viewGroupedItems(ids) {
 
     const isOccupied = !!(assignee || p.assigned_employee || p.asset_status === 'assigned');
 
+    const isNotDeployable = isDamaged || p.asset_status === 'damaged' || p.asset_status === 'lost' || p.asset_status === 'under_repair';
     const actionBtns =
-      (!isDamaged && !isOccupied ? '<button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:11px;" data-deploy-from-view="' + p.id + '">' + deployBtnLabel + '</button>' : '') +
+      (!isNotDeployable && !isOccupied ? '<button class="btn btn-primary btn-sm" style="padding:4px 12px;font-size:11px;" data-deploy-from-view="' + p.id + '">' + deployBtnLabel + '</button>' : '') +
       (assignee ? '<button class="btn btn-sm" style="padding:4px 10px;font-size:11px;background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,0.25);" data-return-from-view="' + assignment.id + '">&#8617; Return</button>' : '') +
       (isDamaged
         ? '<button class="btn btn-danger btn-sm" style="padding:4px 12px;font-size:11px;" data-dmg-from-view="' + p.id + '">&#9888; Edit Status</button>'

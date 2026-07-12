@@ -83,6 +83,159 @@ class ApprovalService {
         );
     }
 
+    // ── Staff confirms a forwarded request ────────────────────────────────────
+
+    public function confirm(int $id, string $userName): array {
+        $req = $this->getById($id);
+
+        if ($req['status'] !== 'forwarded') {
+            throw new RuntimeException('Only forwarded requests can be confirmed', 409);
+        }
+        if ($req['requested_by'] !== $userName) {
+            throw new RuntimeException('Access denied', 403);
+        }
+
+        $payload      = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
+        $resourceType = $req['resource_type'];
+
+        // For forwarded Asset requests (brand/model request form), the payload contains
+        // requestor info + category/brand/model — not a product record. We find the best
+        // matching available product and create a direct assignment for the requestor.
+        if (in_array($resourceType, ['Asset', 'asset_request'], true)) {
+            $result = $this->executeForwardedAssetRequest($req, $payload, $userName);
+        } else {
+            // For any other forwarded resource type fall back to the normal execute path
+            $result = $this->execute($req, $req['reviewed_by'] ?? 'Admin');
+        }
+
+        // Mark as approved
+        $this->model->review($id, 'approved', $userName, 'Confirmed by requestor');
+
+        AuditLogService::log(
+            'approved',
+            $req['resource_type'],
+            $req['resource_id'] ?? null,
+            $req['resource_name'] ?? null,
+            'Asset confirmed and assigned to ' . $userName
+        );
+
+        // Notify the requestor that their assets are now assigned
+        $this->notif->create([
+            'for_role'    => 'staff',
+            'for_user_id' => $req['user_id'] ?? null,
+            'type'        => 'approval_approved',
+            'title'       => '✅ Asset assigned to you',
+            'body'        => 'You have confirmed receipt of "' . ($req['resource_name'] ?? 'Asset') . '". It is now listed in your assets.',
+            'link'        => 'requests.html?tab=myassets',
+            'meta'        => ['approval_id' => $id],
+        ]);
+
+        // Notify all admins that the staff member confirmed and the form is ready to print
+        $this->notif->create([
+            'for_role' => 'admin',
+            'type'     => 'asset_confirmed',
+            'title'    => '🖨️ Asset confirmed by ' . $userName,
+            'body'     => '"' . ($req['resource_name'] ?? 'Asset') . '" has been confirmed by ' . $userName . '. You may now print the accountability form.',
+            'link'     => 'approvals.html',
+            'meta'     => ['approval_id' => $id, 'confirmed_by' => $userName],
+        ]);
+
+        return [
+            'request' => $this->model->findById($id),
+            'result'  => $result,
+        ];
+    }
+
+    /**
+     * Handle a forwarded Asset/asset_request approval confirmation by the staff member.
+     * Finds the best matching available product and creates an assignment.
+     */
+    private function executeForwardedAssetRequest(array $req, array $payload, string $assigneeName): array {
+        require_once __DIR__ . '/AssignmentService.php';
+        require_once __DIR__ . '/../model/ProductModel.php';
+
+        $assignSvc    = new AssignmentService();
+        $productModel = new ProductModel();
+        $assignedBy   = $req['reviewed_by'] ?? 'Admin';
+        $created      = [];
+
+        // Resolve assignee name — prefer explicit payload field, fall back to session user
+        $resolvedAssignee = trim(
+            $payload['requestor_name'] ?? $payload['assignee_name'] ?? $payload['assignee'] ?? $assigneeName
+        );
+        if ($resolvedAssignee === '') $resolvedAssignee = $assigneeName;
+
+        // Collect assets list — either explicit assets array or single item from payload fields
+        $assets = $payload['assets'] ?? [];
+        if (empty($assets)) {
+            // Single-asset request built from brand/model/category fields
+            $assets = [[
+                'name'  => $payload['resource_name'] ?? $req['resource_name'] ?? '',
+                'brand' => $payload['brand']  ?? '',
+                'tag'   => $payload['serial_number'] ?? $payload['sku'] ?? '',
+            ]];
+        }
+
+        foreach ($assets as $asset) {
+            $assetName = trim($asset['name'] ?? $req['resource_name'] ?? '');
+            $assetTag  = trim($asset['tag']  ?? $payload['serial_number'] ?? $payload['sku'] ?? '');
+            $assetBrand = trim($asset['brand'] ?? $payload['brand'] ?? '');
+
+            $product = null;
+
+            // 1. Try serial / SKU tag
+            if ($assetTag !== '') {
+                $product = $productModel->findBySku($assetTag)
+                        ?? $productModel->findBySerial($assetTag);
+            }
+            // 2. Try tokens in brand field
+            if (!$product && $assetBrand !== '') {
+                foreach (explode(' ', $assetBrand) as $token) {
+                    $token = trim($token);
+                    if ($token === '') continue;
+                    $product = $productModel->findBySku($token)
+                            ?? $productModel->findBySerial($token);
+                    if ($product) break;
+                }
+            }
+            // 3. Exact name match
+            if (!$product && $assetName !== '') {
+                $matches = $productModel->findByName($assetName);
+                $product = $matches[0] ?? null;
+            }
+            // 4. Category-filtered name search
+            if (!$product) {
+                $catId = !empty($payload['category_id']) ? (int)$payload['category_id'] : null;
+                if ($catId) {
+                    $candidates = $productModel->findAvailableByCategory($catId);
+                    $product = $candidates[0] ?? null;
+                }
+            }
+            // 5. Partial name match
+            if (!$product && $assetName !== '') {
+                $product = $productModel->findByPartialName($assetName);
+            }
+
+            if (!$product) continue; // no matching product in inventory — skip
+
+            try {
+                $assignment = $assignSvc->create([
+                    'product_id'    => (int)$product['id'],
+                    'assignee_name' => $resolvedAssignee,
+                    'assigned_by'   => $assignedBy,
+                    'due_back'      => null,
+                    'notes'         => trim($payload['description'] ?? $payload['purpose'] ?? $req['notes'] ?? '') ?: null,
+                    'location_id'   => $product['location_id'] ?? null,
+                ], skipAvailabilityCheck: true);
+                $created[] = $assignment['id'];
+            } catch (\Exception $e) {
+                // Non-fatal — continue with remaining assets
+            }
+        }
+
+        return ['assignments_created' => $created];
+    }
+
     // ── Review (admin only) ───────────────────────────────────────────────────
 
     public function review(int $id, string $decision, string $reviewedBy, ?string $reviewNotes = null): array {

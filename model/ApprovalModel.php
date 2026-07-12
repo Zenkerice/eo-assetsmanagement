@@ -106,4 +106,16 @@ class ApprovalModel {
         $stmt->execute([$id]);
         return $stmt->rowCount() > 0;
     }
+
+    public function updatePayload(int $id, array $payload): bool {
+        $stmt = $this->db->prepare('UPDATE approval_requests SET payload = ? WHERE id = ?');
+        return $stmt->execute([json_encode($payload), $id]);
+    }
+
+    public function resetToPending(int $id): bool {
+        $stmt = $this->db->prepare(
+            "UPDATE approval_requests SET status = 'pending', reviewed_by = NULL, review_notes = NULL, reviewed_at = NULL WHERE id = ?"
+        );
+        return $stmt->execute([$id]);
+    }
 }

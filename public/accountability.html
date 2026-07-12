@@ -618,21 +618,25 @@
 
     function getBrandsForCategory(categoryLabel) {
       const prods = getProductsForCategory(categoryLabel);
-      return [...new Set(prods.map(p => (p.brand_model || '').trim()).filter(Boolean))].sort();
+      return [...new Set(prods.map(p => {
+        // brand_model may be pre-joined, or we join brand + model ourselves
+        return (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').trim();
+      }).filter(Boolean))].sort();
     }
 
     function getAvailableSerials(categoryLabel, brandName, currentSn) {
       const prods = getProductsForCategory(categoryLabel);
       const filtered = prods.filter(p => {
-        const brandMatch  = !brandName || (p.brand_model || '').trim() === brandName;
+        const productBrandModel = (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').trim();
+        const brandMatch  = !brandName || productBrandModel === brandName;
         const statusVal   = (p.asset_status || '').toLowerCase().trim();
         const isAvailable = statusVal === 'available' || statusVal === '';
-        const isCurrent   = currentSn && (p.serial_number || '').trim() === (currentSn || '').trim();
-        const hasSn       = (p.serial_number || '').trim() !== '';
+        const isCurrent   = currentSn && (p.serial_number || p.sku || '').trim() === (currentSn || '').trim();
+        const hasSn       = (p.serial_number || p.sku || '').trim() !== '';
         // isCurrent bypasses brandMatch so a pre-filled serial always appears
         return hasSn && (isCurrent || (brandMatch && isAvailable));
       });
-      return [...new Set(filtered.map(p => (p.serial_number || '').trim()).filter(Boolean))].sort();
+      return [...new Set(filtered.map(p => (p.serial_number || p.sku || '').trim()).filter(Boolean))].sort();
     }
 
     /* -- Custom inline combo widget -- */
@@ -819,41 +823,94 @@
     }
 
     function wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp) {
-      // Category → refresh brands (live)
+      // Category → refresh brand options but keep existing value if still valid
       typeCombo._onChange = (cat) => {
-        brandCombo._refresh(() => getBrandsForCategory(typeCombo._getValue()), '');
+        const existingBrand = brandCombo._getValue();
+        const newBrands = getBrandsForCategory(cat);
+        // Keep the current brand if it's still valid for the new category; otherwise clear
+        const keepBrand = newBrands.includes(existingBrand) ? existingBrand : '';
+        brandCombo._refresh(() => getBrandsForCategory(typeCombo._getValue()), keepBrand);
+        if (snCombo) {
+          const existingSn = snCombo._getValue();
+          const newSerials = getAvailableSerials(cat, keepBrand, existingSn);
+          // Keep existing serial only if it's still available
+          const keepSn = newSerials.includes(existingSn) ? existingSn : existingSn; // always keep — it may be a manually typed value
+          snCombo._refresh(() => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), existingSn), keepSn);
+        }
       };
 
       brandCombo._onChange = (brand) => {
         const cat = typeCombo._getValue();
+        if (snCombo) {
+          // Refresh serial number dropdown with all available serials for this brand
+          snCombo._refresh(() => getAvailableSerials(cat, brand, ''), '');
+        }
         if (!brand) return;
-        // Auto-fill condition/value if only one serial available for this brand
+        // Auto-fill if only one serial available
         const serials = getAvailableSerials(cat, brand, '');
         if (serials.length === 1) {
-          const snInp = document.getElementById(`asset-sn-${i}`);
-          if (snInp && !snInp.value) snInp.value = serials[0];
+          if (snCombo) snCombo._selectVal(serials[0]);
           const prod = getProductsForCategory(cat).find(p =>
-            (p.brand_model || '').trim() === brand &&
-            (p.serial_number || '').trim() === serials[0]
+            (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').trim() === brand &&
+            (p.serial_number || p.sku || '').trim() === serials[0]
           );
           if (prod) autofillFromProduct(prod, condCombo, valInp);
         }
       };
+
+      if (snCombo) {
+        snCombo._onChange = (sn) => {
+          if (!sn) return;
+          const cat   = typeCombo._getValue();
+          const brand = brandCombo._getValue();
+          const prod  = getProductsForCategory(cat).find(p =>
+            (p.serial_number || p.sku || '').trim() === sn &&
+            (!brand || (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').trim() === brand)
+          );
+          if (prod) autofillFromProduct(prod, condCombo, valInp);
+        };
+      }
     }
 
     function buildAssetRows(assets) {
       const tbody = document.getElementById('asset-tbody');
       tbody.innerHTML = '';
 
-      FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
-        let matched = null;
-        if (assets && assets.length) {
-          matched = assets.find(a => {
+      // Split assets into positional (new format with rowIndex) and legacy (no rowIndex)
+      const byRowIndex = {};
+      const noIndexAssets = [];
+      if (assets && assets.length) {
+        assets.forEach(a => {
+          if (a.rowIndex != null) byRowIndex[a.rowIndex] = a;
+          else noIndexAssets.push(a);
+        });
+      }
+      const usedLegacyIndices = new Set();
+
+      // For legacy assets (no rowIndex): match by category name only.
+      // Never guess position — show data only where we're certain it belongs.
+      const legacyRowMap = {};
+      if (noIndexAssets.length) {
+        FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+          if (byRowIndex[i] != null) return;
+          for (let ai = 0; ai < noIndexAssets.length; ai++) {
+            if (usedLegacyIndices.has(ai)) continue;
+            const a = noIndexAssets[ai];
             const n = (a.category_name || a.category || a.product_name || a.asset_name || '').toLowerCase();
-            return n.includes(typeLabel.toLowerCase().split(' ')[0]) || typeLabel.toLowerCase().includes(n.split(' ')[0]);
-          }) || null;
-        }
-        const assetType = matched ? (matched.category_name || matched.category || typeLabel) : typeLabel;
+            if (n.includes(typeLabel.toLowerCase().split(' ')[0]) || typeLabel.toLowerCase().includes(n.split(' ')[0])) {
+              legacyRowMap[i] = a;
+              usedLegacyIndices.add(ai);
+              break;
+            }
+          }
+        });
+      }
+
+      FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+        // Priority: positional data > legacy matched data > empty
+        const matched = byRowIndex[i] != null ? byRowIndex[i] : (legacyRowMap[i] || null);
+
+        const assetType = matched ? (matched.name || matched.category_name || matched.category || typeLabel) : typeLabel;
 
         // Resolve to actual DB category name so the combo finds products
         const resolvedType = (() => {
@@ -871,8 +928,8 @@
           });
           return match ? (match.name || match.category_name) : assetType;
         })();
-        const brand  = matched ? (matched.brand_model || '') : '';
-        const sn     = matched ? (matched.serial_number || matched.product_sku || '') : '';
+        const brand  = matched ? (matched.brand || matched.brand_model || '') : '';
+        const sn     = matched ? (matched.tag || matched.serial_number || matched.product_sku || matched.sku || '') : '';
         const cond   = matched ? (matched.condition || '') : '';
         const val    = matched ? (matched.value || matched.unit_price || '') : '';
         const rem    = matched ? (matched.remarks || '') : '';
@@ -884,7 +941,7 @@
         tr.innerHTML = `
           <td class="asset-type-cell" id="td-type-${i}" style="padding:3px 5px;"></td>
           <td id="td-brand-${i}" style="padding:3px 5px;"></td>
-          <td style="padding:3px 5px;"><input type="text" id="asset-sn-${i}" value="${esc(String(sn))}" style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;padding:1px 2px;outline:none;width:100%;"></td>
+          <td id="td-sn-${i}" style="padding:3px 5px;"></td>
           <td id="td-cond-${i}"  style="padding:3px 5px;"></td>
           <td><input type="text" id="asset-val-${i}" value="${esc(String(val))}"></td>
           <td><input type="text" id="asset-rem-${i}" value="${esc(String(rem))}"></td>`;
@@ -897,7 +954,7 @@
           id: `asset-type-${i}`,
           options: () => buildCategoryOptions(resolvedType),
           value: resolvedType,
-          placeholder: '� Type �',
+          placeholder: '▾ Type ▾',
           bold: true,
           onChange: null
         });
@@ -915,6 +972,18 @@
         });
         tr.querySelector(`#td-brand-${i}`).appendChild(brandCombo);
 
+        // Serial Number combo (searchable, populated from available serials for selected brand)
+        const snCombo = makeCombo({
+          id: `asset-sn-${i}`,
+          options: () => getAvailableSerials(typeCombo._getValue(), brandCombo._getValue(), sn),
+          value: sn,
+          placeholder: '',
+          bold: false,
+          onChange: null,
+          searchable: true,
+        });
+        tr.querySelector(`#td-sn-${i}`).appendChild(snCombo);
+
         // Condition combo
         const condCombo = makeCombo({
           id: `asset-cond-${i}`,
@@ -926,7 +995,7 @@
         });
         tr.querySelector(`#td-cond-${i}`).appendChild(condCombo);
 
-        wireRowEvents(i, typeCombo, brandCombo, null, condCombo, valInp);
+        wireRowEvents(i, typeCombo, brandCombo, snCombo, condCombo, valInp);
 
       });
     }
@@ -1016,6 +1085,34 @@
       o.onclick = e=>{ if(e.target===o) o.style.display='none'; };
     }
 
+    // Expose form data to parent frame so the forward flow can persist admin-entered assets
+    window.getFormAssets = function() {
+      const assets = [];
+      // Save ALL 6 rows by position — including empty ones — so the display can
+      // reconstruct the exact table the admin filled in (including renamed rows).
+      for (let i = 0; i < ASSET_ROWS; i++) {
+        const brand = (document.getElementById(`asset-brand-${i}`)?.value || '').trim();
+        const sn    = (document.getElementById(`asset-sn-${i}`)?.value   || '').trim();
+        const type  = (document.getElementById(`asset-type-${i}`)?.value || FIXED_ASSET_TYPES[i]).trim();
+        const cond  = (document.getElementById(`asset-cond-${i}`)?.value || '').trim();
+        const val   = (document.getElementById(`asset-val-${i}`)?.value  || '').trim();
+        const rem   = (document.getElementById(`asset-rem-${i}`)?.value  || '').trim();
+        assets.push({
+          rowIndex:     i,
+          originalType: FIXED_ASSET_TYPES[i],
+          name: type, brand, tag: sn, condition: cond, value: val, remarks: rem
+        });
+      }
+      return {
+        assets,
+        assignee:  document.getElementById('field-fullname')?.value.trim()  || '',
+        empid:     document.getElementById('field-empid')?.value.trim()     || '',
+        location:  document.getElementById('field-location')?.value.trim()  || '',
+        dept:      document.getElementById('field-dept')?.value.trim()      || '',
+        date:      document.getElementById('field-date-assigned')?.value.trim() || '',
+      };
+    };
+
     function submitRequest() {
       const name = document.getElementById('field-fullname').value.trim();
       if (!name) { showValModal('Please enter the employee name before submitting.'); document.getElementById('field-fullname').focus(); return; }
@@ -1052,10 +1149,35 @@
       if (!auth.isAdmin()) document.querySelectorAll('.btn-submit').forEach(b=>b.style.display='inline-flex');
       await loadAssignees();
       const params = new URLSearchParams(window.location.search), assigneeName = params.get('assignee');
+      const isReadonly   = params.get('readonly') === '1';
+      const assetsParam  = params.get('assets');
+      // In readonly mode with an explicit admin-filled assets list, skip the assignee pre-fill
+      // so the system deployments don't accidentally overwrite what the admin entered.
+      const skipAssigneePrefill = isReadonly && !!assetsParam;
       if (assigneeName) {
-        const match = _assigneeList.find(a=>a.name.toLowerCase()===assigneeName.toLowerCase());
-        if (match) selectAssignee(match);
-        else { document.getElementById('field-fullname').value=assigneeName; document.getElementById('assignee-search').value=assigneeName; const ui=_userByName[assigneeName.toLowerCase()]; if(ui){document.getElementById('field-empid').value=ui.employee_id||'';document.getElementById('field-role').value=_roleDisplay(ui);document.getElementById('field-contact').value=ui.contact_number||'';document.getElementById('field-email').value=ui.email||'';} document.getElementById('prefill-hint').textContent='Pre-filled from your profile.'; }
+        if (skipAssigneePrefill) {
+          // Just fill the header fields (name, empid, location) without touching the asset rows
+          document.getElementById('field-fullname').value = assigneeName;
+          document.getElementById('assignee-search').value = assigneeName;
+          const ui = _userByName[assigneeName.toLowerCase()];
+          if (ui) {
+            document.getElementById('field-empid').value   = ui.employee_id || '';
+            document.getElementById('field-role').value    = _roleDisplay(ui);
+            document.getElementById('field-contact').value = ui.contact_number || '';
+            document.getElementById('field-email').value   = ui.email || '';
+          } else {
+            const empId = _employeeById[assigneeName.toLowerCase()] || '';
+            if (empId) document.getElementById('field-empid').value = empId;
+          }
+          const empidParam = params.get('empid');
+          if (empidParam) document.getElementById('field-empid').value = empidParam;
+          const locationParam = params.get('location');
+          if (locationParam) document.getElementById('field-location').value = locationParam;
+        } else {
+          const match = _assigneeList.find(a=>a.name.toLowerCase()===assigneeName.toLowerCase());
+          if (match) selectAssignee(match);
+          else { document.getElementById('field-fullname').value=assigneeName; document.getElementById('assignee-search').value=assigneeName; const ui=_userByName[assigneeName.toLowerCase()]; if(ui){document.getElementById('field-empid').value=ui.employee_id||'';document.getElementById('field-role').value=_roleDisplay(ui);document.getElementById('field-contact').value=ui.contact_number||'';document.getElementById('field-email').value=ui.email||'';} document.getElementById('prefill-hint').textContent='Pre-filled from your profile.'; }
+        }
       } else {
         const me = auth.currentUser;
         if (me) { const match=_assigneeList.find(a=>a.name.toLowerCase()===me.name.toLowerCase()); if(match)selectAssignee(match); else { document.getElementById('field-fullname').value=me.name||''; document.getElementById('assignee-search').value=me.name||''; document.getElementById('field-empid').value=me.employee_id||''; document.getElementById('field-role').value=_roleDisplay(me); document.getElementById('field-contact').value=me.contact_number||''; document.getElementById('field-email').value=me.email||''; document.getElementById('prefill-hint').textContent=`Pre-filled with your profile, ${me.name}.`; } }
@@ -1071,10 +1193,58 @@
         const reqSerial = qp.get('serial')   || '';
         const hasAssignee = !!qp.get('assignee');
 
-        // Only override with syntheticAsset when there's no real assignee loaded —
-        // if an assignee is present, their actual deployed assets (with serial numbers)
-        // were already built by selectAssignee() above, so don't overwrite them.
-        if (!hasAssignee && (reqBrand || reqModel || reqCat)) {
+        // If admin filled in assets array, use it directly to pre-populate the table
+        if (assetsParam) {
+          try {
+            const adminAssets = JSON.parse(assetsParam);
+            if (Array.isArray(adminAssets) && adminAssets.length) {
+              // Render directly as readonly plain-text rows — bypass combo widgets entirely
+              // to avoid any combo-initialization issues in readonly view.
+              const tbody = document.getElementById('asset-tbody');
+              tbody.innerHTML = '';
+
+              // Build positional lookup
+              const byRI = {};
+              const noRI = [];
+              adminAssets.forEach(a => {
+                if (a.rowIndex != null) byRI[a.rowIndex] = a;
+                else noRI.push(a);
+              });
+              const usedNR = new Set();
+              const legMap = {};
+              FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+                if (byRI[i] != null) return;
+                for (let ai = 0; ai < noRI.length; ai++) {
+                  if (usedNR.has(ai)) continue;
+                  const n = (noRI[ai].name || noRI[ai].category_name || '').toLowerCase();
+                  if (n.includes(typeLabel.toLowerCase().split(' ')[0]) || typeLabel.toLowerCase().includes(n.split(' ')[0])) {
+                    legMap[i] = noRI[ai]; usedNR.add(ai); break;
+                  }
+                }
+              });
+
+              FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+                const a = byRI[i] != null ? byRI[i] : (legMap[i] || null);
+                const displayType  = a ? (a.name  || typeLabel) : typeLabel;
+                const displayBrand = a ? (a.brand || '') : '';
+                const displaySn    = a ? (a.tag   || a.serial_number || '') : '';
+                const displayCond  = a ? (a.condition || '') : '';
+                const displayVal   = a ? (a.value  || '') : '';
+                const displayRem   = a ? (a.remarks || '') : '';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td class="asset-type-cell" style="padding:3px 5px;font-weight:600;color:#111;">${esc(displayType)}</td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayBrand)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displaySn)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayCond)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayVal)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayRem)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>`;
+                tbody.appendChild(tr);
+              });
+            }
+          } catch(_) { /* fall through to legacy handling */ }
+        } else if (!hasAssignee && (reqBrand || reqModel || reqCat)) {
           // Build a synthetic asset entry for the requested item.
           const syntheticAsset = [{
             category_name: reqCat,

@@ -239,7 +239,8 @@
     #ppanel-return.anim-ready .pfield:nth-child(2){animation:fieldSlideIn .3s .24s both}
     #ppanel-return.anim-ready .pfield:nth-child(3){animation:fieldSlideIn .3s .30s both}
     #ppanel-return.anim-ready .pfield:nth-child(4){animation:fieldSlideIn .3s .36s both}
-    #ppanel-return.anim-ready .pbtn-row{animation:fieldSlideIn .3s .42s both}
+    #ppanel-return.anim-ready .pfield:nth-child(5){animation:fieldSlideIn .3s .42s both}
+    #ppanel-return.anim-ready .pbtn-row{animation:fieldSlideIn .3s .48s both}
 
     /* Input/select focus glow */
     .pfield select,.pfield textarea{transition:border-color .15s,box-shadow .15s}
@@ -395,6 +396,13 @@
             <svg viewBox="0 0 24 24"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
           </div>
           <div><div class="portal-form-title">Request return</div><div class="portal-form-sub">Submit to facilities for pickup or drop-off</div></div>
+        </div>
+        <div class="pfield"><label>Return ID</label>
+          <div style="position:relative;">
+            <input id="pret-return-id" type="text" readonly
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;box-sizing:border-box;" />
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);pointer-events:none;">Auto</span>
+          </div>
         </div>
         <div class="pfield"><label>Asset to Return</label>
           <div class="pselect-wrap"><select id="pret-asset"><option value="">· Select an asset ·</option></select><span class="pselect-arrow">?</span></div>
@@ -920,35 +928,61 @@
 <!-- -- Success Modal -- -->
 <div id="success-modal-overlay" style="
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);
-  z-index:950;align-items:center;justify-content:center;">
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);
+  z-index:950;align-items:center;justify-content:center;padding:20px;">
   <div style="
-    background:var(--bg2);border:1px solid var(--border2);
-    border-radius:var(--radius);width:100%;max-width:400px;
-    padding:40px 36px 32px;text-align:center;
-    box-shadow:0 24px 80px rgba(0,0,0,0.6);
-    animation:_smSlide .25s ease;">
-    <div style="
-      width:60px;height:60px;border-radius:50%;
-      background:var(--green-dim);border:2px solid var(--green);
-      display:flex;align-items:center;justify-content:center;
-      margin:0 auto 18px;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);
+    border:1px solid rgba(62,207,142,.2);
+    border-radius:20px;width:100%;max-width:380px;
+    padding:44px 36px 36px;text-align:center;
+    box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(62,207,142,.08);
+    animation:_smSlide .3s cubic-bezier(.22,.68,0,1.2);">
+    <!-- Animated check circle -->
+    <div style="position:relative;width:72px;height:72px;margin:0 auto 24px;">
+      <!-- Outer pulse ring -->
+      <div style="
+        position:absolute;inset:-8px;border-radius:50%;
+        border:2px solid rgba(62,207,142,.25);
+        animation:_smPulse 2s ease-in-out infinite;"></div>
+      <!-- Middle ring -->
+      <div style="
+        position:absolute;inset:-2px;border-radius:50%;
+        border:1.5px solid rgba(62,207,142,.15);"></div>
+      <!-- Icon circle -->
+      <div style="
+        width:72px;height:72px;border-radius:50%;
+        background:linear-gradient(135deg,rgba(62,207,142,.2) 0%,rgba(62,207,142,.08) 100%);
+        border:2px solid var(--green);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 0 24px rgba(62,207,142,.2);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(62,207,142,.6))"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
     </div>
-    <h3 style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px;" id="success-modal-title">Submitted!</h3>
-    <p style="font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:26px;" id="success-modal-msg"></p>
+    <!-- Title -->
+    <h3 style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:-.3px;" id="success-modal-title">Done!</h3>
+    <!-- Message -->
+    <p style="font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:28px;max-width:280px;margin-left:auto;margin-right:auto;" id="success-modal-msg"></p>
+    <!-- Divider -->
+    <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin-bottom:24px;"></div>
+    <!-- OK button -->
     <button onclick="closeSuccessModal()" style="
-      background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);
-      padding:10px 32px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
-      cursor:pointer;transition:background .15s;"
-      onmouseover="this.style.background='#2db87a'"
-      onmouseout="this.style.background='var(--green)'">OK</button>
+      background:linear-gradient(135deg,var(--green) 0%,#2ab97e 100%);
+      color:#fff;border:none;border-radius:10px;
+      padding:11px 40px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+      cursor:pointer;transition:all .15s;letter-spacing:.2px;
+      box-shadow:0 4px 16px rgba(62,207,142,.35);"
+      onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(62,207,142,.45)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(62,207,142,.35)'">Got it</button>
   </div>
 </div>
 <style>
   @keyframes _smSlide {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
+    from { opacity:0; transform:translateY(20px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes _smPulse {
+    0%,100% { transform:scale(1); opacity:.6; }
+    50%      { transform:scale(1.12); opacity:1; }
   }
 </style>
 
@@ -2350,13 +2384,19 @@ async function _openRequestFormModal() {
     if (nameEl)  nameEl.value  = user?.name  || '';
     if (empidEl) empidEl.value = user?.employee_id || user?.username || '';
 
-    // Reset brand/model selection
-    _rfClearBrand();
-    _rfClearModel();
-    const brandSearchEl = document.getElementById('rf-brand-search');
-    const modelSearchEl = document.getElementById('rf-model-search');
-    if (brandSearchEl) brandSearchEl.value = '';
-    if (modelSearchEl) { modelSearchEl.value = ''; modelSearchEl.disabled = true; modelSearchEl.style.opacity = '.5'; modelSearchEl.style.cursor = 'not-allowed'; modelSearchEl.placeholder = 'Select a brand first…'; }
+    // Generate a unique Request ID for this new request
+    const reqIdEl = document.getElementById('rf-request-id');
+    if (reqIdEl) {
+      const now    = new Date();
+      const date   = now.getFullYear().toString()
+                   + String(now.getMonth() + 1).padStart(2, '0')
+                   + String(now.getDate()).padStart(2, '0');
+      const rand   = Math.random().toString(36).substring(2, 6).toUpperCase();
+      reqIdEl.value = `REQ-${date}-${rand}`;
+    }
+
+    // Reset asset rows
+    _rfInitRows();
     const descEl = document.getElementById('rf-description');
     if (descEl) descEl.value = '';
 
@@ -2384,55 +2424,157 @@ async function _openRequestFormModal() {
       _rfAllAssets   = (prodRes.data || []).filter(p => p.asset_status === 'available');
     } catch(_) { _rfAllAssets = []; }
 
-    _rfFilterBrands(false);
+    // Re-init rows now that asset data is loaded so dropdowns populate correctly
+    _rfInitRows();
   }
 
   document.getElementById('request-form-modal').classList.add('open');
 }
 
-// ── Brand helpers ──────────────────────────────────────────────────────────
-function _rfFilterBrands(show = true) {
-  const catId = (document.getElementById('rf-category')?.value || '').trim();
-  const query = (document.getElementById('rf-brand-search')?.value || '').toLowerCase().trim();
-  let pool    = _rfAllAssets;
-  if (catId) pool = pool.filter(p => String(p.category_id) === catId);
-  // Unique brands from pool
-  const brands = [...new Set(pool.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
-  const filtered = query ? brands.filter(b => b.toLowerCase().includes(query)) : brands;
+// ── Asset rows (multi-row brand+model) ────────────────────────────────────
+let _rfRowId = 0;
+const _rfRows = {}; // { id: { brand, model } }
 
-  const dd = document.getElementById('rf-brand-dropdown');
-  if (!dd) return;
-  if (filtered.length === 0) {
-    dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No brands found</div>';
-  } else {
-    dd.innerHTML = filtered.map(b =>
-      `<div onclick="_rfSelectBrand('${b.replace(/'/g,"\\'")}') "
-        style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s;"
-        onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''"
-      >${esc(b)}</div>`
-    ).join('');
-  }
-  if (show) _rfShowBrandDropdown();
+function _rfOnCategoryChange() {
+  // Rebuild dropdowns for all existing rows
+  Object.keys(_rfRows).forEach(id => {
+    _rfRebuildBrandDropdown(id);
+    _rfRows[id].model = '';
+    const modelInp = document.getElementById(`rf-model-${id}`);
+    if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; }
+  });
 }
 
-function _rfShowBrandDropdown() {
-  const dd = document.getElementById('rf-brand-dropdown');
+function _rfInitRows() {
+  _rfRowId = 0;
+  Object.keys(_rfRows).forEach(k => delete _rfRows[k]);
+  const container = document.getElementById('rf-asset-rows');
+  if (container) container.innerHTML = '';
+  _rfAddRow();
+}
+
+function _rfAddRow() {
+  const id = ++_rfRowId;
+  _rfRows[id] = { brand: '', model: '' };
+  const container = document.getElementById('rf-asset-rows');
+  if (!container) return;
+
+  // Build category options HTML (reuse loaded categories)
+  const catOpts = '<option value="">-- Category --</option>'
+    + (allCategories.length ? allCategories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('') : '');
+
+  const SEL_STYLE = `background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;`;
+
+  const row = document.createElement('div');
+  row.id = `rf-row-${id}`;
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start;';
+  row.innerHTML = `
+    <!-- Category -->
+    <div>
+      <select id="rf-cat-${id}" onchange="_rfOnRowCategoryChange(${id})"
+        style="${SEL_STYLE}"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"
+      >${catOpts}</select>
+    </div>
+    <!-- Brand combobox -->
+    <div style="position:relative;">
+      <input id="rf-brand-${id}" type="text" autocomplete="off" placeholder="Search brand…"
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--blue)';_rfShowBrandDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_rfHideBrandDd(${id}),160)"
+        oninput="_rfFilterBrandDd(${id})" />
+      <div id="rf-brand-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
+    </div>
+    <!-- Model combobox -->
+    <div style="position:relative;">
+      <input id="rf-model-${id}" type="text" autocomplete="off" placeholder="Select brand first…" disabled
+        style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;opacity:.5;cursor:not-allowed;"
+        onfocus="this.style.borderColor='var(--blue)';_rfShowModelDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_rfHideModelDd(${id}),160)"
+        oninput="_rfFilterModelDd(${id})" />
+      <div id="rf-model-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
+    </div>`;
+  container.appendChild(row);
+  _rfRebuildBrandDropdown(id);
+}
+
+function _rfOnRowCategoryChange(id) {
+  // Reset brand + model for this row when its category changes
+  if (_rfRows[id]) _rfRows[id].brand = '';
+  if (_rfRows[id]) _rfRows[id].model = '';
+  const brandInp = document.getElementById(`rf-brand-${id}`);
+  if (brandInp) brandInp.value = '';
+  const modelInp = document.getElementById(`rf-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  _rfRebuildBrandDropdown(id);
+}
+
+// No-op: category is now per-row
+function _rfOnCategoryChange() {}
+
+function _rfGetCatId(id) {
+  return (document.getElementById(`rf-cat-${id}`)?.value || '').trim();
+}
+
+function _rfBrandPool(catId) {
+  let pool = _rfAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === String(catId));
+  return [...new Set(pool.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+}
+
+function _rfModelPool(catId, brand) {
+  let pool = _rfAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === String(catId));
+  if (brand) pool = pool.filter(p => (p.brand || '').toLowerCase() === brand.toLowerCase());
+  return [...new Set(pool.map(p => (p.model || '').trim()).filter(Boolean))].sort();
+}
+
+function _rfRebuildBrandDropdown(id) {
+  const catId   = _rfGetCatId(id);
+  const brands  = _rfBrandPool(catId);
+  const query   = (document.getElementById(`rf-brand-${id}`)?.value || '').toLowerCase();
+  const filtered = query ? brands.filter(b => b.toLowerCase().includes(query)) : brands;
+  const dd = document.getElementById(`rf-brand-dd-${id}`);
+  if (!dd) return;
+  dd.innerHTML = filtered.length
+    ? filtered.map(b => {
+        const encoded = encodeURIComponent(b || '');
+        return `<div class="rf-dd-opt" data-row="${id}" data-val="${encoded}" data-fn="brand"
+          onmousedown="event.preventDefault()"
+          style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);"
+          onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''">${esc(b)}</div>`;
+      }).join('')
+    : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No brands found</div>';
+}
+
+function _rfShowBrandDd(id) {
+  _rfRebuildBrandDropdown(id);
+  const dd = document.getElementById(`rf-brand-dd-${id}`);
   if (dd) dd.style.display = 'block';
 }
-function _rfHideBrandDropdown() {
-  const dd = document.getElementById('rf-brand-dropdown');
+function _rfHideBrandDd(id) {
+  const dd = document.getElementById(`rf-brand-dd-${id}`);
   if (dd) dd.style.display = 'none';
 }
-function _rfSelectBrand(brand) {
-  const inp  = document.getElementById('rf-brand-search');
-  const pill = document.getElementById('rf-brand-selected');
-  const lbl  = document.getElementById('rf-brand-selected-label');
-  if (inp)  inp.value = '';
-  if (lbl)  lbl.textContent = brand;
-  if (pill) pill.style.display = 'flex';
-  _rfHideBrandDropdown();
-  // Enable model search
-  const modelInp = document.getElementById('rf-model-search');
+function _rfFilterBrandDd(id) {
+  _rfRebuildBrandDropdown(id);
+  const dd = document.getElementById(`rf-brand-dd-${id}`);
+  if (dd) dd.style.display = 'block';
+  // Clear model when brand text changes
+  const row = _rfRows[id];
+  if (row) row.brand = '';
+  const modelInp = document.getElementById(`rf-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; }
+  if (row) row.model = '';
+}
+
+function _rfSelectBrandRow(id, brand) {
+  const inp = document.getElementById(`rf-brand-${id}`);
+  if (inp) inp.value = brand;
+  _rfHideBrandDd(id);
+  if (_rfRows[id]) _rfRows[id].brand = brand;
+  // Enable model
+  const modelInp = document.getElementById(`rf-model-${id}`);
   if (modelInp) {
     modelInp.disabled    = false;
     modelInp.style.opacity = '1';
@@ -2440,104 +2582,115 @@ function _rfSelectBrand(brand) {
     modelInp.placeholder   = 'Search model…';
     modelInp.value         = '';
   }
-  _rfClearModel(false);
-  _rfFilterModels(false);
-}
-function _rfClearBrand(resetModel = true) {
-  const pill = document.getElementById('rf-brand-selected');
-  if (pill) pill.style.display = 'none';
-  if (resetModel) {
-    _rfClearModel();
-    const modelInp = document.getElementById('rf-model-search');
-    if (modelInp) {
-      modelInp.disabled    = true;
-      modelInp.style.opacity = '.5';
-      modelInp.style.cursor  = 'not-allowed';
-      modelInp.placeholder   = 'Select a brand first…';
-      modelInp.value         = '';
-    }
-  }
-}
-function _rfGetSelectedBrand() {
-  const lbl = document.getElementById('rf-brand-selected-label');
-  return lbl?.textContent?.trim() || null;
+  if (_rfRows[id]) _rfRows[id].model = '';
+  _rfRebuildModelDropdown(id);
 }
 
-// ── Model helpers ──────────────────────────────────────────────────────────
-function _rfFilterModels(show = true) {
-  const catId = (document.getElementById('rf-category')?.value || '').trim();
-  const brand = _rfGetSelectedBrand();
-  const query = (document.getElementById('rf-model-search')?.value || '').toLowerCase().trim();
-  let pool    = _rfAllAssets;
-  if (catId) pool = pool.filter(p => String(p.category_id) === catId);
-  if (brand) pool = pool.filter(p => (p.brand || '').trim().toLowerCase() === brand.toLowerCase());
-  const models = [...new Set(pool.map(p => (p.model || '').trim()).filter(Boolean))].sort();
+function _rfRebuildModelDropdown(id) {
+  const catId   = _rfGetCatId(id);
+  const brand   = _rfRows[id]?.brand || (document.getElementById(`rf-brand-${id}`)?.value || '');
+  const models  = _rfModelPool(catId, brand);
+  const query   = (document.getElementById(`rf-model-${id}`)?.value || '').toLowerCase();
   const filtered = query ? models.filter(m => m.toLowerCase().includes(query)) : models;
-
-  const dd = document.getElementById('rf-model-dropdown');
+  const dd = document.getElementById(`rf-model-dd-${id}`);
   if (!dd) return;
-  if (filtered.length === 0) {
-    dd.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
-  } else {
-    dd.innerHTML = filtered.map(m =>
-      `<div onclick="_rfSelectModel('${m.replace(/'/g,"\\'")}') "
-        style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s;"
-        onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''"
-      >${esc(m)}</div>`
-    ).join('');
-  }
-  if (show) _rfShowModelDropdown();
+  dd.innerHTML = filtered.length
+    ? filtered.map(m => {
+        const encoded = encodeURIComponent(m || '');
+        return `<div class="rf-dd-opt" data-row="${id}" data-val="${encoded}" data-fn="model"
+          onmousedown="event.preventDefault()"
+          style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);"
+          onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''">${esc(m)}</div>`;
+      }).join('')
+    : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
 }
 
-function _rfShowModelDropdown() {
-  const dd = document.getElementById('rf-model-dropdown');
+function _rfShowModelDd(id) {
+  if (!_rfRows[id]?.brand && !document.getElementById(`rf-brand-${id}`)?.value) return;
+  _rfRebuildModelDropdown(id);
+  const dd = document.getElementById(`rf-model-dd-${id}`);
   if (dd) dd.style.display = 'block';
 }
-function _rfHideModelDropdown() {
-  const dd = document.getElementById('rf-model-dropdown');
+function _rfHideModelDd(id) {
+  const dd = document.getElementById(`rf-model-dd-${id}`);
   if (dd) dd.style.display = 'none';
 }
-function _rfSelectModel(model) {
-  const inp  = document.getElementById('rf-model-search');
-  const pill = document.getElementById('rf-model-selected');
-  const lbl  = document.getElementById('rf-model-selected-label');
-  if (inp)  inp.value = '';
-  if (lbl)  lbl.textContent = model;
-  if (pill) pill.style.display = 'flex';
-  _rfHideModelDropdown();
+function _rfFilterModelDd(id) {
+  _rfRebuildModelDropdown(id);
+  const dd = document.getElementById(`rf-model-dd-${id}`);
+  if (dd) dd.style.display = 'block';
 }
-function _rfClearModel(resetPill = true) {
-  if (resetPill) {
-    const pill = document.getElementById('rf-model-selected');
-    if (pill) pill.style.display = 'none';
+
+function _rfSelectModelRow(id, model) {
+  const inp = document.getElementById(`rf-model-${id}`);
+  if (inp) inp.value = model;
+  _rfHideModelDd(id);
+  if (_rfRows[id]) _rfRows[id].model = model;
+  // If this is the last row and both brand+model are filled, add a new row
+  const ids = Object.keys(_rfRows).map(Number);
+  if (id === Math.max(...ids)) {
+    const brand = document.getElementById(`rf-brand-${id}`)?.value || '';
+    if (brand && model) _rfAddRow();
   }
 }
-function _rfGetSelectedModel() {
-  const lbl = document.getElementById('rf-model-selected-label');
-  return lbl?.textContent?.trim() || null;
-}
+
+// Delegated click handler for rf dropdown options (avoids inline onclick quote issues)
+document.addEventListener('click', function(e) {
+  const opt = e.target.closest('.rf-dd-opt');
+  if (!opt) return;
+  const rowId = parseInt(opt.dataset.row, 10);
+  const val   = decodeURIComponent(opt.dataset.val);
+  if (opt.dataset.fn === 'brand') _rfSelectBrandRow(rowId, val);
+  else if (opt.dataset.fn === 'model') _rfSelectModelRow(rowId, val);
+});
+
+// Keep old helpers as stubs so any remaining references don't break
+function _rfFilterBrands() {}
+function _rfShowBrandDropdown() {}
+function _rfHideBrandDropdown() {}
+function _rfSelectBrand() {}
+function _rfClearBrand() {}
+function _rfGetSelectedBrand() { return null; }
+function _rfFilterModels() {}
+function _rfShowModelDropdown() {}
+function _rfHideModelDropdown() {}
+function _rfSelectModel() {}
+function _rfClearModel() {}
+function _rfGetSelectedModel() { return null; }
 
 async function _submitNonAdminRequest() {
   const name   = (document.getElementById('rf-name')?.value  || '').trim();
   const empid  = (document.getElementById('rf-empid')?.value || '').trim();
+  const reqId  = (document.getElementById('rf-request-id')?.value || '').trim();
   const locSel2 = document.getElementById('rf-location');
   const locId  = locSel2?.value || '';
   const locName= locSel2?.options[locSel2.selectedIndex]?.text || '';
-  const catSel = document.getElementById('rf-category');
-  const catId  = catSel?.value || '';
-  const catName= catSel?.options[catSel.selectedIndex]?.text || '';
-  const brand  = _rfGetSelectedBrand() || '';
-  const model  = _rfGetSelectedModel() || '';
   const desc   = (document.getElementById('rf-description')?.value || '').trim();
 
   if (!name) { showToast("Requestor's name is required.", 'error'); return; }
-  if (!desc && !brand) { showToast('Please select a brand or provide a description.', 'error'); return; }
+
+  // Collect filled asset rows (per-row category + brand + model)
+  const assets = Object.keys(_rfRows).map(id => {
+    const catSel = document.getElementById(`rf-cat-${id}`);
+    return {
+      category_id:   catSel?.value || null,
+      category_name: catSel?.options[catSel.selectedIndex]?.text?.replace(/^--\s*/, '').replace(/\s*--$/, '') || null,
+      brand: (document.getElementById(`rf-brand-${id}`)?.value || '').trim(),
+      model: (document.getElementById(`rf-model-${id}`)?.value || '').trim(),
+    };
+  }).filter(a => a.brand || a.model);
+
+  if (!assets.length && !desc) {
+    showToast('Please fill in at least one asset brand or provide a description.', 'error');
+    return;
+  }
 
   const btn = document.getElementById('rf-submit-btn');
   if (btn) btn.disabled = true;
 
-  const resourceName = [brand, model].filter(Boolean).join(' ') ||
-    (catName && catName !== '-- All Categories --' ? catName : 'Asset');
+  const firstAsset = assets[0] || {};
+  const resourceName = [firstAsset.brand, firstAsset.model].filter(Boolean).join(' ') ||
+    (firstAsset.category_name || 'Asset');
 
   try {
     await ApprovalFlow.submit({
@@ -2546,14 +2699,16 @@ async function _submitNonAdminRequest() {
       resource_id:   null,
       resource_name: resourceName,
       payload: {
+        request_id:            reqId  || null,
         requestor_name:        name,
         requestor_id:          empid,
         requestor_location:    locName !== '-- Select Location --' ? locName : '',
         requestor_location_id: locId || null,
-        category_id:           catId  || null,
-        category_name:         (catName !== '-- All Categories --' ? catName : null),
-        brand:                 brand  || null,
-        model:                 model  || null,
+        category_id:           firstAsset.category_id   || null,
+        category_name:         firstAsset.category_name || null,
+        brand:                 firstAsset.brand  || null,
+        model:                 firstAsset.model  || null,
+        assets:                assets.length ? assets : null,
         description:           desc,
       },
       notes: desc,
@@ -2615,13 +2770,17 @@ function _mrRender() {
     const model = payload.model || '';
     const cat   = payload.category_name || '';
     const sub   = [brand, model, cat].filter(Boolean).join(' · ') || r.resource_name || r.resource_type;
+    const reqId = payload.request_id || '';
     const date  = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
     const reviewNote = r.review_notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;">"${esc(r.review_notes)}"</div>` : '';
     return `
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
         <div style="width:38px;height:38px;border-radius:9px;background:${s.bg};border:1px solid ${s.border};display:grid;place-items:center;flex-shrink:0;font-size:16px;">📋</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.resource_name || 'Asset Request')}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.resource_name || 'Asset Request')}</div>
+            ${reqId ? `<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.4px;color:var(--muted);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;flex-shrink:0;">${esc(reqId)}</span>` : ''}
+          </div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">${esc(sub)}</div>
           ${reviewNote}
         </div>
@@ -2637,9 +2796,13 @@ function _mrRender() {
   }).join('');
 }
 
+let _mrViewRequestId = null;
+
 function _mrOpenView(id) {
   const r = _mrData.find(x => x.id === id);
   if (!r) return;
+
+  _mrViewRequestId = id;
 
   const payload  = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
   const statusStyle = {
@@ -2654,6 +2817,12 @@ function _mrOpenView(id) {
   const titleEl   = document.getElementById('mr-view-title');
   const body      = document.getElementById('mr-view-body');
   const iframe    = document.getElementById('mr-view-iframe');
+  const footer    = document.getElementById('mr-view-footer');
+
+  // Show footer with Confirm Asset button only for forwarded requests
+  if (footer) footer.style.display = r.status === 'forwarded' ? 'flex' : 'none';
+  const confirmBtn = document.getElementById('mr-confirm-asset-btn');
+  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = ''; confirmBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm Asset'; }
 
   if (r.status === 'forwarded') {
     // Show accountability form iframe
@@ -2668,16 +2837,22 @@ function _mrOpenView(id) {
     params.set('modal', '1');
     params.set('readonly', '1');
     // Support both field name conventions used by different request forms
-    const assigneeName = payload.requestor_name || payload.assignee_name || r.requested_by || '';
+    const assigneeName = payload.admin_assignee || payload.requestor_name || payload.assignee_name || r.requested_by || '';
     if (assigneeName)               params.set('assignee',  assigneeName);
-    if (payload.requestor_id)       params.set('empid',     payload.requestor_id);
-    if (payload.requestor_location) params.set('location',  payload.requestor_location);
+    const empId = payload.admin_empid || payload.requestor_id || '';
+    if (empId)                      params.set('empid',     empId);
+    const location = payload.admin_location || payload.requestor_location || '';
+    if (location)                   params.set('location',  location);
     if (payload.brand)              params.set('brand',     payload.brand);
     if (payload.model)              params.set('model',     payload.model);
     if (payload.category_name)      params.set('category',  payload.category_name);
     // serial_number may be stored as sku depending on which field was filled
     const reqSerial = payload.serial_number || payload.sku || '';
     if (reqSerial)                  params.set('serial',    reqSerial);
+    // Pass admin-filled assets array so accountability form pre-populates the table
+    if (Array.isArray(payload.assets) && payload.assets.length) {
+      params.set('assets', JSON.stringify(payload.assets));
+    }
     iframe.src = 'accountability.html?' + params.toString();
   } else {
     // Show plain details
@@ -2703,6 +2878,7 @@ function _mrOpenView(id) {
       <div style="margin-bottom:18px;">
         <span style="display:inline-flex;align-items:center;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${s.label}</span>
       </div>
+      ${payload.request_id ? row('Request ID', `<span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;">${esc(payload.request_id)}</span>`) : ''}
       ${row('Asset Requested', esc(r.resource_name || '—'))}
       ${row('Category',        esc(payload.category_name || '—'))}
       ${row('Brand',           esc(payload.brand  || '—'))}
@@ -2721,14 +2897,413 @@ function _mrOpenView(id) {
   document.getElementById('mr-view-modal').classList.add('open');
 }
 
+async function _mrConfirmAsset() {
+  if (!_mrViewRequestId) return;
+  const btn = document.getElementById('mr-confirm-asset-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Confirming…'; }
+  try {
+    const root = (typeof resolveProjectRoot === 'function') ? resolveProjectRoot() : '';
+    const res  = await fetch(`${root}/api/approvals/${_mrViewRequestId}?action=confirm`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+    _mrCloseView();
+    showToast('Asset confirmed and assigned to you!', 'success');
+    // Reload My Requests list
+    await _mrLoad();
+    // Refresh My Assets panel immediately — fetch fresh assignments and re-render
+    try {
+      const user = auth.currentUser;
+      const myName = (user?.name || '').toLowerCase();
+      const assignRes = await api.getActiveAssignments();
+      _portalAssets = (assignRes.data || []).filter(a =>
+        (a.assignee_name || '').toLowerCase() === myName
+      );
+      renderPortalAssets();
+      // Also refresh the return dropdown
+      const retSel = document.getElementById('pret-asset');
+      if (retSel) {
+        retSel.innerHTML = '<option value="">· Select an asset ·</option>'
+          + _portalAssets.map(a => {
+              const status = getAssetStatus(a);
+              const label  = status === 'overdue' ? ' (Overdue)' : status === 'aging' ? ' (Aging)' : '';
+              const serial = a.serial_number || a.product_sku || '';
+              const serialPart = serial ? ` [${serial}]` : '';
+              return `<option value="${a.id}">${esc(a.product_name || a.asset_name || 'Asset')}${serialPart}${label}</option>`;
+            }).join('');
+      }
+      // Switch to My Assets tab so user sees the result right away
+      switchPortalTab('myassets');
+    } catch(_) { /* non-fatal — assets will refresh on next tab visit */ }
+  } catch(e) {
+    showToast(e.message || 'Failed to confirm asset.', 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm Asset'; }
+  }
+}
+
 function _mrCloseView() {
   document.getElementById('mr-view-modal').classList.remove('open');
+  _mrViewRequestId = null;
   setTimeout(() => {
     const iframe = document.getElementById('mr-view-iframe');
     if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
     const shell = document.getElementById('mr-view-shell');
     if (shell)  { shell.style.maxWidth = '500px'; shell.style.maxHeight = '90vh'; shell.style.overflow = 'auto'; }
+    const footer = document.getElementById('mr-view-footer');
+    if (footer) footer.style.display = 'none';
   }, 300);
+}
+
+function _mrOpenChangeAsset() {
+  const r = _mrData.find(x => x.id === _mrViewRequestId);
+  if (!r) return;
+  const payload = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
+
+  const descEl = document.getElementById('mr-change-asset-desc');
+  if (descEl) descEl.value = payload.description || r.notes || '';
+
+  // Ensure form data is available, then populate
+  if (!allCategories.length || !allProducts.length) {
+    loadFormData().then(() => _mrPopulateChangeAssetDropdowns(payload));
+  } else {
+    _mrPopulateChangeAssetDropdowns(payload);
+  }
+
+  document.getElementById('mr-change-asset-modal').classList.add('open');
+}
+
+// Holds available options derived from allProducts
+let _mrBrandOptions = [];
+let _mrModelOptions = [];
+
+// ── Multi-row brand+model for Change Assets ───────────────────────────────
+let _mrRowId = 0;
+const _mrRows = {}; // { id: { brand, model } }
+
+function _mrInitRows(prefillAssets) {
+  _mrRowId = 0;
+  Object.keys(_mrRows).forEach(k => delete _mrRows[k]);
+  const container = document.getElementById('mr-asset-rows');
+  if (container) container.innerHTML = '';
+  // Pre-fill from existing payload assets, or start with one empty row
+  const list = Array.isArray(prefillAssets) && prefillAssets.length ? prefillAssets : [{}];
+  list.forEach(a => _mrAddRow(a.category_id || '', a.category_name || '', a.brand || '', a.model || ''));
+  // Always append one extra empty row after the pre-filled ones
+  _mrAddRow('', '', '', '');
+}
+
+function _mrAddRow(prefillCatId, prefillCatName, prefillBrand, prefillModel) {
+  const id = ++_mrRowId;
+  _mrRows[id] = { brand: prefillBrand || '', model: prefillModel || '' };
+  const container = document.getElementById('mr-asset-rows');
+  if (!container) return;
+
+  const SEL_STYLE = `background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;`;
+
+  const catOpts = '<option value="">· Category ·</option>'
+    + allCategories.map(c => {
+        const matchById   = prefillCatId   && String(c.id) === String(prefillCatId);
+        const matchByName = prefillCatName && c.name.trim().toLowerCase() === prefillCatName.trim().toLowerCase();
+        return `<option value="${c.id}"${matchById || matchByName ? ' selected' : ''}>${esc(c.name)}</option>`;
+      }).join('');
+
+  const INP = (ph, disabled, val) =>
+    `placeholder="${ph}" value="${(val||'').replace(/"/g,'&quot;')}" ${disabled ? 'disabled' : ''} autocomplete="off"
+     style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;${disabled ? 'opacity:.5;cursor:not-allowed;' : ''}"`;
+
+  const row = document.createElement('div');
+  row.id = `mr-row-${id}`;
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start;';
+  row.innerHTML = `
+    <!-- Category -->
+    <div>
+      <select id="mr-cat-${id}" onchange="_mrOnRowCategoryChange(${id})"
+        style="${SEL_STYLE}"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"
+      >${catOpts}</select>
+    </div>
+    <!-- Brand -->
+    <div style="position:relative;">
+      <input id="mr-brand-${id}" type="text" ${INP('Search brand…', false, prefillBrand)}
+        onfocus="this.style.borderColor='var(--blue)';_mrShowBrandDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_mrHideBrandDd(${id}),160)"
+        oninput="_mrFilterBrandDd(${id})" />
+      <div id="mr-brand-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:400;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
+    </div>
+    <!-- Model -->
+    <div style="position:relative;">
+      <input id="mr-model-${id}" type="text" ${INP(prefillBrand ? 'Search model…' : 'Select brand first…', !prefillBrand, prefillModel)}
+        onfocus="this.style.borderColor='var(--blue)';_mrShowModelDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_mrHideModelDd(${id}),160)"
+        oninput="_mrFilterModelDd(${id})" />
+      <div id="mr-model-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:400;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
+    </div>`;
+  container.appendChild(row);
+}
+
+function _mrOnRowCategoryChange(id) {
+  if (_mrRows[id]) _mrRows[id].brand = '';
+  if (_mrRows[id]) _mrRows[id].model = '';
+  const brandInp = document.getElementById(`mr-brand-${id}`);
+  if (brandInp) brandInp.value = '';
+  const modelInp = document.getElementById(`mr-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  _mrMaybeSpawnRow(id);
+}
+
+function _mrGetCatId(id) {
+  return parseInt(document.getElementById(`mr-cat-${id}`)?.value, 10) || null;
+}
+
+function _mrBrandPool(catId) {
+  const pool = catId ? allProducts.filter(p => p.category_id === catId) : allProducts;
+  return [...new Set(pool.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+}
+
+function _mrModelPool(catId, brand) {
+  let pool = allProducts;
+  if (catId) pool = pool.filter(p => p.category_id === catId);
+  if (brand) pool = pool.filter(p => (p.brand || '').toLowerCase() === brand.toLowerCase());
+  return [...new Set(pool.map(p => (p.model || '').trim()).filter(Boolean))].sort();
+}
+
+function _mrRenderDdList(ddId, options, onSelectFn) {
+  const el = document.getElementById(ddId);
+  if (!el) return;
+  if (!options.length) {
+    el.innerHTML = '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No options found</div>';
+    el.style.display = 'block';
+    return;
+  }
+  el.innerHTML = options.map(o => {
+    const encoded = encodeURIComponent(o.val || '');
+    return `<div class="mr-dd-opt" data-row="${o.rowId}" data-val="${encoded}" data-fn="${onSelectFn}"
+        onmousedown="event.preventDefault()"
+        style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);"
+        onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''"
+      >${esc(o.val)}</div>`;
+  }).join('');
+  el.style.display = 'block';
+}
+
+// Single delegated click handler for all mr dropdowns
+document.addEventListener('click', function(e) {
+  const opt = e.target.closest('.mr-dd-opt');
+  if (!opt) return;
+  const rowId = parseInt(opt.dataset.row, 10);
+  const val   = decodeURIComponent(opt.dataset.val);
+  const fn    = opt.dataset.fn;
+  if (fn === '_mrSelectBrandRow') _mrSelectBrandRow(rowId, val);
+  else if (fn === '_mrSelectModelRow') _mrSelectModelRow(rowId, val);
+});
+
+function _mrShowBrandDd(id) {
+  const catId = _mrGetCatId(id);
+  const q = (document.getElementById(`mr-brand-${id}`)?.value || '').toLowerCase();
+  const opts = _mrBrandPool(catId).filter(b => !q || b.toLowerCase().includes(q));
+  _mrRenderDdList(`mr-brand-dd-${id}`, opts.map(b => ({ rowId: id, val: b })), '_mrSelectBrandRow');
+}
+function _mrHideBrandDd(id) {
+  const el = document.getElementById(`mr-brand-dd-${id}`);
+  if (el) el.style.display = 'none';
+}
+function _mrFilterBrandDd(id) {
+  _mrShowBrandDd(id);
+  // Reset model for this row when brand text changes
+  if (_mrRows[id]) _mrRows[id].brand = '';
+  const modelInp = document.getElementById(`mr-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; }
+  if (_mrRows[id]) _mrRows[id].model = '';
+  _mrHideModelDd(id);
+}
+
+function _mrSelectBrandRow(id, brand) {
+  const inp = document.getElementById(`mr-brand-${id}`);
+  if (inp) inp.value = brand;
+  _mrHideBrandDd(id);
+  if (_mrRows[id]) _mrRows[id].brand = brand;
+  const modelInp = document.getElementById(`mr-model-${id}`);
+  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model…'; modelInp.value = ''; }
+  if (_mrRows[id]) _mrRows[id].model = '';
+  _mrMaybeSpawnRow(id);
+}
+
+function _mrShowModelDd(id) {
+  if (!_mrRows[id]?.brand && !document.getElementById(`mr-brand-${id}`)?.value) return;
+  const catId = _mrGetCatId(id);
+  const brand = _mrRows[id]?.brand || document.getElementById(`mr-brand-${id}`)?.value || '';
+  const q = (document.getElementById(`mr-model-${id}`)?.value || '').toLowerCase();
+  const opts = _mrModelPool(catId, brand).filter(m => !q || m.toLowerCase().includes(q));
+  _mrRenderDdList(`mr-model-dd-${id}`, opts.map(m => ({ rowId: id, val: m })), '_mrSelectModelRow');
+}
+function _mrHideModelDd(id) {
+  const el = document.getElementById(`mr-model-dd-${id}`);
+  if (el) el.style.display = 'none';
+}
+function _mrFilterModelDd(id) {
+  _mrShowModelDd(id);
+}
+
+function _mrSelectModelRow(id, model) {
+  const inp = document.getElementById(`mr-model-${id}`);
+  if (inp) inp.value = model;
+  _mrHideModelDd(id);
+  if (_mrRows[id]) _mrRows[id].model = model;
+  _mrMaybeSpawnRow(id);
+}
+
+// Spawn a new empty row if `id` is the last row and all three fields are filled
+function _mrMaybeSpawnRow(id) {
+  const ids = Object.keys(_mrRows).map(Number);
+  if (id !== Math.max(...ids)) return;
+  const cat   = document.getElementById(`mr-cat-${id}`)?.value   || '';
+  const brand = document.getElementById(`mr-brand-${id}`)?.value || '';
+  const model = document.getElementById(`mr-model-${id}`)?.value || '';
+  if (cat && brand && model) _mrAddRow('', '', '', '');
+}
+
+function _mrPopulateChangeAssetDropdowns(payload) {
+  let prefill = [];
+
+  // Helper: given a brand string, find the matching category and split brand/model if combined
+  function inferCategory(brand) {
+    if (!brand || !allProducts.length) return { id: '', name: '', brand, model: '' };
+    const b = brand.toLowerCase().trim();
+    // Try exact brand match first
+    let prod = allProducts.find(p => (p.brand || '').toLowerCase().trim() === b);
+    // Fallback: brand is a combined "brand model" string — try startsWith
+    if (!prod) prod = allProducts.find(p => {
+      const pb = (p.brand || '').toLowerCase().trim();
+      return pb && b.startsWith(pb);
+    });
+    if (!prod) return { id: '', name: '', brand, model: '' };
+    const cat = allCategories.find(c => String(c.id) === String(prod.category_id));
+    // If the stored brand string is actually "brand model" combined, split it
+    const prodBrand = (prod.brand || '').trim();
+    const isCombined = brand.toLowerCase().startsWith(prodBrand.toLowerCase()) && brand.length > prodBrand.length;
+    const resolvedBrand = isCombined ? prodBrand : brand;
+    const resolvedModel = isCombined ? brand.slice(prodBrand.length).trim() : '';
+    return {
+      id:    prod.category_id ? String(prod.category_id) : '',
+      name:  cat ? cat.name : (prod.category_name || ''),
+      brand: resolvedBrand,
+      model: resolvedModel,
+    };
+  }
+
+  if (Array.isArray(payload.assets) && payload.assets.length) {
+    prefill = payload.assets
+      .filter(a => a.brand || a.model || a.category_name || a.category_id)
+      .map(a => {
+        // If category info is missing, infer from brand
+        if (!a.category_id && !a.category_name && a.brand) {
+          const inf = inferCategory(a.brand);
+          return {
+            category_id:   inf.id,
+            category_name: inf.name,
+            brand:         inf.brand || a.brand,
+            model:         a.model  || inf.model,
+          };
+        }
+        return a;
+      });
+  } else if (payload.brand || payload.category_name || payload.category_id) {
+    const catId   = payload.category_id   || '';
+    const catName = payload.category_name || '';
+    if (!catId && !catName && payload.brand) {
+      const inf = inferCategory(payload.brand);
+      prefill = [{
+        category_id:   inf.id,
+        category_name: inf.name,
+        brand:         inf.brand || payload.brand,
+        model:         payload.model || inf.model,
+      }];
+    } else {
+      prefill = [{
+        category_id:   catId,
+        category_name: catName,
+        brand:         payload.brand || '',
+        model:         payload.model || '',
+      }];
+    }
+  }
+
+  _mrInitRows(prefill);
+}
+
+// No-op: category is now per-row
+function _mrChangeAssetCategoryChange() {}
+
+function _mrCloseChangeAsset() {
+  document.getElementById('mr-change-asset-modal').classList.remove('open');
+}
+
+async function _mrSaveChangeAsset() {
+  if (!_mrViewRequestId) return;
+  const desc = (document.getElementById('mr-change-asset-desc')?.value || '').trim();
+
+  // Collect filled asset rows (per-row category + brand + model)
+  const assets = Object.keys(_mrRows).map(id => {
+    const catSel = document.getElementById(`mr-cat-${id}`);
+    return {
+      category_id:   catSel?.value || null,
+      category_name: catSel?.options[catSel.selectedIndex]?.text?.replace(/^·\s*/, '').replace(/\s*·$/, '') || null,
+      brand: (document.getElementById(`mr-brand-${id}`)?.value || '').trim(),
+      model: (document.getElementById(`mr-model-${id}`)?.value || '').trim(),
+    };
+  }).filter(a => a.brand || a.model);
+
+  const firstAsset = assets[0] || {};
+
+  const saveBtn = document.getElementById('mr-change-asset-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '⏳ Saving…'; }
+  try {
+    const root = (typeof resolveProjectRoot === 'function') ? resolveProjectRoot() : '';
+    const res = await fetch(`${root}/api/approvals/${_mrViewRequestId}?action=change_asset`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description:   desc,
+        category_id:   firstAsset.category_id   || null,
+        category_name: firstAsset.category_name || null,
+        brand:         firstAsset.brand || null,
+        model:         firstAsset.model || null,
+        assets:        assets.length ? assets : null,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+
+    // Update local cache
+    const r = _mrData.find(x => x.id === _mrViewRequestId);
+    if (r) {
+      const payload = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
+      payload.description   = desc;
+      if (firstAsset.category_id)   payload.category_id   = firstAsset.category_id;
+      if (firstAsset.category_name) payload.category_name = firstAsset.category_name;
+      if (firstAsset.brand)         payload.brand         = firstAsset.brand;
+      if (firstAsset.model)         payload.model         = firstAsset.model;
+      if (assets.length)            payload.assets        = assets;
+      r.payload = payload;
+    }
+
+    _mrCloseChangeAsset();
+    showToast('Asset details updated. Your request is back in pending review.', 'success');
+    // Reload My Requests list so the status updates from "Waiting for confirmation" → "Pending"
+    await _mrLoad();
+  } catch(e) {
+    showToast(e.message || 'Failed to save changes.', 'error');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
+    }
+  }
 }
 
 function _closeRequestFormModal() {
@@ -2753,6 +3328,16 @@ function switchPortalTab(tab) {
     rp.classList.remove('anim-ready');
     void rp.offsetWidth; // reflow
     rp.classList.add('anim-ready');
+    // Generate a fresh Return ID each time the tab is opened
+    const retIdEl = document.getElementById('pret-return-id');
+    if (retIdEl) {
+      const now  = new Date();
+      const date = now.getFullYear().toString()
+                 + String(now.getMonth() + 1).padStart(2, '0')
+                 + String(now.getDate()).padStart(2, '0');
+      const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+      retIdEl.value = `RET-${date}-${rand}`;
+    }
   }
 
   // Wide shell only for On behalf (because of the embedded accountability form)
@@ -2842,6 +3427,16 @@ function clearReturnForm() {
   document.getElementById('pret-notes').value     = '';
   document.getElementById('pret-condition').value = 'good';
   document.getElementById('pret-method').value    = 'dropoff';
+  // Regenerate a fresh Return ID for the next submission
+  const retIdEl = document.getElementById('pret-return-id');
+  if (retIdEl) {
+    const now  = new Date();
+    const date = now.getFullYear().toString()
+               + String(now.getMonth() + 1).padStart(2, '0')
+               + String(now.getDate()).padStart(2, '0');
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    retIdEl.value = `RET-${date}-${rand}`;
+  }
 }
 
 async function submitPortalReturn() {
@@ -2849,6 +3444,7 @@ async function submitPortalReturn() {
   const condition = document.getElementById('pret-condition').value;
   const method    = document.getElementById('pret-method').value;
   const notes     = document.getElementById('pret-notes').value.trim();
+  const returnId  = document.getElementById('pret-return-id')?.value || '';
   if (!assetId) { showToast('Please select an asset to return.', 'error'); return; }
 
   const asset = _portalAssets.find(a => String(a.id) === String(assetId));
@@ -2862,6 +3458,7 @@ async function submitPortalReturn() {
       resource_id:   parseInt(assetId),
       resource_name: (asset?.product_name || 'Asset') + ' · return by ' + (auth.currentUser?.name || ''),
       payload: {
+        return_id:     returnId || null,
         assignment_id: assetId,
         product_id:    asset?.product_id || null,
         condition,
@@ -3092,6 +3689,80 @@ async function submitOnBehalf() {
     <div id="mr-view-body" style="padding:22px 24px;display:flex;flex-direction:column;gap:0;"></div>
     <!-- Accountability form iframe (forwarded requests) -->
     <iframe id="mr-view-iframe" src="" style="display:none;flex:1;border:none;width:100%;background:#f4f6f9;min-height:600px;" frameborder="0"></iframe>
+    <!-- Footer actions (shown for forwarded requests) -->
+    <div id="mr-view-footer" style="display:none;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;align-items:center;justify-content:space-between;gap:10px;">
+      <!-- Left: Change Assets -->
+      <button id="mr-change-asset-btn" onclick="_mrOpenChangeAsset()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;"
+        onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--blue)'"
+        onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border2)'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Change Assets
+      </button>
+      <!-- Right: Close + Confirm -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="_mrCloseView()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;"
+          onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+          onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
+        >Close</button>
+        <button id="mr-confirm-asset-btn" onclick="_mrConfirmAsset()" style="background:var(--blue);border:1px solid var(--blue);color:#fff;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;"
+          onmouseover="this.style.filter='brightness(1.1)'"
+          onmouseout="this.style.filter='none'"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm Asset
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Assets Modal -->
+<div class="modal-overlay" id="mr-change-asset-modal" style="z-index:320;padding:20px;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:460px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:var(--blue)"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text);">Change Assets</span>
+      </div>
+      <button onclick="_mrCloseChangeAsset()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;"
+        onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+        onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
+      >&#10005;</button>
+    </div>
+    <!-- Body -->
+    <div style="padding:22px 24px;">
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:18px;line-height:1.5;">
+        Update the asset details for your request. The admin will see your changes before the assignment is finalized.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <!-- Dynamic asset rows (Category + Brand + Model per row) -->
+        <div style="display:flex;flex-direction:column;gap:8px;" id="mr-asset-rows"></div>
+        <!-- Description -->
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description</label>
+          <textarea id="mr-change-asset-desc" rows="3" placeholder="Describe the asset or any changes needed…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;resize:vertical;width:100%;transition:border-color .15s;line-height:1.5;"
+            onfocus="this.style.borderColor='var(--blue)'"
+            onblur="this.style.borderColor='var(--border2)'"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 24px 20px;border-top:1px solid var(--border);">
+      <button onclick="_mrCloseChangeAsset()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;"
+        onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+        onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'"
+      >Cancel</button>
+      <button id="mr-change-asset-save-btn" onclick="_mrSaveChangeAsset()" style="background:var(--blue);border:1px solid var(--blue);color:#fff;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;"
+        onmouseover="this.style.filter='brightness(1.1)'"
+        onmouseout="this.style.filter='none'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+      </button>
+    </div>
   </div>
 </div>
 
@@ -3129,6 +3800,15 @@ async function submitOnBehalf() {
 
     <!-- Non-admin request form -->
     <div id="request-form-body" style="padding:16px 24px;overflow-y:auto;flex:0 0 auto;display:flex;flex-direction:column;gap:10px;">
+      <!-- Request ID (auto-generated, read-only) -->
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Request ID</label>
+        <div style="position:relative;">
+          <input id="rf-request-id" type="text" readonly
+            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;" />
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);pointer-events:none;">Auto</span>
+        </div>
+      </div>
       <!-- Requestor's Name -->
       <div class="form-group">
         <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Name</label>
@@ -3146,44 +3826,10 @@ async function submitOnBehalf() {
           <option value="">-- Select Location --</option>
         </select>
       </div>
-      <!-- Category -->
+      <!-- Dynamic asset rows (Category + Brand + Model per row) -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Category</label>
-        <select id="rf-category" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" onchange="_rfClearBrand();_rfFilterBrands(false)">
-          <option value="">-- All Categories --</option>
-        </select>
-      </div>
-      <!-- Brand search -->
-      <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Brand <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
-        <div style="position:relative;">
-          <input id="rf-brand-search" type="text" placeholder="Search brand…" autocomplete="off"
-            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;"
-            onfocus="this.style.borderColor='var(--blue)';_rfShowBrandDropdown()"
-            onblur="this.style.borderColor='var(--border2)';setTimeout(_rfHideBrandDropdown,180)"
-            oninput="_rfFilterBrands()" />
-          <div id="rf-brand-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:3px;"></div>
-        </div>
-        <div id="rf-brand-selected" style="display:none;margin-top:6px;background:rgba(41,182,232,0.1);border:1px solid rgba(41,182,232,0.25);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--blue);align-items:center;justify-content:space-between;">
-          <span id="rf-brand-selected-label"></span>
-          <button onclick="_rfClearBrand()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;" title="Clear">&#10005;</button>
-        </div>
-      </div>
-      <!-- Model search -->
-      <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Model <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
-        <div style="position:relative;">
-          <input id="rf-model-search" type="text" placeholder="Select a brand first…" autocomplete="off" disabled
-            style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;opacity:.5;cursor:not-allowed;"
-            onfocus="this.style.borderColor='var(--blue)';_rfShowModelDropdown()"
-            onblur="this.style.borderColor='var(--border2)';setTimeout(_rfHideModelDropdown,180)"
-            oninput="_rfFilterModels()" />
-          <div id="rf-model-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:3px;"></div>
-        </div>
-        <div id="rf-model-selected" style="display:none;margin-top:6px;background:rgba(41,182,232,0.1);border:1px solid rgba(41,182,232,0.25);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--blue);align-items:center;justify-content:space-between;">
-          <span id="rf-model-selected-label"></span>
-          <button onclick="_rfClearModel()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;" title="Clear">&#10005;</button>
-        </div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Assets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
+        <div id="rf-asset-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
       <!-- Description -->
       <div class="form-group">
