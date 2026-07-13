@@ -98,6 +98,81 @@
     html[data-theme="light"] .prefill-dropdown-item:hover, html[data-theme="light"] .prefill-dropdown-item.active { background: #e0f0ff; color: #0f2057; }
     html[data-theme="light"] .prefill-hint { color: #94a3b8; }
   </style>
+
+  <!-- ── Page entrance animations ── -->
+  <style>
+    @keyframes acFadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes acFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes acSlideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Topbar */
+    .topbar {
+      animation: acFadeIn 0.35s ease both;
+    }
+
+    /* Prefill bar drops in from top */
+    .prefill-bar {
+      animation: acSlideDown 0.4s 0.05s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Page content fades up */
+    .page-content {
+      animation: acFadeUp 0.45s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Form card lifts in with a slightly longer delay */
+    .form-wrapper {
+      animation: acFadeUp 0.5s 0.18s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Doc header (logo + title) fades in after card */
+    .doc-header,
+    .doc-title {
+      animation: acFadeIn 0.4s 0.3s ease both;
+    }
+
+    /* Info grid slides up after title */
+    .info-grid {
+      animation: acFadeUp 0.4s 0.35s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Asset table appears after info grid */
+    .asset-table {
+      animation: acFadeUp 0.4s 0.42s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Policy, ack, sig, disclaimer stagger in */
+    .policy-section {
+      animation: acFadeUp 0.4s 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .ack-section {
+      animation: acFadeUp 0.4s 0.56s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .sig-row {
+      animation: acFadeUp 0.4s 0.62s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .doc-disclaimer {
+      animation: acFadeUp 0.35s 0.68s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Suppress all animations when printing */
+    @media print {
+      .topbar, .prefill-bar, .page-content, .form-wrapper,
+      .doc-header, .doc-title, .info-grid, .asset-table,
+      .policy-section, .ack-section, .sig-row, .doc-disclaimer {
+        animation: none !important;
+      }
+    }
+  </style>
   <style>
     /* ===== PHYSICAL DOCUMENT FORM ===== */
     .form-wrapper { background: #fff; color: #111; border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.35); width: 100%; font-family: Arial, 'DM Sans', sans-serif; font-size: 12px; padding: 28px 36px 32px; }
@@ -1247,7 +1322,7 @@
               FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
                 const a = byRI[i] != null ? byRI[i] : (legMap[i] || null);
                 const displayType  = a ? (a.name  || typeLabel) : typeLabel;
-                const displayBrand = a ? (a.brand || '') : '';
+                const displayBrand = a ? ([a.brand, a.model].filter(Boolean).join(' ') || a.brand_model || '') : '';
                 const displaySn    = a ? (a.tag   || a.serial_number || '') : '';
                 const displayCond  = a ? (a.condition || '') : '';
                 const displayVal   = a ? (a.value  || '') : '';
