@@ -1204,14 +1204,15 @@ function renderStatusChart(damaged, resolved, disposed, donated, spare, lost) {
         const { ctx: c, chartArea: { left, right, top, bottom } } = chart;
         const cx = (left + right) / 2;
         const cy = (top + bottom) / 2;
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
         c.save();
         c.textAlign = 'center';
         c.textBaseline = 'middle';
         c.font = '800 32px Syne, sans-serif';
-        c.fillStyle = '#e8eaf0';
+        c.fillStyle = isLight ? '#1e40af' : '#29b6e8';
         c.fillText(total, cx, cy - 9);
-        c.font = '500 11px DM Sans, sans-serif';
-        c.fillStyle = '#6b7080';
+        c.font = '700 11px DM Sans, sans-serif';
+        c.fillStyle = isLight ? '#475569' : '#9aa0b2';
         c.fillText('TOTAL', cx, cy + 14);
         c.restore();
       }
@@ -1224,6 +1225,11 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// Redraw chart immediately when theme changes so center text color updates without refresh
+document.addEventListener('themechange', () => {
+  if (statusChartInstance) statusChartInstance.update();
 });
 
 /* -- Product-level status actions (Spare / Repair / Lost tabs) -- */
