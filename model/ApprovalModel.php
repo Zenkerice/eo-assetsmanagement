@@ -36,7 +36,7 @@ class ApprovalModel {
         ");
         // Ensure 'forwarded' is in the enum for existing tables
         try {
-            $this->db->exec("ALTER TABLE approval_requests MODIFY COLUMN status ENUM('pending','approved','rejected','forwarded') NOT NULL DEFAULT 'pending'");
+            $this->db->exec("ALTER TABLE approval_requests MODIFY COLUMN status ENUM('pending','approved','rejected','forwarded','confirmed') NOT NULL DEFAULT 'pending'");
         } catch (\PDOException $e) { /* already updated */ }
     }
 

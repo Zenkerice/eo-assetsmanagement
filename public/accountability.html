@@ -1003,7 +1003,7 @@
           });
           return match ? (match.name || match.category_name) : assetType;
         })();
-        const brand  = matched ? (matched.brand || matched.brand_model || '') : '';
+        const brand  = matched ? (matched.brand_model || [matched.brand, matched.model].filter(Boolean).join(' ') || '') : '';
         const sn     = matched ? (matched.tag || matched.serial_number || matched.product_sku || matched.sku || '') : '';
         const cond   = matched ? (matched.condition || '') : '';
         const val    = matched ? (matched.value || matched.unit_price || '') : '';
@@ -1247,9 +1247,15 @@
       const params = new URLSearchParams(window.location.search), assigneeName = params.get('assignee');
       const isReadonly   = params.get('readonly') === '1';
       const assetsParam  = params.get('assets');
-      // In readonly mode with an explicit admin-filled assets list, skip the assignee pre-fill
-      // so the system deployments don't accidentally overwrite what the admin entered.
-      const skipAssigneePrefill = isReadonly && !!assetsParam;
+      // Skip assignee pre-fill (which would overwrite asset rows) when:
+      // - readonly mode with explicit assets, OR
+      // - lock_sn_cond mode (admin pending fill) with explicit assets, OR
+      // - prefill_assets mode (admin confirmed fill) with explicit assets, OR
+      // - serial_only mode (admin fills serials only) with explicit assets
+      const skipAssigneePrefill = (isReadonly && !!assetsParam)
+        || (!isReadonly && params.get('lock_sn_cond') === '1' && !!assetsParam)
+        || (!isReadonly && params.get('prefill_assets') === '1' && !!assetsParam)
+        || (!isReadonly && params.get('serial_only') === '1' && !!assetsParam);
       if (assigneeName) {
         if (skipAssigneePrefill) {
           // Just fill the header fields (name, empid, location) without touching the asset rows
@@ -1383,6 +1389,143 @@
           inp.setAttribute('readonly', 'readonly');
           inp.style.pointerEvents = 'none';
         });
+      }
+
+      // Non-readonly admin-fill mode: if lock_sn_cond=1, pre-populate from assets param
+      // then lock Serial Number (col 3) and Condition at Issuance (col 4) combos.
+      if (!isReadonly && params.get('lock_sn_cond') === '1') {
+        if (assetsParam) {
+          try {
+            const adminAssets = JSON.parse(assetsParam);
+            if (Array.isArray(adminAssets) && adminAssets.length) {
+              buildAssetRows(adminAssets);
+            }
+          } catch(_) { /* ignore */ }
+        }
+        // Lock Serial Number and Condition combos for all rows
+        for (let i = 0; i < ASSET_ROWS; i++) {
+          const snDisplay   = document.getElementById(`asset-sn-${i}-display`);
+          const condDisplay = document.getElementById(`asset-cond-${i}-display`);
+          if (snDisplay) {
+            snDisplay.classList.add('ic-locked');
+            snDisplay.setAttribute('tabindex', '-1');
+            snDisplay.title = 'Serial number is auto-filled from inventory';
+          }
+          if (condDisplay) {
+            condDisplay.classList.add('ic-locked');
+            condDisplay.setAttribute('tabindex', '-1');
+            condDisplay.title = 'Condition is auto-filled from inventory';
+          }
+        }
+      }
+
+      // Confirmed mode: pre-populate assets without locking any combos so admin
+      // can freely fill serial numbers and condition before re-forwarding.
+      if (!isReadonly && params.get('prefill_assets') === '1' && assetsParam) {
+        try {
+          const confirmedAssets = JSON.parse(assetsParam);
+          if (Array.isArray(confirmedAssets) && confirmedAssets.length) {
+            buildAssetRows(confirmedAssets);
+          }
+        } catch(_) { /* ignore */ }
+      }
+
+      // Serial-only mode: render the asset table with all columns locked as plain
+      // text EXCEPT Serial Number, which is a free-text input admin can type into.
+      // Header fields are also locked. Prefill bar is hidden.
+      if (!isReadonly && params.get('serial_only') === '1') {
+        console.log('[serial_only] mode active, assetsParam:', assetsParam);
+        if (assetsParam) {
+          try {
+            const serialOnlyAssets = JSON.parse(assetsParam);
+            console.log('[serial_only] parsed assets:', serialOnlyAssets);
+            if (Array.isArray(serialOnlyAssets) && serialOnlyAssets.length) {
+              // Build positional lookup (same logic as readonly block)
+              const byRI = {};
+              const noRI = [];
+              serialOnlyAssets.forEach(a => {
+                if (a.rowIndex != null) byRI[a.rowIndex] = a;
+                else noRI.push(a);
+              });
+              const usedNR = new Set();
+              const legMap = {};
+              FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+                if (byRI[i] != null) return;
+                for (let ai = 0; ai < noRI.length; ai++) {
+                  if (usedNR.has(ai)) continue;
+                  const n = (noRI[ai].name || noRI[ai].category_name || '').toLowerCase();
+                  if (n.includes(typeLabel.toLowerCase().split(' ')[0]) || typeLabel.toLowerCase().includes(n.split(' ')[0])) {
+                    legMap[i] = noRI[ai]; usedNR.add(ai); break;
+                  }
+                }
+              });
+
+              const tbody = document.getElementById('asset-tbody');
+              tbody.innerHTML = '';
+              FIXED_ASSET_TYPES.forEach((typeLabel, i) => {
+                const a = byRI[i] != null ? byRI[i] : (legMap[i] || null);
+                const displayType  = a ? (a.name || typeLabel) : typeLabel;
+                const displayBrand = a ? ([a.brand, a.model].filter(Boolean).join(' ') || a.brand_model || '') : '';
+                const existingSn   = a ? (a.tag || a.serial_number || '') : '';
+                const displayCond  = a ? (a.condition || '') : '';
+                const displayVal   = a ? (a.value || '') : '';
+                const displayRem   = a ? (a.remarks || '') : '';
+                // Only rows with a brand are "occupied" — serial is required for those
+                const isOccupied   = displayBrand.trim() !== '';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td class="asset-type-cell" style="padding:3px 5px;font-weight:600;color:#111;">${esc(displayType)}</td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayBrand)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td id="td-sn-so-${i}" style="padding:3px 5px;">
+                    ${isOccupied
+                      ? `<input type="text" id="asset-sn-${i}" value="${esc(existingSn)}"
+                           placeholder="Enter serial no."
+                           style="border:1px solid #29b6e8;border-radius:3px;background:#f0faff;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;outline:none;padding:2px 5px;box-sizing:border-box;"
+                           onfocus="this.style.background='#e0f4ff';this.style.borderColor='#0a8dbf'"
+                           onblur="this.style.background='#f0faff';this.style.borderColor='#29b6e8'">`
+                      : `<input type="text" id="asset-sn-${i}" value="" readonly
+                           style="border:none;background:transparent;color:#999;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;">`
+                    }
+                  </td>
+                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayCond)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" id="asset-val-${i}" value="${esc(displayVal)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" id="asset-rem-${i}" value="${esc(displayRem)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>`;
+                tbody.appendChild(tr);
+
+                // Also create hidden inputs that getFormAssets() expects for other fields
+                // (type and brand combos won't exist — patch getFormAssets reads won't find them,
+                //  but we need asset-type-* and asset-brand-* to return the locked values)
+                const typeHidden  = document.createElement('input');
+                typeHidden.type   = 'hidden';
+                typeHidden.id     = `asset-type-${i}`;
+                typeHidden.value  = displayType;
+                tr.appendChild(typeHidden);
+
+                const brandHidden = document.createElement('input');
+                brandHidden.type  = 'hidden';
+                brandHidden.id    = `asset-brand-${i}`;
+                brandHidden.value = displayBrand;
+                tr.appendChild(brandHidden);
+
+                const condHidden  = document.createElement('input');
+                condHidden.type   = 'hidden';
+                condHidden.id     = `asset-cond-${i}`;
+                condHidden.value  = displayCond;
+                tr.appendChild(condHidden);
+              });
+            }
+          } catch(_) { /* ignore */ }
+        }
+
+        // Lock header info fields
+        ['field-fullname','field-empid','field-dept','field-date-assigned','field-hire-date','field-location'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.readOnly = true; el.style.pointerEvents = 'none'; el.style.color = '#111'; }
+        });
+        // Hide the prefill search bar
+        const prefillBar = document.getElementById('prefill-bar');
+        if (prefillBar) prefillBar.style.display = 'none';
       }
     }});
 

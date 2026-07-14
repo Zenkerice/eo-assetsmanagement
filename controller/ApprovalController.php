@@ -148,7 +148,7 @@ class ApprovalController extends BaseController {
         }
         $userName = $_SESSION['user']['name'] ?? '';
         $result   = $this->service->confirm($id, $userName);
-        $this->respond(['success' => true, 'data' => $result, 'message' => 'Asset confirmed and assigned']);
+        $this->respond(['success' => true, 'data' => $result, 'message' => 'Assets confirmed — awaiting admin serial release']);
     }
 
     private function patchPayload(int $id, array $body): void {

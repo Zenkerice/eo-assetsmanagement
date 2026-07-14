@@ -125,6 +125,7 @@
     .pill.approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
     .pill.rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)}
     .pill.forwarded{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)}
+    .pill.confirmed{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
     .pill.urgent{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)}
     .pill.normal{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.25)}
     .pill.low{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
@@ -496,6 +497,7 @@
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="forwarded">Waiting for confirmation</option>
+          <option value="confirmed">Waiting for Approval</option>
           <option value="approved">Approved</option>
           <option value="rejected">Declined</option>
         </select>
@@ -1231,7 +1233,7 @@ function priorityPill(priority) {
 }
 
 function statusPill(status) {
-  const map = { pending: 'Pending', approved: 'Approved', rejected: 'Declined' };
+  const map = { pending: 'Pending', approved: 'Approved', rejected: 'Declined', forwarded: 'Waiting for confirmation', confirmed: 'Waiting for Approval' };
   return `<span class="pill ${esc(status)}">${map[status] || esc(status)}</span>`;
 }
 
@@ -2794,6 +2796,7 @@ function _mrRender() {
     approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
     rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
     forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
+    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '⏳ Waiting for Approval' },
   };
 
   list.innerHTML = rows.map(r => {
@@ -2843,6 +2846,7 @@ function _mrOpenView(id) {
     approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
     rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
     forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
+    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '⏳ Waiting for Approval' },
   };
   const s    = statusStyle[r.status] || statusStyle.pending;
 
@@ -2852,13 +2856,26 @@ function _mrOpenView(id) {
   const iframe    = document.getElementById('mr-view-iframe');
   const footer    = document.getElementById('mr-view-footer');
 
-  // Show footer with Confirm Asset button only for forwarded requests
-  if (footer) footer.style.display = r.status === 'forwarded' ? 'flex' : 'none';
+  // Show footer with Confirm Asset button for forwarded requests;
+  // for confirmed show it disabled with "Waiting" label
+  if (footer) footer.style.display = (r.status === 'forwarded' || r.status === 'confirmed') ? 'flex' : 'none';
   const confirmBtn = document.getElementById('mr-confirm-asset-btn');
-  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = ''; confirmBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm Asset'; }
+  if (confirmBtn) {
+    if (r.status === 'confirmed') {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '⏳ Waiting for Admin Approval';
+      confirmBtn.style.opacity = '0.6';
+      confirmBtn.style.cursor  = 'not-allowed';
+    } else {
+      confirmBtn.disabled = false;
+      confirmBtn.style.opacity = '';
+      confirmBtn.style.cursor  = '';
+      confirmBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm Asset';
+    }
+  }
 
-  if (r.status === 'forwarded') {
-    // Show accountability form iframe
+  if (r.status === 'forwarded' || r.status === 'confirmed') {
+    // Show accountability form iframe (readonly for both — staff cannot edit)
     titleEl.textContent = 'Asset Accountability Form';
     body.style.display   = 'none';
     iframe.style.display = 'block';
@@ -2945,33 +2962,9 @@ async function _mrConfirmAsset() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
     _mrCloseView();
-    showToast('Asset confirmed and assigned to you!', 'success');
-    // Reload My Requests list
+    showToast('Assets confirmed! Waiting for admin to release serial.', 'success');
+    // Reload My Requests list to show updated status
     await _mrLoad();
-    // Refresh My Assets panel immediately — fetch fresh assignments and re-render
-    try {
-      const user = auth.currentUser;
-      const myName = (user?.name || '').toLowerCase();
-      const assignRes = await api.getActiveAssignments();
-      _portalAssets = (assignRes.data || []).filter(a =>
-        (a.assignee_name || '').toLowerCase() === myName
-      );
-      renderPortalAssets();
-      // Also refresh the return dropdown
-      const retSel = document.getElementById('pret-asset');
-      if (retSel) {
-        retSel.innerHTML = '<option value="">· Select an asset ·</option>'
-          + _portalAssets.map(a => {
-              const status = getAssetStatus(a);
-              const label  = status === 'overdue' ? ' (Overdue)' : status === 'aging' ? ' (Aging)' : '';
-              const serial = a.serial_number || a.product_sku || '';
-              const serialPart = serial ? ` [${serial}]` : '';
-              return `<option value="${a.id}">${esc(a.product_name || a.asset_name || 'Asset')}${serialPart}${label}</option>`;
-            }).join('');
-      }
-      // Switch to My Assets tab so user sees the result right away
-      switchPortalTab('myassets');
-    } catch(_) { /* non-fatal — assets will refresh on next tab visit */ }
   } catch(e) {
     showToast(e.message || 'Failed to confirm asset.', 'error');
     if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirm Asset'; }

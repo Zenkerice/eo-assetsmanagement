@@ -193,4 +193,53 @@ class ProductModel {
         $stmt->execute([$categoryId]);
         return $stmt->fetchAll();
     }
+
+    /**
+     * Find products by brand_model combined string (e.g. "Apple MacBook Neo").
+     */
+    public function findByBrandModel(string $brandModel): array {
+        $stmt = $this->db->prepare(
+            "SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             LEFT JOIN suppliers  s ON p.supplier_id  = s.id
+             WHERE p.brand_model = ? OR CONCAT(COALESCE(p.brand,''), ' ', COALESCE(p.model,'')) = ?
+             ORDER BY p.asset_status = 'available' DESC, p.id ASC"
+        );
+        $stmt->execute([$brandModel, $brandModel]);
+        $rows = $stmt->fetchAll();
+        if ($rows) return $rows;
+
+        $stmt2 = $this->db->prepare(
+            "SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             LEFT JOIN suppliers  s ON p.supplier_id  = s.id
+             WHERE p.brand_model LIKE ? OR CONCAT(COALESCE(p.brand,''), ' ', COALESCE(p.model,'')) LIKE ?
+             ORDER BY p.asset_status = 'available' DESC, p.id ASC
+             LIMIT 10"
+        );
+        $like = '%' . $brandModel . '%';
+        $stmt2->execute([$like, $like]);
+        return $stmt2->fetchAll();
+    }
+
+    /**
+     * Find available products by category name string (case-insensitive).
+     */
+    public function findAvailableByCategoryName(string $categoryName): array {
+        $stmt = $this->db->prepare(
+            "SELECT p.*, c.name AS category_name,
+                    COALESCE(s.name, p.supplier_name) AS supplier_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             LEFT JOIN suppliers  s ON p.supplier_id  = s.id
+             WHERE LOWER(c.name) = LOWER(?) AND p.asset_status = 'available'
+             ORDER BY p.id ASC"
+        );
+        $stmt->execute([$categoryName]);
+        return $stmt->fetchAll();
+    }
 }

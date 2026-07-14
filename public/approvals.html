@@ -79,6 +79,7 @@
     .pill.approved  {background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
     .pill.rejected  {background:var(--red-dim);  color:var(--red);  border:1px solid rgba(244,91,105,.25)}
     .pill.forwarded {background:var(--blue-dim); color:var(--blue); border:1px solid rgba(41,182,232,.25)}
+    .pill.confirmed {background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
     .pill-action{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(41,182,232,.2)}
     .pill-resource{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
 
@@ -362,6 +363,96 @@
   </div>
 </div>
 
+<!-- Serial Fill Modal — for confirmed requests: admin fills serial numbers only -->
+<div class="modal-overlay" id="serial-fill-modal" style="z-index:260;padding:12px;overflow-y:auto;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:860px;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:modalIn .2s ease;margin:auto;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17" style="color:var(--blue)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;">Asset Accountability Form</span>
+        <span id="sfm-title" style="font-size:13px;color:var(--muted2);margin-left:4px;"></span>
+      </div>
+      <button onclick="_closeSfModal()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;"
+        onmouseover="this.style.color='var(--text)';this.style.background='var(--border2)'"
+        onmouseout="this.style.color='var(--muted2)';this.style.background='var(--bg3)'">&times;</button>
+    </div>
+    <!-- Form body -->
+    <div style="padding:20px 28px;background:#f4f6f9;overflow-y:auto;">
+      <div style="background:#fff;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-family:Arial,'DM Sans',sans-serif;font-size:12px;padding:22px 28px 26px;color:#111;">
+        <!-- Logo + title -->
+        <div style="text-align:center;margin-bottom:8px;"><img src="logo.png" alt="EmpireOne" style="height:48px;max-width:220px;object-fit:contain;"></div>
+        <div style="text-align:center;font-size:13px;font-weight:700;text-decoration:underline;text-transform:uppercase;letter-spacing:1.5px;color:#111;margin-bottom:14px;">Asset Accountability Form</div>
+        <!-- Info grid -->
+        <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px;">
+          <tbody>
+            <tr>
+              <td style="width:55%;border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Complete Employee Name:</span>
+                <span id="sfm-assignee" style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;"></span>
+              </td>
+              <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Account/Program:</span>
+                <span id="sfm-dept" style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;"></span>
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Employee #:</span>
+                <span id="sfm-empid" style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;"></span>
+              </td>
+              <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Date of Issue:</span>
+                <span id="sfm-date" style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;"></span>
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Hire date:</span>
+                <span style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;">&nbsp;</span>
+              </td>
+              <td style="border:1px solid #333;padding:5px 8px 4px;vertical-align:bottom;">
+                <span style="font-size:9px;font-weight:600;display:block;margin-bottom:3px;color:#111;">Location:</span>
+                <span id="sfm-location" style="font-size:11px;color:#111;display:block;border-bottom:1px solid #888;padding:2px 0;min-height:16px;"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Asset table -->
+        <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px;table-layout:fixed;">
+          <colgroup>
+            <col style="width:18%"><col style="width:20%"><col style="width:16%">
+            <col style="width:16%"><col style="width:16%"><col style="width:14%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;text-align:left;">Asset Type</th>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;text-align:center;">Brand &amp; Model</th>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#1a4a8a;color:#fff;text-align:center;">Serial Number ✏</th>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;text-align:center;">Condition at Issuance</th>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;text-align:center;">Value at Time of Purchase</th>
+              <th style="border:1px solid #333;padding:5px 6px;font-size:9px;font-weight:700;background:#f0f0f0;color:#111;text-align:center;">Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="sfm-asset-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;flex-shrink:0;">
+      <div class="form-group" style="margin:0;">
+        <label for="sfm-notes" style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);">Notes / Reason (optional)</label>
+        <textarea id="sfm-notes" placeholder="Add a note for the staff member&hellip;" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:60px;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="sfm-forward-btn" class="btn btn-success" onclick="_sfmForward()">&#8594; Forward to Requestor</button>
+        <!-- label updated dynamically by _openSfModal based on request status -->
+        <button class="btn btn-ghost" onclick="_closeSfModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Request Form Preview Modal -->
 <div class="rf-overlay" id="rf-modal">
   <div class="rf-modal" id="rf-print-area">
@@ -402,6 +493,7 @@ let _categoriesCache  = {};
 let _suppliersCache   = {};
 let _productsCache    = {};   // id → name
 let _brandModelCache  = {};   // brand_model string → { brand, model, category_name }
+let _sfmProducts      = [];   // raw product list for SFM serial lookup
 
 function fmtDate(s) {
   if (!s) return '?';
@@ -481,6 +573,11 @@ function _renderPayload(payload) {
     if (k === 'assets' && Array.isArray(v) && v.length) {
       const filled = v.filter(a => a.brand || a.model || a.category_name);
       if (!filled.length) return '';
+      // Only show the Available checkbox column for pending requests — it's
+      // how the admin marks which assets to pre-populate the form with.
+      // For confirmed / forwarded / approved / rejected, the column is hidden.
+      const _rq = allRequests.find(x => x.id === reviewingId);
+      const showAvailCol = !_rq || _rq.status === 'pending';
       const tableRows = filled.map((a, i) => {
         // Legacy payloads stored brand_model combined in the `brand` field with
         // no separate `model`. Resolve using the product catalog first.
@@ -498,15 +595,13 @@ function _renderPayload(payload) {
         }
 
         const cbId = `asset-avail-${reviewingId}-${i}`;
-        return `
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-          <td style="padding:7px 10px;font-size:12px;color:var(--muted2);font-family:'DM Mono',monospace;font-weight:600;white-space:nowrap;">${i + 1}</td>
-          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayCategory || '—')}</td>
-          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayBrand || '—')}</td>
-          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayModel || '—')}</td>
+        const availCell = showAvailCol ? `
           <td style="padding:7px 10px;text-align:center;">
             <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;" title="Mark as available">
               <input type="checkbox" id="${cbId}" class="asset-avail-cb"
+                data-category="${esc(displayCategory || '')}"
+                data-brand="${esc(displayBrand || '')}"
+                data-model="${esc(displayModel || '')}"
                 style="width:15px;height:15px;accent-color:var(--green);cursor:pointer;"
                 onchange="(function(el){
                   const row = el.closest('tr');
@@ -522,9 +617,19 @@ function _renderPayload(payload) {
                 })(this)">
               <span style="font-size:11px;font-weight:600;color:var(--muted);min-width:68px;">Unavailable</span>
             </label>
-          </td>
+          </td>` : '';
+        return `
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:7px 10px;font-size:12px;color:var(--muted2);font-family:'DM Mono',monospace;font-weight:600;white-space:nowrap;">${i + 1}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayCategory || '—')}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayBrand || '—')}</td>
+          <td style="padding:7px 10px;font-size:13px;color:var(--text);">${esc(displayModel || '—')}</td>
+          ${availCell}
         </tr>`;
       }).join('');
+      const availHeader = showAvailCol
+        ? `<th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:center;">Available</th>`
+        : '';
       valHtml = `
         <table style="width:100%;border-collapse:collapse;background:var(--bg3);border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">
           <thead>
@@ -533,7 +638,7 @@ function _renderPayload(payload) {
               <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Category</th>
               <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Brand</th>
               <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:left;">Model</th>
-              <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);text-align:center;">Available</th>
+              ${availHeader}
             </tr>
           </thead>
           <tbody>${tableRows}</tbody>
@@ -593,6 +698,7 @@ async function loadApprovals() {
         _brandModelCache[bm] = { brand: p.brand || bm, model: p.model || '', category_name: p.category_name || '' };
       }
     });
+    _sfmProducts = prodRes.data || [];
 
     updateCounts();
     renderTable();
@@ -621,6 +727,7 @@ function animateCount(id, target, duration) {
 function updateCounts() {
   const pending   = allRequests.filter(r => r.status === 'pending').length;
   const forwarded = allRequests.filter(r => r.status === 'forwarded').length;
+  const confirmed = allRequests.filter(r => r.status === 'confirmed').length;
   const approved  = allRequests.filter(r => r.status === 'approved').length;
   const rejected  = allRequests.filter(r => r.status === 'rejected').length;
 
@@ -630,7 +737,7 @@ function updateCounts() {
   animateCount('stat-total',    allRequests.length);
 
   document.getElementById('tab-pending-count').textContent   = pending;
-  document.getElementById('tab-forwarded-count').textContent = forwarded;
+  document.getElementById('tab-forwarded-count').textContent = forwarded + confirmed;
   document.getElementById('tab-approved-count').textContent  = approved;
   document.getElementById('tab-rejected-count').textContent  = rejected;
 }
@@ -652,7 +759,12 @@ function renderTable() {
   const resource = document.getElementById('filter-resource').value;
 
   const data = allRequests.filter(r => {
-    if (r.status !== currentTab) return false;
+    // 'forwarded' tab shows both forwarded AND confirmed requests
+    if (currentTab === 'forwarded') {
+      if (r.status !== 'forwarded' && r.status !== 'confirmed') return false;
+    } else {
+      if (r.status !== currentTab) return false;
+    }
     if (resource && r.resource_type !== resource) return false;
     if (q) {
       const hay = [r.requested_by, r.resource_type, r.resource_name, r.notes, r.action_type]
@@ -701,7 +813,7 @@ function renderTable() {
       }
     }
 
-    const statusLabels = { pending: 'Pending', forwarded: 'Waiting for confirmation', approved: 'Approved', rejected: 'Rejected' };
+    const statusLabels = { pending: 'Pending', forwarded: 'Waiting for confirmation', confirmed: 'Waiting for Approval — Assets Confirmed', approved: 'Approved', rejected: 'Rejected' };
     const statusPill = `<span class="pill ${r.status}" style="font-size:10px;">${statusLabels[r.status] || r.status}</span>`;
 
     return `<tr>
@@ -729,22 +841,24 @@ function openDetailModal(id) {
 
   // asset_request -> use the Request Form preview
   if (r.resource_type === 'asset_request') {
-    openRfModal(id, r.status === 'pending');
+    // For confirmed or forwarded: open form so admin can fill serial / release assets
+    openRfModal(id, r.status === 'pending' || r.status === 'confirmed' || r.status === 'forwarded');
     return;
   }
 
   reviewingId = id;
-  const isPending = r.status === 'pending';
+  const isPending   = r.status === 'pending';
+  const isConfirmed = r.status === 'confirmed';
 
   document.getElementById('review-modal-title').textContent = 'Request Details';
-  document.getElementById('btn-approve').style.display      = isPending ? '' : 'none';
-  document.getElementById('btn-reject').style.display       = isPending ? '' : 'none';
+  document.getElementById('btn-approve').style.display        = isPending ? '' : 'none';
+  document.getElementById('btn-reject').style.display         = isPending ? '' : 'none';
   document.getElementById('review-notes-group').style.display = isPending ? '' : 'none';
   document.getElementById('review-notes').value = '';
 
-  // Show "View Form" for Asset requests that have been approved or forwarded
+  // Show "View Form" for Asset requests that have been approved, forwarded, or confirmed
   const isAssetType = r.resource_type === 'Asset' || r.resource_type === 'asset_request';
-  const hasForm     = isAssetType && (r.status === 'approved' || r.status === 'forwarded');
+  const hasForm     = isAssetType && (r.status === 'approved' || r.status === 'forwarded' || r.status === 'confirmed');
   document.getElementById('btn-view-form').style.display = hasForm ? '' : 'none';
 
   const payload = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
@@ -764,7 +878,7 @@ function openDetailModal(id) {
 
   document.getElementById('review-detail-rows').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px;">
-      <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val"><span class="pill ${r.status}">${r.status === 'forwarded' ? 'Waiting for confirmation' : r.status}</span></div></div>
+      <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val"><span class="pill ${r.status}">${r.status === 'forwarded' ? 'Waiting for confirmation' : r.status === 'confirmed' ? 'Waiting for Approval' : r.status}</span></div></div>
       <div class="detail-row"><div class="detail-key">Requested By</div><div class="detail-val" style="font-weight:600;">${esc(r.requested_by)}</div></div>
       ${(payload.request_id || payload.return_id) ? `<div class="detail-row"><div class="detail-key">Request ID</div><div class="detail-val" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.4px;">${esc(payload.request_id || payload.return_id)}</div></div>` : ''}
       <div class="detail-row"><div class="detail-key">Action</div><div class="detail-val"><span class="pill" style="${actionStyle};text-transform:capitalize;display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">${esc(r.action_type)}</span></div></div>
@@ -787,12 +901,20 @@ function _openFormFromReviewModal() {
   if (!r) return;
   const p = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
   closeReviewModal();
+
+  // For confirmed or forwarded asset requests, open the Serial Fill Modal
+  // so admin can fill/update serial numbers and re-forward.
+  if (r.status === 'confirmed' || r.status === 'forwarded') {
+    _openSfModal(r, p);
+    return;
+  }
+
   // For forwarded requests, open in readonly mode (already sent to staff — just viewing)
   // For other statuses (approved), open in view-only mode with no actions
   _openAssetAccIframe(r, p, false);
 }
 
-function openRfModal(id, showActions) {
+function openRfModal(id, showActions, checkedAssets) {
   const r = allRequests.find(x => x.id === id);
   if (!r) return;
   reviewingId = id;
@@ -800,8 +922,13 @@ function openRfModal(id, showActions) {
   const p = (() => { try { return JSON.parse(r.payload || '{}'); } catch { return {}; } })();
 
   // -- Asset request type: show live accountability iframe ---------
+  // Confirmed and forwarded asset_requests go to the Serial Fill Modal (native, no iframe).
+  if (r.resource_type === 'asset_request' && (r.status === 'confirmed' || r.status === 'forwarded')) {
+    _openSfModal(r, p);
+    return;
+  }
   if (r.resource_type === 'Asset') {
-    _openAssetAccIframe(r, p, showActions);
+    _openAssetAccIframe(r, p, showActions, checkedAssets || []);
     return;
   }
 
@@ -1046,41 +1173,52 @@ async function submitReviewFromRf(decision) {
 
 /* -- Asset Accountability iframe modal (for Asset-type approvals) ---------- */
 
-function _openAssetAccIframe(r, p, showActions) {
+function _openAssetAccIframe(r, p, showActions, checkedAssets) {
   const modal = document.getElementById('asset-acc-modal');
   const iframe = document.getElementById('asset-acc-iframe');
   const title  = document.getElementById('asset-acc-title');
   const approveBtn = document.getElementById('asset-acc-approve');
+
+  // Always keep reviewingId in sync — callers like _openFormFromReviewModal
+  // call closeReviewModal() first which nulls it out before calling here.
+  reviewingId = r.id;
   const notesWrap  = document.getElementById('asset-acc-notes-wrap');
 
   title.textContent = r.resource_name || 'Asset Request';
 
-  const isPending = showActions && r.status === 'pending';
-  approveBtn.style.display = isPending ? '' : 'none';
-  notesWrap.style.display  = isPending ? '' : 'none';
+  const isPending   = showActions && r.status === 'pending';
+  const isConfirmed = showActions && r.status === 'confirmed';
+
+  // Show Forward button for both pending (first forward) and confirmed (fill serial + re-forward)
+  approveBtn.style.display = (isPending || isConfirmed) ? '' : 'none';
+  if (approveBtn) approveBtn.disabled = false;
+  notesWrap.style.display  = (isPending || isConfirmed) ? '' : 'none';
   document.getElementById('asset-acc-notes').value = '';
 
   // Build query params from request payload
   const params = new URLSearchParams();
   params.set('modal', '1');
 
+  // For confirmed: open the Serial Fill Modal so admin can type serial numbers
+  // directly in a native (non-iframe) form with no locking issues.
+  if (isConfirmed) {
+    _openSfModal(r, p);
+    return;
+  }
+
   // For already-forwarded/approved requests viewed by admin, open as readonly
-  // so they see exactly what was sent to the staff member
   const isForwardedOrApproved = r.status === 'forwarded' || (r.status === 'approved' && !isPending);
   if (isForwardedOrApproved) {
     params.set('readonly', '1');
-    // Pass the admin-filled assignee info
     const assigneeName = p.admin_assignee || p.requestor_name || r.requested_by || '';
     if (assigneeName) params.set('assignee', assigneeName);
     const empId = p.admin_empid || p.requestor_id || '';
     if (empId)        params.set('empid',    empId);
     const location = p.admin_location || p.requestor_location || '';
     if (location)     params.set('location', location);
-    // Pass admin-filled assets array so the form shows exactly what was sent
     if (Array.isArray(p.assets) && p.assets.length) {
       params.set('assets', JSON.stringify(p.assets));
     } else {
-      // Fallback: legacy single-asset fields
       if (p.brand)         params.set('brand',    p.brand);
       if (p.model)         params.set('model',    p.model);
       if (p.category_name) params.set('category', p.category_name);
@@ -1092,6 +1230,60 @@ function _openAssetAccIframe(r, p, showActions) {
     if (p.requestor_name)     params.set('assignee',  p.requestor_name);
     if (p.requestor_id)       params.set('empid',     p.requestor_id);
     if (p.requestor_location) params.set('location',  p.requestor_location);
+
+    // Lock Serial Number and Condition at Issuance columns (admin should not edit those)
+    params.set('lock_sn_cond', '1');
+
+    // If admin checked available assets in the Request Details modal, pre-populate those rows.
+    if (checkedAssets && checkedAssets.length) {
+      const baseAssets = Array.isArray(p.assets) ? JSON.parse(JSON.stringify(p.assets)) : [];
+      const FIXED_TYPES = ['Laptop','Mobile Device','Keyboard','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+      const mergedByRow = {};
+      baseAssets.forEach(a => { if (a.rowIndex != null) mergedByRow[a.rowIndex] = { ...a }; });
+
+      const scored = checkedAssets.map(ca => {
+        const catKey = (ca.category_name || '').toLowerCase().trim();
+        const brandModel = [ca.brand, ca.model].filter(Boolean).join(' ').trim();
+        let bestRowIdx = -1, bestScore = -1;
+        FIXED_TYPES.forEach((typeLabel, idx) => {
+          const tl = typeLabel.toLowerCase();
+          const score = tl === catKey ? 3
+                      : catKey.includes(tl.split(' ')[0]) || tl.includes(catKey.split(' ')[0]) ? 2
+                      : catKey.includes(tl) || tl.includes(catKey) ? 1 : 0;
+          if (score > bestScore) { bestScore = score; bestRowIdx = idx; }
+        });
+        return { ca, brandModel, bestRowIdx, bestScore };
+      });
+
+      scored.sort((a, b) => b.bestScore - a.bestScore);
+
+      scored.forEach(({ ca, brandModel, bestRowIdx, bestScore }) => {
+        if (bestScore <= 0 || (mergedByRow[bestRowIdx] && mergedByRow[bestRowIdx]._fromChecked)) {
+          const startIdx = bestScore > 0 ? bestRowIdx : 0;
+          let fallbackRow = -1;
+          for (let fi = startIdx; fi < FIXED_TYPES.length; fi++) {
+            if (!mergedByRow[fi] || !mergedByRow[fi]._fromChecked) { fallbackRow = fi; break; }
+          }
+          if (fallbackRow < 0) {
+            for (let fi = 0; fi < startIdx; fi++) {
+              if (!mergedByRow[fi] || !mergedByRow[fi]._fromChecked) { fallbackRow = fi; break; }
+            }
+          }
+          bestRowIdx = fallbackRow >= 0 ? fallbackRow : FIXED_TYPES.length - 1;
+        }
+        mergedByRow[bestRowIdx] = {
+          ...(mergedByRow[bestRowIdx] || {}),
+          rowIndex: bestRowIdx,
+          name: ca.category_name || FIXED_TYPES[bestRowIdx],
+          category_name: ca.category_name || '',
+          brand: brandModel, brand_model: brandModel, model: ca.model || '',
+          tag: '', serial_number: '', condition: '', _fromChecked: true,
+        };
+      });
+
+      const mergedAssets = Object.values(mergedByRow).map(a => { const c = { ...a }; delete c._fromChecked; return c; });
+      if (mergedAssets.length) params.set('assets', JSON.stringify(mergedAssets));
+    }
   }
 
   iframe.src = 'accountability.html?' + params.toString();
@@ -1102,42 +1294,42 @@ async function _submitAssetAccApproval(decision) {
   if (!reviewingId) return;
   const notes = (document.getElementById('asset-acc-notes')?.value || '').trim();
   const approveBtn = document.getElementById('asset-acc-approve');
-  approveBtn.disabled = true;
   try {
+    if (approveBtn) approveBtn.disabled = true;
     // Before forwarding, read the admin-filled form data from the iframe
     // and patch the approval payload so the non-admin sees the same assets
     if (decision === 'forwarded') {
       const iframeWin = document.getElementById('asset-acc-iframe')?.contentWindow;
-      if (!iframeWin || typeof iframeWin.getFormAssets !== 'function') {
-        showToast('Form not ready — please wait a moment and try again.', 'error');
-        approveBtn.disabled = false;
-        return;
+      if (iframeWin && typeof iframeWin.getFormAssets === 'function') {
+        const formData  = iframeWin.getFormAssets();
+        const existing  = allRequests.find(x => x.id === reviewingId);
+        const oldPayload = (() => { try { return JSON.parse(existing?.payload || '{}'); } catch { return {}; } })();
+        const newPayload = {
+          ...oldPayload,
+          assets:             formData.assets,
+          admin_assignee:     formData.assignee  || oldPayload.requestor_name  || '',
+          admin_empid:        formData.empid     || oldPayload.requestor_id    || '',
+          admin_location:     formData.location  || oldPayload.requestor_location || '',
+          admin_dept:         formData.dept      || '',
+          admin_date:         formData.date      || '',
+        };
+        // Patch the payload on the server before the status change
+        const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + reviewingId + '?action=patch_payload', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload: newPayload }),
+        });
+        if (!patchRes.ok) {
+          const errData = await patchRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to save asset data — please try again.');
+        }
+        // Update local cache so subsequent reads in the same session see the new payload
+        if (existing) existing.payload = JSON.stringify(newPayload);
+      } else {
+        // iframe not ready — proceed with existing payload as-is
       }
-      const formData  = iframeWin.getFormAssets();
-      const existing  = allRequests.find(x => x.id === reviewingId);
-      const oldPayload = (() => { try { return JSON.parse(existing?.payload || '{}'); } catch { return {}; } })();
-      const newPayload = {
-        ...oldPayload,
-        assets:             formData.assets,
-        admin_assignee:     formData.assignee  || oldPayload.requestor_name  || '',
-        admin_empid:        formData.empid     || oldPayload.requestor_id    || '',
-        admin_location:     formData.location  || oldPayload.requestor_location || '',
-        admin_dept:         formData.dept      || '',
-        admin_date:         formData.date      || '',
-      };
-      // Patch the payload on the server before the status change
-      const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + reviewingId + '?action=patch_payload', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: newPayload }),
-      });
-      if (!patchRes.ok) {
-        const errData = await patchRes.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to save asset data — please try again.');
-      }
-      // Update local cache so subsequent reads in the same session see the new payload
-      if (existing) existing.payload = JSON.stringify(newPayload);
+      // If iframe isn't ready, proceed with forwarding using the existing payload as-is
     }
 
     await api.reviewApproval(reviewingId, { decision, review_notes: notes });
@@ -1148,7 +1340,7 @@ async function _submitAssetAccApproval(decision) {
     if (window.refreshSidebar) refreshSidebar();
   } catch (e) {
     showToast(e.message, 'error');
-    approveBtn.disabled = false;
+    if (approveBtn) approveBtn.disabled = false;
   }
 }
 
@@ -1158,6 +1350,275 @@ function _closeAssetAccModal() {
   modal.classList.remove('open');
   setTimeout(() => { iframe.src = ''; }, 300);
   reviewingId = null;
+}
+
+/* ── Serial Fill Modal (SFM) ─────────────────────────────────────────────────
+ * Used for confirmed requests: admin fills serial numbers in a native modal
+ * (no iframe) so the inputs are always editable.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/** Get available serial numbers for a given brand+model string from inventory */
+function _sfmGetSerials(brandModel) {
+  if (!brandModel || !_sfmProducts.length) return [];
+  const bm = brandModel.toLowerCase().trim();
+  return _sfmProducts
+    .filter(p => {
+      const pbm = (p.brand_model || [p.brand, p.model].filter(Boolean).join(' ') || '').toLowerCase().trim();
+      const status = (p.asset_status || '').toLowerCase();
+      return pbm === bm && (status === 'available' || status === '');
+    })
+    .map(p => (p.serial_number || p.sku || '').trim())
+    .filter(Boolean);
+}
+
+/** Build a searchable serial combo inside a container element.
+ *  Returns { getValue, setValue } so _sfmForward can read the chosen serial. */
+function _sfmMakeSerialCombo(container, brandModel, existingVal) {
+  const serials = _sfmGetSerials(brandModel);
+
+  // Wrapper
+  container.innerHTML = '';
+  container.style.position = 'relative';
+
+  // Text input (free-type + filter)
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = existingVal || '';
+  inp.placeholder = serials.length ? 'Select or type serial…' : 'Enter serial no.';
+  inp.autocomplete = 'off';
+  inp.style.cssText = `width:100%;box-sizing:border-box;border:1.5px solid #2196f3;border-radius:3px;
+    background:#e8f4ff;color:#000;font-size:11px;font-family:Arial,sans-serif;
+    padding:3px 22px 3px 6px;outline:none;`;
+
+  // Dropdown arrow button (only shown when there are inventory serials)
+  const arrow = document.createElement('button');
+  arrow.type = 'button';
+  arrow.textContent = '▾';
+  arrow.style.cssText = `position:absolute;right:2px;top:50%;transform:translateY(-50%);
+    border:none;background:transparent;color:#2196f3;font-size:10px;cursor:pointer;
+    padding:0 3px;line-height:1;display:${serials.length ? 'block' : 'none'};`;
+
+  // Dropdown list
+  const drop = document.createElement('div');
+  drop.style.cssText = `display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;
+    background:#fff;border:1px solid #2196f3;border-radius:3px;z-index:9999;
+    max-height:140px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.15);`;
+
+  function renderDrop(filter) {
+    drop.innerHTML = '';
+    const filtered = filter
+      ? serials.filter(s => s.toLowerCase().includes(filter.toLowerCase()))
+      : serials;
+    if (!filtered.length) {
+      const empty = document.createElement('div');
+      empty.textContent = filter ? 'No match' : 'No available serials';
+      empty.style.cssText = 'padding:6px 10px;font-size:11px;color:#999;font-family:Arial,sans-serif;';
+      drop.appendChild(empty);
+      return;
+    }
+    filtered.forEach(s => {
+      const item = document.createElement('div');
+      item.textContent = s;
+      item.style.cssText = 'padding:5px 10px;font-size:11px;font-family:Arial,sans-serif;cursor:pointer;color:#111;';
+      item.addEventListener('mouseenter', () => item.style.background = '#e8f4ff');
+      item.addEventListener('mouseleave', () => item.style.background = '');
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        inp.value = s;
+        drop.style.display = 'none';
+      });
+      drop.appendChild(item);
+    });
+  }
+
+  function openDrop() {
+    if (!serials.length) return;
+    renderDrop(inp.value);
+    drop.style.display = 'block';
+  }
+  function closeDrop() { drop.style.display = 'none'; }
+
+  inp.addEventListener('focus', () => { inp.style.background = '#d0eaff'; inp.style.borderColor = '#0d6ebd'; openDrop(); });
+  inp.addEventListener('blur',  () => { inp.style.background = '#e8f4ff'; inp.style.borderColor = '#2196f3'; setTimeout(closeDrop, 150); });
+  inp.addEventListener('input', () => renderDrop(inp.value));
+  arrow.addEventListener('mousedown', e => { e.preventDefault(); drop.style.display === 'none' ? openDrop() : closeDrop(); });
+
+  container.appendChild(inp);
+  if (serials.length) container.appendChild(arrow);
+  container.appendChild(drop);
+
+  return {
+    getValue: () => inp.value.trim(),
+    setValue: v => { inp.value = v; },
+  };
+}
+
+function _openSfModal(r, p) {
+  reviewingId = r.id;
+  document.getElementById('sfm-title').textContent    = r.resource_name || 'Asset Request';
+  document.getElementById('sfm-assignee').textContent = p.admin_assignee || p.requestor_name || r.requested_by || '';
+  document.getElementById('sfm-empid').textContent    = p.admin_empid    || p.requestor_id   || '';
+  document.getElementById('sfm-location').textContent = p.admin_location || p.requestor_location || '';
+  document.getElementById('sfm-dept').textContent     = p.admin_dept     || '';
+  document.getElementById('sfm-notes').value          = '';
+
+  // Date of issue
+  const rawDate = p.admin_date || p.date_deployed || r.created_at || '';
+  if (rawDate) {
+    const d = new Date(rawDate);
+    if (!isNaN(d)) {
+      document.getElementById('sfm-date').textContent =
+        String(d.getMonth()+1).padStart(2,'0') + ' / ' +
+        String(d.getDate()).padStart(2,'0') + ' / ' + d.getFullYear();
+    } else { document.getElementById('sfm-date').textContent = rawDate; }
+  } else { document.getElementById('sfm-date').textContent = ''; }
+
+  // Build asset rows
+  const FIXED = ['Laptop','Mobile Device','Keyboard','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+  const assets = Array.isArray(p.assets) ? p.assets : [];
+  const byRI = {}, noRI = [];
+  assets.forEach(a => { a.rowIndex != null ? byRI[a.rowIndex] = a : noRI.push(a); });
+  const usedNR = new Set(), legMap = {};
+  FIXED.forEach((lbl, i) => {
+    if (byRI[i] != null) return;
+    for (let ai = 0; ai < noRI.length; ai++) {
+      if (usedNR.has(ai)) continue;
+      const n = (noRI[ai].name || noRI[ai].category_name || '').toLowerCase();
+      if (n.includes(lbl.toLowerCase().split(' ')[0]) || lbl.toLowerCase().includes((n||'').split(' ')[0])) {
+        legMap[i] = noRI[ai]; usedNR.add(ai); break;
+      }
+    }
+  });
+
+  const tbody = document.getElementById('sfm-asset-tbody');
+  tbody.innerHTML = '';
+  FIXED.forEach((lbl, i) => {
+    const a = byRI[i] != null ? byRI[i] : (legMap[i] || null);
+    const displayType  = a ? (a.name  || lbl) : lbl;
+    const displayBrand = a ? ([a.brand, a.model].filter(Boolean).join(' ') || a.brand_model || '') : '';
+    const existingSn   = a ? (a.tag   || a.serial_number || '') : '';
+    const displayCond  = a ? (a.condition || '') : '';
+    const displayVal   = a ? (a.value     || '') : '';
+    const displayRem   = a ? (a.remarks   || '') : '';
+    const occupied     = displayBrand.trim() !== '';
+
+    const tr = document.createElement('tr');
+    tr.dataset.rowIndex = i;
+    tr.dataset.type     = displayType;
+    tr.dataset.brand    = displayBrand;
+    tr.dataset.cond     = displayCond;
+    tr.dataset.val      = displayVal;
+    tr.dataset.rem      = displayRem;
+    tr.dataset.occupied = occupied ? '1' : '0';
+
+    const snCell = occupied
+      ? `<td id="sfm-sn-td-${i}" style="border:1px solid #333;padding:4px 5px;position:relative;"></td>`
+      : `<td style="border:1px solid #333;padding:4px 5px;font-size:11px;color:#999;">—</td>`;
+
+    tr.innerHTML = `
+      <td style="border:1px solid #333;padding:4px 5px;font-weight:600;color:#111;font-size:11px;background:#fafafa;">${esc(displayType)}</td>
+      <td style="border:1px solid #333;padding:4px 5px;font-size:11px;color:#111;">${esc(displayBrand || '—')}</td>
+      ${snCell}
+      <td style="border:1px solid #333;padding:4px 5px;font-size:11px;color:#111;">${esc(displayCond || '—')}</td>
+      <td style="border:1px solid #333;padding:4px 5px;font-size:11px;color:#111;">${esc(displayVal  || '—')}</td>
+      <td style="border:1px solid #333;padding:4px 5px;font-size:11px;color:#111;">${esc(displayRem  || '—')}</td>`;
+    tbody.appendChild(tr);
+
+    // Build searchable serial combo for occupied rows
+    if (occupied) {
+      const td = tr.querySelector(`#sfm-sn-td-${i}`);
+      const combo = _sfmMakeSerialCombo(td, displayBrand, existingSn);
+      tr._sfmGetSn = combo.getValue;
+    }
+  });
+
+  const btn = document.getElementById('sfm-forward-btn');
+  if (btn) btn.disabled = false;
+  // For awaiting-confirmation requests (forwarded or confirmed), show "Release Assets"
+  const isReleaseMode = r.status === 'forwarded' || r.status === 'confirmed';
+  if (btn) btn.innerHTML = isReleaseMode ? '&#10003; Release Assets' : '&#8594; Forward to Requestor';
+  if (btn) btn.dataset.sfmDecision = isReleaseMode ? 'approved' : 'forwarded';
+  document.getElementById('serial-fill-modal').classList.add('open');
+}
+
+function _closeSfModal() {
+  document.getElementById('serial-fill-modal').classList.remove('open');
+  reviewingId = null;
+}
+
+async function _sfmForward() {
+  if (!reviewingId) return;
+  const btn = document.getElementById('sfm-forward-btn');
+  const decision = btn?.dataset.sfmDecision || 'forwarded';
+  const isRelease = decision === 'approved';
+
+  // Collect rows from the SFM table
+  const tbody = document.getElementById('sfm-asset-tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  const FIXED = ['Laptop','Mobile Device','Keyboard','Other Equipment','ID & Lanyard','Access Badge/RFID'];
+
+  // Validate serial numbers only when forwarding (not when releasing)
+  if (!isRelease) {
+    const missing = [];
+    rows.forEach(tr => {
+      if (tr.dataset.occupied !== '1') return;
+      const sn = tr._sfmGetSn ? tr._sfmGetSn() : '';
+      if (!sn) missing.push(tr.dataset.type || `Row ${Number(tr.dataset.rowIndex)+1}`);
+    });
+    if (missing.length) {
+      showToast('Please fill serial number for: ' + missing.join(', '), 'error');
+      return;
+    }
+  }
+
+  // Build assets array from the table
+  const updatedAssets = rows.map(tr => {
+    const i  = tr.dataset.rowIndex;
+    const sn = (tr._sfmGetSn ? tr._sfmGetSn() : '');
+    return {
+      rowIndex:      Number(i),
+      originalType:  FIXED[Number(i)] || '',
+      name:          tr.dataset.type  || FIXED[Number(i)] || '',
+      brand:         tr.dataset.brand || '',
+      model:         '',
+      category_name: tr.dataset.type  || '',
+      tag:           sn,
+      condition:     tr.dataset.cond  || '',
+      value:         tr.dataset.val   || '',
+      remarks:       tr.dataset.rem   || '',
+    };
+  });
+
+  const notes   = (document.getElementById('sfm-notes')?.value || '').trim();
+  const existing = allRequests.find(x => x.id === reviewingId);
+  const oldPayload = (() => { try { return JSON.parse(existing?.payload || '{}'); } catch { return {}; } })();
+  const newPayload = { ...oldPayload, assets: updatedAssets };
+
+  try {
+    if (btn) btn.disabled = true;
+
+    // Patch payload with updated serials
+    const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + reviewingId + '?action=patch_payload', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: newPayload }),
+    });
+    if (!patchRes.ok) {
+      const err = await patchRes.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to save asset data.');
+    }
+    if (existing) existing.payload = JSON.stringify(newPayload);
+
+    // Submit decision
+    await api.reviewApproval(reviewingId, { decision, review_notes: notes });
+    showToast(isRelease ? 'Assets released — request approved' : 'Forwarded to requestor', 'success');
+    _closeSfModal();
+    await loadApprovals();
+    if (window.refreshSidebar) refreshSidebar();
+  } catch (e) {
+    showToast(e.message, 'error');
+    if (btn) btn.disabled = false;
+  }
 }
 
 function closeReviewModal() {
@@ -1185,9 +1646,18 @@ async function submitReview(decision) {
   if (decision === 'approved') {
     const r = allRequests.find(x => x.id === reviewingId);
     if (r && r.resource_type === 'Asset') {
-      const idToOpen = reviewingId;   // capture before closeReviewModal nulls it
+      const idToOpen = reviewingId;
+      // Collect checked (available) assets from the Request Details modal before closing it
+      const checkedAssets = [];
+      document.querySelectorAll('.asset-avail-cb:checked').forEach(cb => {
+        checkedAssets.push({
+          category_name: cb.dataset.category || '',
+          brand:         cb.dataset.brand    || '',
+          model:         cb.dataset.model    || '',
+        });
+      });
       closeReviewModal();
-      openRfModal(idToOpen, true);
+      openRfModal(idToOpen, true, checkedAssets);
       return;
     }
   }
@@ -1223,8 +1693,11 @@ document.getElementById('rf-modal').addEventListener('click', e => {
 document.getElementById('asset-acc-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('asset-acc-modal')) _closeAssetAccModal();
 });
+document.getElementById('serial-fill-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('serial-fill-modal')) _closeSfModal();
+});
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeReviewModal(); closeRfModal(); _closeAssetAccModal(); }
+  if (e.key === 'Escape') { closeReviewModal(); closeRfModal(); _closeAssetAccModal(); _closeSfModal(); }
 });
 
 // Init tab header

@@ -95,54 +95,41 @@ class ApprovalService {
             throw new RuntimeException('Access denied', 403);
         }
 
-        $payload      = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-        $resourceType = $req['resource_type'];
-
-        // For forwarded Asset requests (brand/model request form), the payload contains
-        // requestor info + category/brand/model — not a product record. We find the best
-        // matching available product and create a direct assignment for the requestor.
-        if (in_array($resourceType, ['Asset', 'asset_request'], true)) {
-            $result = $this->executeForwardedAssetRequest($req, $payload, $userName);
-        } else {
-            // For any other forwarded resource type fall back to the normal execute path
-            $result = $this->execute($req, $req['reviewed_by'] ?? 'Admin');
-        }
-
-        // Mark as approved
-        $this->model->review($id, 'approved', $userName, 'Confirmed by requestor');
+        // Mark as confirmed — asset is NOT deployed yet.
+        // Admin must fill serial numbers and re-forward before the asset is assigned.
+        $this->model->review($id, 'confirmed', $userName, 'Assets confirmed by requestor — awaiting serial release');
 
         AuditLogService::log(
-            'approved',
+            'updated',
             $req['resource_type'],
             $req['resource_id'] ?? null,
             $req['resource_name'] ?? null,
-            'Asset confirmed and assigned to ' . $userName
+            'Assets confirmed by ' . $userName . ' — pending admin serial release'
         );
 
-        // Notify the requestor that their assets are now assigned
-        $this->notif->create([
-            'for_role'    => 'staff',
-            'for_user_id' => $req['user_id'] ?? null,
-            'type'        => 'approval_approved',
-            'title'       => '✅ Asset assigned to you',
-            'body'        => 'You have confirmed receipt of "' . ($req['resource_name'] ?? 'Asset') . '". It is now listed in your assets.',
-            'link'        => 'requests.html?tab=myassets',
-            'meta'        => ['approval_id' => $id],
-        ]);
-
-        // Notify all admins that the staff member confirmed and the form is ready to print
+        // Notify all admins: staff confirmed, add serials and re-forward
         $this->notif->create([
             'for_role' => 'admin',
             'type'     => 'asset_confirmed',
-            'title'    => '🖨️ Asset confirmed by ' . $userName,
-            'body'     => '"' . ($req['resource_name'] ?? 'Asset') . '" has been confirmed by ' . $userName . '. You may now print the accountability form.',
+            'title'    => '✅ Assets confirmed — release serial',
+            'body'     => $userName . ' has confirmed the assets for "' . ($req['resource_name'] ?? 'Asset') . '". Assets confirmed, you may now release serial.',
             'link'     => 'approvals.html',
             'meta'     => ['approval_id' => $id, 'confirmed_by' => $userName],
         ]);
 
+        // Notify the requestor that their confirmation was received
+        $this->notif->create([
+            'for_role'    => 'staff',
+            'for_user_id' => $req['user_id'] ?? null,
+            'type'        => 'approval_forwarded',
+            'title'       => '⏳ Waiting for admin approval',
+            'body'        => 'Your confirmation for "' . ($req['resource_name'] ?? 'Asset') . '" has been received. Waiting for the admin to release the serial number.',
+            'link'        => 'requests.html',
+            'meta'        => ['approval_id' => $id],
+        ]);
+
         return [
             'request' => $this->model->findById($id),
-            'result'  => $result,
         ];
     }
 
@@ -283,6 +270,90 @@ class ApprovalService {
                     'request' => $this->model->findById($id),
                     'result'  => $result,
                     'message' => 'Deployment completed',
+                ];
+            }
+            // Re-forward path: admin fills serials on a confirmed request and forwards to staff
+            if ($decision === 'forwarded' && $req['status'] === 'confirmed') {
+                $this->model->review($id, 'forwarded', $reviewedBy, $reviewNotes ?? 'Serial added by admin');
+                AuditLogService::log('forwarded', $req['resource_type'], $req['resource_id'], $req['resource_name'],
+                    'Re-forwarded with serial numbers by ' . $reviewedBy);
+                $this->notif->create([
+                    'for_role'    => 'staff',
+                    'for_user_id' => $req['user_id'] ?? null,
+                    'type'        => 'approval_forwarded',
+                    'title'       => '📦 Assets Ready — Please Receive',
+                    'body'        => 'The serial number of your assets for "' . ($req['resource_name'] ?? 'Asset') . '" is released. Please receive the assets.',
+                    'link'        => 'requests.html?tab=myrequests',
+                    'meta'        => ['approval_id' => $id],
+                ]);
+                return [
+                    'request' => $this->model->findById($id),
+                    'message' => 'Forwarded with serial numbers',
+                ];
+            }
+            // Update-and-re-forward path: admin updates serials on an already-forwarded request
+            if ($decision === 'forwarded' && $req['status'] === 'forwarded') {
+                $this->model->review($id, 'forwarded', $reviewedBy, $reviewNotes ?? 'Serial updated by admin');
+                AuditLogService::log('forwarded', $req['resource_type'], $req['resource_id'], $req['resource_name'],
+                    'Serial numbers updated and re-forwarded by ' . $reviewedBy);
+                $this->notif->create([
+                    'for_role'    => 'staff',
+                    'for_user_id' => $req['user_id'] ?? null,
+                    'type'        => 'approval_forwarded',
+                    'title'       => '📦 Assets Ready — Please Receive',
+                    'body'        => 'The serial number of your assets for "' . ($req['resource_name'] ?? 'Asset') . '" is released. Please receive the assets.',
+                    'link'        => 'requests.html?tab=myrequests',
+                    'meta'        => ['approval_id' => $id],
+                ]);
+                return [
+                    'request' => $this->model->findById($id),
+                    'message' => 'Re-forwarded with updated serial numbers',
+                ];
+            }
+            // Release path: admin releases assets from a forwarded request directly → deploy
+            if ($decision === 'approved' && $req['status'] === 'forwarded') {
+                $payload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
+                $assigneeName = trim($payload['admin_assignee'] ?? $payload['requestor_name'] ?? $req['requested_by'] ?? '');
+                $result = $this->executeForwardedAssetRequest($req, $payload, $assigneeName);
+                $this->model->review($id, 'approved', $reviewedBy, $reviewNotes ?? 'Assets released by admin');
+                AuditLogService::log('approved', $req['resource_type'], $req['resource_id'], $req['resource_name'],
+                    'Assets released and deployed by ' . $reviewedBy);
+                $this->notif->create([
+                    'for_role'    => 'staff',
+                    'for_user_id' => $req['user_id'] ?? null,
+                    'type'        => 'approval_approved',
+                    'title'       => '✅ Asset assigned to you',
+                    'body'        => '"' . ($req['resource_name'] ?? 'Asset') . '" has been released by the admin and is now assigned to you.',
+                    'link'        => 'requests.html?tab=myassets',
+                    'meta'        => ['approval_id' => $id],
+                ]);
+                return [
+                    'request' => $this->model->findById($id),
+                    'result'  => $result,
+                    'message' => 'Assets released and deployed',
+                ];
+            }
+            // Release path: admin approves a staff-confirmed request (serial release → deploy)
+            if ($decision === 'approved' && $req['status'] === 'confirmed') {
+                $payload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
+                $assigneeName = trim($payload['admin_assignee'] ?? $payload['requestor_name'] ?? $req['requested_by'] ?? '');
+                $result = $this->executeForwardedAssetRequest($req, $payload, $assigneeName);
+                $this->model->review($id, 'approved', $reviewedBy, $reviewNotes ?? 'Serial released by admin');
+                AuditLogService::log('approved', $req['resource_type'], $req['resource_id'], $req['resource_name'],
+                    'Serial released and asset deployed by ' . $reviewedBy);
+                $this->notif->create([
+                    'for_role'    => 'staff',
+                    'for_user_id' => $req['user_id'] ?? null,
+                    'type'        => 'approval_approved',
+                    'title'       => '✅ Asset assigned to you',
+                    'body'        => '"' . ($req['resource_name'] ?? 'Asset') . '" has been released by the admin and is now assigned to you.',
+                    'link'        => 'requests.html?tab=myassets',
+                    'meta'        => ['approval_id' => $id],
+                ]);
+                return [
+                    'request' => $this->model->findById($id),
+                    'result'  => $result,
+                    'message' => 'Serial released and asset deployed',
                 ];
             }
             throw new RuntimeException('Request has already been reviewed', 409);
@@ -485,12 +556,20 @@ class ApprovalService {
                 $created  = [];
 
                 foreach ($assets as $asset) {
-                    $assetName  = trim($asset['name']  ?? '');
-                    $assetTag   = trim($asset['tag']   ?? '');
-                    $assetBrand = trim($asset['brand'] ?? '');
+                    $assetName      = trim($asset['name']       ?? '');
+                    $assetTag       = trim($asset['tag']        ?? '');
+                    $assetBrand     = trim($asset['brand']      ?? '');
+                    $assetModel     = trim($asset['model']      ?? '');
+                    $assetCatName   = trim($asset['category_name'] ?? '');
+                    $assetBrandModel = trim($asset['brand_model'] ?? '');
 
-                    // Skip rows that carry no identifying data (tag, brand, or name).
-                    if ($assetTag === '' && $assetBrand === '' && $assetName === '') continue;
+                    // Reconstruct brand_model if stored split
+                    if ($assetBrandModel === '' && $assetBrand !== '' && $assetModel !== '') {
+                        $assetBrandModel = $assetBrand . ' ' . $assetModel;
+                    }
+
+                    // Skip rows that carry no identifying data.
+                    if ($assetTag === '' && $assetBrand === '' && $assetName === '' && $assetCatName === '') continue;
 
                     // PDO fetch() returns false on no match; normalise to null.
                     $fetch = static function($r) { return ($r !== false && $r !== null) ? $r : null; };
@@ -508,24 +587,38 @@ class ApprovalService {
                                 ?? $fetch($productModel->findBySerial($assetBrand));
                     }
 
-                    // 3. Exact name match — available products only to avoid phantom deployments.
+                    // 3. Exact name match — available products only.
                     if (!$product && $assetName !== '') {
                         $matches = $productModel->findByName($assetName);
                         foreach ($matches as $m) {
                             if ($m['asset_status'] === 'available') { $product = $m; break; }
                         }
-                        // Allow any status only when an explicit tag was also provided
                         if (!$product && $assetTag !== '' && !empty($matches)) {
                             $product = $matches[0];
                         }
                     }
 
-                    // 4. Partial name match — available units only
+                    // 4. Match by brand_model combined string (e.g. "Apple MacBook Neo")
+                    if (!$product && $assetBrandModel !== '') {
+                        $bmMatches = $productModel->findByBrandModel($assetBrandModel);
+                        foreach ($bmMatches as $m) {
+                            if ($m['asset_status'] === 'available') { $product = $m; break; }
+                        }
+                        if (!$product && !empty($bmMatches)) $product = $bmMatches[0];
+                    }
+
+                    // 5. Partial name match — available units only
                     if (!$product && $assetName !== '') {
                         $product = $productModel->findByPartialName($assetName);
                         if ($product && $product['asset_status'] !== 'available' && $assetTag === '') {
                             $product = null;
                         }
+                    }
+
+                    // 6. Category name fallback — first available product in that category
+                    if (!$product && $assetCatName !== '') {
+                        $catMatches = $productModel->findAvailableByCategoryName($assetCatName);
+                        if (!empty($catMatches)) $product = $catMatches[0];
                     }
 
                     if (!$product) continue; // product not found in inventory — skip
