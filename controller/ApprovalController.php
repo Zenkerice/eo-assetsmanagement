@@ -227,6 +227,8 @@ class ApprovalController extends BaseController {
 
         // Notify all admins
         require_once __DIR__ . '/../model/NotificationModel.php';
+        require_once __DIR__ . '/../model/UserModel.php';
+        require_once __DIR__ . '/../services/EmailService.php';
         $resourceName = $req['resource_name'] ?? 'Asset';
         (new \NotificationModel())->create([
             'for_role' => 'admin',
@@ -236,6 +238,23 @@ class ApprovalController extends BaseController {
             'link'     => 'approvals.html',
             'meta'     => ['approval_id' => $id, 'changed_by' => $userName],
         ]);
+
+        // Email all admins
+        $mailer    = new \EmailService();
+        $allUsers  = (new \UserModel())->findAll();
+        $admins    = array_filter($allUsers, fn($u) => $u['role'] === 'admin' && !empty($u['email']));
+        $emailSubject = "✏️ Asset request updated by {$userName}";
+        $emailText    = "{$userName} has updated their asset request details for \"{$resourceName}\".\n\nThe request has been reset to pending and requires your re-approval.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
+        $emailHtml    = "<p><strong>{$userName}</strong> has updated their asset request details.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$resourceName}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Updated by</td><td style='padding:8px 12px;color:#e6edf3;'>{$userName}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Reset to pending — re-approval needed</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Request</a></p>";
+        foreach ($admins as $admin) {
+            $mailer->send($admin['email'], $admin['name'], $emailSubject, $emailText, $emailHtml);
+        }
 
         $this->respond(['success' => true, 'message' => 'Asset details updated']);
     }

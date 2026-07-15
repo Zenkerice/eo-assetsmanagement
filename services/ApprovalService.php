@@ -3,7 +3,9 @@ require_once __DIR__ . '/../model/ApprovalModel.php';
 require_once __DIR__ . '/../model/ProductModel.php';
 require_once __DIR__ . '/../model/CategoryModel.php';
 require_once __DIR__ . '/../model/NotificationModel.php';
+require_once __DIR__ . '/../model/UserModel.php';
 require_once __DIR__ . '/../services/AuditLogService.php';
+require_once __DIR__ . '/../services/EmailService.php';
 
 /**
  * Handles the approval workflow for staff-initiated mutations.
@@ -11,10 +13,40 @@ require_once __DIR__ . '/../services/AuditLogService.php';
 class ApprovalService {
     private ApprovalModel      $model;
     private NotificationModel  $notif;
+    private EmailService       $mailer;
+    private UserModel          $userModel;
 
     public function __construct() {
-        $this->model = new ApprovalModel();
-        $this->notif = new NotificationModel();
+        $this->model     = new ApprovalModel();
+        $this->notif     = new NotificationModel();
+        $this->mailer    = new EmailService();
+        $this->userModel = new UserModel();
+    }
+
+    // ── Email helpers ─────────────────────────────────────────────────────────
+
+    /**
+     * Send an email to every admin user who has an email address on file.
+     */
+    private function emailAdmins(string $subject, string $bodyText, string $bodyHtml): void {
+        $admins = array_filter(
+            $this->userModel->findAll(),
+            fn($u) => $u['role'] === 'admin' && !empty($u['email'])
+        );
+        foreach ($admins as $admin) {
+            $this->mailer->send($admin['email'], $admin['name'], $subject, $bodyText, $bodyHtml);
+        }
+    }
+
+    /**
+     * Send an email to a specific user by their user ID.
+     */
+    private function emailUser(?int $userId, string $subject, string $bodyText, string $bodyHtml): void {
+        if (!$userId) return;
+        $user = $this->userModel->findById($userId);
+        if ($user && !empty($user['email'])) {
+            $this->mailer->send($user['email'], $user['name'], $subject, $bodyText, $bodyHtml);
+        }
     }
 
     // ── Queue a request ───────────────────────────────────────────────────────
@@ -41,6 +73,63 @@ class ApprovalService {
             'link'     => 'approvals.html',
             'meta'     => ['approval_id' => $id, 'action_type' => $data['action_type']],
         ]);
+
+        // Email all admins
+        // Build asset list from payload — may contain multiple items
+        $payload      = is_string($data['payload'] ?? null)
+                            ? json_decode($data['payload'], true)
+                            : ($data['payload'] ?? []);
+        $assetsList   = $payload['assets'] ?? [];
+
+        // Plain-text asset lines
+        if (!empty($assetsList)) {
+            $assetLines = [];
+            foreach ($assetsList as $i => $asset) {
+                $label = trim(($asset['name'] ?? '') ?: ($asset['category_name'] ?? ''));
+                $brand = trim($asset['brand'] ?? '');
+                $model = trim($asset['model'] ?? '');
+                $tag   = trim($asset['tag']   ?? '');
+                $parts = array_filter([$brand, $model, $tag ? "(SN: $tag)" : '']);
+                $detail = implode(' ', $parts);
+                $assetLines[] = ($i + 1) . '. ' . $label . ($detail ? ' — ' . $detail : '');
+            }
+            $assetsTextBlock = implode("\n", $assetLines);
+        } else {
+            $assetsTextBlock = $resource;
+        }
+
+        // HTML asset rows
+        $assetRowsHtml = '';
+        if (!empty($assetsList)) {
+            foreach ($assetsList as $i => $asset) {
+                $label  = htmlspecialchars(trim(($asset['name'] ?? '') ?: ($asset['category_name'] ?? '')), ENT_QUOTES);
+                $brand  = htmlspecialchars(trim($asset['brand'] ?? ''), ENT_QUOTES);
+                $model  = htmlspecialchars(trim($asset['model'] ?? ''), ENT_QUOTES);
+                $tag    = htmlspecialchars(trim($asset['tag']   ?? ''), ENT_QUOTES);
+                $detail = trim(implode(' ', array_filter([$brand, $model])));
+                $sub    = trim(($detail ? $detail : '') . ($tag ? ($detail ? ' · ' : '') . 'SN: ' . $tag : ''));
+                $rowBg  = ($i % 2 === 1) ? "background:#1c2333;" : '';
+                $num    = $i + 1;
+                $assetRowsHtml .= "<tr style='{$rowBg}'>
+  <td style='padding:8px 12px;color:#8b949e;width:140px;'>Asset {$num}</td>
+  <td style='padding:8px 12px;color:#e6edf3;'>{$label}" .
+                    ($sub ? "<br><span style='font-size:12px;color:#8b949e;'>{$sub}</span>" : '') .
+                "</td></tr>\n";
+            }
+        } else {
+            $assetRowsHtml = "<tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($resource, ENT_QUOTES) . "</td></tr>\n";
+        }
+
+        $emailSubject = "New approval request from {$data['requested_by']}";
+        $emailText    = "A new approval request has been submitted.\n\nRequest Type: {$action} {$data['resource_type']}\nRequested Assets:\n{$assetsTextBlock}\nSubmitted by: {$data['requested_by']}\n\nPlease log in to review the request:\nhttp://localhost/inventory/public/approvals.html";
+        $emailHtml    = "<p>A new approval request has been submitted and requires your review.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$data['resource_type']}</td></tr>
+  {$assetRowsHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>{$data['requested_by']}</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Request</a></p>";
+        $this->emailAdmins($emailSubject, $emailText, $emailHtml);
 
         return $this->model->findById($id);
     }
@@ -117,6 +206,19 @@ class ApprovalService {
             'meta'     => ['approval_id' => $id, 'confirmed_by' => $userName],
         ]);
 
+        // Email all admins
+        $assetName = $req['resource_name'] ?? 'Asset';
+        $adminEmailSubject = "✅ Assets confirmed by {$userName} — release serial numbers";
+        $adminEmailText    = "{$userName} has confirmed the assets for \"{$assetName}\".\n\nYou may now release the serial numbers to complete the assignment.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
+        $adminEmailHtml    = "<p><strong>{$userName}</strong> has confirmed the assets for the following request:</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetName}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Confirmed by</td><td style='padding:8px 12px;color:#e6edf3;'>{$userName}</td></tr>
+</table>
+<p>You may now release the serial numbers to complete the assignment.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Release Serial Numbers</a></p>";
+        $this->emailAdmins($adminEmailSubject, $adminEmailText, $adminEmailHtml);
+
         // Notify the requestor that their confirmation was received
         $this->notif->create([
             'for_role'    => 'staff',
@@ -127,6 +229,18 @@ class ApprovalService {
             'link'        => 'requests.html',
             'meta'        => ['approval_id' => $id],
         ]);
+
+        // Email the requestor
+        $staffEmailSubject = "⏳ Confirmation received — awaiting serial release";
+        $staffEmailText    = "Your asset confirmation for \"{$assetName}\" has been received.\n\nThe admin will now release the serial numbers for your assigned assets. You will receive another notification once they are ready.\n\nTrack your request:\nhttp://localhost/inventory/public/requests.html";
+        $staffEmailHtml    = "<p>Your asset confirmation has been received successfully.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetName}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Awaiting serial number release</td></tr>
+</table>
+<p>The admin will release the serial numbers for your assigned assets shortly.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html' style='background:#1f6feb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Track My Request</a></p>";
+        $this->emailUser($req['user_id'] ?? null, $staffEmailSubject, $staffEmailText, $staffEmailHtml);
 
         return [
             'request' => $this->model->findById($id),
@@ -286,6 +400,20 @@ class ApprovalService {
                     'link'        => 'requests.html?tab=myrequests',
                     'meta'        => ['approval_id' => $id],
                 ]);
+                // Email the requestor
+                $assetNameFwd = $req['resource_name'] ?? 'Asset';
+                $this->emailUser(
+                    $req['user_id'] ?? null,
+                    '📦 Assets Ready — Please Receive',
+                    "The serial numbers for your assets \"{$assetNameFwd}\" have been released by the admin.\n\nPlease proceed to receive your assets.\n\nView your request:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
+                    "<p>Great news! The serial numbers for your assets have been released.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetNameFwd}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Ready to receive</td></tr>
+</table>
+<p>Please log in to confirm receipt of your assets.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myrequests' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Receive Assets</a></p>"
+                );
                 return [
                     'request' => $this->model->findById($id),
                     'message' => 'Forwarded with serial numbers',
@@ -305,6 +433,20 @@ class ApprovalService {
                     'link'        => 'requests.html?tab=myrequests',
                     'meta'        => ['approval_id' => $id],
                 ]);
+                // Email the requestor
+                $assetNameUpd = $req['resource_name'] ?? 'Asset';
+                $this->emailUser(
+                    $req['user_id'] ?? null,
+                    '📦 Assets Ready — Please Receive',
+                    "The serial numbers for your assets \"{$assetNameUpd}\" have been updated and released by the admin.\n\nPlease proceed to receive your assets.\n\nView your request:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
+                    "<p>The serial numbers for your assets have been updated and released.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetNameUpd}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Ready to receive</td></tr>
+</table>
+<p>Please log in to confirm receipt of your assets.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myrequests' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Receive Assets</a></p>"
+                );
                 return [
                     'request' => $this->model->findById($id),
                     'message' => 'Re-forwarded with updated serial numbers',
@@ -327,6 +469,20 @@ class ApprovalService {
                     'link'        => 'requests.html?tab=myassets',
                     'meta'        => ['approval_id' => $id],
                 ]);
+                // Email the requestor
+                $assetNameRel = $req['resource_name'] ?? 'Asset';
+                $this->emailUser(
+                    $req['user_id'] ?? null,
+                    '✅ Asset assigned to you',
+                    "Great news! \"{$assetNameRel}\" has been released by the admin and is now assigned to you.\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
+                    "<p>Your asset request has been approved and the asset is now assigned to you.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetNameRel}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Released by</td><td style='padding:8px 12px;color:#e6edf3;'>{$reviewedBy}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myassets' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Assets</a></p>"
+                );
                 return [
                     'request' => $this->model->findById($id),
                     'result'  => $result,
@@ -350,6 +506,20 @@ class ApprovalService {
                     'link'        => 'requests.html?tab=myassets',
                     'meta'        => ['approval_id' => $id],
                 ]);
+                // Email the requestor
+                $assetNameConf = $req['resource_name'] ?? 'Asset';
+                $this->emailUser(
+                    $req['user_id'] ?? null,
+                    '✅ Asset assigned to you',
+                    "Great news! \"{$assetNameConf}\" has been released by the admin and is now assigned to you.\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
+                    "<p>Your asset request has been approved and the asset is now assigned to you.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$assetNameConf}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Released by</td><td style='padding:8px 12px;color:#e6edf3;'>{$reviewedBy}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myassets' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Assets</a></p>"
+                );
                 return [
                     'request' => $this->model->findById($id),
                     'result'  => $result,
@@ -411,6 +581,43 @@ class ApprovalService {
             'link'        => $isAssetForward ? 'requests.html?tab=myrequests' : 'requests.html',
             'meta'        => ['approval_id' => $id, 'decision' => $decision],
         ]);
+
+        // Email the requestor
+        if ($isAssetForward) {
+            $emailSubjectStaff = "📋 Action required: Please confirm your asset request";
+            $emailTextStaff    = "Your asset request for \"{$resource}\" requires your confirmation.\n\nPlease log in to review and sign the accountability form.\n\nView your request:\nhttp://localhost/inventory/public/requests.html?tab=myrequests";
+            $emailHtmlStaff    = "<p>Your asset request requires your confirmation before it can be processed.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$resource}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Action required</td><td style='padding:8px 12px;color:#f0a500;'>Review &amp; confirm</td></tr>
+</table>
+<p>Please log in to review and sign the accountability form.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myrequests' style='background:#1f6feb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Confirm My Request</a></p>";
+        } elseif ($decision === 'approved') {
+            $emailSubjectStaff = "✅ Your request has been approved";
+            $emailTextStaff    = "Your {$action} {$friendlyType} request for \"{$resource}\" has been approved." . ($reviewNotes ? "\n\nNote: {$reviewNotes}" : '') . "\n\nView your requests:\nhttp://localhost/inventory/public/requests.html";
+            $emailHtmlStaff    = "<p>Your request has been approved.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$resource}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Approved</td></tr>" .
+                ($reviewNotes ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Note</td><td style='padding:8px 12px;color:#e6edf3;'>{$reviewNotes}</td></tr>" : '') .
+                "</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Requests</a></p>";
+        } else {
+            $emailSubjectStaff = "✖ Your request has been rejected";
+            $emailTextStaff    = "Your {$action} {$friendlyType} request for \"{$resource}\" has been rejected." . ($reviewNotes ? "\n\nReason: {$reviewNotes}" : '') . "\n\nView your requests:\nhttp://localhost/inventory/public/requests.html";
+            $emailHtmlStaff    = "<p>Your request has been reviewed and unfortunately was not approved.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$resource}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f85149;'>Rejected</td></tr>" .
+                ($reviewNotes ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Reason</td><td style='padding:8px 12px;color:#e6edf3;'>{$reviewNotes}</td></tr>" : '') .
+                "</table>
+<p>If you have questions, please contact the admin.</p>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html' style='background:#1f6feb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Requests</a></p>";
+        }
+        $this->emailUser($req['user_id'] ?? null, $emailSubjectStaff, $emailTextStaff, $emailHtmlStaff);
 
         return [
             'request' => $this->model->findById($id),
