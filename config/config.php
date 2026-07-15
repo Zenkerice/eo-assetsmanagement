@@ -8,9 +8,9 @@ define('DB_CHARSET', 'utf8mb4');
 
 // App settings
 define('LOW_STOCK_THRESHOLD', 10);
-define('APP_NAME', 'Inventory System');
+define('APP_NAME', 'EO Asset Management');
 
 // Mail / SMTP configuration (Gmail with App Password)
 define('MAIL_FROM_EMAIL',    'rayvenompar@gmail.com');
-define('MAIL_FROM_NAME',     'EO Assets Management');
+define('MAIL_FROM_NAME',     'EO Asset Management');
 define('MAIL_SMTP_PASSWORD', 'sqxk wfuy iybd ynfp');
