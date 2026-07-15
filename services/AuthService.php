@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../model/UserModel.php';
 require_once __DIR__ . '/../model/NotificationModel.php';
+require_once __DIR__ . '/../services/EmailService.php';
 
 class AuthService {
     private UserModel $model;
     private NotificationModel $notifModel;
+    private EmailService $mailer;
 
     public function __construct() {
         $this->model      = new UserModel();
         $this->notifModel = new NotificationModel();
+        $this->mailer     = new EmailService();
     }
 
     /** Verify credentials and return user array (without password) or throw with reason. */
@@ -76,6 +79,37 @@ class AuthService {
             'meta'     => ['user_id' => $user['id'], 'action' => 'registration'],
         ]);
 
+        // Email all admins
+        try {
+            $admins = array_filter($this->model->findAll(), fn($u) => $u['role'] === 'admin' && !empty($u['email']));
+            $name     = htmlspecialchars($user['name'],     ENT_QUOTES);
+            $username = htmlspecialchars($user['username'], ENT_QUOTES);
+            $role     = htmlspecialchars($roleLabel,        ENT_QUOTES);
+            $pos      = htmlspecialchars($user['position'] ?? '—', ENT_QUOTES);
+            $empId    = htmlspecialchars($user['employee_id'] ?? '—', ENT_QUOTES);
+            $emailRow = htmlspecialchars($user['email'] ?? '—', ENT_QUOTES);
+
+            $subject  = "New Account Pending Approval — {$user['name']}";
+            $bodyText = "A new account is awaiting your approval.\n\nName: {$user['name']}\nUsername: {$user['username']}\nRole: {$roleLabel}\nPosition: " . ($user['position'] ?? '—') . "\nEmployee ID: " . ($user['employee_id'] ?? '—') . "\nEmail: " . ($user['email'] ?? '—') . "\n\nLog in to approve or reject:\nhttp://localhost/inventory/public/users.html";
+            $bodyHtml = "<p>A new account registration is awaiting your approval.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$name}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Username</td><td style='padding:8px 12px;color:#e6edf3;'>{$username}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Role</td><td style='padding:8px 12px;color:#e6edf3;'>{$role}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Position</td><td style='padding:8px 12px;color:#e6edf3;'>{$pos}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Employee ID</td><td style='padding:8px 12px;color:#e6edf3;'>{$empId}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Email</td><td style='padding:8px 12px;color:#e6edf3;'>{$emailRow}</td></tr>
+  <tr><td style='padding:8px 12px;color:#f0a500;font-weight:600;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Pending approval</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/users.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Account</a></p>";
+
+            foreach ($admins as $admin) {
+                $this->mailer->send($admin['email'], $admin['name'], $subject, $bodyText, $bodyHtml);
+            }
+        } catch (\Throwable $e) {
+            error_log('EmailService (register → admins): ' . $e->getMessage());
+        }
+
         return $user;
     }
 
@@ -121,6 +155,27 @@ class AuthService {
                 'link'        => null,
                 'meta'        => ['action' => 'account_approved'],
             ]);
+            // Email the user
+            try {
+                if (!empty($user['email'])) {
+                    $nameHtml = htmlspecialchars($user['name'], ENT_QUOTES);
+                    $this->mailer->send(
+                        $user['email'],
+                        $user['name'],
+                        '✅ Your account has been approved',
+                        "Hi {$user['name']},\n\nGreat news! Your account registration has been approved by an admin. You can now sign in.\n\nLog in here:\nhttp://localhost/inventory/public/login.html",
+                        "<p>Hi <strong>{$nameHtml}</strong>,</p>
+<p>Great news! Your account registration has been approved. You can now sign in to the system.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$nameHtml}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;font-weight:600;'>Approved — Active</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/login.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Sign In Now</a></p>"
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('EmailService (updateStatus approved → user): ' . $e->getMessage());
+            }
         } elseif ($status === 'rejected') {
             $this->notifModel->create([
                 'for_user_id' => $id,
@@ -131,6 +186,49 @@ class AuthService {
                 'link'        => null,
                 'meta'        => ['action' => 'account_rejected'],
             ]);
+            // Email the user
+            try {
+                if (!empty($user['email'])) {
+                    $nameHtml = htmlspecialchars($user['name'], ENT_QUOTES);
+                    $this->mailer->send(
+                        $user['email'],
+                        $user['name'],
+                        '✖ Your account registration was not approved',
+                        "Hi {$user['name']},\n\nUnfortunately, your account registration was not approved. Please contact your administrator for more information.",
+                        "<p>Hi <strong>{$nameHtml}</strong>,</p>
+<p>Unfortunately, your account registration was reviewed and was not approved at this time.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$nameHtml}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f85149;font-weight:600;'>Rejected</td></tr>
+</table>
+<p>If you believe this is a mistake, please contact your administrator directly.</p>"
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('EmailService (updateStatus rejected → user): ' . $e->getMessage());
+            }
+        } elseif ($status === 'suspended') {
+            // Email the user
+            try {
+                if (!empty($user['email'])) {
+                    $nameHtml = htmlspecialchars($user['name'], ENT_QUOTES);
+                    $this->mailer->send(
+                        $user['email'],
+                        $user['name'],
+                        '⚠️ Your account has been suspended',
+                        "Hi {$user['name']},\n\nYour account has been suspended by an administrator. You will not be able to sign in until the suspension is lifted.\n\nIf you believe this is a mistake, please contact your administrator.",
+                        "<p>Hi <strong>{$nameHtml}</strong>,</p>
+<p>Your account has been suspended by an administrator.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$nameHtml}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;font-weight:600;'>Suspended</td></tr>
+</table>
+<p>You will not be able to sign in while your account is suspended. If you believe this is a mistake, please contact your administrator directly.</p>"
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('EmailService (updateStatus suspended → user): ' . $e->getMessage());
+            }
         }
 
         return $this->model->findById($id);
@@ -161,6 +259,62 @@ class AuthService {
         if (empty($fields)) throw new InvalidArgumentException('No fields to update');
 
         $this->model->update($id, $fields);
+
+        // Send suspension email if the status changed to suspended
+        $newStatus  = $data['status'] ?? null;
+        $prevStatus = $existing['status'] ?? 'active';
+        if ($newStatus === 'suspended' && $prevStatus !== 'suspended') {
+            // Use the updated email in case it was changed in the same save
+            $emailAddr = $data['email'] ?? $existing['email'] ?? null;
+            $userName  = $data['name']  ?? $existing['name']  ?? '';
+            try {
+                if (!empty($emailAddr)) {
+                    $nameHtml = htmlspecialchars($userName, ENT_QUOTES);
+                    $this->mailer->send(
+                        $emailAddr,
+                        $userName,
+                        '⚠️ Your account has been suspended',
+                        "Hi {$userName},\n\nYour account has been suspended by an administrator. You will not be able to sign in until the suspension is lifted.\n\nIf you believe this is a mistake, please contact your administrator.",
+                        "<p>Hi <strong>{$nameHtml}</strong>,</p>
+<p>Your account has been suspended by an administrator.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$nameHtml}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;font-weight:600;'>Suspended</td></tr>
+</table>
+<p>You will not be able to sign in while your account is suspended. If you believe this is a mistake, please contact your administrator directly.</p>"
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('EmailService (update suspended → user): ' . $e->getMessage());
+            }
+        }
+
+        // Send unsuspension email if the status changed from suspended to active
+        if ($newStatus === 'active' && $prevStatus === 'suspended') {
+            $emailAddr = $data['email'] ?? $existing['email'] ?? null;
+            $userName  = $data['name']  ?? $existing['name']  ?? '';
+            try {
+                if (!empty($emailAddr)) {
+                    $nameHtml = htmlspecialchars($userName, ENT_QUOTES);
+                    $this->mailer->send(
+                        $emailAddr,
+                        $userName,
+                        '✅ Your account suspension has been lifted',
+                        "Hi {$userName},\n\nYour account suspension has been lifted by an administrator. You can now sign in again.\n\nLog in here:\nhttp://localhost/inventory/public/login.html",
+                        "<p>Hi <strong>{$nameHtml}</strong>,</p>
+<p>Your account suspension has been lifted. You can now sign in to the system again.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Name</td><td style='padding:8px 12px;color:#e6edf3;'>{$nameHtml}</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;font-weight:600;'>Active</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/login.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Sign In Now</a></p>"
+                    );
+                }
+            } catch (\Throwable $e) {
+                error_log('EmailService (update unsuspended → user): ' . $e->getMessage());
+            }
+        }
+
         return $this->model->findById($id);
     }
 
