@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 13, 2026 at 07:04 AM
+-- Generation Time: Jul 15, 2026 at 03:22 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -37,13 +37,35 @@ CREATE TABLE `approval_requests` (
   `resource_name` varchar(255) DEFAULT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
   `notes` text DEFAULT NULL,
-  `status` enum('pending','approved','rejected','forwarded') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','approved','rejected','forwarded','confirmed') NOT NULL DEFAULT 'pending',
   `reviewed_by` varchar(150) DEFAULT NULL,
   `review_notes` text DEFAULT NULL,
   `reviewed_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `approval_requests`
+--
+
+INSERT INTO `approval_requests` (`id`, `requested_by`, `user_id`, `action_type`, `resource_type`, `resource_id`, `resource_name`, `payload`, `notes`, `status`, `reviewed_by`, `review_notes`, `reviewed_at`, `created_at`, `updated_at`) VALUES
+(1, 'Zen', 2, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260713-XENJ\",\"requestor_name\":\"Zen\",\"requestor_id\":\"asdgasc7a8sczen\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Keyboards\",\"brand\":\"Inplay\",\"model\":\"IP\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS13\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ11\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Laptop\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Laptop\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Zen\",\"admin_empid\":\"asdgasc7a8sczen\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 13 \\/ 2026\"}', NULL, 'approved', 'Zen', 'Confirmed by requestor', '2026-07-13 17:42:40', '2026-07-13 17:16:29', '2026-07-13 17:42:40'),
+(2, 'Zen', 2, 'delete', 'Assignment', 2, 'Inplay Keboard · return by Zen', '{\"return_id\":\"RET-20260713-WYEE\",\"assignment_id\":\"2\",\"product_id\":16,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-13 17:43:29', '2026-07-13 17:42:52', '2026-07-13 17:43:29'),
+(3, 'Zen', 2, 'delete', 'Assignment', 1, 'Apple MacBook Neo · return by Zen', '{\"return_id\":\"RET-20260713-85SN\",\"assignment_id\":\"1\",\"product_id\":1,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-13 17:43:24', '2026-07-13 17:42:56', '2026-07-13 17:43:24'),
+(4, 'Zen', 2, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260713-GCRW\",\"requestor_name\":\"Zen\",\"requestor_id\":\"asdgasc7a8sczen\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ12\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"Mobile Device\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Mobile Device\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Zen\",\"admin_empid\":\"asdgasc7a8sczen\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 13 \\/ 2026\"}', NULL, 'approved', 'Zen', 'Confirmed by requestor', '2026-07-13 17:51:21', '2026-07-13 17:43:52', '2026-07-13 17:51:21'),
+(5, 'Raven Ompar', 5, 'create', 'Asset', NULL, 'Apple MacBook Neo', '{\"request_id\":\"REQ-20260714-AJER\",\"requestor_name\":\"Raven Ompar\",\"requestor_id\":\"RA2004\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"23\",\"category_name\":\"Laptop\",\"brand\":\"Apple\",\"model\":\"MacBook Neo\",\"assets\":[{\"category_id\":\"23\",\"category_name\":\"Laptop\",\"brand\":\"Apple\",\"model\":\"MacBook Neo\"}],\"description\":\"\"}', NULL, 'rejected', 'Administrator', '', '2026-07-14 09:35:44', '2026-07-14 09:23:46', '2026-07-14 09:35:44'),
+(6, 'Raven Ompar', 5, 'create', 'Asset', NULL, 'Apple MacBook Neo', '{\"request_id\":\"REQ-20260714-9KM6\",\"requestor_name\":\"Raven Ompar\",\"requestor_id\":\"RA2004\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"23\",\"category_name\":\"Laptop\",\"brand\":\"Apple\",\"model\":\"MacBook Neo\",\"assets\":[{\"category_id\":\"23\",\"category_name\":\"Laptop\",\"brand\":\"Apple\",\"model\":\"MacBook Neo\"},{\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\"}],\"description\":\"\"}', NULL, 'rejected', 'Administrator', '', '2026-07-14 09:37:33', '2026-07-14 09:36:52', '2026-07-14 09:37:33'),
+(7, 'Raven Ompar', 5, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260714-3Y16\",\"requestor_name\":\"Raven Ompar\",\"requestor_id\":\"RA2004\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"category_name\":\"UPS\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"Mobile Device\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Mobile Device\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay\",\"model\":\"IP\",\"category_name\":\"Keyboards\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Raven Ompar\",\"admin_empid\":\"RA2004\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 14 \\/ 2026\"}', NULL, 'approved', 'Raven Ompar', 'Confirmed by requestor', '2026-07-14 10:22:10', '2026-07-14 09:40:46', '2026-07-14 10:22:10'),
+(8, 'Raven Ompar', 5, 'delete', 'Assignment', 5, 'Secure UPS · return by Raven Ompar', '{\"return_id\":\"RET-20260714-RPT0\",\"assignment_id\":\"5\",\"product_id\":13,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-14 10:23:15', '2026-07-14 10:22:53', '2026-07-14 10:23:15'),
+(9, 'Raven Ompar', 5, 'delete', 'Assignment', 6, 'Secure UPS · return by Raven Ompar', '{\"return_id\":\"RET-20260714-9L6T\",\"assignment_id\":\"6\",\"product_id\":14,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-14 10:23:13', '2026-07-14 10:22:56', '2026-07-14 10:23:13'),
+(10, 'Raven Ompar', 5, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260714-B3IC\",\"requestor_name\":\"Raven Ompar\",\"requestor_id\":\"RA2004\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Laptop\",\"brand\":\"Apple\",\"model\":\"MacBook Neo\",\"category_name\":\"Laptop\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"category_name\":\"UPS\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay\",\"model\":\"IP\",\"category_name\":\"Keyboards\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Keyboards\",\"brand\":\"Inplay\",\"model\":\"IP\",\"category_name\":\"Keyboards\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Raven Ompar\",\"admin_empid\":\"RA2004\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 14 \\/ 2026\"}', NULL, '', 'Raven Ompar', 'Assets confirmed by requestor — awaiting serial release', '2026-07-14 11:32:32', '2026-07-14 10:27:51', '2026-07-14 11:32:32'),
+(11, 'Zen', 2, 'delete', 'Assignment', 4, 'Secure UPS · return by Zen', '{\"return_id\":\"RET-20260714-YV5P\",\"assignment_id\":\"4\",\"product_id\":12,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-14 13:15:08', '2026-07-14 13:14:49', '2026-07-14 13:15:08'),
+(12, 'Zen', 2, 'delete', 'Assignment', 3, 'Secure UPS · return by Zen', '{\"return_id\":\"RET-20260714-5ALV\",\"assignment_id\":\"3\",\"product_id\":11,\"condition\":\"good\",\"return_method\":\"dropoff\",\"notes\":\"\"}', 'Return request: good', 'approved', 'Administrator', '', '2026-07-14 13:15:06', '2026-07-14 13:14:52', '2026-07-14 13:15:06'),
+(13, 'Raven Ompar', 5, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260714-7BK8\",\"requestor_name\":\"Raven Ompar\",\"requestor_id\":\"RA2004\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Laptop\",\"brand\":\"Apple MacBook Neo\",\"model\":\"\",\"category_name\":\"Laptop\",\"tag\":\"MC1\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure XPS 15\",\"model\":\"\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ11\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay IP\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS13\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Keyboards\",\"brand\":\"Inplay IP\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS13\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Raven Ompar\",\"admin_empid\":\"RA2004\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 14 \\/ 2026\"}', NULL, 'approved', 'Administrator', '', '2026-07-14 21:44:59', '2026-07-14 13:16:15', '2026-07-14 21:44:59'),
+(14, 'Zen', 2, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260714-HLDY\",\"requestor_name\":\"Zen\",\"requestor_id\":\"asdgasc7a8sczen\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Laptop\",\"brand\":\"Apple MacBook Neo\",\"model\":\"\",\"category_name\":\"Laptop\",\"tag\":\"MC1\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure XPS 15\",\"model\":\"\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ11\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay IP\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS13\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Zen\",\"admin_empid\":\"asdgasc7a8sczen\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 14 \\/ 2026\"}', NULL, 'approved', 'Administrator', '', '2026-07-14 21:44:15', '2026-07-14 21:26:56', '2026-07-14 21:44:15'),
+(15, 'Zen', 2, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260714-6U21\",\"requestor_name\":\"Zen\",\"requestor_id\":\"asdgasc7a8sczen\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"Laptop\",\"brand\":\"Apple MacBook Neo\",\"model\":\"\",\"category_name\":\"Laptop\",\"tag\":\"MC2\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"UPS\",\"brand\":\"Secure XPS 15\",\"model\":\"\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ12\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay IP\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS14\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Zen\",\"admin_empid\":\"asdgasc7a8sczen\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 14 \\/ 2026\"}', NULL, 'approved', 'Administrator', '', '2026-07-14 21:48:27', '2026-07-14 21:45:56', '2026-07-14 21:48:27'),
+(16, 'Zen', 2, 'create', 'Asset', NULL, 'Secure XPS 15', '{\"request_id\":\"REQ-20260715-IYLV\",\"requestor_name\":\"Zen\",\"requestor_id\":\"asdgasc7a8sczen\",\"requestor_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"requestor_location_id\":\"1\",\"category_id\":\"22\",\"category_name\":\"UPS\",\"brand\":\"Secure\",\"model\":\"XPS 15\",\"assets\":[{\"rowIndex\":0,\"originalType\":\"Laptop\",\"name\":\"UPS\",\"brand\":\"Secure XPS 15\",\"model\":\"\",\"category_name\":\"UPS\",\"tag\":\"KAKSDJ13\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":1,\"originalType\":\"Mobile Device\",\"name\":\"Mobile Device\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Mobile Device\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":2,\"originalType\":\"Keyboard\",\"name\":\"Keyboards\",\"brand\":\"Inplay IP\",\"model\":\"\",\"category_name\":\"Keyboards\",\"tag\":\"HAJS15\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":3,\"originalType\":\"Other Equipment\",\"name\":\"Other Equipment\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Other Equipment\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":4,\"originalType\":\"ID & Lanyard\",\"name\":\"ID & Lanyard\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"ID & Lanyard\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"},{\"rowIndex\":5,\"originalType\":\"Access Badge\\/RFID\",\"name\":\"Access Badge\\/RFID\",\"brand\":\"\",\"model\":\"\",\"category_name\":\"Access Badge\\/RFID\",\"tag\":\"\",\"condition\":\"\",\"value\":\"\",\"remarks\":\"\"}],\"description\":\"\",\"admin_assignee\":\"Zen\",\"admin_empid\":\"asdgasc7a8sczen\",\"admin_location\":\"Site 3 | San Carlos City, Dungganon Site\",\"admin_dept\":\"\",\"admin_date\":\"07 \\/ 15 \\/ 2026\"}', NULL, 'approved', 'Administrator', '', '2026-07-15 09:21:27', '2026-07-15 09:20:01', '2026-07-15 09:21:27');
 
 -- --------------------------------------------------------
 
@@ -66,6 +88,24 @@ CREATE TABLE `assignments` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `assignments`
+--
+
+INSERT INTO `assignments` (`id`, `product_id`, `assignee_name`, `assigned_by`, `assigned_at`, `due_back`, `returned_at`, `notes`, `location_id`, `status`, `created_at`, `updated_at`) VALUES
+(7, 1, 'Zen', 'Zen', '2026-07-14 15:44:15', NULL, '2026-07-14 21:44:59', NULL, 1, 'returned', '2026-07-14 21:44:15', '2026-07-14 21:44:59'),
+(8, 11, 'Zen', 'Zen', '2026-07-14 15:44:15', NULL, '2026-07-14 21:44:59', NULL, 1, 'returned', '2026-07-14 21:44:15', '2026-07-14 21:44:59'),
+(9, 16, 'Zen', 'Zen', '2026-07-14 15:44:15', NULL, '2026-07-14 21:44:59', NULL, 2, 'returned', '2026-07-14 21:44:15', '2026-07-14 21:44:59'),
+(10, 1, 'Raven Ompar', 'Raven Ompar', '2026-07-14 15:44:59', NULL, NULL, NULL, 1, 'active', '2026-07-14 21:44:59', '2026-07-14 21:44:59'),
+(11, 11, 'Raven Ompar', 'Raven Ompar', '2026-07-14 15:44:59', NULL, NULL, NULL, 1, 'active', '2026-07-14 21:44:59', '2026-07-14 21:44:59'),
+(12, 16, 'Raven Ompar', 'Raven Ompar', '2026-07-14 15:44:59', NULL, '2026-07-14 21:44:59', NULL, 2, 'returned', '2026-07-14 21:44:59', '2026-07-14 21:44:59'),
+(13, 16, 'Raven Ompar', 'Raven Ompar', '2026-07-14 15:44:59', NULL, NULL, NULL, 2, 'active', '2026-07-14 21:44:59', '2026-07-14 21:44:59'),
+(14, 2, 'Zen', 'Zen', '2026-07-14 15:48:27', NULL, NULL, NULL, 1, 'active', '2026-07-14 21:48:27', '2026-07-14 21:48:27'),
+(15, 12, 'Zen', 'Zen', '2026-07-14 15:48:27', NULL, NULL, NULL, 1, 'active', '2026-07-14 21:48:27', '2026-07-14 21:48:27'),
+(16, 17, 'Zen', 'Zen', '2026-07-14 15:48:27', NULL, NULL, NULL, 2, 'active', '2026-07-14 21:48:27', '2026-07-14 21:48:27'),
+(17, 13, 'Zen', 'Zen', '2026-07-15 03:21:27', NULL, NULL, NULL, 1, 'active', '2026-07-15 09:21:27', '2026-07-15 09:21:27'),
+(18, 18, 'Zen', 'Zen', '2026-07-15 03:21:27', NULL, NULL, NULL, 2, 'active', '2026-07-15 09:21:27', '2026-07-15 09:21:27');
+
 -- --------------------------------------------------------
 
 --
@@ -84,6 +124,100 @@ CREATE TABLE `audit_logs` (
   `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `user_name`, `action`, `entity_type`, `entity_id`, `entity_name`, `description`, `meta`, `created_at`) VALUES
+(1, 1, 'Administrator', 'created', 'Asset', 1, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:56'),
+(2, 1, 'Administrator', 'created', 'Asset', 2, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:56'),
+(3, 1, 'Administrator', 'created', 'Asset', 3, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(4, 1, 'Administrator', 'created', 'Asset', 4, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(5, 1, 'Administrator', 'created', 'Asset', 5, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(6, 1, 'Administrator', 'created', 'Asset', 6, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(7, 1, 'Administrator', 'created', 'Asset', 7, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(8, 1, 'Administrator', 'created', 'Asset', 8, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(9, 1, 'Administrator', 'created', 'Asset', 9, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(10, 1, 'Administrator', 'created', 'Asset', 10, 'Apple MacBook Neo', 'Asset created: Apple MacBook Neo', NULL, '2026-07-13 17:06:57'),
+(11, 1, 'Administrator', 'created', 'Asset', 11, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-13 17:13:21'),
+(12, 1, 'Administrator', 'created', 'Asset', 12, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-13 17:13:21'),
+(13, 1, 'Administrator', 'created', 'Asset', 13, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-13 17:13:22'),
+(14, 1, 'Administrator', 'created', 'Asset', 14, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-13 17:13:22'),
+(15, 1, 'Administrator', 'created', 'Asset', 15, 'Secure UPS', 'Asset created: Secure UPS', NULL, '2026-07-13 17:13:22'),
+(16, 1, 'Administrator', 'created', 'Asset', 16, 'Inplay Keboard', 'Asset created: Inplay Keboard', NULL, '2026-07-13 17:13:22'),
+(17, 1, 'Administrator', 'created', 'Asset', 17, 'Inplay Keboard', 'Asset created: Inplay Keboard', NULL, '2026-07-13 17:13:22'),
+(18, 1, 'Administrator', 'created', 'Asset', 18, 'Inplay Keboard', 'Asset created: Inplay Keboard', NULL, '2026-07-13 17:13:22'),
+(19, 1, 'Administrator', 'created', 'Asset', 19, 'Inplay Keboard', 'Asset created: Inplay Keboard', NULL, '2026-07-13 17:13:22'),
+(20, 1, 'Administrator', 'created', 'Asset', 20, 'Inplay Keboard', 'Asset created: Inplay Keboard', NULL, '2026-07-13 17:13:22'),
+(21, 2, 'Zen', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-13 17:16:29'),
+(22, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-13 17:29:09'),
+(23, 2, 'Zen', 'assigned', 'Asset', 16, 'Inplay Keboard', 'Assigned to Zen by Administrator', NULL, '2026-07-13 17:42:40'),
+(24, 2, 'Zen', 'assigned', 'Asset', 11, 'Secure UPS', 'Assigned to Zen by Administrator', NULL, '2026-07-13 17:42:40'),
+(25, 2, 'Zen', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Asset confirmed and assigned to Zen', NULL, '2026-07-13 17:42:40'),
+(26, 2, 'Zen', 'pending', 'Assignment', 2, 'Inplay Keboard · return by Zen', 'Delete request submitted by Zen — awaiting approval', NULL, '2026-07-13 17:42:52'),
+(27, 2, 'Zen', 'pending', 'Assignment', 1, 'Apple MacBook Neo · return by Zen', 'Delete request submitted by Zen — awaiting approval', NULL, '2026-07-13 17:42:56'),
+(28, 1, 'Administrator', 'approved', 'Assignment', 1, 'Apple MacBook Neo · return by Zen', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-13 17:43:24'),
+(29, 1, 'Administrator', 'approved', 'Assignment', 2, 'Inplay Keboard · return by Zen', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-13 17:43:29'),
+(30, 2, 'Zen', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-13 17:43:52'),
+(31, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-13 17:47:40'),
+(32, 2, 'Zen', 'assigned', 'Asset', 12, 'Secure UPS', 'Assigned to Zen by Administrator', NULL, '2026-07-13 17:51:21'),
+(33, 2, 'Zen', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Asset confirmed and assigned to Zen', NULL, '2026-07-13 17:51:21'),
+(34, 5, 'Raven Ompar', 'pending', 'Asset', NULL, 'Apple MacBook Neo', 'Create request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 09:23:46'),
+(35, 1, 'Administrator', 'rejected', 'Asset', NULL, 'Apple MacBook Neo', 'Rejected by Administrator: No reason given', NULL, '2026-07-14 09:35:44'),
+(36, 5, 'Raven Ompar', 'pending', 'Asset', NULL, 'Apple MacBook Neo', 'Create request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 09:36:52'),
+(37, 1, 'Administrator', 'rejected', 'Asset', NULL, 'Apple MacBook Neo', 'Rejected by Administrator: No reason given', NULL, '2026-07-14 09:37:33'),
+(38, 5, 'Raven Ompar', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 09:40:46'),
+(39, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-14 10:21:35'),
+(40, 5, 'Raven Ompar', 'assigned', 'Asset', 13, 'Secure UPS', 'Assigned to Raven Ompar by Administrator', NULL, '2026-07-14 10:22:10'),
+(41, 5, 'Raven Ompar', 'assigned', 'Asset', 14, 'Secure UPS', 'Assigned to Raven Ompar by Administrator', NULL, '2026-07-14 10:22:10'),
+(42, 5, 'Raven Ompar', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Asset confirmed and assigned to Raven Ompar', NULL, '2026-07-14 10:22:10'),
+(43, 5, 'Raven Ompar', 'pending', 'Assignment', 5, 'Secure UPS · return by Raven Ompar', 'Delete request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 10:22:53'),
+(44, 5, 'Raven Ompar', 'pending', 'Assignment', 6, 'Secure UPS · return by Raven Ompar', 'Delete request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 10:22:56'),
+(45, 1, 'Administrator', 'approved', 'Assignment', 6, 'Secure UPS · return by Raven Ompar', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-14 10:23:13'),
+(46, 1, 'Administrator', 'approved', 'Assignment', 5, 'Secure UPS · return by Raven Ompar', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-14 10:23:15'),
+(47, 5, 'Raven Ompar', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 10:27:51'),
+(48, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-14 10:42:18'),
+(49, 5, 'Raven Ompar', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Raven Ompar — pending admin serial release', NULL, '2026-07-14 11:32:32'),
+(50, 2, 'Zen', 'pending', 'Assignment', 4, 'Secure UPS · return by Zen', 'Delete request submitted by Zen — awaiting approval', NULL, '2026-07-14 13:14:49'),
+(51, 2, 'Zen', 'pending', 'Assignment', 3, 'Secure UPS · return by Zen', 'Delete request submitted by Zen — awaiting approval', NULL, '2026-07-14 13:14:52'),
+(52, 1, 'Administrator', 'approved', 'Assignment', 3, 'Secure UPS · return by Zen', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-14 13:15:06'),
+(53, 1, 'Administrator', 'approved', 'Assignment', 4, 'Secure UPS · return by Zen', 'Approved by Administrator: delete on Assignment', NULL, '2026-07-14 13:15:08'),
+(54, 5, 'Raven Ompar', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Raven Ompar — awaiting approval', NULL, '2026-07-14 13:16:15'),
+(55, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-14 13:20:47'),
+(56, 5, 'Raven Ompar', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Raven Ompar — pending admin serial release', NULL, '2026-07-14 13:21:09'),
+(57, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Re-forwarded with serial numbers by Administrator', NULL, '2026-07-14 13:49:23'),
+(58, 5, 'Raven Ompar', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Raven Ompar — pending admin serial release', NULL, '2026-07-14 13:49:57'),
+(59, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Re-forwarded with serial numbers by Administrator', NULL, '2026-07-14 14:11:59'),
+(60, 5, 'Raven Ompar', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Raven Ompar — pending admin serial release', NULL, '2026-07-14 14:12:32'),
+(61, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Re-forwarded with serial numbers by Administrator', NULL, '2026-07-14 20:21:28'),
+(62, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Serial numbers updated and re-forwarded by Administrator', NULL, '2026-07-14 21:20:41'),
+(63, 5, 'Raven Ompar', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Raven Ompar — pending admin serial release', NULL, '2026-07-14 21:25:11'),
+(64, 2, 'Zen', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-14 21:26:56'),
+(65, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-14 21:30:40'),
+(66, 2, 'Zen', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Zen — pending admin serial release', NULL, '2026-07-14 21:31:09'),
+(67, 1, 'Administrator', 'assigned', 'Asset', 1, 'Apple MacBook Neo', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:44:15'),
+(68, 1, 'Administrator', 'assigned', 'Asset', 11, 'Secure UPS', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:44:15'),
+(69, 1, 'Administrator', 'assigned', 'Asset', 16, 'Inplay Keboard', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:44:15'),
+(70, 1, 'Administrator', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Serial released and asset deployed by Administrator', NULL, '2026-07-14 21:44:15'),
+(71, 1, 'Administrator', 'assigned', 'Asset', 1, 'Apple MacBook Neo', 'Assigned to Raven Ompar by Raven Ompar', NULL, '2026-07-14 21:44:59'),
+(72, 1, 'Administrator', 'assigned', 'Asset', 11, 'Secure UPS', 'Assigned to Raven Ompar by Raven Ompar', NULL, '2026-07-14 21:44:59'),
+(73, 1, 'Administrator', 'assigned', 'Asset', 16, 'Inplay Keboard', 'Assigned to Raven Ompar by Raven Ompar', NULL, '2026-07-14 21:44:59'),
+(74, 1, 'Administrator', 'assigned', 'Asset', 16, 'Inplay Keboard', 'Assigned to Raven Ompar by Raven Ompar', NULL, '2026-07-14 21:44:59'),
+(75, 1, 'Administrator', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Serial released and asset deployed by Administrator', NULL, '2026-07-14 21:44:59'),
+(76, 2, 'Zen', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-14 21:45:56'),
+(77, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-14 21:46:22'),
+(78, 2, 'Zen', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Zen — pending admin serial release', NULL, '2026-07-14 21:47:22'),
+(79, 1, 'Administrator', 'assigned', 'Asset', 2, 'Apple MacBook Neo', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:48:27'),
+(80, 1, 'Administrator', 'assigned', 'Asset', 12, 'Secure UPS', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:48:27'),
+(81, 1, 'Administrator', 'assigned', 'Asset', 17, 'Inplay Keboard', 'Assigned to Zen by Zen', NULL, '2026-07-14 21:48:27'),
+(82, 1, 'Administrator', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Serial released and asset deployed by Administrator', NULL, '2026-07-14 21:48:27'),
+(83, 2, 'Zen', 'pending', 'Asset', NULL, 'Secure XPS 15', 'Create request submitted by Zen — awaiting approval', NULL, '2026-07-15 09:20:01'),
+(84, 1, 'Administrator', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Forwarded to requestor by Administrator', NULL, '2026-07-15 09:20:36'),
+(85, 2, 'Zen', 'updated', 'Asset', NULL, 'Secure XPS 15', 'Assets confirmed by Zen — pending admin serial release', NULL, '2026-07-15 09:20:56'),
+(86, 1, 'Administrator', 'assigned', 'Asset', 13, 'Secure UPS', 'Assigned to Zen by Zen', NULL, '2026-07-15 09:21:27'),
+(87, 1, 'Administrator', 'assigned', 'Asset', 18, 'Inplay Keboard', 'Assigned to Zen by Zen', NULL, '2026-07-15 09:21:27'),
+(88, 1, 'Administrator', 'approved', 'Asset', NULL, 'Secure XPS 15', 'Serial released and asset deployed by Administrator', NULL, '2026-07-15 09:21:27');
 
 -- --------------------------------------------------------
 
@@ -202,6 +336,44 @@ CREATE TABLE `notifications` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `for_role`, `for_user_id`, `type`, `title`, `body`, `link`, `is_read`, `meta`, `created_at`) VALUES
+(2, 'staff', 2, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":1,\"decision\":\"forwarded\"}', '2026-07-13 17:29:09'),
+(3, 'staff', 2, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"Secure XPS 15\". It is now listed in your assets.', 'requests.html?tab=myassets', 0, '{\"approval_id\":1}', '2026-07-13 17:42:40'),
+(7, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: Apple MacBook Neo · return by Zen', 'requests.html', 0, '{\"approval_id\":3,\"decision\":\"approved\"}', '2026-07-13 17:43:24'),
+(8, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: Inplay Keboard · return by Zen', 'requests.html', 0, '{\"approval_id\":2,\"decision\":\"approved\"}', '2026-07-13 17:43:29'),
+(10, 'staff', 2, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 0, '{\"approval_id\":4,\"decision\":\"forwarded\"}', '2026-07-13 17:47:40'),
+(11, 'staff', 2, 'approval_approved', '✅ Asset assigned to you', 'You have confirmed receipt of \"Secure XPS 15\". It is now listed in your assets.', 'requests.html?tab=myassets', 1, '{\"approval_id\":4}', '2026-07-13 17:51:21'),
+(28, 'staff', 5, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":10,\"decision\":\"forwarded\"}', '2026-07-14 10:42:18'),
+(30, 'staff', 5, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 1, '{\"approval_id\":10}', '2026-07-14 11:32:32'),
+(33, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: Secure UPS · return by Zen', 'requests.html', 0, '{\"approval_id\":12,\"decision\":\"approved\"}', '2026-07-14 13:15:06'),
+(34, 'staff', 2, 'approval_approved', '✅ Your request was approved', 'Delete Assignment: Secure UPS · return by Zen', 'requests.html', 0, '{\"approval_id\":11,\"decision\":\"approved\"}', '2026-07-14 13:15:08'),
+(36, 'staff', 5, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":13,\"decision\":\"forwarded\"}', '2026-07-14 13:20:47'),
+(38, 'staff', 5, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":13}', '2026-07-14 13:21:09'),
+(39, 'staff', 5, 'approval_forwarded', '📋 Asset Form Ready — Please Confirm', 'Admin has added serial numbers to your asset request for \"Secure XPS 15\". Please review and confirm.', 'requests.html?tab=myrequests', 0, '{\"approval_id\":13}', '2026-07-14 13:49:23'),
+(41, 'staff', 5, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":13}', '2026-07-14 13:49:57'),
+(42, 'staff', 5, 'approval_forwarded', '📦 Assets Ready — Please Receive', 'The serial number of your assets for \"Secure XPS 15\" is released. Please receive the assets.', 'requests.html?tab=myrequests', 0, '{\"approval_id\":13}', '2026-07-14 14:11:59'),
+(44, 'staff', 5, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":13}', '2026-07-14 14:12:32'),
+(45, 'staff', 5, 'approval_forwarded', '📦 Assets Ready — Please Receive', 'The serial number of your assets for \"Secure XPS 15\" is released. Please receive the assets.', 'requests.html?tab=myrequests', 0, '{\"approval_id\":13}', '2026-07-14 20:21:28'),
+(46, 'staff', 5, 'approval_forwarded', '📦 Assets Ready — Please Receive', 'The serial number of your assets for \"Secure XPS 15\" is released. Please receive the assets.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":13}', '2026-07-14 21:20:41'),
+(48, 'staff', 5, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":13}', '2026-07-14 21:25:11'),
+(50, 'staff', 2, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 0, '{\"approval_id\":14,\"decision\":\"forwarded\"}', '2026-07-14 21:30:40'),
+(52, 'staff', 2, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":14}', '2026-07-14 21:31:09'),
+(53, 'staff', 2, 'approval_approved', '✅ Asset assigned to you', '\"Secure XPS 15\" has been released by the admin and is now assigned to you.', 'requests.html?tab=myassets', 0, '{\"approval_id\":14}', '2026-07-14 21:44:15'),
+(54, 'staff', 5, 'approval_approved', '✅ Asset assigned to you', '\"Secure XPS 15\" has been released by the admin and is now assigned to you.', 'requests.html?tab=myassets', 0, '{\"approval_id\":13}', '2026-07-14 21:44:59'),
+(56, 'staff', 2, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":15,\"decision\":\"forwarded\"}', '2026-07-14 21:46:22'),
+(57, 'admin', NULL, 'asset_confirmed', '✅ Assets confirmed — release serial', 'Zen has confirmed the assets for \"Secure XPS 15\". Assets confirmed, you may now release serial.', 'approvals.html', 1, '{\"approval_id\":15,\"confirmed_by\":\"Zen\"}', '2026-07-14 21:47:22'),
+(58, 'staff', 2, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":15}', '2026-07-14 21:47:22'),
+(59, 'staff', 2, 'approval_approved', '✅ Asset assigned to you', '\"Secure XPS 15\" has been released by the admin and is now assigned to you.', 'requests.html?tab=myassets', 1, '{\"approval_id\":15}', '2026-07-14 21:48:27'),
+(60, 'admin', NULL, 'approval_submitted', 'New approval request from Zen', 'Create Asset: Secure XPS 15', 'approvals.html', 1, '{\"approval_id\":16,\"action_type\":\"create\"}', '2026-07-15 09:20:01'),
+(61, 'staff', 2, 'approval_forwarded', '📋 Asset Form Confirmation', 'Your asset request for \"Secure XPS 15\" requires your confirmation. Please review and sign the accountability form.', 'requests.html?tab=myrequests', 1, '{\"approval_id\":16,\"decision\":\"forwarded\"}', '2026-07-15 09:20:36'),
+(62, 'admin', NULL, 'asset_confirmed', '✅ Assets confirmed — release serial', 'Zen has confirmed the assets for \"Secure XPS 15\". Assets confirmed, you may now release serial.', 'approvals.html', 1, '{\"approval_id\":16,\"confirmed_by\":\"Zen\"}', '2026-07-15 09:20:56'),
+(63, 'staff', 2, 'approval_forwarded', '⏳ Waiting for admin approval', 'Your confirmation for \"Secure XPS 15\" has been received. Waiting for the admin to release the serial number.', 'requests.html', 0, '{\"approval_id\":16}', '2026-07-15 09:20:56'),
+(64, 'staff', 2, 'approval_approved', '✅ Asset assigned to you', '\"Secure XPS 15\" has been released by the admin and is now assigned to you.', 'requests.html?tab=myassets', 0, '{\"approval_id\":16}', '2026-07-15 09:21:27');
+
 -- --------------------------------------------------------
 
 --
@@ -233,6 +405,32 @@ CREATE TABLE `products` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `products`
+--
+
+INSERT INTO `products` (`id`, `name`, `sku`, `brand_model`, `brand`, `model`, `assigned_employee`, `assigned_employee_id`, `description`, `category_id`, `supplier_id`, `supplier_name`, `purchase_date`, `deployed_date`, `location_id`, `quantity`, `asset_status`, `image_path`, `serial_number`, `po_id`, `po_item_id`, `created_at`, `updated_at`) VALUES
+(1, 'Apple MacBook Neo', 'IMP-MRJ00KB0-GMGW6D', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-25', NULL, 1, 1, 'assigned', NULL, 'MC1', NULL, NULL, '2026-07-13 17:06:56', '2026-07-14 21:44:15'),
+(2, 'Apple MacBook Neo', 'IMP-MRJ00KDF-XJ6RPX', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-26', NULL, 1, 1, 'assigned', NULL, 'MC2', NULL, NULL, '2026-07-13 17:06:56', '2026-07-14 21:48:27'),
+(3, 'Apple MacBook Neo', 'IMP-MRJ00KFC-1C73K8', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-27', NULL, 1, 1, 'available', NULL, 'MC3', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(4, 'Apple MacBook Neo', 'IMP-MRJ00KGW-YEO8MP', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-28', NULL, 1, 1, 'available', NULL, 'MC4', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(5, 'Apple MacBook Neo', 'IMP-MRJ00KI8-6WYJV2', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-29', NULL, 1, 1, 'available', NULL, 'MC5', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(6, 'Apple MacBook Neo', 'IMP-MRJ00KJV-2N5EIL', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-30', NULL, 2, 1, 'available', NULL, 'MC6', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(7, 'Apple MacBook Neo', 'IMP-MRJ00KLW-GQCK06', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-03-31', NULL, 2, 1, 'available', NULL, 'MC7', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(8, 'Apple MacBook Neo', 'IMP-MRJ00KNS-UCKWDB', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-04-01', NULL, 2, 1, 'available', NULL, 'MC8', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(9, 'Apple MacBook Neo', 'IMP-MRJ00KPZ-FKM0WB', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-04-02', NULL, 2, 1, 'available', NULL, 'MC9', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(10, 'Apple MacBook Neo', 'IMP-MRJ00KRG-7V0HK9', 'Apple MacBook Neo', 'Apple', 'MacBook Neo', '', '', 'Apple MacBook Neo', 23, 1, NULL, '2026-04-03', NULL, 2, 1, 'available', NULL, 'MC10', NULL, NULL, '2026-07-13 17:06:57', '2026-07-13 17:06:57'),
+(11, 'Secure UPS', 'IMP-MRJ08T9V-2BUCQM', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-03-16', NULL, 1, 1, 'assigned', NULL, 'KAKSDJ11', NULL, NULL, '2026-07-13 17:13:21', '2026-07-14 21:44:15'),
+(12, 'Secure UPS', 'IMP-MRJ08TDH-H38X7B', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-03-17', NULL, 1, 1, 'assigned', NULL, 'KAKSDJ12', NULL, NULL, '2026-07-13 17:13:21', '2026-07-14 21:48:27'),
+(13, 'Secure UPS', 'IMP-MRJ08TG1-3UKN0N', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-03-18', NULL, 1, 1, 'assigned', NULL, 'KAKSDJ13', NULL, NULL, '2026-07-13 17:13:22', '2026-07-15 09:21:27'),
+(14, 'Secure UPS', 'IMP-MRJ08TJ9-NK6Z5W', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-03-19', NULL, 2, 1, 'available', NULL, 'KAKSDJ14', NULL, NULL, '2026-07-13 17:13:22', '2026-07-14 10:23:13'),
+(15, 'Secure UPS', 'IMP-MRJ08TLT-ZBPM4T', 'Secure XPS 15', 'Secure', 'XPS 15', '', '', 'Secure UPS', 22, 1, NULL, '2025-03-20', NULL, 2, 1, 'available', NULL, 'KAKSDJ15', NULL, NULL, '2026-07-13 17:13:22', '2026-07-13 17:13:22'),
+(16, 'Inplay Keboard', 'IMP-MRJ08TNX-33VARV', 'Inplay IP', 'Inplay', 'IP', '', '', 'Inplay Keboard', 10, 1, NULL, '2025-03-21', NULL, 2, 1, 'assigned', NULL, 'HAJS13', NULL, NULL, '2026-07-13 17:13:22', '2026-07-14 21:44:15'),
+(17, 'Inplay Keboard', 'IMP-MRJ08TQ7-BWUZFL', 'Inplay IP', 'Inplay', 'IP', '', '', 'Inplay Keboard', 10, 1, NULL, '2025-03-22', NULL, 2, 1, 'assigned', NULL, 'HAJS14', NULL, NULL, '2026-07-13 17:13:22', '2026-07-14 21:48:27'),
+(18, 'Inplay Keboard', 'IMP-MRJ08TSW-6UKUD8', 'Inplay IP', 'Inplay', 'IP', '', '', 'Inplay Keboard', 10, 1, NULL, '2025-03-23', NULL, 2, 1, 'assigned', NULL, 'HAJS15', NULL, NULL, '2026-07-13 17:13:22', '2026-07-15 09:21:27'),
+(19, 'Inplay Keboard', 'IMP-MRJ08TVJ-L8THDX', 'Inplay IP', 'Inplay', 'IP', '', '', 'Inplay Keboard', 10, 1, NULL, '2025-03-24', NULL, 2, 1, 'available', NULL, 'HAJS16', NULL, NULL, '2026-07-13 17:13:22', '2026-07-13 17:13:22'),
+(20, 'Inplay Keboard', 'IMP-MRJ08TXK-LU8IUL', 'Inplay IP', 'Inplay', 'IP', '', '', 'Inplay Keboard', 10, 1, NULL, '2025-03-25', NULL, 2, 1, 'available', NULL, 'HAJS17', NULL, NULL, '2026-07-13 17:13:22', '2026-07-13 17:13:22');
 
 -- --------------------------------------------------------
 
@@ -380,7 +578,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `employee_id`, `username`, `password`, `role`, `status`, `position`, `email`, `contact_number`, `created_at`) VALUES
 (1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, NULL, NULL, '2026-05-12 22:52:48'),
-(2, 'Zen', 'asdgasc7a8sczen', 'zen', '$2y$12$7Tw3S.JVmFtQzzmlVu9sXOjukjyvy9DydZbSf1clZATBF6OVIIwLC', 'viewer', 'active', 'Team Leader', 'zen@mail.com', '098788909876', '2026-07-10 11:01:43');
+(2, 'Zen', 'asdgasc7a8sczen', 'zen', '$2y$12$7Tw3S.JVmFtQzzmlVu9sXOjukjyvy9DydZbSf1clZATBF6OVIIwLC', 'viewer', 'active', 'Team Leader', 'zen@mail.com', '098788909876', '2026-07-10 11:01:43'),
+(5, 'Raven Ompar', 'RA2004', 'raven', '$2y$12$sTm7SecOlKp4Os7MsWW4ru9Vm4vSUe8fkI1vnWIGV3xzo1n2pJmNS', 'viewer', 'active', 'Team Leader', 'rayvenompar@gmail.com', '09631719419', '2026-07-14 01:20:12');
 
 --
 -- Indexes for dumped tables
@@ -530,19 +729,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `approval_requests`
 --
 ALTER TABLE `approval_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -572,13 +771,13 @@ ALTER TABLE `locations`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `purchase_orders`
@@ -620,7 +819,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
