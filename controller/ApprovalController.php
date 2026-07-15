@@ -240,20 +240,56 @@ class ApprovalController extends BaseController {
         ]);
 
         // Email all admins
-        $mailer    = new \EmailService();
-        $allUsers  = (new \UserModel())->findAll();
-        $admins    = array_filter($allUsers, fn($u) => $u['role'] === 'admin' && !empty($u['email']));
-        $emailSubject = "✏️ Asset request updated by {$userName}";
-        $emailText    = "{$userName} has updated their asset request details for \"{$resourceName}\".\n\nThe request has been reset to pending and requires your re-approval.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
-        $emailHtml    = "<p><strong>{$userName}</strong> has updated their asset request details.</p>
+        try {
+            require_once __DIR__ . '/../services/ApprovalService.php';
+            $mailer   = new \EmailService();
+            $allUsers = (new \UserModel())->findAll();
+            $admins   = array_filter($allUsers, fn($u) => $u['role'] === 'admin' && !empty($u['email']));
+
+            // Decode the updated payload to pull meta fields and asset list
+            $updatedPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
+
+            // Meta rows: Request ID, Employee ID, Location
+            $reqId    = trim($updatedPayload['request_id']         ?? '');
+            $empId    = trim($updatedPayload['requestor_id']       ?? '');
+            $location = trim($updatedPayload['requestor_location'] ?? '');
+            $notes    = trim($updatedPayload['description'] ?? $updatedPayload['purpose'] ?? $updatedPayload['notes'] ?? '');
+
+            $metaHtml = '';
+            $metaText = '';
+            if ($reqId) {
+                $metaHtml .= "<tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request ID</td><td style='padding:8px 12px;color:#e6edf3;font-family:monospace;letter-spacing:.5px;'>" . htmlspecialchars($reqId, ENT_QUOTES) . "</td></tr>\n";
+                $metaText .= "Request ID: {$reqId}\n";
+            }
+            if ($empId) {
+                $metaHtml .= "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Employee ID</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($empId, ENT_QUOTES) . "</td></tr>\n";
+                $metaText .= "Employee ID: {$empId}\n";
+            }
+            if ($location) {
+                $metaHtml .= "<tr><td style='padding:8px 12px;color:#8b949e;'>Location</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($location, ENT_QUOTES) . "</td></tr>\n";
+                $metaText .= "Location: {$location}\n";
+            }
+            $notesHtml = $notes
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($notes, ENT_QUOTES) . "</td></tr>\n"
+                : '';
+            $notesText = $notes ? "Reason / Notes: {$notes}\n" : '';
+
+            $emailSubject = "✏️ Asset request updated by {$userName}";
+            $emailText    = "{$userName} has updated their asset request details for \"{$resourceName}\".\n\n{$metaText}{$notesText}\nThe request has been reset to pending and requires your re-approval.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
+            $emailHtml    = "<p><strong>" . htmlspecialchars($userName, ENT_QUOTES) . "</strong> has updated their asset request details.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>{$resourceName}</td></tr>
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Updated by</td><td style='padding:8px 12px;color:#e6edf3;'>{$userName}</td></tr>
+  {$metaHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($resourceName, ENT_QUOTES) . "</td></tr>
+  {$notesHtml}
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Updated by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($userName, ENT_QUOTES) . "</td></tr>
   <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Reset to pending — re-approval needed</td></tr>
 </table>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Request</a></p>";
-        foreach ($admins as $admin) {
-            $mailer->send($admin['email'], $admin['name'], $emailSubject, $emailText, $emailHtml);
+            foreach ($admins as $admin) {
+                $mailer->send($admin['email'], $admin['name'], $emailSubject, $emailText, $emailHtml);
+            }
+        } catch (\Throwable $e) {
+            error_log('EmailService (changeAsset → admins): ' . $e->getMessage());
         }
 
         $this->respond(['success' => true, 'message' => 'Asset details updated']);
