@@ -568,6 +568,28 @@
 
   
 
+      // Mark each employee record that belongs to a named-role user so the
+      // unassigned pool can reliably exclude them without name-matching at render time.
+      const NAMED_ROLES = new Set(['staff', 'viewer', 'manager']);
+      const namedUserNames  = new Set(allUsers.filter(u => NAMED_ROLES.has(u.role)).map(u => (u.name || '').trim().toLowerCase()));
+      const namedUserEmpIds = new Set(
+        allUsers.filter(u => NAMED_ROLES.has(u.role))
+          .map(u => String(u.employee_id || '').replace(/^#/, '').trim().toLowerCase())
+          .filter(Boolean)
+      );
+      const namedUserIds = new Set(allUsers.filter(u => NAMED_ROLES.has(u.role)).map(u => u.id).filter(Boolean));
+
+      allEmployees.forEach(e => {
+        const eName  = (e.name        || '').trim().toLowerCase();
+        const eEmpId = String(e.employee_id || '').replace(/^#/, '').trim().toLowerCase();
+        e._isNamedRoleUser =
+          (eName  && namedUserNames.has(eName))   ||
+          (eEmpId && namedUserEmpIds.has(eEmpId)) ||
+          (e.id   && namedUserIds.has(e.id));
+      });
+
+  
+
       teamRows = (team.data || [])
 
         .map(normalizeRow)
@@ -712,6 +734,36 @@
 
   
 
+  /**
+   * Returns true if this employee record corresponds to a user who already
+   * appears in one of the named-role groups (Manager / Supervisor / Staff).
+   * Matches on: employee_id string, numeric users.id stored in employee_id,
+   * and full name (case-insensitive) — all three to be safe.
+   */
+  function _isNamedRoleEmployee(emp) {
+    const NAMED_ROLES = new Set(['staff', 'viewer', 'manager']);
+    const namedUsers  = allUsers.filter(u => NAMED_ROLES.has(u.role));
+
+    // Build normalised sets for O(1) lookup
+    const namedNames = new Set(namedUsers.map(u => (u.name || '').trim().toLowerCase()));
+    const namedEmpIds = new Set(
+      namedUsers
+        .map(u => String(u.employee_id || '').replace(/^#/, '').trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const namedUserIds = new Set(namedUsers.map(u => u.id).filter(Boolean));
+
+    const empName  = (emp.name        || '').trim().toLowerCase();
+    const empEmpId = String(emp.employee_id || '').replace(/^#/, '').trim().toLowerCase();
+    const empId    = emp.id;
+
+    if (empName  && namedNames.has(empName))   return true;
+    if (empEmpId && namedEmpIds.has(empEmpId)) return true;
+    if (empId    && namedUserIds.has(empId))   return true;
+
+    return false;
+  }
+
   function renderUnassigned() {
 
     const search = document.getElementById('unassignedSearch');
@@ -720,11 +772,20 @@
 
     const assigned = assignedEmployeeIds();
 
-    const poolFromEmployees = allEmployees.filter(e => !assigned.has(e.id));
+    const poolFromEmployees = allEmployees.filter(e =>
+      !assigned.has(e.id) && !e._isNamedRoleUser
+    );
 
     const knownNames = new Set(allEmployees.map(e => (e.name || '').trim().toLowerCase()));
 
     const seenNames  = new Set(poolFromEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+    // Also exclude named-role users (supervisors, managers, staff) from the product-sourced pool
+    const namedRoleUserNames = new Set(
+      allUsers
+        .filter(u => ['staff', 'viewer', 'manager'].includes(u.role))
+        .map(u => (u.name || '').trim().toLowerCase())
+    );
 
     const poolFromProducts = [];
 
@@ -735,6 +796,9 @@
       const key = p.assigned_employee.trim().toLowerCase();
 
       if (knownNames.has(key) || seenNames.has(key)) return;
+
+      // Skip if this person is a named-role user (they appear in the role groups above)
+      if (namedRoleUserNames.has(key)) return;
 
       seenNames.add(key);
 
@@ -1018,15 +1082,22 @@
 
     const assigned = assignedEmployeeIds();
 
-    // Only real employees with valid positive IDs that aren't already assigned
-
-    const poolFromEmployees = allEmployees.filter(e => isValidId(e.id) && !assigned.has(e.id));
+    const poolFromEmployees = allEmployees.filter(e =>
+      isValidId(e.id) && !assigned.has(e.id) && !e._isNamedRoleUser
+    );
 
   
 
     const knownNames = new Set(allEmployees.map(e => (e.name || '').trim().toLowerCase()));
 
     const seenNames  = new Set(poolFromEmployees.map(e => (e.name || '').trim().toLowerCase()));
+
+    // Exclude named-role users (supervisors, managers, staff) from product-sourced pool
+    const namedRoleUserNames = new Set(
+      allUsers
+        .filter(u => ['staff', 'viewer', 'manager'].includes(u.role))
+        .map(u => (u.name || '').trim().toLowerCase())
+    );
 
   
 
@@ -1041,6 +1112,8 @@
       const key = p.assigned_employee.trim().toLowerCase();
 
       if (knownNames.has(key) || seenNames.has(key)) return;
+
+      if (namedRoleUserNames.has(key)) return;
 
       seenNames.add(key);
 

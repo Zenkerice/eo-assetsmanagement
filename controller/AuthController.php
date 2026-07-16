@@ -14,6 +14,7 @@ class AuthController extends BaseController {
             $sub === 'login'    && $method === 'POST'   => $this->login($body),
             $sub === 'logout'   && $method === 'POST'   => $this->logout(),
             $sub === 'me'       && $method === 'GET'    => $this->me(),
+            $sub === 'me'       && $method === 'PUT'    => $this->updateMe($body),
             $sub === 'register' && $method === 'POST'   => $this->register($body),
             $sub === 'users'    && $method === 'GET'    => $this->listUsers(),
             $sub === 'users'    && $method === 'POST'   => $this->createUser($body),
@@ -71,12 +72,45 @@ class AuthController extends BaseController {
     private function me(): void {
         $user = $_SESSION['user'] ?? null;
         if (!$user) {
-            // Return 200 so the browser doesn't log a console error on the login page.
-            // Callers check data.success to determine auth state.
             $this->respond(['success' => false, 'error' => 'Not authenticated'], 200);
             return;
         }
         $this->respond(['success' => true, 'data' => $user]);
+    }
+
+    /** Self-update — any authenticated user can update their own name, email, contact, password. */
+    private function updateMe(array $body): void {
+        $user = $_SESSION['user'] ?? null;
+        if (!$user) {
+            $this->respond(['success' => false, 'error' => 'Not authenticated'], 401);
+            return;
+        }
+        $id = (int) $user['id'];
+
+        // Only allow safe self-editable fields — never role, status, or username
+        $allowed = ['name', 'email', 'contact_number', 'password'];
+        $fields  = [];
+        foreach ($allowed as $f) {
+            if (array_key_exists($f, $body)) {
+                $fields[$f] = $body[$f];
+            }
+        }
+        if (empty($fields)) {
+            $this->respond(['error' => 'No updatable fields provided'], 400);
+            return;
+        }
+        if (isset($fields['password']) && strlen($fields['password']) < 6) {
+            $this->respond(['error' => 'Password must be at least 6 characters'], 400);
+            return;
+        }
+
+        $updated = $this->service->update($id, $fields);
+        unset($updated['password']);
+
+        // Refresh the session with updated user data
+        $_SESSION['user'] = array_merge($_SESSION['user'], $updated);
+
+        $this->respond(['success' => true, 'data' => $updated]);
     }
 
     // ── User management (admin only) ──────────────────────────────────────────

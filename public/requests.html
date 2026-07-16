@@ -59,7 +59,6 @@
     .req-icon-btn{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;padding:6px 8px;border-radius:8px;line-height:1;transition:background 0.15s,color 0.15s,transform 0.2s cubic-bezier(0.34,1.56,0.64,1);display:inline-flex;align-items:center;justify-content:center}
     .req-icon-btn:hover{background:rgba(255,255,255,0.08);color:var(--text)}
     .req-icon-btn:active{transform:scale(0.9)}
-    .req-icon-btn.theme:hover{transform:rotate(20deg) scale(1.15)}
     .req-icon-btn.logout:hover{background:rgba(244,91,105,0.15);color:#f45b69;transform:scale(1.15)}
     html[data-theme="light"] .req-icon-btn:hover{background:rgba(0,0,0,0.06);color:#0f172a}
     html[data-theme="light"] .req-icon-btn.logout:hover{background:rgba(220,38,38,0.10);color:#dc2626}
@@ -357,6 +356,109 @@
     html[data-theme="light"] .pbadge.active{background:rgba(22,163,74,0.10);color:#16a34a;border-color:rgba(22,163,74,.25)}
     html[data-theme="light"] .pbadge.aging{background:rgba(217,119,6,0.10);color:#d97706;border-color:rgba(217,119,6,.25)}
     html[data-theme="light"] .pbadge.overdue{background:rgba(220,38,38,0.10);color:#dc2626;border-color:rgba(220,38,38,.25)}
+
+    /* ── Compact view (applied via JS when spw-compact pref is on) ── */
+    body.sp-compact .portal-asset-card{padding:9px 12px !important}
+    body.sp-compact .portal-stat{padding:10px 14px !important}
+    body.sp-compact .sp-row{padding:8px 0 !important}
+    body.sp-compact .sdrawer-nav-item{padding:7px 12px !important}
+    /* Serial number visibility */
+    body.sp-hide-serials .sp-serial{display:none !important}
+
+    /* ── Settings panel ────────────────────────────────────────────────── */
+    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s}
+    .settings-overlay.open{opacity:1;pointer-events:auto}
+    .settings-drawer{position:fixed;top:0;right:0;bottom:0;width:720px;max-width:100vw;background:var(--bg);z-index:601;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.22,.68,0,1.05);box-shadow:-8px 0 40px rgba(0,0,0,.5)}
+    html[data-theme="light"] .settings-drawer{background:#f0f4ff}
+    .settings-drawer.open{transform:translateX(0)}
+    .settings-drawer-inner{display:flex;flex:1;overflow:hidden}
+    /* Drawer header */
+    .sdrawer-head{padding:28px 32px 20px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .sdrawer-title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--text)}
+    html[data-theme="light"] .sdrawer-title{color:#0f172a}
+    .sdrawer-sub{font-size:13px;color:var(--muted2);margin-top:3px;line-height:1.5}
+    .sdrawer-close{background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .15s}
+    .sdrawer-close:hover{color:var(--text);background:var(--border2)}
+    html[data-theme="light"] .sdrawer-close{background:#e2e8f0;border-color:rgba(0,0,0,.1)}
+    /* Left nav */
+    .sdrawer-nav{width:200px;flex-shrink:0;padding:20px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+    html[data-theme="light"] .sdrawer-nav{background:#fff;border-right-color:rgba(0,0,0,.07)}
+    .sdrawer-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted2);cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;text-align:left;width:100%;transition:all .15s}
+    .sdrawer-nav-item:hover{background:var(--bg3);color:var(--text)}
+    .sdrawer-nav-item.active{background:rgba(99,102,241,.12);color:#6366f1;font-weight:600}
+    html[data-theme="light"] .sdrawer-nav-item:hover{background:#eef2ff;color:#0f172a}
+    html[data-theme="light"] .sdrawer-nav-item.active{background:#eef2ff;color:#4f46e5}
+    .sdrawer-nav-icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+    /* Content area */
+    .sdrawer-content{flex:1;overflow-y:auto;padding:28px 32px}
+    .sdrawer-content::-webkit-scrollbar{width:4px}
+    .sdrawer-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+    /* Panels */
+    .sdrawer-panel{display:none}
+    .sdrawer-panel.active{display:block}
+    .sdrawer-panel-title{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
+    html[data-theme="light"] .sdrawer-panel-title{color:#0f172a}
+    .sdrawer-panel-sub{font-size:13px;color:var(--muted2);margin-bottom:22px;line-height:1.5}
+    /* Profile card */
+    .sp-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:16px}
+    html[data-theme="light"] .sp-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    .sp-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+    html[data-theme="light"] .sp-card-title{color:#0f172a}
+    .sp-card-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+    /* Avatar row */
+    .sp-avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+    .sp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:grid;place-items:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+    .sp-avatar-btns{display:flex;gap:8px}
+    .sp-btn{padding:7px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--border2);background:var(--bg3);color:var(--muted2)}
+    .sp-btn:hover{color:var(--text);background:var(--border2)}
+    .sp-btn.primary{background:#6366f1;color:#fff;border-color:#6366f1}
+    .sp-btn.primary:hover{background:#4f46e5;border-color:#4f46e5}
+    html[data-theme="light"] .sp-btn{background:#e2e8f0;border-color:rgba(0,0,0,.1);color:#334155}
+    html[data-theme="light"] .sp-btn:hover{background:#cbd5e1;color:#0f172a}
+    html[data-theme="light"] .sp-btn.primary{background:#4f46e5;color:#fff;border-color:#4f46e5}
+    /* Form grid */
+    .sp-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .sp-field{display:flex;flex-direction:column;gap:5px}
+    .sp-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}
+    .sp-field input,.sp-field select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;transition:border-color .15s;width:100%}
+    .sp-field input:focus,.sp-field select:focus{border-color:#6366f1}
+    .sp-field input:read-only{opacity:.55;cursor:default}
+    html[data-theme="light"] .sp-field input,html[data-theme="light"] .sp-field select{background:#eef2ff;border-color:rgba(0,0,0,.1);color:#0f172a}
+    html[data-theme="light"] .sp-field input:read-only{background:#e2e8f0}
+    .sp-card-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+    html[data-theme="light"] .sp-card-footer{border-top-color:rgba(0,0,0,.07)}
+    /* Section divider */
+    .sp-divider{height:1px;background:var(--border);margin:6px 0 18px}
+    /* Security rows */
+    .sp-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+    .sp-row:last-child{border-bottom:none}
+    .sp-row-label{font-size:14px;font-weight:500;color:var(--text)}
+    html[data-theme="light"] .sp-row-label{color:#0f172a}
+    .sp-row-desc{font-size:12px;color:var(--muted);margin-top:2px}
+    /* Toggle */
+    .sp-toggle{position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0}
+    .sp-toggle input{opacity:0;width:0;height:0;position:absolute}
+    .sp-toggle-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:11px;transition:all .2s}
+    .sp-toggle input:checked + .sp-toggle-track{background:#6366f1;border-color:#6366f1}
+    .sp-toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .sp-toggle input:checked ~ .sp-toggle-thumb{transform:translateX(18px)}
+    /* Theme picker in drawer */
+    .sp-theme-options{display:flex;gap:10px;margin-top:10px}
+    .sp-theme-opt{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 18px;border-radius:10px;border:2px solid var(--border2);cursor:pointer;background:var(--bg3);min-width:80px;transition:all .15s}
+    .sp-theme-opt:hover{border-color:#6366f1}
+    .sp-theme-opt.selected{border-color:#6366f1;background:rgba(99,102,241,.12)}
+    html[data-theme="light"] .sp-theme-opt{background:#eef2ff;border-color:rgba(0,0,0,.1)}
+    html[data-theme="light"] .sp-theme-opt.selected{border-color:#4f46e5;background:#e0e7ff}
+    .sp-preview{width:48px;height:30px;border-radius:5px;border:1px solid var(--border2);overflow:hidden;display:flex;flex-direction:column}
+    .sp-preview-bar{height:8px;flex-shrink:0}
+    .sp-preview-body{flex:1;display:flex;gap:2px;padding:2px}
+    .sp-preview-side{width:10px;border-radius:2px}
+    .sp-preview-main{flex:1;border-radius:2px}
+    .sp-preview.dark .sp-preview-bar{background:#1a1e28}.sp-preview.dark .sp-preview-side{background:#13161e}.sp-preview.dark .sp-preview-body{background:#0d0f14}.sp-preview.dark .sp-preview-main{background:#13161e}
+    .sp-preview.light .sp-preview-bar{background:#e5e7eb}.sp-preview.light .sp-preview-side{background:#fff}.sp-preview.light .sp-preview-body{background:#f0f2f7}.sp-preview.light .sp-preview-main{background:#fff}
+    .sp-theme-name{font-size:12px;font-weight:600;color:var(--text)}
+    .sp-theme-opt.selected .sp-theme-name{color:#6366f1}
+    html[data-theme="light"] .sp-theme-opt.selected .sp-theme-name{color:#4f46e5}
   </style>
 </head>
 <body>
@@ -377,7 +479,7 @@
         <span class="role" id="user-role"></span>
       </div>
     </div>
-    <button class="req-icon-btn theme" id="req-theme-btn" title="Toggle theme" onclick="_sidebarToggleTheme()"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <button class="req-icon-btn" id="req-settings-btn" title="Settings" onclick="_openSettingsPanel()"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     <button class="req-icon-btn logout" id="btn-signout" title="Sign out"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button>
   </div>
 </header>
@@ -1010,6 +1112,184 @@
 
 <div id="toast-container"></div>
 
+<!-- ── Settings Overlay + Drawer ──────────────────────────────────────── -->
+<div class="settings-overlay" id="settings-overlay" onclick="_closeSettingsPanel()"></div>
+<div class="settings-drawer" id="settings-drawer">
+  <!-- Header -->
+  <div style="display:flex;flex-direction:column;flex-shrink:0;">
+    <div class="sdrawer-head">
+      <div>
+        <div class="sdrawer-title">Settings</div>
+        <div class="sdrawer-sub">Manage your profile, notifications, and how EmpireOne looks and feels for you.</div>
+      </div>
+      <button class="sdrawer-close" onclick="_closeSettingsPanel()" title="Close">&times;</button>
+    </div>
+  </div>
+  <!-- Body: nav + content -->
+  <div class="settings-drawer-inner">
+    <!-- Left nav -->
+    <nav class="sdrawer-nav">
+      <button class="sdrawer-nav-item active" data-panel="profile" onclick="_switchSettingsTab('profile',this)">
+        <svg class="sdrawer-nav-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <button class="sdrawer-nav-item" data-panel="security" onclick="_switchSettingsTab('security',this)">
+        <svg class="sdrawer-nav-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Security
+      </button>
+      <button class="sdrawer-nav-item" data-panel="notifications" onclick="_switchSettingsTab('notifications',this)">
+        <svg class="sdrawer-nav-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </button>
+      <button class="sdrawer-nav-item" data-panel="appearance" onclick="_switchSettingsTab('appearance',this)">
+        <svg class="sdrawer-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Appearance
+      </button>
+      <button class="sdrawer-nav-item" data-panel="workspace" onclick="_switchSettingsTab('workspace',this)">
+        <svg class="sdrawer-nav-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Workspace
+      </button>
+    </nav>
+
+    <!-- Content area -->
+    <div class="sdrawer-content">
+
+      <!-- PROFILE -->
+      <div class="sdrawer-panel active" id="sp-panel-profile">
+        <div class="sdrawer-panel-title">Profile information</div>
+        <div class="sdrawer-panel-sub">This is how you appear to your team across EmpireOne.</div>
+        <div class="sp-card">
+          <div class="sp-avatar-row">
+            <div class="sp-avatar" id="sp-avatar-initials">?</div>
+            <div class="sp-avatar-btns">
+              <button class="sp-btn primary" disabled title="Avatar upload coming soon">Upload photo</button>
+              <button class="sp-btn" disabled>Remove</button>
+            </div>
+          </div>
+          <div class="sp-form-grid">
+            <div class="sp-field">
+              <label>Full name</label>
+              <input type="text" id="sp-fullname" placeholder="Your full name" />
+            </div>
+            <div class="sp-field">
+              <label>Display name</label>
+              <input type="text" id="sp-displayname" placeholder="Preferred name" />
+            </div>
+            <div class="sp-field">
+              <label>Email address</label>
+              <input type="email" id="sp-email" placeholder="you@empireone.com" />
+            </div>
+            <div class="sp-field">
+              <label>Contact number</label>
+              <input type="text" id="sp-contact" placeholder="+63 9XX XXX XXXX" />
+            </div>
+            <div class="sp-field">
+              <label>Role</label>
+              <input type="text" id="sp-role" readonly />
+            </div>
+            <div class="sp-field">
+              <label>Assigned site</label>
+              <input type="text" id="sp-site" readonly />
+            </div>
+          </div>
+          <div class="sp-card-footer">
+            <button class="sp-btn" onclick="_closeSettingsPanel()">Cancel</button>
+            <button class="sp-btn primary" onclick="_saveProfile()">Save changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="sdrawer-panel" id="sp-panel-security">
+        <div class="sdrawer-panel-title">Security</div>
+        <div class="sdrawer-panel-sub">Manage your password and account access.</div>
+        <div class="sp-card">
+          <div class="sp-card-title">Password</div>
+          <div class="sp-card-sub">Change your login password. Use at least 6 characters.</div>
+          <div class="sp-form-grid">
+            <div class="sp-field" style="grid-column:1/-1">
+              <label>New password</label>
+              <input type="password" id="sp-pw-new" placeholder="Min. 6 characters" />
+            </div>
+            <div class="sp-field" style="grid-column:1/-1">
+              <label>Confirm new password</label>
+              <input type="password" id="sp-pw-confirm" placeholder="Repeat new password" />
+            </div>
+          </div>
+          <div class="sp-card-footer">
+            <button class="sp-btn primary" onclick="_savePassword()">Update password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="sdrawer-panel" id="sp-panel-notifications">
+        <div class="sdrawer-panel-title">Notifications</div>
+        <div class="sdrawer-panel-sub">Choose what you get notified about.</div>
+        <div class="sp-card">
+          <div class="sp-row">
+            <div><div class="sp-row-label">Request status updates</div><div class="sp-row-desc">Get notified when your requests are approved or declined</div></div>
+            <label class="sp-toggle"><input type="checkbox" checked id="spn-requests"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+          <div class="sp-row">
+            <div><div class="sp-row-label">Return reminders</div><div class="sp-row-desc">Reminders when an asset is nearing its return due date</div></div>
+            <label class="sp-toggle"><input type="checkbox" checked id="spn-returns"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+          <div class="sp-row">
+            <div><div class="sp-row-label">Team activity</div><div class="sp-row-desc">Notify when a teammate you manage submits a request</div></div>
+            <label class="sp-toggle"><input type="checkbox" id="spn-team"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+          <div class="sp-row">
+            <div><div class="sp-row-label">System announcements</div><div class="sp-row-desc">Important messages from the EmpireOne admin</div></div>
+            <label class="sp-toggle"><input type="checkbox" checked id="spn-system"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="sdrawer-panel" id="sp-panel-appearance">
+        <div class="sdrawer-panel-title">Appearance</div>
+        <div class="sdrawer-panel-sub">Choose how EmpireOne looks for you.</div>
+        <div class="sp-card">
+          <div class="sp-card-title">Theme</div>
+          <div class="sp-card-sub">Applies instantly across all pages</div>
+          <div class="sp-theme-options">
+            <div class="sp-theme-opt" id="sp-opt-dark" onclick="_spSetTheme('dark')">
+              <div class="sp-preview dark"><div class="sp-preview-bar"></div><div class="sp-preview-body"><div class="sp-preview-side"></div><div class="sp-preview-main"></div></div></div>
+              <span class="sp-theme-name">Dark</span>
+            </div>
+            <div class="sp-theme-opt" id="sp-opt-light" onclick="_spSetTheme('light')">
+              <div class="sp-preview light"><div class="sp-preview-bar"></div><div class="sp-preview-body"><div class="sp-preview-side"></div><div class="sp-preview-main"></div></div></div>
+              <span class="sp-theme-name">Light</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE -->
+      <div class="sdrawer-panel" id="sp-panel-workspace">
+        <div class="sdrawer-panel-title">Workspace</div>
+        <div class="sdrawer-panel-sub">Preferences for how you work within EmpireOne.</div>
+        <div class="sp-card">
+          <div class="sp-row">
+            <div><div class="sp-row-label">Compact view</div><div class="sp-row-desc">Show more content with reduced spacing</div></div>
+            <label class="sp-toggle"><input type="checkbox" id="spw-compact"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+          <div class="sp-row">
+            <div><div class="sp-row-label">Auto-refresh requests</div><div class="sp-row-desc">Automatically refresh your request list every minute</div></div>
+            <label class="sp-toggle"><input type="checkbox" checked id="spw-autorefresh"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+          <div class="sp-row">
+            <div><div class="sp-row-label">Show asset serial numbers</div><div class="sp-row-desc">Display serial numbers alongside asset names in lists</div></div>
+            <label class="sp-toggle"><input type="checkbox" checked id="spw-serials"><div class="sp-toggle-track"></div><div class="sp-toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /sdrawer-content -->
+  </div><!-- /settings-drawer-inner -->
+</div><!-- /settings-drawer -->
+
 <!-- -- Cancel Request Confirm Modal -- -->
 <div class="modal-overlay" id="cancel-request-modal">
   <div class="modal modal-sm">
@@ -1087,7 +1367,7 @@
 </style>
 
 <script src="js/api.js?v=26"></script>
-<script src="js/auth.js?v=9"></script>
+<script src="js/auth.js?v=10"></script>
 <script src="js/toast.js?v=3"></script>
 <script src="js/sidebar.js?v=77"></script>
 <script src="js/approval_flow.js?v=2"></script>
@@ -1245,23 +1525,6 @@ document.getElementById('btn-submit-request').addEventListener('click', () => {
   if (_reqMode === 'bulk') submitBulkRequests();
   else submitNewRequest();
 });
-
-// Sync theme toggle icon
-function _syncReqThemeBtn() {
-  const btn = document.getElementById('req-theme-btn');
-  if (!btn || typeof theme === 'undefined') return;
-  const isDark = theme.current() === 'dark';
-  const moonSvg = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-  const sunSvg  = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-  btn.innerHTML = isDark ? moonSvg : sunSvg;
-  btn.title = isDark ? 'Switch to Light mode' : 'Switch to Dark mode';
-}
-document.addEventListener('themechange', _syncReqThemeBtn);
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', _syncReqThemeBtn);
-} else {
-  setTimeout(_syncReqThemeBtn, 0);
-}
 
 function parsePayload(r) {
   try { return typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {}); }
@@ -3492,7 +3755,7 @@ function renderPortalAssets() {
     const catLabel = esc(a.category_name || 'Asset');
     const dateStr  = a.assigned_at ? new Date(a.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     const serial   = a.serial_number || a.product_sku || '';
-    const serialPart = serial ? ` · <span style="font-family:'DM Mono',monospace;font-size:11px">${esc(serial)}</span>` : '';
+    const serialPart = serial ? ` · <span class="sp-serial" style="font-family:'DM Mono',monospace;font-size:11px">${esc(serial)}</span>` : '';
     const sub      = status === 'overdue'
       ? `Overdue · Due ${fmtDate(a.due_back)} · ${catLabel}${serialPart}`
       : `Checked out${dateStr ? ' · ' + dateStr : ''} · ${catLabel}${serialPart}`;
@@ -3841,6 +4104,217 @@ async function submitOnBehalf() {
 
 
 
+
+/* -- Settings Panel --------------------------------------------------- */
+// Snapshot of profile values when the panel was opened — used to detect real changes
+var _spOriginalProfile = {};
+
+function _openSettingsPanel() {
+  var user = auth.currentUser;
+  if (user) {
+    var initials = (user.name || '?').charAt(0).toUpperCase();
+    var spAv = document.getElementById('sp-avatar-initials');
+    if (spAv) spAv.textContent = initials;
+    function setVal(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; }
+    setVal('sp-fullname',    user.name || '');
+    setVal('sp-displayname', user.display_name || user.name || '');
+    setVal('sp-email',       user.email || '');
+    setVal('sp-contact',     user.contact_number || user.phone || '');
+    setVal('sp-role',        auth.getRoleDisplay ? auth.getRoleDisplay(user) : (user.role || ''));
+    setVal('sp-site',        user.location_name || user.station || '');
+
+    // Snapshot all editable fields for change detection
+    _spOriginalProfile = {
+      name:           (user.name           || '').trim(),
+      display_name:   (user.name           || '').trim(),
+      email:          (user.email          || '').trim(),
+      contact_number: (user.contact_number || user.phone || '').trim(),
+    };
+  }
+  _spSyncTheme();
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-drawer').classList.add('open');
+}
+function _closeSettingsPanel() {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-drawer').classList.remove('open');
+}
+function _switchSettingsTab(panel, btn) {
+  document.querySelectorAll('.sdrawer-nav-item').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.sdrawer-panel').forEach(function(p){ p.classList.remove('active'); });
+  var panelEl = document.getElementById('sp-panel-' + panel);
+  if (panelEl) panelEl.classList.add('active');
+}
+function _spSetTheme(t) {
+  if (typeof theme !== 'undefined') theme.set(t);
+  _spSyncTheme();
+}
+function _spSyncTheme() {
+  var current = (typeof theme !== 'undefined') ? theme.current() : 'dark';
+  var dk = document.getElementById('sp-opt-dark');
+  var lt = document.getElementById('sp-opt-light');
+  if (dk) dk.classList.toggle('selected',  current === 'dark');
+  if (lt) lt.classList.toggle('selected', current === 'light');
+}
+document.addEventListener('themechange', _spSyncTheme);
+async function _saveProfile() {
+  var user = auth.currentUser;
+  if (!user) return;
+  var fullname = (document.getElementById('sp-fullname')?.value    || '').trim();
+  var display  = (document.getElementById('sp-displayname')?.value || '').trim();
+  var email    = (document.getElementById('sp-email')?.value       || '').trim();
+  var contact  = (document.getElementById('sp-contact')?.value     || '').trim();
+
+  // Use display name as the canonical name — it's what the user sees and edits.
+  // Fall back to full name if display is empty.
+  var resolvedName = display || fullname;
+  if (!resolvedName) { showToast('Full name is required.', 'error'); return; }
+
+  // Build payload of only changed fields
+  var payload = {};
+  if (resolvedName !== _spOriginalProfile.name)           payload.name           = resolvedName;
+  if (email        !== _spOriginalProfile.email)          payload.email          = email;
+  if (contact      !== _spOriginalProfile.contact_number) payload.contact_number = contact;
+
+  if (Object.keys(payload).length === 0) {
+    showToast('No changes to save.', 'info');
+    return;
+  }
+
+  var btn = document.querySelector('#sp-panel-profile .sp-btn.primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+  try {
+    await auth.updateMe(payload);
+    if (payload.name)           user.name           = payload.name;
+    if (payload.email)          user.email          = payload.email;
+    if (payload.contact_number) user.contact_number = payload.contact_number;
+    auth.currentUser = user;
+
+    // Update snapshot
+    _spOriginalProfile.name           = (user.name           || '').trim();
+    _spOriginalProfile.display_name   = (user.name           || '').trim();
+    _spOriginalProfile.email          = (user.email          || '').trim();
+    _spOriginalProfile.contact_number = (user.contact_number || '').trim();
+
+    // Update header
+    var nameEl = document.getElementById('user-name'); if (nameEl) nameEl.textContent = user.name;
+    var avEl   = document.getElementById('user-avatar'); if (avEl) avEl.textContent = (user.name || '?').charAt(0).toUpperCase();
+    var spEl   = document.getElementById('sp-avatar-initials'); if (spEl) spEl.textContent = (user.name || '?').charAt(0).toUpperCase();
+
+    showToast('Profile updated', 'success');
+    _closeSettingsPanel();
+  } catch(e) { showToast(e.message || 'Failed to save profile.', 'error'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Save changes'; } }
+}
+async function _savePassword() {
+  var user = auth.currentUser;
+  if (!user) return;
+  var pw1 = document.getElementById('sp-pw-new')?.value || '';
+  var pw2 = document.getElementById('sp-pw-confirm')?.value || '';
+  if (!pw1 || pw1.length < 6) { showToast('Password must be at least 6 characters.', 'error'); return; }
+  if (pw1 !== pw2) { showToast('Passwords do not match.', 'error'); return; }
+  var btn = document.querySelector('#sp-panel-security .sp-btn.primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
+  try {
+    await auth.updateMe({ password: pw1 });
+    document.getElementById('sp-pw-new').value = '';
+    document.getElementById('sp-pw-confirm').value = '';
+    showToast('Password updated successfully', 'success');
+  } catch(e) { showToast(e.message || 'Failed to update password.', 'error'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Update password'; } }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') _closeSettingsPanel();
+});
+
+/* -- Notification & Workspace prefs (localStorage) ─────────────────── */
+var _SP_PREFS_KEY = 'empireone_sp_prefs';
+
+var _SP_DEFAULTS = {
+  'spn-requests':    true,
+  'spn-returns':     true,
+  'spn-team':        false,
+  'spn-system':      true,
+  'spw-compact':     false,
+  'spw-autorefresh': true,
+  'spw-serials':     true,
+};
+
+function _spLoadPrefs() {
+  try { return JSON.parse(localStorage.getItem(_SP_PREFS_KEY) || '{}'); }
+  catch(_) { return {}; }
+}
+
+function _spSavePref(key, value) {
+  var prefs = _spLoadPrefs();
+  prefs[key] = value;
+  localStorage.setItem(_SP_PREFS_KEY, JSON.stringify(prefs));
+}
+
+function _spApplyPrefs() {
+  var prefs = _spLoadPrefs();
+  Object.keys(_SP_DEFAULTS).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var val = (id in prefs) ? prefs[id] : _SP_DEFAULTS[id];
+    el.checked = val;
+    // Remove inline checked attr so JS state is authoritative
+    el.removeAttribute('checked');
+  });
+  // Apply compact view immediately if enabled
+  _spApplyCompact();
+}
+
+function _spApplyCompact() {
+  var prefs = _spLoadPrefs();
+  var compact = ('spw-compact' in prefs) ? prefs['spw-compact'] : _SP_DEFAULTS['spw-compact'];
+  document.body.classList.toggle('sp-compact', compact);
+}
+
+function _spApplySerials() {
+  var prefs = _spLoadPrefs();
+  var show = ('spw-serials' in prefs) ? prefs['spw-serials'] : _SP_DEFAULTS['spw-serials'];
+  document.body.classList.toggle('sp-hide-serials', !show);
+}
+
+// Wire each toggle to auto-save on change
+document.addEventListener('DOMContentLoaded', function() {
+  Object.keys(_SP_DEFAULTS).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', function() {
+      _spSavePref(id, el.checked);
+      if (id === 'spw-compact')     _spApplyCompact();
+      if (id === 'spw-serials')     _spApplySerials();
+      if (id === 'spw-autorefresh') _spToggleAutoRefresh(el.checked);
+      var label = el.closest('.sp-row') && el.closest('.sp-row').querySelector('.sp-row-label');
+      showToast((label ? label.textContent.trim() : id) + (el.checked ? ' enabled' : ' disabled'), 'success');
+    });
+  });
+  _spApplyPrefs();
+  _spApplyCompact();
+  _spApplySerials();
+  // Start auto-refresh immediately if the pref is on
+  var prefs = _spLoadPrefs();
+  var autoOn = ('spw-autorefresh' in prefs) ? prefs['spw-autorefresh'] : _SP_DEFAULTS['spw-autorefresh'];
+  if (autoOn) _spToggleAutoRefresh(true);
+});
+
+var _spRefreshTimer = null;
+function _spToggleAutoRefresh(enabled) {
+  clearInterval(_spRefreshTimer);
+  if (enabled && typeof loadRequests === 'function') {
+    _spRefreshTimer = setInterval(function() { loadRequests(); }, 60000);
+  }
+}
+
+// Load prefs into toggles whenever the panel opens
+var _origOpenSettingsPanel = _openSettingsPanel;
+_openSettingsPanel = function() {
+  _origOpenSettingsPanel();
+  _spApplyPrefs();
+};
 </script>
 <!-- -- My Request View Modal -- -->
 <div class="modal-overlay" id="mr-view-modal" style="z-index:310;padding:20px;">

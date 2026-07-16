@@ -110,6 +110,19 @@ const auth = {
     return data.data;
   },
 
+  /** Update the currently logged-in user's own profile (works for all roles, no admin needed). */
+  async updateMe(payload) {
+    const res  = await fetch(`${AUTH_BASE}/me`, {
+      method:      'PUT',
+      credentials: 'include',
+      headers:     { 'Content-Type': 'application/json' },
+      body:        JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update profile');
+    return data.data;
+  },
+
   async deleteUser(id) {
     const uid = parseInt(id, 10);
     if (!uid) throw new Error('Invalid user ID');
