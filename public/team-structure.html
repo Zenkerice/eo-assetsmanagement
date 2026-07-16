@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
@@ -110,6 +110,7 @@
     .asset-item-info{flex:1;min-width:0}
     .asset-item-name{font-size:13px;font-weight:500}
     .asset-item-sku{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-top:2px}
+    .asset-item-loc{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
     .asset-status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap;border:1px solid transparent}
     .badge-working{background:var(--green-dim);color:var(--green);border-color:rgba(62,207,142,0.25)}
     .badge-damaged{background:var(--red-dim);color:var(--red);border-color:rgba(244,91,105,0.25)}
@@ -123,9 +124,12 @@
     .form-row{display:flex;gap:10px}
     .form-group{display:flex;flex-direction:column;gap:5px;flex:1}
     .form-group label{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2)}
-    .form-group select,.form-group input{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%}
-    .form-group select:focus,.form-group input:focus{border-color:var(--blue)}
+    .form-group select,.form-group input,.form-group textarea{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%}
+    .form-group select:focus,.form-group input:focus,.form-group textarea:focus{border-color:var(--blue)}
     .form-group select option{background:var(--bg3)}
+    .form-group textarea{resize:vertical;min-height:70px}
+    /* Asset search combobox */
+    .aa-search-wrap{position:relative}
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
     .modal-overlay.open{display:flex}
     .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .2s ease}
@@ -383,29 +387,60 @@
       <div id="addAssetFormWrap" style="padding:14px 24px 0;display:none">
         <div class="add-asset-form">
           <div class="add-asset-form-title">Assign a new asset</div>
-          <div class="form-row" style="margin-bottom:10px">
-            <div class="form-group">
-              <label>Asset / Product</label>
-              <select id="newAssetProductId"><option value="">Select a product�</option></select>
+
+          <!-- Assets row: Category | Brand | Model -->
+          <div class="form-group" style="margin-bottom:4px">
+            <label>Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(available only)</span></label>
+            <input type="hidden" id="newAssetProductId" />
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start">
+              <!-- Category -->
+              <select id="newAssetCategoryId" onchange="_aaOnCategoryChange()">
+                <option value="">-- Category --</option>
+              </select>
+              <!-- Brand combobox -->
+              <div style="position:relative">
+                <input id="newAssetBrand" type="text" autocomplete="off" placeholder="Search brand..."
+                  onfocus="_aaShowBrandDd()" onblur="setTimeout(_aaHideBrandDd,160)"
+                  oninput="_aaFilterBrand()" />
+                <div id="newAssetBrandDd" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)"></div>
+              </div>
+              <!-- Model combobox -->
+              <div style="position:relative">
+                <input id="newAssetModel" type="text" autocomplete="off" placeholder="Select brand first..." disabled
+                  style="opacity:.5;cursor:not-allowed"
+                  onfocus="_aaShowModelDd()" onblur="setTimeout(_aaHideModelDd,160)"
+                  oninput="_aaFilterModel()" />
+                <div id="newAssetModelDd" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)"></div>
+              </div>
             </div>
           </div>
-          <div class="form-row" style="margin-bottom:10px">
-            <div class="form-group">
-              <label>Due Back (optional)</label>
-              <input type="date" id="newAssetDueBack" />
-            </div>
-            <div class="form-group">
-              <label>Notes (optional)</label>
-              <input type="text" id="newAssetNotes" placeholder="e.g. Field use" />
-            </div>
+
+          <!-- Serial Number dropdown (shown after model selected) -->
+          <div class="form-group" id="newAssetSerialWrap" style="margin-top:8px;margin-bottom:4px;display:none">
+            <label>Serial Number <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(select unit)</span></label>
+            <select id="newAssetSerial" onchange="_aaOnSerialChange()" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;width:100%;cursor:pointer;transition:border-color .15s">
+              <option value="">-- Select serial number --</option>
+            </select>
           </div>
+
+          <!-- Due back -->
+          <div class="form-group" style="margin-bottom:10px;margin-top:10px">
+            <label>Due Back (optional)</label>
+            <input type="date" id="newAssetDueBack" />
+          </div>
+
+          <!-- Description / Notes textarea -->
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Description / Notes</label>
+            <textarea id="newAssetNotes" placeholder="Reason for request or additional notes..."></textarea>
+          </div>
+
           <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
             <button class="btn btn-ghost btn-sm" onclick="toggleAddAssetForm(false)">Cancel</button>
             <button class="btn btn-primary btn-sm" id="confirmAddAssetBtn" onclick="confirmAddAsset()">Confirm</button>
           </div>
         </div>
-      </div>
-      <!-- Asset list -->
+      </div>      <!-- Asset list -->
       <div class="modal-list" id="assetsList" style="padding:14px 24px;min-height:140px"></div>
       <div class="modal-footer">
         <span style="font-size:12px;color:var(--muted2)" id="assetsCount"></span>
@@ -1527,9 +1562,9 @@
 
             <div class="asset-item-sku">${serial ? esc(serial) : ''}${a.category_name ? ' &middot; ' + esc(a.category_name) : ''}</div>
 
-          </div>
+            ${loc !== '\u2014' ? `<div class="asset-item-loc">${esc(loc)}</div>` : ''}
 
-          <span class="agent-station" style="flex-shrink:0">${esc(loc)}</span>
+          </div>
 
           <span class="asset-status-badge ${badge}">${st.charAt(0).toUpperCase() + st.slice(1)}</span>
 
@@ -1591,14 +1626,166 @@
 
   function populateProductDropdown() {
 
-    const sel = document.getElementById('newAssetProductId');
+    // Populate category dropdown
+    const catSel = document.getElementById('newAssetCategoryId');
+    if (catSel) {
+      const cats = [...new Map(
+        allProducts
+          .filter(p => p.asset_status !== 'assigned' && p.category_id)
+          .map(p => [p.category_id, { id: p.category_id, name: p.category_name || 'Uncategorized' }])
+      ).values()].sort((a, b) => a.name.localeCompare(b.name));
+      catSel.innerHTML = '<option value="">-- Category --</option>' +
+        cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    }
 
-    const available = allProducts.filter(p => !p.asset_status || p.asset_status !== 'assigned');
+  }
 
-    sel.innerHTML = '<option value="">Select a product\u2026</option>' +
+  // ── Add-asset combobox helpers ────────────────────────────────────────────
 
-      available.map(p => `<option value="${p.id}">[${esc(p.sku || p.id)}] ${esc(p.name)}${p.category_name ? ' \u00b7 ' + esc(p.category_name) : ''}</option>`).join('');
+  function _aaPool() {
+    const catId = document.getElementById('newAssetCategoryId')?.value || '';
+    return allProducts.filter(p =>
+      p.asset_status === 'available' &&
+      (!catId || String(p.category_id) === catId)
+    );
+  }
 
+  function _aaBrandPool() {
+    // Use brand field, fall back to first word of name, deduplicated
+    return [...new Set(
+      _aaPool()
+        .map(p => (p.brand || '').trim())
+        .filter(Boolean)
+    )].sort();
+  }
+
+  function _aaModelPool() {
+    const brand = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
+    // Group by product name — each distinct name is one "model"
+    return [...new Set(
+      _aaPool()
+        .filter(p => !brand || (p.brand || '').trim().toLowerCase() === brand)
+        .map(p => (p.model || p.name || '').trim())
+        .filter(Boolean)
+    )].sort();
+  }
+
+  function _aaRenderDd(ddId, items, onClickFn) {
+    const dd = document.getElementById(ddId);
+    if (!dd) return;
+    if (!items.length) {
+      dd.innerHTML = '<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">No options found</div>';
+    } else {
+      dd.innerHTML = items.map(v =>
+        `<div class="aa-dd-opt" data-fn="${esc(onClickFn)}" data-val="${esc(v)}"
+          onmousedown="event.preventDefault()"
+          style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)"
+          onmouseover="this.style.background='rgba(41,182,232,.1)'" onmouseout="this.style.background=''"
+        >${esc(v)}</div>`
+      ).join('');
+    }
+    dd.style.display = 'block';
+  }
+
+  // Single delegated click handler for all aa dropdowns
+  document.addEventListener('click', function(e) {
+    const opt = e.target.closest('.aa-dd-opt');
+    if (!opt) return;
+    const fn  = opt.dataset.fn;
+    const val = opt.dataset.val;
+    if (fn === '_aaSelectBrand') _aaSelectBrand(val);
+    else if (fn === '_aaSelectModel') _aaSelectModel(val);
+  });
+
+  function _aaOnCategoryChange() {
+    document.getElementById('newAssetProductId').value = '';
+    const brandEl = document.getElementById('newAssetBrand');
+    const modelEl = document.getElementById('newAssetModel');
+    if (brandEl) brandEl.value = '';
+    if (modelEl) { modelEl.value = ''; modelEl.disabled = true; modelEl.style.opacity = '.5'; modelEl.style.cursor = 'not-allowed'; modelEl.placeholder = 'Select brand first...'; }
+    const serialWrap = document.getElementById('newAssetSerialWrap');
+    if (serialWrap) serialWrap.style.display = 'none';
+  }
+
+  function _aaShowBrandDd() {
+    const q = (document.getElementById('newAssetBrand')?.value || '').toLowerCase();
+    const items = _aaBrandPool().filter(b => !q || b.toLowerCase().includes(q));
+    _aaRenderDd('newAssetBrandDd', items, '_aaSelectBrand');
+  }
+  function _aaHideBrandDd() { const d = document.getElementById('newAssetBrandDd'); if (d) d.style.display = 'none'; }
+  function _aaFilterBrand() {
+    _aaShowBrandDd();
+    document.getElementById('newAssetProductId').value = '';
+    const modelEl = document.getElementById('newAssetModel');
+    if (modelEl) { modelEl.value = ''; modelEl.disabled = true; modelEl.style.opacity = '.5'; modelEl.style.cursor = 'not-allowed'; }
+    const serialWrap = document.getElementById('newAssetSerialWrap');
+    if (serialWrap) serialWrap.style.display = 'none';
+  }
+  function _aaSelectBrand(brand) {
+    const el = document.getElementById('newAssetBrand');
+    if (el) el.value = brand;
+    _aaHideBrandDd();
+    document.getElementById('newAssetProductId').value = '';
+    const serialWrap = document.getElementById('newAssetSerialWrap');
+    if (serialWrap) serialWrap.style.display = 'none';
+    const modelEl = document.getElementById('newAssetModel');
+    if (modelEl) {
+      modelEl.disabled = false;
+      modelEl.style.opacity = '1';
+      modelEl.style.cursor = 'text';
+      modelEl.placeholder = 'Search model...';
+      modelEl.value = '';
+    }
+  }
+
+  function _aaShowModelDd() {
+    const q = (document.getElementById('newAssetModel')?.value || '').toLowerCase();
+    const items = _aaModelPool().filter(m => !q || m.toLowerCase().includes(q));
+    _aaRenderDd('newAssetModelDd', items, '_aaSelectModel');
+  }
+  function _aaHideModelDd() { const d = document.getElementById('newAssetModelDd'); if (d) d.style.display = 'none'; }
+  function _aaFilterModel() { _aaShowModelDd(); }
+  function _aaSelectModel(model) {
+    const el = document.getElementById('newAssetModel');
+    if (el) el.value = model;
+    _aaHideModelDd();
+
+    const brand  = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
+    const catId  = document.getElementById('newAssetCategoryId')?.value || '';
+
+    // Match units by: same category (if set) + same brand (if set) + model matches p.model OR p.name
+    const units = allProducts.filter(p =>
+      p.asset_status === 'available' &&
+      (!catId || String(p.category_id) === catId) &&
+      (!brand || (p.brand || '').trim().toLowerCase() === brand) &&
+      ((p.model || '').trim() === model || (p.name || '').trim() === model)
+    );
+
+    const serialSel  = document.getElementById('newAssetSerial');
+    const serialWrap = document.getElementById('newAssetSerialWrap');
+
+    document.getElementById('newAssetProductId').value = '';
+
+    if (!units.length) {
+      if (serialWrap) serialWrap.style.display = 'none';
+      showToast('No available units found for this model.', 'error');
+      return;
+    }
+
+    // Always show serial dropdown so admin picks exact unit
+    serialSel.innerHTML = '<option value="">-- Select serial number --</option>' +
+      units.map(p => {
+        const serial = (p.sku || p.serial_number || '').trim();
+        return `<option value="${p.id}">${esc(serial || 'Unit #' + p.id)}</option>`;
+      }).join('');
+    serialSel.value = '';
+    if (serialWrap) serialWrap.style.display = '';
+    setTimeout(() => serialSel.focus(), 50);
+  }
+
+  function _aaOnSerialChange() {
+    const id = parseInt(document.getElementById('newAssetSerial').value) || 0;
+    document.getElementById('newAssetProductId').value = id || '';
   }
 
   function toggleAddAssetForm(show) {
@@ -1615,6 +1802,15 @@
 
       document.getElementById('newAssetNotes').value     = '';
 
+      const brandEl = document.getElementById('newAssetBrand');
+      const modelEl = document.getElementById('newAssetModel');
+      if (brandEl) brandEl.value = '';
+      if (modelEl) { modelEl.value = ''; modelEl.disabled = true; modelEl.style.opacity = '.5'; modelEl.style.cursor = 'not-allowed'; modelEl.placeholder = 'Select brand first...'; }
+      const serialWrap = document.getElementById('newAssetSerialWrap');
+      if (serialWrap) serialWrap.style.display = 'none';
+      const serialSel = document.getElementById('newAssetSerial');
+      if (serialSel) serialSel.value = '';
+
       if (productsLoaded) populateProductDropdown();
 
     }
@@ -1623,9 +1819,25 @@
 
   async function confirmAddAsset() {
 
-    const productId = parseInt(document.getElementById('newAssetProductId').value);
+    // Try to resolve product ID from brand/model if not already set by _aaSelectModel
+    let productId = parseInt(document.getElementById('newAssetProductId').value) || 0;
 
-    if (!productId) { showToast('Please select a product', 'error'); return; }
+    if (!productId) {
+      const catId = document.getElementById('newAssetCategoryId')?.value || '';
+      const brand = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
+      const model = (document.getElementById('newAssetModel')?.value || '').trim();
+      if (brand || model) {
+        const match = allProducts.find(p =>
+          p.asset_status === 'available' &&
+          (!catId  || String(p.category_id) === catId) &&
+          (!brand  || (p.brand  || '').trim().toLowerCase() === brand) &&
+          (!model  || (p.model  || '').trim() === model || (p.name || '').trim() === model)
+        );
+        if (match) productId = match.id;
+      }
+    }
+
+    if (!productId) { showToast('Please select a serial number.', 'error'); return; }
 
     if (!currentAgentName) return;
 
