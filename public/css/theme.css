@@ -1025,11 +1025,11 @@ html[data-theme="light"] .sidebar-hamburger {
   position: fixed;
   bottom: 28px;
   right: 28px;
-  z-index: 9999;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  pointer-events: none;
+  pointer-events: auto;
   max-width: 360px;
   width: calc(100vw - 56px);
 }

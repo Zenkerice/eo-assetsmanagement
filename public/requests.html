@@ -3,7 +3,7 @@
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=11" />
+  <link rel="stylesheet" href="css/theme.css?v=12" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -1028,7 +1028,7 @@
 <!-- -- Success Modal -- -->
 <div id="success-modal-overlay" style="
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);
+  background:rgba(0,0,0,0.72);
   z-index:950;align-items:center;justify-content:center;padding:20px;">
   <div style="
     background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);
@@ -1543,7 +1543,6 @@ async function submitNewRequest() {
       },
       notes: reason,
     });
-    showToast('Request submitted for review', 'success');
     closeModal('new-modal');
     await loadRequests();
     showSuccessModal('Request Submitted', 'Your asset request has been sent for admin review.');
@@ -1792,7 +1791,6 @@ async function submitBulkRequests() {
     bar.style.width = '0%';
     bar.style.background = 'var(--blue)';
     if (succeeded > 0) {
-      showToast(`${succeeded} request${succeeded !== 1 ? 's' : ''} submitted for review`, 'success');
       closeModal('new-modal');
       loadRequests();
       showSuccessModal('Requests Submitted', `${succeeded} request${succeeded !== 1 ? 's' : ''} sent for admin review.`);
@@ -2789,7 +2787,7 @@ async function _submitNonAdminRequest() {
     (firstAsset.category_name || 'Asset');
 
   try {
-    await ApprovalFlow.submit({
+    await api.submitApproval({
       action_type:   'create',
       resource_type: 'Asset',
       resource_id:   null,
@@ -2809,6 +2807,7 @@ async function _submitNonAdminRequest() {
       },
       notes: desc,
     });
+    if (window.refreshNotifDot) refreshNotifDot();
     _closeRequestFormModal();
     showSuccessModal('Request Submitted', 'Your asset request has been sent for admin review.');
   } catch(e) {
@@ -3556,7 +3555,6 @@ async function submitPortalReturn() {
       notes: `Return request: ${condition}${notes ? ' · ' + notes : ''}`,
     });
 
-    showToast('Return request submitted for admin review.', 'success');
     clearReturnForm();
     showSuccessModal('Return Submitted', 'Your return request has been sent for admin review.');
   } catch(e) {
@@ -3830,7 +3828,6 @@ async function submitOnBehalf() {
         on_behalf_of:          _selectedTm.name,
       },
     });
-    showToast(`Request submitted on behalf of ${_selectedTm.name}!`, 'success');
     showSuccessModal('Request Submitted', `Request sent on behalf of ${_selectedTm.name} and is pending admin review.`);
     pobCancelForm();
   } catch(e) {

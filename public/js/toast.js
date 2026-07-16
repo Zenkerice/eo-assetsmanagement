@@ -30,7 +30,11 @@
     closeBtn.className = 'toast-close';
     closeBtn.innerHTML = CLOSE_ICON;
     closeBtn.setAttribute('aria-label', 'Dismiss');
-    closeBtn.addEventListener('click', () => dismiss(toast));
+    closeBtn.setAttribute('type', 'button');
+    closeBtn.onclick = function (e) {
+      e.stopPropagation();
+      dismiss(toast);
+    };
 
     toast.appendChild(icon);
     toast.appendChild(text);
@@ -38,9 +42,9 @@
     container.appendChild(toast);
 
     // Auto-dismiss
-    const timer = setTimeout(() => dismiss(toast), 4000);
+    let timer = setTimeout(() => dismiss(toast), 7000);
     toast.addEventListener('mouseenter', () => clearTimeout(timer));
-    toast.addEventListener('mouseleave', () => setTimeout(() => dismiss(toast), 1500));
+    toast.addEventListener('mouseleave', () => { timer = setTimeout(() => dismiss(toast), 2000); });
   };
 
   function dismiss(toast) {
