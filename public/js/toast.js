@@ -49,7 +49,7 @@
 
   function dismiss(toast) {
     if (!toast.isConnected) return;
-    toast.style.animation = 'toastOut .25s ease forwards';
+    toast.classList.add('toast-dismissing');
     toast.addEventListener('animationend', () => toast.remove(), { once: true });
   }
 })();

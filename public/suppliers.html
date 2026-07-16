@@ -150,11 +150,7 @@ tbody tr:hover td{background:rgba(255,255,255,0.02)}
 .del-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
 .del-msg{font-size:14px;color:var(--muted2);line-height:1.6;margin-bottom:24px}
 .del-actions{display:flex;gap:10px;justify-content:center}
-/* Toast */
-#toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
-.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
-.toast.error{border-color:var(--red);color:var(--red)}
-.toast.success{border-color:var(--green);color:var(--green)}
+
 /* receipt print ? hide everything except the modal content */
 @media print {
   body > *:not(#receipt-modal) { display: none !important; }

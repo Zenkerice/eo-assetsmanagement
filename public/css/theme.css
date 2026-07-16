@@ -1056,7 +1056,7 @@ html[data-theme="light"] .sidebar-hamburger {
   color: var(--text) !important;
   line-height: 1.45 !important;
   box-shadow: 0 8px 32px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.25) !important;
-  animation: toastIn .28s cubic-bezier(.22,.68,0,1.2) both !important;
+  animation: toastIn .28s cubic-bezier(.22,.68,0,1.2) both;
   pointer-events: auto !important;
   max-width: 100% !important;
   backdrop-filter: blur(8px) !important;
@@ -1120,6 +1120,10 @@ html[data-theme="light"] .sidebar-hamburger {
 @keyframes toastOut {
   from { opacity: 1; transform: translateX(0)    scale(1);   max-height: 80px; margin-bottom: 0; }
   to   { opacity: 0; transform: translateX(16px) scale(.96); max-height: 0;    margin-bottom: -10px; }
+}
+
+.toast-dismissing {
+  animation: toastOut .25s ease forwards !important;
 }
 
 /* ── Light mode ── */
