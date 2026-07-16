@@ -1,12 +1,17 @@
 <?php
+// Suppress all error output to the browser — errors must never corrupt the JSON response.
+// Check the PHP / Apache error log for diagnostics instead.
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
+ini_set('log_errors',     '1');
+
+// Output buffer wraps the entire request so any stray PHP warning/notice
+// output is captured and discarded before we send clean JSON to the client.
+ob_start();
 
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>false,'httponly'=>true,'samesite'=>'Lax']);
     session_start();
-    // Release session lock immediately for read-only requests so parallel
-    // API calls from the same browser tab don't block each other.
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         session_write_close();
     }
@@ -26,8 +31,17 @@ require_once __DIR__ . '/controller/NotificationController.php';
 require_once __DIR__ . '/controller/EmployeeController.php';
 require_once __DIR__ . '/controller/TeamStructureController.php';
 
-header('Content-Type: application/json');
+// ── Helper: send JSON and exit cleanly ───────────────────────────────────────
+// Discards any buffered stray output, then sends headers + JSON body.
+function sendJson(array $data, int $status = 200): void {
+    ob_end_clean(); // discard any buffered noise (PHP warnings, whitespace, etc.)
+    http_response_code($status);
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit;
+}
 
+// ── CORS + standard headers ──────────────────────────────────────────────────
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $isAllowed = $origin === ''
     || in_array($origin, ['http://localhost','http://127.0.0.1','null'], true)
@@ -41,8 +55,13 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header("Content-Security-Policy: script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; default-src 'self'; connect-src *; img-src 'self' data: blob:;");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    ob_end_clean();
+    http_response_code(204);
+    exit;
+}
 
+// ── Request parsing ──────────────────────────────────────────────────────────
 $method = $_SERVER['REQUEST_METHOD'];
 $query  = $_GET;
 
@@ -70,25 +89,34 @@ if (strpos($uri, '/api') !== false) {
 $uri = rtrim($uri, '/') ?: '/api';
 unset($query['_uri']);
 
-// Auth routes
+// ── Auth routes ──────────────────────────────────────────────────────────────
 if (preg_match('#^/api/auth(?:/([a-z]+)(?:/(\d+))?)?$#', $uri, $m)) {
     try {
+        ob_end_clean();
+        header('Content-Type: application/json');
+        ob_start(); // restart buffer so controller output is clean
         (new AuthController())->handle($method, isset($m[2]) ? (int)$m[2] : null, $body, $m[1] ?? '');
     } catch (InvalidArgumentException $e) {
-        http_response_code(400); echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
+        ob_end_clean();
+        header('Content-Type: application/json');
+        http_response_code(400);
+        echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
     } catch (RuntimeException $e) {
-        http_response_code($e->getCode() ?: 500); echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
+        ob_end_clean();
+        header('Content-Type: application/json');
+        http_response_code($e->getCode() ?: 500);
+        echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
     }
     exit;
 }
 
 if (!isset($_SESSION['user'])) {
-    http_response_code(401); echo json_encode(['success'=>false,'error'=>'Authentication required']); exit;
+    sendJson(['success'=>false,'error'=>'Authentication required'], 401);
 }
 
-// Match /api/{resource}[/{id}] — allow letters, underscores, hyphens
+// ── Resource routing ─────────────────────────────────────────────────────────
 if (!preg_match('#^/api/([a-z][a-z0-9_-]*)(?:/(\d+))?$#', $uri, $matches)) {
-    http_response_code(404); echo json_encode(['error'=>'Not found']); exit;
+    sendJson(['error'=>'Not found'], 404);
 }
 
 $resource = $matches[1];
@@ -96,8 +124,12 @@ $id       = isset($matches[2]) ? (int)$matches[2] : null;
 
 $role = $_SESSION['user']['role'] ?? 'staff';
 if ($role === 'staff' && $method === 'DELETE' && !in_array($resource, ['notifications', 'approvals'], true)) {
-    http_response_code(403); echo json_encode(['success'=>false,'error'=>'Staff accounts cannot delete records']); exit;
+    sendJson(['success'=>false,'error'=>'Staff accounts cannot delete records'], 403);
 }
+
+// Discard any noise accumulated so far, then send clean JSON from here on
+ob_end_clean();
+header('Content-Type: application/json');
 
 try {
     switch ($resource) {
@@ -128,12 +160,16 @@ try {
         case 'team-structure':
             (new TeamStructureController())->handle($method, $id, $body, $query); break;
         default:
-            http_response_code(404); echo json_encode(['error'=>"Resource '$resource' not found"]);
+            http_response_code(404);
+            echo json_encode(['error'=>"Resource '$resource' not found"]);
     }
 } catch (InvalidArgumentException $e) {
-    http_response_code(400); echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
+    http_response_code(400);
+    echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
 } catch (RuntimeException $e) {
-    http_response_code($e->getCode() ?: 500); echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
+    http_response_code($e->getCode() ?: 500);
+    echo json_encode(['success'=>false,'error'=>$e->getMessage()]);
 } catch (PDOException $e) {
-    http_response_code(500); echo json_encode(['success'=>false,'error'=>'Database error: '.$e->getMessage()]);
+    http_response_code(500);
+    echo json_encode(['success'=>false,'error'=>'Database error: '.$e->getMessage()]);
 }

@@ -462,21 +462,89 @@
     <div class="portal-panel" id="ppanel-onbehalf">
       <h2 class="portal-panel-title">Request on behalf</h2>
       <p class="portal-panel-sub" id="pob-sub">· submit a request for a teammate</p>
-      <div class="portal-box">
+
+      <!-- Step 1: Select teammate -->
+      <div class="portal-box" id="pob-tm-box">
         <div class="portal-box-label">Select Teammate</div>
         <div class="ptm-list" id="ptm-list"><div style="color:var(--muted);font-size:13px;">Loading teammates·</div></div>
       </div>
-      <!-- Accountability form embed · shown after teammate selected -->
+
+      <!-- Step 2: Request Asset form (shown after teammate selected) -->
       <div id="pob-form-wrap" style="display:none;">
-        <div style="display:flex;align-items:center;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 16px;">
-          <span style="font-size:13px;font-weight:500;color:var(--muted2);">&#128100; Filling form for: <strong style="color:var(--blue);" id="pob-form-name"></strong></span>
+        <!-- form card -->
+        <div class="portal-form-card" id="pob-form-card">
+          <!-- Header -->
+          <div class="portal-form-head" style="margin-bottom:20px;">
+            <div class="portal-form-icon" style="background:var(--blue-dim);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <div class="portal-form-title">Request Asset</div>
+              <div class="portal-form-sub">For: <strong id="pob-form-name" style="color:var(--blue);">·</strong></div>
+            </div>
+            <button onclick="pobCancelForm()" style="margin-left:auto;background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;"
+              onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted2)'">&#10005;</button>
+          </div>
+
+          <!-- Request ID -->
+          <div class="pfield">
+            <label>Request ID</label>
+            <div style="position:relative;">
+              <input id="pob-request-id" type="text" readonly
+                style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;box-sizing:border-box;" />
+              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);pointer-events:none;">Auto</span>
+            </div>
+          </div>
+
+          <!-- Requestor's Name -->
+          <div class="pfield">
+            <label>Requestor's Name</label>
+            <input id="pob-name" type="text" placeholder="Full name"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;box-sizing:border-box;transition:border-color .15s;"
+              onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
+          </div>
+
+          <!-- Employee ID -->
+          <div class="pfield">
+            <label>Employee ID</label>
+            <input id="pob-empid" type="text" placeholder="e.g. EMP001"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;box-sizing:border-box;transition:border-color .15s;"
+              onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
+          </div>
+
+          <!-- Requestor's Location -->
+          <div class="pfield">
+            <label>Requestor's Location</label>
+            <div class="pselect-wrap">
+              <select id="pob-location"
+                style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;padding-right:32px;appearance:none;-webkit-appearance:none;transition:border-color .15s;"
+                onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+                <option value="">-- Select Location --</option>
+              </select>
+              <span class="pselect-arrow">▾</span>
+            </div>
+          </div>
+
+          <!-- Assets row: category / brand / model -->
+          <div class="pfield">
+            <label>Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(available only)</span></label>
+            <div id="pob-asset-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+
+          <!-- Description / Notes -->
+          <div class="pfield">
+            <label>Description / Notes</label>
+            <textarea id="pob-description" placeholder="Reason for request or additional notes…"
+              style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;min-height:96px;resize:vertical;box-sizing:border-box;transition:border-color .15s;"
+              onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+          </div>
+
+          <!-- Actions -->
+          <div class="pbtn-row" style="margin-top:8px;">
+            <button class="pbtn" onclick="pobCancelForm()">Cancel</button>
+            <button class="pbtn primary" id="pob-submit" onclick="submitOnBehalf()" style="flex:1;">Submit Request</button>
+          </div>
         </div>
-        <iframe id="pob-accountability-iframe"
-          src="about:blank"
-          style="width:100%;min-width:860px;border:1px solid var(--border2);border-radius:8px;background:#fff;display:block;"
-          frameborder="0"
-          scrolling="yes">
-        </iframe>
       </div>
     </div>
 
@@ -2366,13 +2434,6 @@ async function loadPortalSection() {
     const assignedIds = new Set(teamRows.map(r => r.employee_id));
     _portalTeammates  = allEmployees.filter(e => assignedIds.has(e.id));
 
-    // Populate category dropdown for on-behalf
-    const catSel = document.getElementById('pob-category');
-    if (catSel) {
-      catSel.innerHTML = '<option value="">· Select category ·</option>'
-        + (catRes.data || []).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-    }
-
     renderPortalAssets();
     renderTeammateList();
   } catch(e) {
@@ -2749,6 +2810,7 @@ async function _submitNonAdminRequest() {
       notes: desc,
     });
     _closeRequestFormModal();
+    showSuccessModal('Request Submitted', 'Your asset request has been sent for admin review.');
   } catch(e) {
     showToast(e.message || 'Failed to submit request.', 'error');
   } finally {
@@ -3366,9 +3428,9 @@ function switchPortalTab(tab) {
     }
   }
 
-  // Wide shell only for On behalf (because of the embedded accountability form)
+  // Shell width: standard for all panels
   const shell = document.querySelector('.portal-shell');
-  if (shell) shell.classList.toggle('wide', tab === 'onbehalf');
+  if (shell) shell.classList.remove('wide');
 
   // Reflect active state on the top nav buttons
   ['btn-myassets','btn-return','btn-onbehalf','btn-myrequests'].forEach(id => {
@@ -3507,63 +3569,141 @@ async function submitPortalReturn() {
 // -- On Behalf ---------------------------------------------------------
 const TM_COLORS = ['#3b82f6','#16a34a','#d97706','#7c3aed','#e11d48','#0891b2','#15803d','#b45309'];
 
-let _selectedPobAssetId = null; // selected product_id for on-behalf
+let _selectedPobAssetId = null; // legacy — kept so no other ref breaks
 
-function pobCategoryChanged() {
-  const catId = document.getElementById('pob-category').value;
-  _selectedPobAssetId = null;
-  const wrap = document.getElementById('pob-asset-wrap');
-  const list = document.getElementById('pob-asset-list');
+// ── pob asset rows (category / brand / model) ─────────────────────────────
+let _pobRowId   = 0;
+const _pobRows  = {};
+let _pobAllAssets = [];
 
-  if (!catId) { wrap.style.display = 'none'; return; }
-
-  const pool = allProducts.filter(p =>
-    p.asset_status === 'available' && String(p.category_id) === String(catId)
-  );
-
-  wrap.style.display = '';
-
-  if (!pool.length) {
-    list.innerHTML = '<div class="pob-asset-empty">No available assets in this category.</div>';
-    return;
-  }
-
-  // Auto-select first
-  _selectedPobAssetId = pool[0].id;
-  renderPobAssetList(pool);
+function _pobInitRows() {
+  _pobRowId = 0;
+  Object.keys(_pobRows).forEach(k => delete _pobRows[k]);
+  const container = document.getElementById('pob-asset-rows');
+  if (container) container.innerHTML = '';
+  _pobAddRow();
 }
 
-function renderPobAssetList(pool) {
-  document.getElementById('pob-asset-list').innerHTML = pool.map(p => {
-    const sel    = _selectedPobAssetId === p.id;
-    const serial = p.serial_number || p.sku || '';
-    return `<div class="pob-asset-row${sel ? ' selected' : ''}" onclick="selectPobAsset(${p.id})" data-pid="${p.id}">
-      <div class="pob-asset-radio"></div>
-      <span class="pob-asset-name">${esc(p.name)}${p.brand_model ? ' <span style="font-weight:400;color:var(--muted2)">· ' + esc(p.brand_model) + '</span>' : ''}</span>
-      ${serial ? `<span class="pob-asset-serial">${esc(serial)}</span>` : ''}
+function _pobAddRow() {
+  const id = ++_pobRowId;
+  _pobRows[id] = { brand: '', model: '' };
+  const container = document.getElementById('pob-asset-rows');
+  if (!container) return;
+  const catOpts = '<option value="">-- Category --</option>'
+    + (allCategories.length ? allCategories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('') : '');
+  const BASE = `background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;`;
+  const SEL  = BASE + `appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;`;
+  const row = document.createElement('div');
+  row.id = `pob-row-${id}`;
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start;';
+  row.innerHTML = `
+    <div>
+      <select id="pob-cat-${id}" onchange="_pobOnRowCatChange(${id})" style="${SEL}"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">${catOpts}</select>
+    </div>
+    <div style="position:relative;">
+      <input id="pob-brand-${id}" type="text" autocomplete="off" placeholder="Search brand…" style="${BASE}"
+        onfocus="this.style.borderColor='var(--blue)';_pobShowBrandDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_pobHideBrandDd(${id}),160)"
+        oninput="_pobFilterBrandDd(${id})" />
+      <div id="pob-brand-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:600;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
+    </div>
+    <div style="position:relative;">
+      <input id="pob-model-${id}" type="text" autocomplete="off" placeholder="Select brand first…" disabled
+        style="${BASE}opacity:.5;cursor:not-allowed;"
+        onfocus="this.style.borderColor='var(--blue)';_pobShowModelDd(${id})"
+        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_pobHideModelDd(${id}),160)"
+        oninput="_pobFilterModelDd(${id})" />
+      <div id="pob-model-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:600;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
     </div>`;
-  }).join('');
+  container.appendChild(row);
+  _pobRebuildBrandDd(id);
 }
 
-function selectPobAsset(id) {
-  _selectedPobAssetId = id;
-  const catId = document.getElementById('pob-category').value;
-  const pool  = allProducts.filter(p =>
-    p.asset_status === 'available' && String(p.category_id) === String(catId)
-  );
-  renderPobAssetList(pool);
+function _pobOnRowCatChange(id) {
+  if (_pobRows[id]) { _pobRows[id].brand = ''; _pobRows[id].model = ''; }
+  const brandInp = document.getElementById(`pob-brand-${id}`);
+  if (brandInp) brandInp.value = '';
+  const modelInp = document.getElementById(`pob-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  _pobRebuildBrandDd(id);
 }
+function _pobGetCatId(id) { return (document.getElementById(`pob-cat-${id}`)?.value || '').trim(); }
+function _pobBrandPool(catId) {
+  let pool = _pobAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === String(catId));
+  return [...new Set(pool.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+}
+function _pobModelPool(catId, brand) {
+  let pool = _pobAllAssets;
+  if (catId) pool = pool.filter(p => String(p.category_id) === String(catId));
+  if (brand) pool = pool.filter(p => (p.brand || '').toLowerCase() === brand.toLowerCase());
+  return [...new Set(pool.map(p => (p.model || '').trim()).filter(Boolean))].sort();
+}
+function _pobRebuildBrandDd(id) {
+  const catId = _pobGetCatId(id);
+  const brands = _pobBrandPool(catId);
+  const query = (document.getElementById(`pob-brand-${id}`)?.value || '').toLowerCase();
+  const filtered = query ? brands.filter(b => b.toLowerCase().includes(query)) : brands;
+  const dd = document.getElementById(`pob-brand-dd-${id}`);
+  if (!dd) return;
+  dd.innerHTML = filtered.length
+    ? filtered.map(b => `<div class="pob-dd-opt" data-row="${id}" data-val="${encodeURIComponent(b)}" data-fn="brand" onmousedown="event.preventDefault()" style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);" onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''">${esc(b)}</div>`).join('')
+    : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No brands found</div>';
+}
+function _pobRebuildModelDd(id) {
+  const catId = _pobGetCatId(id);
+  const brand = _pobRows[id]?.brand || (document.getElementById(`pob-brand-${id}`)?.value || '');
+  const models = _pobModelPool(catId, brand);
+  const query = (document.getElementById(`pob-model-${id}`)?.value || '').toLowerCase();
+  const filtered = query ? models.filter(m => m.toLowerCase().includes(query)) : models;
+  const dd = document.getElementById(`pob-model-dd-${id}`);
+  if (!dd) return;
+  dd.innerHTML = filtered.length
+    ? filtered.map(m => `<div class="pob-dd-opt" data-row="${id}" data-val="${encodeURIComponent(m)}" data-fn="model" onmousedown="event.preventDefault()" style="padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);" onmouseover="this.style.background='rgba(41,182,232,0.1)'" onmouseout="this.style.background=''">${esc(m)}</div>`).join('')
+    : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
+}
+function _pobShowBrandDd(id) { _pobRebuildBrandDd(id); const dd = document.getElementById(`pob-brand-dd-${id}`); if (dd) dd.style.display = 'block'; }
+function _pobHideBrandDd(id) { const dd = document.getElementById(`pob-brand-dd-${id}`); if (dd) dd.style.display = 'none'; }
+function _pobFilterBrandDd(id) {
+  _pobRebuildBrandDd(id); const dd = document.getElementById(`pob-brand-dd-${id}`); if (dd) dd.style.display = 'block';
+  if (_pobRows[id]) _pobRows[id].brand = '';
+  const modelInp = document.getElementById(`pob-model-${id}`);
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; }
+  if (_pobRows[id]) _pobRows[id].model = '';
+}
+function _pobShowModelDd(id) {
+  if (!_pobRows[id]?.brand && !document.getElementById(`pob-brand-${id}`)?.value) return;
+  _pobRebuildModelDd(id); const dd = document.getElementById(`pob-model-dd-${id}`); if (dd) dd.style.display = 'block';
+}
+function _pobHideModelDd(id) { const dd = document.getElementById(`pob-model-dd-${id}`); if (dd) dd.style.display = 'none'; }
+function _pobFilterModelDd(id) { _pobRebuildModelDd(id); const dd = document.getElementById(`pob-model-dd-${id}`); if (dd) dd.style.display = 'block'; }
+function _pobSelectBrand(id, brand) {
+  const inp = document.getElementById(`pob-brand-${id}`); if (inp) inp.value = brand;
+  _pobHideBrandDd(id); if (_pobRows[id]) _pobRows[id].brand = brand;
+  const modelInp = document.getElementById(`pob-model-${id}`);
+  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model…'; modelInp.value = ''; }
+  if (_pobRows[id]) _pobRows[id].model = ''; _pobRebuildModelDd(id);
+}
+function _pobSelectModel(id, model) {
+  const inp = document.getElementById(`pob-model-${id}`); if (inp) inp.value = model;
+  _pobHideModelDd(id); if (_pobRows[id]) _pobRows[id].model = model;
+}
+document.addEventListener('click', function(e) {
+  const opt = e.target.closest('.pob-dd-opt');
+  if (!opt) return;
+  const rowId = parseInt(opt.dataset.row, 10);
+  const val   = decodeURIComponent(opt.dataset.val);
+  if (opt.dataset.fn === 'brand') _pobSelectBrand(rowId, val);
+  else if (opt.dataset.fn === 'model') _pobSelectModel(rowId, val);
+});
 
+// ── Teammate list ─────────────────────────────────────────────────────────
 function renderTeammateList() {
   const list = document.getElementById('ptm-list');
   if (!_portalTeammates.length) {
     list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 4px;">No agents have been assigned to you yet. Contact an admin to set up your team.</div>';
-    if (!_selectedTm) updateObLabel();
     return;
-  }
-  if (!_selectedTm) {
-    _selectedTm = _portalTeammates[0];
-    updateObLabel();
   }
   list.innerHTML = _portalTeammates.map((e, i) => {
     const initials = (e.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
@@ -3593,104 +3733,114 @@ function updateObLabel() {
 
 function loadPobForm() {
   if (!_selectedTm) return;
-  const name = encodeURIComponent(_selectedTm.name || '');
-  const iframe = document.getElementById('pob-accountability-iframe');
-  iframe.onload = () => resizePobIframe(iframe);
-  iframe.src = `accountability.html?modal=1&assignee=${name}`;
-  iframe.style.height = '860px'; // initial height while loading
   document.getElementById('pob-form-wrap').style.display = '';
-  document.getElementById('pob-form-name').textContent = _selectedTm.name || '';
-  const nameEl = document.getElementById('pob-submit-name');
-  if (nameEl) nameEl.textContent = _selectedTm.name || '·';
-  // Widen the shell to fit the accountability form
-  document.querySelector('.portal-shell')?.classList.add('wide');
+  const nameEl = document.getElementById('pob-form-name');
+  if (nameEl) nameEl.textContent = _selectedTm.name || '';
+  // Generate fresh Request ID
+  const reqIdEl = document.getElementById('pob-request-id');
+  if (reqIdEl) {
+    const now  = new Date();
+    const date = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const rand  = Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    reqIdEl.value = `REQ-${date}-${rand}`;
+  }
+  // Pre-fill name and employee ID
+  const nameInput  = document.getElementById('pob-name');
+  const empidInput = document.getElementById('pob-empid');
+  if (nameInput)  nameInput.value  = _selectedTm.name        || '';
+  if (empidInput) empidInput.value = _selectedTm.employee_id || _selectedTm.username || '';
+  // Clear notes
+  const descEl = document.getElementById('pob-description');
+  if (descEl) descEl.value = '';
+  _pobLoadLocations();
+  _pobLoadAssets();
+  setTimeout(() => document.getElementById('pob-form-card')?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 80);
 }
 
-function resizePobIframe(iframe) {
+async function _pobLoadLocations() {
+  const locSel = document.getElementById('pob-location');
+  if (!locSel) return;
   try {
-    const h = iframe.contentDocument?.documentElement?.scrollHeight;
-    if (h && h > 200) iframe.style.height = h + 'px';
-  } catch(e) {
-    iframe.style.height = '900px'; // fallback
-  }
+    const res = await api.getLocations();
+    locSel.innerHTML = '<option value="">-- Select Location --</option>'
+      + (res.data || []).map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  } catch(_) {}
 }
+
+async function _pobLoadAssets() {
+  try {
+    const res = await api.getProducts();
+    _pobAllAssets = (res.data || []).filter(p => p.asset_status === 'available');
+  } catch(_) { _pobAllAssets = []; }
+  _pobInitRows();
+}
+
+function pobCancelForm() {
+  document.getElementById('pob-form-wrap').style.display = 'none';
+  _selectedTm = null;
+  renderTeammateList();
+}
+
+function resizePobIframe() {} // legacy stub
 
 async function submitOnBehalf() {
   if (!_selectedTm) { showToast('Please select a teammate.', 'error'); return; }
-
-  // Read data from the accountability iframe
-  const iframe = document.getElementById('pob-accountability-iframe');
-  const iDoc = iframe?.contentDocument || iframe?.contentWindow?.document;
-
-  if (!iDoc) { showToast('Form not loaded yet. Please wait.', 'error'); return; }
-
-  // Collect fields from the iframe's accountability form
-  const assigneeName = iDoc.getElementById('field-fullname')?.value?.trim() || _selectedTm.name;
-  const department   = iDoc.getElementById('field-dept')?.value?.trim() || '';
-  const location     = iDoc.getElementById('field-location')?.value?.trim() || '';
-  const dateAssigned = iDoc.getElementById('field-date-assigned')?.value?.trim() || '';
-  const empid        = iDoc.getElementById('field-empid')?.value?.trim() || '';
-
-  if (!assigneeName) { showToast('Please enter the employee name in the form.', 'error'); return; }
-
-  // Collect assets from the form rows
-  const FIXED_TYPES = ['Laptop','Mobile Device','Headset','Other Equipment','ID & Lanyard','Access Badge/RFID'];
-  const assets = [];
-  for (let i = 0; i < FIXED_TYPES.length; i++) {
-    const typeSel  = iDoc.getElementById(`asset-type-${i}`);
-    const brandEl  = iDoc.getElementById(`asset-brand-${i}`);
-    const snEl     = iDoc.getElementById(`asset-sn-${i}`);
-    const condEl   = iDoc.getElementById(`asset-cond-${i}`);
-    const valEl    = iDoc.getElementById(`asset-val-${i}`);
-    const remEl    = iDoc.getElementById(`asset-rem-${i}`);
-    const brand    = brandEl?.value?.trim() || '';
-    const sn       = snEl?.value?.trim() || '';
-    if (brand || sn) {
-      assets.push({
-        name:      typeSel?.value || FIXED_TYPES[i],
-        brand,
-        tag:       sn,
-        condition: condEl?.value?.trim() || '',
-        value:     valEl?.value?.trim() || '',
-        remarks:   remEl?.value?.trim() || '',
-      });
-    }
-  }
-
+  const name   = (document.getElementById('pob-name')?.value        || '').trim();
+  const empid  = (document.getElementById('pob-empid')?.value       || '').trim();
+  const reqId  = (document.getElementById('pob-request-id')?.value  || '').trim();
+  const desc   = (document.getElementById('pob-description')?.value || '').trim();
+  const locSel = document.getElementById('pob-location');
+  const locId  = locSel?.value || '';
+  const locName = locSel?.options[locSel?.selectedIndex]?.text?.replace(/^--\s*/,'').replace(/\s*--$/,'') || '';
+  if (!name) { showToast("Requestor's name is required.", 'error'); return; }
+  const assets = Object.keys(_pobRows).map(id => {
+    const catSel = document.getElementById(`pob-cat-${id}`);
+    return {
+      category_id:   catSel?.value || null,
+      category_name: catSel?.options[catSel?.selectedIndex]?.text?.replace(/^--\s*/,'').replace(/\s*--$/,'') || null,
+      brand: (document.getElementById(`pob-brand-${id}`)?.value || '').trim(),
+      model: (document.getElementById(`pob-model-${id}`)?.value || '').trim(),
+    };
+  }).filter(a => a.brand || a.model);
+  if (!assets.length && !desc) { showToast('Please fill in at least one asset or provide a description.', 'error'); return; }
   const btn = document.getElementById('pob-submit');
   btn.disabled = true;
+  const firstAsset   = assets[0] || {};
+  const resourceName = [firstAsset.brand, firstAsset.model].filter(Boolean).join(' ') || firstAsset.category_name || name;
   try {
     await api.submitApproval({
       action_type:   'create',
-      resource_type: 'asset_request',
-      resource_name: assigneeName,
-      notes:         'Asset Accountability',
+      resource_type: 'Asset',
+      resource_id:   null,
+      resource_name: resourceName,
+      notes:         desc || null,
       payload: {
-        assignee:       assigneeName,
-        empid,
-        department,
-        location,
-        date_deployed:  dateAssigned,
-        purpose:        'Asset Accountability',
-        expected_return: '',
-        remarks:        '',
-        on_behalf_of:   _selectedTm.name,
-        assets,
+        request_id:            reqId  || null,
+        requestor_name:        name,
+        requestor_id:          empid,
+        requestor_location:    locName || '',
+        requestor_location_id: locId  || null,
+        category_id:           firstAsset.category_id   || null,
+        category_name:         firstAsset.category_name || null,
+        brand:                 firstAsset.brand  || null,
+        model:                 firstAsset.model  || null,
+        assets:                assets.length ? assets : null,
+        description:           desc,
+        on_behalf_of:          _selectedTm.name,
       },
     });
     showToast(`Request submitted on behalf of ${_selectedTm.name}!`, 'success');
     showSuccessModal('Request Submitted', `Request sent on behalf of ${_selectedTm.name} and is pending admin review.`);
-    // Reset iframe
-    document.getElementById('pob-accountability-iframe').src = 'about:blank';
-    document.getElementById('pob-form-wrap').style.display = 'none';
-    _selectedTm = null;
-    renderTeammateList();
+    pobCancelForm();
   } catch(e) {
     showToast(e.message || 'Failed to submit.', 'error');
   } finally {
     btn.disabled = false;
   }
 }
+
+
 
 
 

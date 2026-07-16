@@ -82,7 +82,51 @@ class ApprovalService {
     }
 
     /**
+     * Build meta rows identical to buildMetaRows() but replacing the standalone
+     * "Employee ID" row with an "On behalf of" row (Name + ID) when $payload
+     * contains an `on_behalf_of` key.
+     *
+     * Returns [plainText, htmlRows] — same shape as buildMetaRows().
+     */
+    private function buildMetaRowsForStaff(array $payload): array {
+        $reqId        = trim($payload['request_id']         ?? '');
+        $empId        = trim($payload['requestor_id']       ?? '');
+        $onBehalfName = trim($payload['on_behalf_of']       ?? '');
+        $location     = trim($payload['requestor_location'] ?? '');
+
+        $plain = '';
+        if ($reqId) $plain .= "Request ID: {$reqId}\n";
+        if ($onBehalfName) {
+            $plain .= "On behalf of: {$onBehalfName}" . ($empId ? " ({$empId})" : '') . "\n";
+        } elseif ($empId) {
+            $plain .= "Employee ID: {$empId}\n";
+        }
+        if ($location) $plain .= "Location: {$location}\n";
+
+        $html = '';
+        if ($reqId) {
+            $safe = htmlspecialchars($reqId, ENT_QUOTES);
+            $html .= "<tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request ID</td><td style='padding:8px 12px;color:#e6edf3;font-family:monospace;letter-spacing:.5px;'>{$safe}</td></tr>\n";
+        }
+        if ($onBehalfName) {
+            $display = htmlspecialchars($onBehalfName, ENT_QUOTES)
+                . ($empId ? ' <span style="color:#8b949e;font-size:12px;">(' . htmlspecialchars($empId, ENT_QUOTES) . ')</span>' : '');
+            $html .= "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>On behalf of</td><td style='padding:8px 12px;color:#e6edf3;'>{$display}</td></tr>\n";
+        } elseif ($empId) {
+            $safe = htmlspecialchars($empId, ENT_QUOTES);
+            $html .= "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Employee ID</td><td style='padding:8px 12px;color:#e6edf3;'>{$safe}</td></tr>\n";
+        }
+        if ($location) {
+            $safe = htmlspecialchars($location, ENT_QUOTES);
+            $html .= "<tr><td style='padding:8px 12px;color:#8b949e;'>Location</td><td style='padding:8px 12px;color:#e6edf3;'>{$safe}</td></tr>\n";
+        }
+
+        return [$plain, $html];
+    }
+
+    /**
      * Build the asset list sections for approval emails.
+     *
      * Returns [plainTextBlock, htmlTableRows] where htmlTableRows is a string of <tr> elements.
      *
      * Looks for assets in payload['assets'], falls back to resource_name.
@@ -177,38 +221,145 @@ class ApprovalService {
 
         // Email all admins — wrapped in try/catch so SMTP errors never break the API response
         try {
-            // Build asset list from payload — reuse the shared helper (filters blank rows)
             $payload = is_string($data['payload'] ?? null)
                            ? json_decode($data['payload'], true)
                            : ($data['payload'] ?? []);
 
-            // Synthesise a minimal $req-shaped array so buildAssetEmailParts() can fall back correctly
-            $fakeReq = ['resource_name' => $resource, 'payload' => $payload];
-            [$assetsTextBlock, $assetRowsHtml] = $this->buildAssetEmailParts($fakeReq, $payload);
-            [,$metaRowsHtml] = $this->buildMetaRows($payload);
-            [$metaPlain,]    = $this->buildMetaRows($payload);
+            // ── Return request — dedicated, richly formatted email ──────────
+            $isReturnRequest = strtolower($data['action_type']) === 'delete'
+                            && strtolower($data['resource_type']) === 'assignment';
 
-            // Requester's notes / purpose / description
-            $reqNotes = trim(
-                $data['notes'] ?? $payload['purpose'] ?? $payload['description'] ?? $payload['notes'] ?? ''
-            );
-            $reqNotesHtml = $reqNotes
-                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reqNotes, ENT_QUOTES) . "</td></tr>\n"
-                : '';
-            $reqNotesText = $reqNotes ? "\nReason / Notes: {$reqNotes}" : '';
+            if ($isReturnRequest) {
+                $returnId      = trim($payload['return_id']     ?? '');
+                $assetName     = trim($resource);
+                // Strip " · return by <name>" suffix that the JS appends to resource_name
+                $assetName     = preg_replace('/\s*·\s*return by .+$/i', '', $assetName);
+                $returnMethod  = trim($payload['return_method'] ?? $payload['method'] ?? '');
+                $condition     = trim($payload['condition']     ?? '');
+                $notes         = trim($payload['notes']         ?? $data['notes'] ?? '');
+                $submittedBy   = $data['requested_by'];
 
-            $emailSubject = "New approval request from {$data['requested_by']}";
-            $emailText    = "A new approval request has been submitted.\n\n{$metaPlain}Request Type: {$action} {$data['resource_type']}\nRequested Assets:\n{$assetsTextBlock}{$reqNotesText}\nSubmitted by: {$data['requested_by']}\n\nPlease log in to review the request:\nhttp://localhost/inventory/public/approvals.html";
-            $emailHtml    = "<p>A new approval request has been submitted and requires your review.</p>
+                // Human-readable labels
+                $methodLabels = [
+                    'dropoff' => 'Drop off at IT desk',
+                    'pickup'  => 'Schedule pickup',
+                    'courier' => 'Send via courier',
+                ];
+                $conditionLabels = [
+                    'good'    => 'Good · no damage',
+                    'minor'   => 'Minor wear',
+                    'damaged' => 'Damaged · needs repair',
+                    'broken'  => 'Broken / non-functional',
+                ];
+                $methodLabel    = $methodLabels[$returnMethod]    ?? ucfirst($returnMethod)    ?: '·';
+                $conditionLabel = $conditionLabels[$condition]     ?? ucfirst($condition)       ?: '·';
+
+                // Plain text
+                $returnEmailText = "{$submittedBy} has submitted an asset return request and requires your approval.\n\n"
+                    . ($returnId    ? "Return ID     : {$returnId}\n"       : '')
+                    . "Asset         : {$assetName}\n"
+                    . "Return Method : {$methodLabel}\n"
+                    . "Condition     : {$conditionLabel}\n"
+                    . ($notes       ? "Notes         : {$notes}\n"          : '')
+                    . "\nSubmitted by: {$submittedBy}\n"
+                    . "\nPlease log in to review the request:\nhttp://localhost/inventory/public/approvals.html";
+
+                // HTML rows
+                $returnIdRow  = $returnId
+                    ? "<tr><td style='padding:8px 12px;color:#8b949e;width:160px;'>Return ID</td><td style='padding:8px 12px;color:#e6edf3;font-family:monospace;letter-spacing:.5px;'>" . htmlspecialchars($returnId, ENT_QUOTES) . "</td></tr>\n"
+                    : '';
+                $notesRow     = $notes
+                    ? "<tr><td style='padding:8px 12px;color:#8b949e;'>Notes / Reason</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($notes, ENT_QUOTES) . "</td></tr>\n"
+                    : '';
+
+                $returnEmailHtml = "<p><strong>" . htmlspecialchars($submittedBy, ENT_QUOTES) . "</strong> has submitted an asset return request and requires your approval.</p>
+<table style='width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #30363d;border-radius:8px;overflow:hidden;'>
+  {$returnIdRow}
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:160px;'>Asset to Return</td><td style='padding:8px 12px;color:#e6edf3;font-weight:600;'>" . htmlspecialchars($assetName, ENT_QUOTES) . "</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Return Method</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($methodLabel, ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Condition</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($conditionLabel, ENT_QUOTES) . "</td></tr>
+  {$notesRow}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($submittedBy, ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Pending approval</td></tr>
+</table>
+<p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Return Request</a></p>";
+
+                $this->emailAdmins(
+                    "🔄 Asset return request from {$submittedBy}",
+                    $returnEmailText,
+                    $returnEmailHtml
+                );
+
+            } else {
+                // ── Generic approval email for all other request types ───────
+                $fakeReq = ['resource_name' => $resource, 'payload' => $payload];
+                [$assetsTextBlock, $assetRowsHtml] = $this->buildAssetEmailParts($fakeReq, $payload);
+
+                // Build meta rows — but swap Employee ID for "On behalf" when present
+                $onBehalfName = trim($payload['on_behalf_of']   ?? '');
+                $empId        = trim($payload['requestor_id']   ?? '');
+                $reqId        = trim($payload['request_id']     ?? '');
+                $location     = trim($payload['requestor_location'] ?? '');
+
+                // Plain-text meta
+                $metaPlain = '';
+                if ($reqId)    $metaPlain .= "Request ID: {$reqId}\n";
+                if ($onBehalfName) {
+                    $metaPlain .= "On behalf of: {$onBehalfName}" . ($empId ? " ({$empId})" : '') . "\n";
+                } elseif ($empId) {
+                    $metaPlain .= "Employee ID: {$empId}\n";
+                }
+                if ($location) $metaPlain .= "Location: {$location}\n";
+
+                // HTML meta rows
+                $metaRowsHtml = '';
+                if ($reqId) {
+                    $safe = htmlspecialchars($reqId, ENT_QUOTES);
+                    $metaRowsHtml .= "<tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request ID</td><td style='padding:8px 12px;color:#e6edf3;font-family:monospace;letter-spacing:.5px;'>{$safe}</td></tr>\n";
+                }
+                if ($onBehalfName) {
+                    $onBehalfDisplay = htmlspecialchars($onBehalfName, ENT_QUOTES)
+                        . ($empId ? ' <span style="color:#8b949e;font-size:12px;">(' . htmlspecialchars($empId, ENT_QUOTES) . ')</span>' : '');
+                    $metaRowsHtml .= "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>On behalf of</td><td style='padding:8px 12px;color:#e6edf3;'>{$onBehalfDisplay}</td></tr>\n";
+                } elseif ($empId) {
+                    $safe = htmlspecialchars($empId, ENT_QUOTES);
+                    $metaRowsHtml .= "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Employee ID</td><td style='padding:8px 12px;color:#e6edf3;'>{$safe}</td></tr>\n";
+                }
+                if ($location) {
+                    $safe = htmlspecialchars($location, ENT_QUOTES);
+                    $metaRowsHtml .= "<tr><td style='padding:8px 12px;color:#8b949e;'>Location</td><td style='padding:8px 12px;color:#e6edf3;'>{$safe}</td></tr>\n";
+                }
+
+                $reqNotes = trim(
+                    $data['notes'] ?? $payload['purpose'] ?? $payload['description'] ?? $payload['notes'] ?? ''
+                );
+                $reqNotesHtml = $reqNotes
+                    ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reqNotes, ENT_QUOTES) . "</td></tr>\n"
+                    : '';
+                $reqNotesText = $reqNotes ? "\nReason / Notes: {$reqNotes}" : '';
+
+                // Intro sentence — mention on-behalf employee when applicable
+                $introSuffix = $onBehalfName
+                    ? " on behalf of <strong>" . htmlspecialchars($onBehalfName, ENT_QUOTES) . "</strong>"
+                      . ($empId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($empId, ENT_QUOTES) . ')</span>' : '')
+                    : '';
+                $introText = $onBehalfName
+                    ? "A new approval request has been submitted on behalf of {$onBehalfName}" . ($empId ? " ({$empId})" : '') . " and requires your review."
+                    : "A new approval request has been submitted and requires your review.";
+
+                $emailSubject = "New approval request from {$data['requested_by']}";
+                $emailText    = "{$introText}\n\n{$metaPlain}Request Type: {$action} {$data['resource_type']}\nRequested Assets:\n{$assetsTextBlock}{$reqNotesText}\nSubmitted by: {$data['requested_by']}\n\nPlease log in to review the request:\nhttp://localhost/inventory/public/approvals.html";
+                $emailHtml    = "<p>A new approval request has been submitted and requires your review{$introSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
   <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$data['resource_type']}</td></tr>
   {$metaRowsHtml}
   {$assetRowsHtml}
   {$reqNotesHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>{$data['requested_by']}</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($data['requested_by'], ENT_QUOTES) . "</td></tr>
 </table>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Review Request</a></p>";
-            $this->emailAdmins($emailSubject, $emailText, $emailHtml);
+                $this->emailAdmins($emailSubject, $emailText, $emailHtml);
+            }
         } catch (\Throwable $e) {
             error_log('EmailService (queue → admins): ' . $e->getMessage());
         }
@@ -292,15 +443,30 @@ class ApprovalService {
         try {
             $confirmPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
             [$confirmPlainAssets, $confirmHtmlAssetRows] = $this->buildAssetEmailParts($req, $confirmPayload);
-            [$confirmMetaPlain, $confirmMetaHtml] = $this->buildMetaRows($confirmPayload);
+            [$confirmMetaPlain, $confirmMetaHtml] = $this->buildMetaRowsForStaff($confirmPayload);
+
+            $confirmOnBehalf = trim($confirmPayload['on_behalf_of'] ?? '');
+            $confirmEmpId    = trim($confirmPayload['requestor_id'] ?? '');
+            $confirmIntroSuffix = $confirmOnBehalf
+                ? " on behalf of <strong>" . htmlspecialchars($confirmOnBehalf, ENT_QUOTES) . "</strong>"
+                  . ($confirmEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($confirmEmpId, ENT_QUOTES) . ')</span>' : '')
+                : '';
+
+            $confirmDesc = trim($confirmPayload['description'] ?? $confirmPayload['purpose'] ?? $confirmPayload['notes'] ?? '');
+            $confirmNotesRow = $confirmDesc
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($confirmDesc, ENT_QUOTES) . "</td></tr>\n"
+                : '';
+            $confirmNotesText = $confirmDesc ? "Reason / Notes: {$confirmDesc}\n" : '';
 
             $adminEmailSubject = "✅ Assets confirmed by {$userName} — release serial numbers";
-            $adminEmailText    = "{$userName} has confirmed the assets for the following request:\n\n{$confirmMetaPlain}Assets:\n{$confirmPlainAssets}\nConfirmed by: {$userName}\n\nYou may now release the serial numbers to complete the assignment.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
-            $adminEmailHtml    = "<p><strong>" . htmlspecialchars($userName, ENT_QUOTES) . "</strong> has confirmed the assets for the following request:</p>
+            $adminEmailText    = "{$userName} has confirmed the assets for the following request:\n\n{$confirmMetaPlain}Request Type: Confirm Asset\n{$confirmNotesText}Assets:\n{$confirmPlainAssets}\nConfirmed by: {$userName}\n\nYou may now release the serial numbers to complete the assignment.\n\nLog in to review:\nhttp://localhost/inventory/public/approvals.html";
+            $adminEmailHtml    = "<p><strong>" . htmlspecialchars($userName, ENT_QUOTES) . "</strong> has confirmed the assets for the following request{$confirmIntroSuffix}:</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Confirm Asset</td></tr>
   {$confirmMetaHtml}
   {$confirmHtmlAssetRows}
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Confirmed by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($userName, ENT_QUOTES) . "</td></tr>
+  {$confirmNotesRow}
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Confirmed by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($userName, ENT_QUOTES) . "</td></tr>
 </table>
 <p>You may now release the serial numbers to complete the assignment.</p>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/approvals.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Release Serial Numbers</a></p>";
@@ -323,14 +489,30 @@ class ApprovalService {
         // Email the requestor — wrapped in try/catch so SMTP errors never break the API response
         try {
             $confirmStaffPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-            [$confirmStaffMetaPlain, $confirmStaffMetaHtml] = $this->buildMetaRows($confirmStaffPayload);
-            $assetNameForStaff = $req['resource_name'] ?? 'Asset';
+            [$confirmStaffPlainAssets, $confirmStaffHtmlAssetRows] = $this->buildAssetEmailParts($req, $confirmStaffPayload);
+            [$confirmStaffMetaPlain, $confirmStaffMetaHtml] = $this->buildMetaRowsForStaff($confirmStaffPayload);
+
+            $csOnBehalf = trim($confirmStaffPayload['on_behalf_of'] ?? '');
+            $csEmpId    = trim($confirmStaffPayload['requestor_id'] ?? '');
+            $csIntroSuffix = $csOnBehalf
+                ? " on behalf of <strong>" . htmlspecialchars($csOnBehalf, ENT_QUOTES) . "</strong>"
+                  . ($csEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($csEmpId, ENT_QUOTES) . ')</span>' : '')
+                : '';
+            $csDesc = trim($confirmStaffPayload['description'] ?? $confirmStaffPayload['purpose'] ?? $confirmStaffPayload['notes'] ?? '');
+            $csNotesRow  = $csDesc
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($csDesc, ENT_QUOTES) . "</td></tr>\n"
+                : '';
+            $csNotesText = $csDesc ? "Reason / Notes: {$csDesc}\n" : '';
+
             $staffEmailSubject = "⏳ Confirmation received — awaiting serial release";
-            $staffEmailText    = "Your asset confirmation for \"{$assetNameForStaff}\" has been received.\n\n{$confirmStaffMetaPlain}The admin will now release the serial numbers for your assigned assets. You will receive another notification once they are ready.\n\nTrack your request:\nhttp://localhost/inventory/public/requests.html";
-            $staffEmailHtml    = "<p>Your asset confirmation has been received successfully.</p>
+            $staffEmailText    = "Your asset confirmation has been received.\n\n{$confirmStaffMetaPlain}Request Type: Confirm Asset\n{$csNotesText}Submitted by: {$req['requested_by']}\n\nThe admin will now release the serial numbers for your assigned assets.\n\nTrack your request:\nhttp://localhost/inventory/public/requests.html";
+            $staffEmailHtml    = "<p>Your asset confirmation has been received successfully{$csIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Confirm Asset</td></tr>
   {$confirmStaffMetaHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($assetNameForStaff, ENT_QUOTES) . "</td></tr>
+  {$confirmStaffHtmlAssetRows}
+  {$csNotesRow}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
   <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f0a500;'>Awaiting serial number release</td></tr>
 </table>
 <p>The admin will release the serial numbers for your assigned assets shortly.</p>
@@ -501,17 +683,32 @@ class ApprovalService {
                 // Email the requestor
                 try {
                     $fwdConfPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-                    [,$fwdConfMetaHtml]  = $this->buildMetaRows($fwdConfPayload);
-                    [$fwdConfMetaPlain,] = $this->buildMetaRows($fwdConfPayload);
-                    $assetNameFwd = $req['resource_name'] ?? 'Asset';
+                    [$fwdConfPlainAssets, $fwdConfHtmlAssetRows] = $this->buildAssetEmailParts($req, $fwdConfPayload);
+                    [,$fwdConfMetaHtml]  = $this->buildMetaRowsForStaff($fwdConfPayload);
+                    [$fwdConfMetaPlain,] = $this->buildMetaRowsForStaff($fwdConfPayload);
+                    $fwdConfOnBehalf = trim($fwdConfPayload['on_behalf_of'] ?? '');
+                    $fwdConfEmpId    = trim($fwdConfPayload['requestor_id'] ?? '');
+                    $fwdConfIntroSuffix = $fwdConfOnBehalf
+                        ? " on behalf of <strong>" . htmlspecialchars($fwdConfOnBehalf, ENT_QUOTES) . "</strong>"
+                          . ($fwdConfEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($fwdConfEmpId, ENT_QUOTES) . ')</span>' : '')
+                        : '';
+                    $fwdConfDesc = trim($fwdConfPayload['description'] ?? $fwdConfPayload['purpose'] ?? $fwdConfPayload['notes'] ?? '');
+                    $fwdConfNotesHtml = $fwdConfDesc
+                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($fwdConfDesc, ENT_QUOTES) . "</td></tr>\n"
+                        : '';
+                    $fwdConfNotesText = $fwdConfDesc ? "Reason / Notes: {$fwdConfDesc}\n" : '';
+                    $fwdConfOnBehalfText = $fwdConfOnBehalf ? ' on behalf of ' . $fwdConfOnBehalf : '';
                     $this->emailUser(
                         $req['user_id'] ?? null,
                         '📦 Assets Ready — Please Receive',
-                        "The serial numbers for your assets \"{$assetNameFwd}\" have been released by the admin.\n\n{$fwdConfMetaPlain}Please proceed to receive your assets.\n\nView your request:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
-                        "<p>Great news! The serial numbers for your assets have been released.</p>
+                        "The serial numbers for your assets have been released by the admin{$fwdConfOnBehalfText}.\n\n{$fwdConfMetaPlain}Request Type: Release Asset\nAssets:\n{$fwdConfPlainAssets}\n{$fwdConfNotesText}Submitted by: {$req['requested_by']}\n\nPlease log in to confirm receipt of your assets:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
+                        "<p>The serial numbers for your assets have been released{$fwdConfIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Release Asset</td></tr>
   {$fwdConfMetaHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($assetNameFwd, ENT_QUOTES) . "</td></tr>
+  {$fwdConfHtmlAssetRows}
+  {$fwdConfNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
   <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Ready to receive</td></tr>
 </table>
 <p>Please log in to confirm receipt of your assets.</p>
@@ -542,17 +739,32 @@ class ApprovalService {
                 // Email the requestor
                 try {
                     $updPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-                    [,$updMetaHtml] = $this->buildMetaRows($updPayload);
-                    [$updMetaPlain,] = $this->buildMetaRows($updPayload);
-                    $assetNameUpd = $req['resource_name'] ?? 'Asset';
+                    [$updPlainAssets, $updHtmlAssetRows] = $this->buildAssetEmailParts($req, $updPayload);
+                    [,$updMetaHtml] = $this->buildMetaRowsForStaff($updPayload);
+                    [$updMetaPlain,] = $this->buildMetaRowsForStaff($updPayload);
+                    $updOnBehalf = trim($updPayload['on_behalf_of'] ?? '');
+                    $updEmpId    = trim($updPayload['requestor_id'] ?? '');
+                    $updIntroSuffix = $updOnBehalf
+                        ? " on behalf of <strong>" . htmlspecialchars($updOnBehalf, ENT_QUOTES) . "</strong>"
+                          . ($updEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($updEmpId, ENT_QUOTES) . ')</span>' : '')
+                        : '';
+                    $updDesc = trim($updPayload['description'] ?? $updPayload['purpose'] ?? $updPayload['notes'] ?? '');
+                    $updNotesHtml = $updDesc
+                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($updDesc, ENT_QUOTES) . "</td></tr>\n"
+                        : '';
+                    $updNotesText = $updDesc ? "Reason / Notes: {$updDesc}\n" : '';
+                    $updOnBehalfText = $updOnBehalf ? ' on behalf of ' . $updOnBehalf : '';
                     $this->emailUser(
                         $req['user_id'] ?? null,
                         '📦 Assets Ready — Please Receive',
-                        "The serial numbers for your assets \"{$assetNameUpd}\" have been updated and released by the admin.\n\n{$updMetaPlain}Please proceed to receive your assets.\n\nView your request:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
-                        "<p>The serial numbers for your assets have been updated and released.</p>
+                        "The serial numbers for your assets have been updated and released by the admin{$updOnBehalfText}.\n\n{$updMetaPlain}Request Type: Release Asset\nAssets:\n{$updPlainAssets}\n{$updNotesText}Submitted by: {$req['requested_by']}\n\nPlease log in to confirm receipt of your assets:\nhttp://localhost/inventory/public/requests.html?tab=myrequests",
+                        "<p>The serial numbers for your assets have been updated and released{$updIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Release Asset</td></tr>
   {$updMetaHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($assetNameUpd, ENT_QUOTES) . "</td></tr>
+  {$updHtmlAssetRows}
+  {$updNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
   <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Ready to receive</td></tr>
 </table>
 <p>Please log in to confirm receipt of your assets.</p>
@@ -586,24 +798,32 @@ class ApprovalService {
                 // Email the requestor
                 try {
                     [$relPlainAssets, $relHtmlAssetRows] = $this->buildAssetEmailParts($req, $payload);
-                    [,$relMetaHtml]  = $this->buildMetaRows($payload);
-                    [$relMetaPlain,] = $this->buildMetaRows($payload);
-                    $relNotes = trim($reviewNotes ?? '');
-                    $relNotesHtml = $relNotes
-                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Note from admin</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($relNotes, ENT_QUOTES) . "</td></tr>\n"
+                    [,$relMetaHtml]  = $this->buildMetaRowsForStaff($payload);
+                    [$relMetaPlain,] = $this->buildMetaRowsForStaff($payload);
+                    $relOnBehalf = trim($payload['on_behalf_of'] ?? '');
+                    $relEmpId    = trim($payload['requestor_id'] ?? '');
+                    $relIntroSuffix = $relOnBehalf
+                        ? " on behalf of <strong>" . htmlspecialchars($relOnBehalf, ENT_QUOTES) . "</strong>"
+                          . ($relEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($relEmpId, ENT_QUOTES) . ')</span>' : '')
                         : '';
-                    $relNotesText = $relNotes ? "\nNote from admin: {$relNotes}" : '';
+                    $relNotes = trim($payload['description'] ?? $payload['purpose'] ?? $payload['notes'] ?? $reviewNotes ?? '');
+                    $relNotesHtml = $relNotes
+                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($relNotes, ENT_QUOTES) . "</td></tr>\n"
+                        : '';
+                    $relNotesText = $relNotes ? "Reason / Notes: {$relNotes}\n" : '';
+                    $relOnBehalfText = $relOnBehalf ? ' on behalf of ' . $relOnBehalf : '';
                     $this->emailUser(
                         $req['user_id'] ?? null,
                         '✅ Asset assigned to you',
-                        "Great news! Your requested assets have been released by the admin and are now assigned to you.\n\n{$relMetaPlain}Assets:\n{$relPlainAssets}\nReleased by: {$reviewedBy}{$relNotesText}\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
-                        "<p>Your asset request has been approved and the assets are now assigned to you.</p>
+                        "Your requested assets have been released by the admin and are now assigned to you{$relOnBehalfText}.\n\n{$relMetaPlain}Request Type: Release Asset\nAssets:\n{$relPlainAssets}\n{$relNotesText}Submitted by: {$req['requested_by']}\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
+                        "<p>Your asset request has been approved and the assets are now assigned to you{$relIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Release Asset</td></tr>
   {$relMetaHtml}
   {$relHtmlAssetRows}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Released by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reviewedBy, ENT_QUOTES) . "</td></tr>
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
   {$relNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
 </table>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myassets' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Assets</a></p>"
                     );
@@ -636,24 +856,32 @@ class ApprovalService {
                 // Email the requestor
                 try {
                     [$confPlainAssets, $confHtmlAssetRows] = $this->buildAssetEmailParts($req, $payload);
-                    [,$confMetaHtml]  = $this->buildMetaRows($payload);
-                    [$confMetaPlain,] = $this->buildMetaRows($payload);
-                    $confNotes = trim($reviewNotes ?? '');
-                    $confNotesHtml = $confNotes
-                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Note from admin</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($confNotes, ENT_QUOTES) . "</td></tr>\n"
+                    [,$confMetaHtml]  = $this->buildMetaRowsForStaff($payload);
+                    [$confMetaPlain,] = $this->buildMetaRowsForStaff($payload);
+                    $confOnBehalf = trim($payload['on_behalf_of'] ?? '');
+                    $confEmpId    = trim($payload['requestor_id'] ?? '');
+                    $confIntroSuffix = $confOnBehalf
+                        ? " on behalf of <strong>" . htmlspecialchars($confOnBehalf, ENT_QUOTES) . "</strong>"
+                          . ($confEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($confEmpId, ENT_QUOTES) . ')</span>' : '')
                         : '';
-                    $confNotesText = $confNotes ? "\nNote from admin: {$confNotes}" : '';
+                    $confNotes = trim($payload['description'] ?? $payload['purpose'] ?? $payload['notes'] ?? $reviewNotes ?? '');
+                    $confNotesHtml = $confNotes
+                        ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($confNotes, ENT_QUOTES) . "</td></tr>\n"
+                        : '';
+                    $confNotesText = $confNotes ? "Reason / Notes: {$confNotes}\n" : '';
+                    $confOnBehalfText = $confOnBehalf ? ' on behalf of ' . $confOnBehalf : '';
                     $this->emailUser(
                         $req['user_id'] ?? null,
                         '✅ Asset assigned to you',
-                        "Great news! Your requested assets have been released by the admin and are now assigned to you.\n\n{$confMetaPlain}Assets:\n{$confPlainAssets}\nReleased by: {$reviewedBy}{$confNotesText}\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
-                        "<p>Your asset request has been approved and the assets are now assigned to you.</p>
+                        "Your requested assets have been released by the admin and are now assigned to you{$confOnBehalfText}.\n\n{$confMetaPlain}Request Type: Release Asset\nAssets:\n{$confPlainAssets}\n{$confNotesText}Submitted by: {$req['requested_by']}\n\nView your assigned assets:\nhttp://localhost/inventory/public/requests.html?tab=myassets",
+                        "<p>Your asset request has been approved and the assets are now assigned to you{$confIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>Release Asset</td></tr>
   {$confMetaHtml}
   {$confHtmlAssetRows}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Released by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reviewedBy, ENT_QUOTES) . "</td></tr>
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
   {$confNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Assigned to you</td></tr>
 </table>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myassets' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Assets</a></p>"
                     );
@@ -724,59 +952,94 @@ class ApprovalService {
 
         // Email the requestor
         if ($isAssetForward) {
-            // Decode payload to get full asset list and admin notes/reason
             $fwdPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
             [$fwdPlainAssets, $fwdHtmlAssetRows] = $this->buildAssetEmailParts($req, $fwdPayload);
-            [,$fwdMetaHtml]  = $this->buildMetaRows($fwdPayload);
-            [$fwdMetaPlain,] = $this->buildMetaRows($fwdPayload);
-
-            // Admin's notes/reason — check review_notes and payload description/purpose
+            [,$fwdMetaHtml]  = $this->buildMetaRowsForStaff($fwdPayload);
+            [$fwdMetaPlain,] = $this->buildMetaRowsForStaff($fwdPayload);
+            $fwdOnBehalf = trim($fwdPayload['on_behalf_of'] ?? '');
+            $fwdEmpId    = trim($fwdPayload['requestor_id'] ?? '');
+            $fwdIntroSuffix = $fwdOnBehalf
+                ? " on behalf of <strong>" . htmlspecialchars($fwdOnBehalf, ENT_QUOTES) . "</strong>"
+                  . ($fwdEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($fwdEmpId, ENT_QUOTES) . ')</span>' : '')
+                : '';
             $fwdNotes = trim($reviewNotes ?? $fwdPayload['description'] ?? $fwdPayload['purpose'] ?? $fwdPayload['notes'] ?? '');
             $fwdNotesHtml = $fwdNotes
-                ? "<tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Note from admin</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($fwdNotes, ENT_QUOTES) . "</td></tr>\n"
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($fwdNotes, ENT_QUOTES) . "</td></tr>\n"
                 : '';
-            $fwdNotesText = $fwdNotes ? "\nNote from admin: {$fwdNotes}" : '';
+            $fwdNotesText = $fwdNotes ? "Reason / Notes: {$fwdNotes}\n" : '';
 
             $emailSubjectStaff = "📋 Action required: Please confirm your asset request";
-            $emailTextStaff    = "Your asset request requires your confirmation before it can be processed.\n\n{$fwdMetaPlain}Requested Assets:\n{$fwdPlainAssets}{$fwdNotesText}\n\nPlease log in to review and sign the accountability form:\nhttp://localhost/inventory/public/requests.html?tab=myrequests";
-            $emailHtmlStaff    = "<p>Your asset request requires your confirmation before it can be processed.</p>
+            $emailTextStaff    = "Your asset request requires your confirmation before it can be processed.\n\n{$fwdMetaPlain}Request Type: {$action} Asset\nAssets:\n{$fwdPlainAssets}\n{$fwdNotesText}Submitted by: {$req['requested_by']}\n\nPlease log in to review and sign the accountability form:\nhttp://localhost/inventory/public/requests.html?tab=myrequests";
+            $emailHtmlStaff    = "<p>Your asset request requires your confirmation before it can be processed{$fwdIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} Asset</td></tr>
   {$fwdMetaHtml}
   {$fwdHtmlAssetRows}
   {$fwdNotesHtml}
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Action required</td><td style='padding:8px 12px;color:#f0a500;'>Review &amp; confirm</td></tr>
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Action required</td><td style='padding:8px 12px;color:#f0a500;'>Review &amp; confirm</td></tr>
 </table>
 <p>Please log in to review and sign the accountability form.</p>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html?tab=myrequests' style='background:#1f6feb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>Confirm My Request</a></p>";
+
         } elseif ($decision === 'approved') {
             $revPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-            [,$revMetaHtml]  = $this->buildMetaRows($revPayload);
-            [$revMetaPlain,] = $this->buildMetaRows($revPayload);
+            [$revPlainAssets, $revHtmlAssetRows] = $this->buildAssetEmailParts($req, $revPayload);
+            [,$revMetaHtml]  = $this->buildMetaRowsForStaff($revPayload);
+            [$revMetaPlain,] = $this->buildMetaRowsForStaff($revPayload);
+            $revOnBehalf = trim($revPayload['on_behalf_of'] ?? '');
+            $revEmpId    = trim($revPayload['requestor_id'] ?? '');
+            $revIntroSuffix = $revOnBehalf
+                ? " on behalf of <strong>" . htmlspecialchars($revOnBehalf, ENT_QUOTES) . "</strong>"
+                  . ($revEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($revEmpId, ENT_QUOTES) . ')</span>' : '')
+                : '';
+            $revNotes = trim($reviewNotes ?? $revPayload['description'] ?? $revPayload['purpose'] ?? $revPayload['notes'] ?? '');
+            $revNotesHtml = $revNotes
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($revNotes, ENT_QUOTES) . "</td></tr>\n"
+                : '';
+            $revNotesText = $revNotes ? "Reason / Notes: {$revNotes}\n" : '';
+
             $emailSubjectStaff = "✅ Your request has been approved";
-            $emailTextStaff    = "Your {$action} {$friendlyType} request for \"{$resource}\" has been approved.\n\n{$revMetaPlain}" . ($reviewNotes ? "Note: {$reviewNotes}\n" : '') . "\nView your requests:\nhttp://localhost/inventory/public/requests.html";
-            $emailHtmlStaff    = "<p>Your request has been approved.</p>
+            $emailTextStaff    = "Your {$action} {$friendlyType} request has been approved.\n\n{$revMetaPlain}Request Type: {$action} {$friendlyType}\nAssets:\n{$revPlainAssets}\n{$revNotesText}Submitted by: {$req['requested_by']}\n\nView your requests:\nhttp://localhost/inventory/public/requests.html";
+            $emailHtmlStaff    = "<p>Your request has been approved{$revIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
   {$revMetaHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($resource, ENT_QUOTES) . "</td></tr>
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
-  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Approved</td></tr>" .
-                ($reviewNotes ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Note</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reviewNotes, ENT_QUOTES) . "</td></tr>" : '') .
-                "</table>
+  {$revHtmlAssetRows}
+  {$revNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#3fb950;'>Approved</td></tr>
+</table>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html' style='background:#238636;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Requests</a></p>";
+
         } else {
             $rejPayload = is_string($req['payload']) ? json_decode($req['payload'], true) : ($req['payload'] ?? []);
-            [,$rejMetaHtml]  = $this->buildMetaRows($rejPayload);
-            [$rejMetaPlain,] = $this->buildMetaRows($rejPayload);
+            [$rejPlainAssets, $rejHtmlAssetRows] = $this->buildAssetEmailParts($req, $rejPayload);
+            [,$rejMetaHtml]  = $this->buildMetaRowsForStaff($rejPayload);
+            [$rejMetaPlain,] = $this->buildMetaRowsForStaff($rejPayload);
+            $rejOnBehalf = trim($rejPayload['on_behalf_of'] ?? '');
+            $rejEmpId    = trim($rejPayload['requestor_id'] ?? '');
+            $rejIntroSuffix = $rejOnBehalf
+                ? " on behalf of <strong>" . htmlspecialchars($rejOnBehalf, ENT_QUOTES) . "</strong>"
+                  . ($rejEmpId ? ' <span style="color:#8b949e;">(' . htmlspecialchars($rejEmpId, ENT_QUOTES) . ')</span>' : '')
+                : '';
+            $rejNotes = trim($reviewNotes ?? $rejPayload['description'] ?? $rejPayload['purpose'] ?? $rejPayload['notes'] ?? '');
+            $rejNotesHtml = $rejNotes
+                ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;width:140px;'>Reason / Notes</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($rejNotes, ENT_QUOTES) . "</td></tr>\n"
+                : '';
+            $rejNotesText = $rejNotes ? "Reason / Notes: {$rejNotes}\n" : '';
+
             $emailSubjectStaff = "✖ Your request has been rejected";
-            $emailTextStaff    = "Your {$action} {$friendlyType} request for \"{$resource}\" has been rejected.\n\n{$rejMetaPlain}" . ($reviewNotes ? "Reason: {$reviewNotes}\n" : '') . "\nView your requests:\nhttp://localhost/inventory/public/requests.html";
-            $emailHtmlStaff    = "<p>Your request has been reviewed and unfortunately was not approved.</p>
+            $emailTextStaff    = "Your {$action} {$friendlyType} request has been rejected.\n\n{$rejMetaPlain}Request Type: {$action} {$friendlyType}\nAssets:\n{$rejPlainAssets}\n{$rejNotesText}Submitted by: {$req['requested_by']}\n\nView your requests:\nhttp://localhost/inventory/public/requests.html";
+            $emailHtmlStaff    = "<p>Your request has been reviewed and unfortunately was not approved{$rejIntroSuffix}.</p>
 <table style='width:100%;border-collapse:collapse;margin:16px 0;'>
+  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Request Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
   {$rejMetaHtml}
-  <tr><td style='padding:8px 12px;color:#8b949e;width:140px;'>Item</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($resource, ENT_QUOTES) . "</td></tr>
-  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Type</td><td style='padding:8px 12px;color:#e6edf3;'>{$action} {$friendlyType}</td></tr>
-  <tr><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f85149;'>Rejected</td></tr>" .
-                ($reviewNotes ? "<tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Reason</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($reviewNotes, ENT_QUOTES) . "</td></tr>" : '') .
-                "</table>
+  {$rejHtmlAssetRows}
+  {$rejNotesHtml}
+  <tr><td style='padding:8px 12px;color:#8b949e;'>Submitted by</td><td style='padding:8px 12px;color:#e6edf3;'>" . htmlspecialchars($req['requested_by'] ?? '', ENT_QUOTES) . "</td></tr>
+  <tr style='background:#1c2333;'><td style='padding:8px 12px;color:#8b949e;'>Status</td><td style='padding:8px 12px;color:#f85149;'>Rejected</td></tr>
+</table>
 <p>If you have questions, please contact the admin.</p>
 <p style='margin-top:24px;'><a href='http://localhost/inventory/public/requests.html' style='background:#1f6feb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;'>View My Requests</a></p>";
         }
