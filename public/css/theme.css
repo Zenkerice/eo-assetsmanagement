@@ -63,6 +63,9 @@ html[data-theme="light"] {
 [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6 { color: #1e40af !important; }
 [data-theme="light"] .section-title   { color: #1e40af !important; }
 [data-theme="light"] .card-title      { color: #1e40af !important; }
+[data-theme="light"] .age-dist-title  { color: #1e40af !important; }
+[data-theme="dark"]  .age-dist-title  { color: #29b6e8 !important; }
+                     .age-dist-title  { color: #29b6e8; }
 [data-theme="light"] .detail-name     { color: #1e40af !important; }
 [data-theme="light"] .panel-header h2 { color: #1e40af !important; }
 

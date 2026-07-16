@@ -116,6 +116,22 @@
     #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999}
     .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 18px;font-size:13px;color:var(--text);animation:slideUp .25s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px}
     .toast.error{border-color:var(--red);color:var(--red)} .toast.success{border-color:var(--green);color:var(--green)}
+    /* Asset search combobox */
+    .asset-search-wrap{position:relative}
+    .asset-search-wrap input{width:100%}
+    .asset-dd{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:600;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);max-height:220px;overflow-y:auto;box-shadow:0 10px 32px rgba(0,0,0,.55)}
+    .asset-dd::-webkit-scrollbar{width:4px}.asset-dd::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+    .asset-dd-item{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s;display:flex;flex-direction:column;gap:2px}
+    .asset-dd-item:last-child{border-bottom:none}
+    .asset-dd-item:hover,.asset-dd-item.focused{background:rgba(41,182,232,0.10)}
+    .asset-dd-item .dd-name{font-size:13px;color:var(--text);font-weight:500}
+    .asset-dd-item .dd-meta{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;display:flex;gap:8px;flex-wrap:wrap;margin-top:1px}
+    .asset-dd-item .dd-serial{color:var(--blue)}
+    .asset-dd-item .dd-cat{color:var(--muted)}
+    .asset-dd-empty{padding:14px 13px;font-size:13px;color:var(--muted);text-align:center}
+    .asset-selected-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-dim);border:1px solid rgba(41,182,232,0.25);border-radius:var(--radius-sm);padding:6px 11px;font-size:12px;color:var(--blue);margin-top:5px;font-weight:500}
+    .asset-selected-badge button{background:none;border:none;color:var(--blue);cursor:pointer;font-size:14px;line-height:1;padding:0 0 0 4px;opacity:.7}
+    .asset-selected-badge button:hover{opacity:1}
 
     /* Status chart */
     .status-chart-section{display:grid;grid-template-columns:220px 1fr;gap:32px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;align-items:center}
@@ -398,10 +414,22 @@
     <div class="form-body">
       <form id="damage-form" onsubmit="submitForm(event)" style="display:contents;">
         <div class="form-group">
-          <label for="dmg-product-id">Asset *</label>
-          <select id="dmg-product-id" name="product_id" required>
-            <option value="">&mdash; Select asset &mdash;</option>
-          </select>
+          <label for="dmg-asset-search">Asset *</label>
+          <input type="hidden" id="dmg-product-id" name="product_id" />
+          <div class="asset-search-wrap">
+            <input
+              id="dmg-asset-search"
+              type="text"
+              autocomplete="off"
+              placeholder="&#128269; Search by name, serial number, or SKU&hellip;"
+              oninput="_assetDdFilter()"
+              onfocus="_assetDdShow()"
+              onblur="setTimeout(_assetDdHide, 160)"
+              onkeydown="_assetDdKeydown(event)"
+            />
+            <div class="asset-dd" id="dmg-asset-dd"></div>
+          </div>
+          <div id="dmg-asset-selected" style="display:none"></div>
         </div>
         <div class="form-group">
           <label for="dmg-reported-by">Reported By *</label>
@@ -842,6 +870,114 @@ function renderDisposedTable(data) {
   }).join('');
 }
 
+/* -- Asset search combobox helpers -- */
+let _assetDdFocusIdx = -1;
+
+function _assetDdItems() {
+  const q = (document.getElementById('dmg-asset-search')?.value || '').toLowerCase().trim();
+  const pool = allProducts.filter(p => {
+    if (!q) return true;
+    return (p.name         || '').toLowerCase().includes(q)
+        || (p.serial_number|| '').toLowerCase().includes(q)
+        || (p.sku          || '').toLowerCase().includes(q)
+        || (p.brand        || '').toLowerCase().includes(q)
+        || (p.category_name|| '').toLowerCase().includes(q);
+  });
+  return pool.slice(0, 60); // cap for perf
+}
+
+function _assetDdRender(items) {
+  const dd = document.getElementById('dmg-asset-dd');
+  if (!dd) return;
+  _assetDdFocusIdx = -1;
+  if (!items.length) {
+    dd.innerHTML = '<div class="asset-dd-empty">No assets found</div>';
+    dd.style.display = 'block';
+    return;
+  }
+  dd.innerHTML = items.map((p, i) => {
+    const serial = p.serial_number || p.sku || '';
+    const cat    = p.category_name || '';
+    const loc    = p.location_name || '';
+    return `<div class="asset-dd-item" data-id="${p.id}" data-name="${esc(p.name)}" data-serial="${esc(serial)}"
+      onmousedown="event.preventDefault()" onclick="_assetDdSelect(${p.id})">
+      <div class="dd-name">${esc(p.name)}</div>
+      <div class="dd-meta">
+        ${serial ? `<span class="dd-serial">${esc(serial)}</span>` : ''}
+        ${cat    ? `<span class="dd-cat">${esc(cat)}</span>` : ''}
+        ${loc    ? `<span class="dd-cat">${esc(loc)}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function _assetDdShow() {
+  _assetDdRender(_assetDdItems());
+}
+
+function _assetDdFilter() {
+  _assetDdRender(_assetDdItems());
+  // Clear selection if user is typing
+  document.getElementById('dmg-product-id').value = '';
+  document.getElementById('dmg-asset-selected').style.display = 'none';
+}
+
+function _assetDdHide() {
+  const dd = document.getElementById('dmg-asset-dd');
+  if (dd) dd.style.display = 'none';
+  _assetDdFocusIdx = -1;
+}
+
+function _assetDdSelect(productId) {
+  const p = allProducts.find(x => x.id === productId);
+  if (!p) return;
+  document.getElementById('dmg-product-id').value = productId;
+  document.getElementById('dmg-asset-search').value = '';
+  _assetDdHide();
+
+  const serial = p.serial_number || p.sku || '';
+  const badge  = document.getElementById('dmg-asset-selected');
+  badge.innerHTML = `<div class="asset-selected-badge">
+    <span>&#128230;</span>
+    <span>${esc(p.name)}${serial ? ' &mdash; <code style="font-family:\'DM Mono\',monospace;font-size:11px;">' + esc(serial) + '</code>' : ''}</span>
+    <button type="button" onclick="_assetDdClear()" title="Clear selection">&times;</button>
+  </div>`;
+  badge.style.display = 'block';
+}
+
+function _assetDdClear() {
+  document.getElementById('dmg-product-id').value = '';
+  document.getElementById('dmg-asset-search').value = '';
+  document.getElementById('dmg-asset-selected').style.display = 'none';
+  document.getElementById('dmg-asset-search').focus();
+}
+
+function _assetDdKeydown(e) {
+  const dd    = document.getElementById('dmg-asset-dd');
+  const items = dd ? dd.querySelectorAll('.asset-dd-item') : [];
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _assetDdFocusIdx = Math.min(_assetDdFocusIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('focused', i === _assetDdFocusIdx));
+    items[_assetDdFocusIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _assetDdFocusIdx = Math.max(_assetDdFocusIdx - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('focused', i === _assetDdFocusIdx));
+    items[_assetDdFocusIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_assetDdFocusIdx >= 0 && items[_assetDdFocusIdx]) {
+      const id = parseInt(items[_assetDdFocusIdx].dataset.id);
+      _assetDdSelect(id);
+    }
+  } else if (e.key === 'Escape') {
+    _assetDdHide();
+  }
+}
+
 /* -- Report / Edit Modal -- */
 function onStatusChange() {
   const status = document.getElementById('form-status').value;
@@ -857,15 +993,23 @@ async function openModal(id = null) {
   document.getElementById('disposal-reason-group').style.display = 'none';
   document.getElementById('donated-to-group').style.display      = 'none';
 
-  const prodRes = await api.getProducts();
-  const prodSel = form.querySelector('select[name="product_id"]');
-  prodSel.innerHTML = '<option value="">&mdash; Select asset &mdash;</option>' +
-    prodRes.data.map(p => `<option value="${p.id}">${esc(p.name)} &mdash; ${esc(p.serial_number || p.sku)}</option>`).join('');
+  // Ensure products are loaded for the combobox
+  if (!allProducts.length) {
+    const prodRes = await api.getProducts();
+    allProducts = prodRes.data || [];
+  }
+
+  // Reset the asset combobox
+  document.getElementById('dmg-product-id').value        = '';
+  document.getElementById('dmg-asset-search').value      = '';
+  document.getElementById('dmg-asset-selected').style.display = 'none';
+  _assetDdHide();
 
   if (id) {
     const d = allDamages.find(x => x.id === id);
     if (d) {
-      form.product_id.value  = d.product_id;
+      // Pre-select the asset via the combobox
+      _assetDdSelect(d.product_id);
       form.reported_by.value = d.reported_by;
       form.issue.value       = d.issue;
       form.status.value      = d.status;
@@ -880,25 +1024,35 @@ async function openModal(id = null) {
     }
   }
   document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('dmg-asset-search').focus(), 80);
 }
 
 // Open modal pre-filled with a specific product (for "+ Report" button)
 async function openReportModalForProduct(productId) {
   await openModal(null);
-  const form = document.getElementById('damage-form');
-  form.product_id.value = productId;
+  _assetDdSelect(productId);
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
+  document.getElementById('dmg-product-id').value        = '';
+  document.getElementById('dmg-asset-search').value      = '';
+  document.getElementById('dmg-asset-selected').style.display = 'none';
+  _assetDdHide();
   editingId = null;
 }
 
 async function submitForm(e) {
   e.preventDefault();
-  const form = e.target;
+  const form      = e.target;
+  const productId = document.getElementById('dmg-product-id').value;
+  if (!productId) {
+    showToast('Please select an asset.', 'error');
+    document.getElementById('dmg-asset-search').focus();
+    return;
+  }
   const data = {
-    product_id:      form.product_id.value,
+    product_id:      productId,
     reported_by:     form.reported_by.value.trim(),
     issue:           form.issue.value.trim(),
     status:          form.status.value,

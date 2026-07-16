@@ -1650,22 +1650,30 @@
     );
   }
 
+  // Extract brand = first word of p.name (or p.brand if set)
+  function _aaGetBrand(p) {
+    if (p.brand && p.brand.trim()) return p.brand.trim();
+    return (p.name || '').trim().split(' ')[0];
+  }
+
+  // Extract model = everything after the brand in p.name (or p.model if set)
+  function _aaGetModel(p) {
+    if (p.model && p.model.trim()) return p.model.trim();
+    const brand = _aaGetBrand(p);
+    const name  = (p.name || '').trim();
+    return name.startsWith(brand) ? name.slice(brand.length).trim() : name;
+  }
+
   function _aaBrandPool() {
-    // Use brand field, fall back to first word of name, deduplicated
-    return [...new Set(
-      _aaPool()
-        .map(p => (p.brand || '').trim())
-        .filter(Boolean)
-    )].sort();
+    return [...new Set(_aaPool().map(p => _aaGetBrand(p)).filter(Boolean))].sort();
   }
 
   function _aaModelPool() {
     const brand = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
-    // Group by product name — each distinct name is one "model"
     return [...new Set(
       _aaPool()
-        .filter(p => !brand || (p.brand || '').trim().toLowerCase() === brand)
-        .map(p => (p.model || p.name || '').trim())
+        .filter(p => !brand || _aaGetBrand(p).toLowerCase() === brand)
+        .map(p => _aaGetModel(p))
         .filter(Boolean)
     )].sort();
   }
@@ -1750,15 +1758,16 @@
     if (el) el.value = model;
     _aaHideModelDd();
 
-    const brand  = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
-    const catId  = document.getElementById('newAssetCategoryId')?.value || '';
+    const brand = (document.getElementById('newAssetBrand')?.value || '').trim().toLowerCase();
+    const catId = document.getElementById('newAssetCategoryId')?.value || '';
 
-    // Match units by: same category (if set) + same brand (if set) + model matches p.model OR p.name
+    // Filter strictly: category match + exact brand match + exact model match
+    // Both brand and model must match — no loose !brand || passthrough
     const units = allProducts.filter(p =>
       p.asset_status === 'available' &&
       (!catId || String(p.category_id) === catId) &&
-      (!brand || (p.brand || '').trim().toLowerCase() === brand) &&
-      ((p.model || '').trim() === model || (p.name || '').trim() === model)
+      _aaGetBrand(p).toLowerCase() === brand &&
+      _aaGetModel(p) === model
     );
 
     const serialSel  = document.getElementById('newAssetSerial');
@@ -1772,10 +1781,9 @@
       return;
     }
 
-    // Always show serial dropdown so admin picks exact unit
     serialSel.innerHTML = '<option value="">-- Select serial number --</option>' +
       units.map(p => {
-        const serial = (p.sku || p.serial_number || '').trim();
+        const serial = (p.serial_number || p.sku || '').trim();
         return `<option value="${p.id}">${esc(serial || 'Unit #' + p.id)}</option>`;
       }).join('');
     serialSel.value = '';
