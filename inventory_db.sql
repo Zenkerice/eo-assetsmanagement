@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 16, 2026 at 11:46 AM
+-- Generation Time: Jul 17, 2026 at 03:52 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -379,7 +379,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `employee_id`, `username`, `password`, `role`, `status`, `position`, `email`, `contact_number`, `created_at`) VALUES
-(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, 'zenangelopalay90@gmail.com', NULL, '2026-05-12 22:52:48');
+(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, 'zenangelopalay90@gmail.com', NULL, '2026-05-12 22:52:48'),
+(8, 'Raven', '098765678', 'raven', '$2y$12$v0BcC2erpIdV2d61R3NyleXRqwuc9wV0uH1vXVGxptMfvTfezl/Au', 'viewer', 'active', 'Team Leader', 'ompar@csr-scc.edu.ph', '09765678', '2026-07-16 10:34:57');
 
 --
 -- Indexes for dumped tables
@@ -619,7 +620,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

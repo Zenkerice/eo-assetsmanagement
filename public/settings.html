@@ -164,13 +164,6 @@
             </div>
           </div>
         </div>
-        <div class="settings-row">
-          <div class="settings-row-left">
-            <div class="settings-row-label">Sidebar collapsed by default</div>
-            <div class="settings-row-desc">Start with the sidebar minimized on load</div>
-          </div>
-          <label class="toggle" for="pref-sidebar-collapsed"><input type="checkbox" id="pref-sidebar-collapsed" onchange="savePref('sidebarCollapsed',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
       </div>
 
       <!-- Account -->
@@ -514,7 +507,6 @@ function loadPrefs() {
     if (el.type === 'checkbox') el.checked = val !== undefined ? val : def;
     else el.value = val !== undefined ? val : def;
   };
-  set('pref-sidebar-collapsed', p.sidebarCollapsed, false);
   set('pref-low-stock',         p.lowStock,         5);
   set('pref-assets-view',       p.assetsView,       'grouped');
   set('pref-damage-badge',      p.damageBadge,      true);
