@@ -496,6 +496,8 @@ function buildSerialRows(items, limit, alreadyReceived) {
             <div style="font-size:11px;color:var(--muted);">Unit ${unitLabel} of ${qty}${item.sku ? ' &middot; ' + esc(item.sku) : ''}</div>
           </div>
           <input class="serial-input sm-serial"
+            id="sn-${item.id}-${doneQty + u}"
+            name="sn-${item.id}-${doneQty + u}"
             type="text"
             placeholder="Serial number\u2026"
             data-item-id="${item.id}"

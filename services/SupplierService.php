@@ -255,6 +255,8 @@ class SupplierService {
                         'purchase_date' => $po['order_date'] ?? null,
                         'po_id'         => $id,
                         'po_item_id'    => $itemId,
+                        'cost_price'    => isset($item['unit_price']) && $item['unit_price'] !== '' ? (float)$item['unit_price'] : null,
+                        'cost_currency' => 'PHP',
                     ]);
                 }
             }
@@ -322,6 +324,8 @@ class SupplierService {
                         'purchase_date' => $po['order_date'] ?? null,
                         'po_id'         => $id,
                         'po_item_id'    => $itemId,
+                        'cost_price'    => isset($item['unit_price']) && $item['unit_price'] !== '' ? (float)$item['unit_price'] : null,
+                        'cost_currency' => 'PHP',
                     ]);
                     $created++;
                 }

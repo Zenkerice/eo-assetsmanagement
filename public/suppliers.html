@@ -698,6 +698,7 @@ function receivePO(id) {
 
 /* -- PO MODAL with line items -- */
 let _poCats = [];  // cached categories for the PO item rows
+let _poRowCounter = 0; // unique counter for po item row field ids
 
 async function ensurePoCategories() {
   if (_poCats.length) return;
@@ -706,6 +707,7 @@ async function ensurePoCategories() {
 
 function buildItemRow(item) {
   item = item || {};
+  const rowId = ++_poRowCounter;
   const row = document.createElement('div');
   row.className = 'po-item-row';
   row.style.cssText = 'display:grid;grid-template-columns:1.2fr 1.4fr 1.4fr 1.4fr 0.8fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;';
@@ -713,6 +715,8 @@ function buildItemRow(item) {
 
   // Category select
   const catSelect = document.createElement('select');
+  catSelect.id = 'po-cat-' + rowId;
+  catSelect.name = 'po-cat-' + rowId;
   catSelect.className = 'po-item-cat';
   catSelect.style.cssText = iStyle + 'cursor:pointer;';
   let catHtml = '<option value="">-- Category --</option>';
@@ -731,15 +735,20 @@ function buildItemRow(item) {
   catSelect.innerHTML = catHtml;
   if (item.category_id) catSelect.value = item.category_id;
 
-  const brandInput = Object.assign(document.createElement('input'), {type:'text', placeholder:'Brand', className:'po-item-brand', value: item.brand || item.product_name || ''});
+  const brandInput = Object.assign(document.createElement('input'), {type:'text', placeholder:'Brand', id:'po-brand-'+rowId, name:'po-brand-'+rowId, className:'po-item-brand', value: item.brand || item.product_name || ''});
+  brandInput.autocomplete = 'off';
   brandInput.style.cssText = iStyle;
-  const modelInput = Object.assign(document.createElement('input'), {type:'text', placeholder:'Model', className:'po-item-model', value: item.model || ''});
+  const modelInput = Object.assign(document.createElement('input'), {type:'text', placeholder:'Model', id:'po-model-'+rowId, name:'po-model-'+rowId, className:'po-item-model', value: item.model || ''});
+  modelInput.autocomplete = 'off';
   modelInput.style.cssText = iStyle;
-  const descInput  = Object.assign(document.createElement('input'), {type:'text', placeholder:'Description', className:'po-item-desc', value: item.description || ''});
+  const descInput  = Object.assign(document.createElement('input'), {type:'text', placeholder:'Description', id:'po-desc-'+rowId, name:'po-desc-'+rowId, className:'po-item-desc', value: item.description || ''});
+  descInput.autocomplete = 'off';
   descInput.style.cssText = iStyle;
-  const qtyInput   = Object.assign(document.createElement('input'), {type:'number', placeholder:'Qty', min:'1', className:'po-item-qty', value: item.quantity || 1});
+  const qtyInput   = Object.assign(document.createElement('input'), {type:'number', placeholder:'Qty', min:'1', id:'po-qty-'+rowId, name:'po-qty-'+rowId, className:'po-item-qty', value: item.quantity || 1});
+  qtyInput.autocomplete = 'off';
   qtyInput.style.cssText = iStyle;
-  const priceInput = Object.assign(document.createElement('input'), {type:'number', placeholder:'0.00', step:'0.01', min:'0', className:'po-item-price', value: item.unit_price || ''});
+  const priceInput = Object.assign(document.createElement('input'), {type:'number', placeholder:'0.00', step:'0.01', min:'0', id:'po-price-'+rowId, name:'po-price-'+rowId, className:'po-item-price', value: item.unit_price || ''});
+  priceInput.autocomplete = 'off';
   priceInput.style.cssText = iStyle;
   const removeBtn  = document.createElement('button');
   removeBtn.type = 'button'; removeBtn.textContent = '\u00d7';
