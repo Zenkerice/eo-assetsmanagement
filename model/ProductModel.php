@@ -87,8 +87,8 @@ class ProductModel {
 
     public function create(array $data): int {
         $stmt = $this->db->prepare(
-            'INSERT INTO products (name, sku, brand_model, brand, model, description, category_id, supplier_id, supplier_name, location_id, quantity, image_path, serial_number, po_id, po_item_id, assigned_employee, assigned_employee_id, purchase_date, deployed_date, asset_status)
-             VALUES (:name, :sku, :brand_model, :brand, :model, :description, :category_id, :supplier_id, :supplier_name, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id, :assigned_employee, :assigned_employee_id, :purchase_date, :deployed_date, :asset_status)'
+            'INSERT INTO products (name, sku, brand_model, brand, model, description, category_id, supplier_id, supplier_name, location_id, quantity, image_path, serial_number, po_id, po_item_id, assigned_employee, assigned_employee_id, purchase_date, deployed_date, asset_status, cost_price, cost_currency)
+             VALUES (:name, :sku, :brand_model, :brand, :model, :description, :category_id, :supplier_id, :supplier_name, :location_id, :quantity, :image_path, :serial_number, :po_id, :po_item_id, :assigned_employee, :assigned_employee_id, :purchase_date, :deployed_date, :asset_status, :cost_price, :cost_currency)'
         );
         $stmt->execute([
             ':name'                 => $data['name'],
@@ -111,6 +111,8 @@ class ProductModel {
             ':purchase_date'        => !empty($data['purchase_date']) ? $data['purchase_date'] : null,
             ':deployed_date'        => !empty($data['deployed_date']) ? $data['deployed_date'] : null,
             ':asset_status'         => !empty($data['asset_status'])  ? $data['asset_status']  : 'available',
+            ':cost_price'           => isset($data['cost_price']) && $data['cost_price'] !== '' ? (float)$data['cost_price'] : null,
+            ':cost_currency'        => !empty($data['cost_currency']) ? $data['cost_currency'] : 'PHP',
         ]);
         return (int) $this->db->lastInsertId();
     }

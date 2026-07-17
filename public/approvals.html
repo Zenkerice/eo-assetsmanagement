@@ -1547,7 +1547,11 @@ function _closeSfModal() {
 }
 
 async function _sfmForward() {
-  if (!reviewingId) return;
+  const localReviewingId = reviewingId;
+  if (!localReviewingId || localReviewingId === 'null' || localReviewingId === 'undefined') {
+    showToast('No request selected. Please close and reopen.', 'error');
+    return;
+  }
   const btn = document.getElementById('sfm-forward-btn');
   const decision = btn?.dataset.sfmDecision || 'forwarded';
   const isRelease = decision === 'approved';
@@ -1590,7 +1594,7 @@ async function _sfmForward() {
   });
 
   const notes   = (document.getElementById('sfm-notes')?.value || '').trim();
-  const existing = allRequests.find(x => x.id === reviewingId);
+  const existing = allRequests.find(x => x.id === localReviewingId);
   const oldPayload = (() => { try { return JSON.parse(existing?.payload || '{}'); } catch { return {}; } })();
   const newPayload = { ...oldPayload, assets: updatedAssets };
 
@@ -1598,7 +1602,7 @@ async function _sfmForward() {
     if (btn) btn.disabled = true;
 
     // Patch payload with updated serials
-    const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + reviewingId + '?action=patch_payload', {
+    const patchRes = await fetch(resolveProjectRoot() + '/api/approvals/' + localReviewingId + '?action=patch_payload', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: newPayload }),
@@ -1610,7 +1614,7 @@ async function _sfmForward() {
     if (existing) existing.payload = JSON.stringify(newPayload);
 
     // Submit decision
-    await api.reviewApproval(reviewingId, { decision, review_notes: notes });
+    await api.reviewApproval(localReviewingId, { decision, review_notes: notes });
     showToast(isRelease ? 'Assets released — request approved' : 'Forwarded to requestor', 'success');
     _closeSfModal();
     await loadApprovals();

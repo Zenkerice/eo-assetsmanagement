@@ -260,6 +260,17 @@
             <label for="item-model">Model</label>
             <input id="item-model" type="text" name="model" placeholder="e.g. XPS 15" autocomplete="off" />
           </div>
+
+          <!-- Cost Price -->
+          <div class="form-group" style="grid-column:1/-1">
+            <label for="item-cost-price">Cost Price</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:14px;pointer-events:none;user-select:none;">&#8369;</span>
+              <input id="item-cost-price" type="number" name="cost_price" placeholder="0.00" min="0" step="0.01" autocomplete="off" style="width:100%;padding-left:30px;" />
+              <input type="hidden" id="item-cost-currency" name="cost_currency" value="PHP" />
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="item-sku">Serial Number</label>
             <input id="item-sku" type="text" name="sku" placeholder="e.g. SN-001234" autocomplete="off" required />
@@ -1060,6 +1071,10 @@ async function openModal(id = null) {
       if (brandInp) brandInp.value = p.brand || '';
       const modelInp = document.getElementById('item-model');
       if (modelInp) modelInp.value = p.model || '';
+      const costPriceInp = document.getElementById('item-cost-price');
+      if (costPriceInp) costPriceInp.value = p.cost_price != null ? p.cost_price : '';
+      const costCurrSel = document.getElementById('item-cost-currency');
+      if (costCurrSel) costCurrSel.value = p.cost_currency || 'PHP';
       const supInp = document.getElementById('item-supplier');
       if (supInp) supInp.value = p.supplier_name || '';
       const locSel = document.getElementById('item-location');
@@ -1172,6 +1187,8 @@ async function submitForm(e) {
   fd.append('sku',                 form.sku.value.trim());
   fd.append('serial_number',       form.sku.value.trim());
   fd.append('model',               document.getElementById('item-model') ? document.getElementById('item-model').value.trim() : '');
+  fd.append('cost_price',          document.getElementById('item-cost-price') ? document.getElementById('item-cost-price').value : '');
+  fd.append('cost_currency',       document.getElementById('item-cost-currency') ? document.getElementById('item-cost-currency').value : 'PHP');
   fd.append('description',         form.description ? form.description.value.trim() : '');
   fd.append('supplier_name',       document.getElementById('item-supplier') ? document.getElementById('item-supplier').value.trim() : '');
   fd.append('location_id',         document.getElementById('item-location') ? document.getElementById('item-location').value : '');
@@ -1352,8 +1369,8 @@ function _renderViewGroupedItems(ids) {
 
   // Single source of truth &mdash; header and every data row use this exact template + gap
   const GRID = showLocation
-    ? 'minmax(90px,auto) minmax(200px,2fr) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)'
-    : 'minmax(90px,auto) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)';
+    ? 'minmax(90px,auto) minmax(200px,2fr) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(100px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)'
+    : 'minmax(90px,auto) minmax(140px,1fr) minmax(110px,1fr) minmax(130px,1fr) minmax(100px,1fr) minmax(120px,1fr) minmax(120px,1fr) minmax(180px,auto)';
   const GAP  = '10px';
   const PAD  = '8px 14px'; // same padding used by both header and rows
   const HDR_PAD = '8px 15px'; // header has no border, add 1px L/R to align with bordered rows
@@ -1365,9 +1382,10 @@ function _renderViewGroupedItems(ids) {
   hdr.innerHTML =
     '<span ' + S  + '>Serial No.</span>' +
     (showLocation ? '<span ' + SC + '>Location</span>' : '') +
-    '<span ' + SC + '>Availability</span>' +
+    '<span ' + SC + '>Assigned To</span>' +
     '<span ' + SC + '>Purchase Date</span>' +
     '<span ' + SC + '>Model</span>' +
+    '<span ' + SC + '>Cost Price</span>' +
     '<span ' + SC + '>Status</span>' +
     '<span ' + SC + '>Date Deployed</span>' +
     '<span ' + SC + '>Actions</span>';
@@ -1399,9 +1417,8 @@ function _renderViewGroupedItems(ids) {
     } else if (p.asset_status === 'assigned') {
       statusHtml = '<span class="serial-status assigned">&#128640; Deployed</span>';
     } else {
-      statusHtml = '<span class="serial-status working">&#10003; Available</span>';
+      statusHtml = '<span style="font-size:12px;color:var(--muted);font-style:italic;">Unassigned</span>';
     }
-
     // Asset status badge (the actual asset_status column value)
     const assetStatusLabels = {
       available:     { label: 'Active',          color: 'var(--green)',  bg: 'var(--green-dim)',  icon: '&#10003;' },
@@ -1459,6 +1476,7 @@ function _renderViewGroupedItems(ids) {
       ctr(statusHtml) +
       ctr(purchaseDateHtml) +
       ctr(p.model ? '<span style="font-size:12px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">' + esc(p.model) + '</span>' : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>') +
+      ctr(p.cost_price != null && p.cost_price !== '' ? '<span style="font-size:12px;color:var(--muted2);font-family:\'DM Mono\',monospace;white-space:nowrap;">' + esc(p.cost_currency || 'PHP') + ' ' + parseFloat(p.cost_price).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' : '<span style="font-size:11px;color:var(--muted);font-style:italic;">&mdash;</span>') +
       ctr(assetStatusBadge) +
       ctr(dateDeployedHtml) +
       '<div class="serial-meta" style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:nowrap;">' + actionBtns + '</div>' +

@@ -549,9 +549,54 @@ async function exportData(type) {
   try {
     let rows = [], filename = type + '.csv';
     if (type === 'assets') {
-      const res = await api.getProducts();
-      rows = [['ID','Name','Serial','Brand/Model','Category','Supplier','Status']];
-      (res.data||[]).forEach(p => rows.push([p.id,p.name,p.serial_number||'',p.brand_model||'',p.category_name||'',p.supplier_name||'',p.asset_status]));
+      const [prodRes, assignRes, empRes, usersRes] = await Promise.all([
+        api.getProducts(), api.getAssignments(),
+        api.getEmployees().catch(() => ({ data: [] })),
+        auth.getUsers().catch(() => []),
+      ]);
+      const assignments = (assignRes.data || []).filter(a => a.status === 'active');
+      const employees   = empRes.data || [];
+      const users       = usersRes || [];
+
+      function getEmpId(name) {
+        if (!name) return '';
+        const emp = employees.find(e => e.name === name);
+        if (emp && emp.employee_id) return emp.employee_id;
+        const usr = users.find(u => u.name === name);
+        if (usr && usr.employee_id) return usr.employee_id;
+        return '';
+      }
+
+      rows = [['Description','Serial No.','Location','Assigned To','Assigned Employee ID','Category','Brand','Model','Cost Price','Purchase Date','Supplier','Status','Date Deployed']];
+      (prodRes.data||[]).forEach(p => {
+        const assignment = assignments.find(a => a.product_id === p.id);
+        const assignTo   = assignment ? assignment.assignee_name : (p.assigned_employee && p.assigned_employee.trim() ? p.assigned_employee.trim() : 'Unassigned');
+        const assignedEmpId = p.assigned_employee_id || getEmpId(assignTo !== 'Unassigned' ? assignTo : null) || '';
+        const purchaseDate = p.purchase_date
+          ? new Date(p.purchase_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+          : '';
+        const dateDeployed = assignment && assignment.assigned_at
+          ? new Date(assignment.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+          : '';
+        const costPrice = p.cost_price != null && p.cost_price !== '' ? parseFloat(p.cost_price).toFixed(2) : '';
+        const statusLabels = {available:'Active',assigned:'Deployed',under_repair:'Under Repair',damaged:'Damaged',spare:'Spare',lost:'Lost',disposed:'Disposed'};
+        const statusLabel = statusLabels[p.asset_status] || p.asset_status || '';
+        rows.push([
+          p.name,
+          p.serial_number || p.sku || '',
+          p.location_name || '',
+          assignTo,
+          assignedEmpId,
+          p.category_name || '',
+          p.brand || '',
+          p.model || '',
+          costPrice,
+          purchaseDate,
+          p.supplier_name || '',
+          statusLabel,
+          dateDeployed,
+        ]);
+      });
     } else if (type === 'damages') {
       const res = await api.getDamages();
       rows = [['ID','Asset','Serial Number','Category','Issue','Reported By','Status','Date']];

@@ -37,6 +37,7 @@
     html[data-modal-embed="1"] aside.sidebar,
     html[data-modal-embed="1"] .topbar { display: none !important; }
     html[data-modal-embed="1"] .main   { margin-left: 0 !important; }
+    html[data-modal-embed="1"] .prefill-bar { display: none !important; }
     /* Read-only mode: hide all interactive chrome */
     html[data-readonly="1"] .prefill-bar,
     html[data-readonly="1"] #modal-action-bar,
@@ -952,6 +953,10 @@
 
     function buildAssetRows(assets) {
       const tbody = document.getElementById('asset-tbody');
+
+      // Remove any orphaned combo dropdowns from a previous build before rebuilding
+      document.querySelectorAll('.ic-dropdown[id]').forEach(function(d) { d.remove(); });
+
       tbody.innerHTML = '';
 
       // Split assets into positional (new format with rowIndex) and legacy (no rowIndex)

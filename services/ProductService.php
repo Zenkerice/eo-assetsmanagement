@@ -91,7 +91,7 @@ class ProductService {
             $data['image_path'] = $this->handleImageUpload($data['image']);
         }
 
-        $allowed = ['name', 'sku', 'brand_model', 'brand', 'model', 'description', 'category_id', 'supplier_id', 'supplier_name', 'location_id', 'quantity', 'image_path', 'asset_status', 'serial_number', 'assigned_employee', 'assigned_employee_id', 'purchase_date', 'deployed_date', 'po_id', 'po_item_id'];
+        $allowed = ['name', 'sku', 'brand_model', 'brand', 'model', 'description', 'category_id', 'supplier_id', 'supplier_name', 'location_id', 'quantity', 'image_path', 'asset_status', 'serial_number', 'assigned_employee', 'assigned_employee_id', 'purchase_date', 'deployed_date', 'po_id', 'po_item_id', 'cost_price', 'cost_currency'];
         $fields  = array_intersect_key($data, array_flip($allowed));
 
         // Convert empty strings to null for nullable FK columns
@@ -105,6 +105,15 @@ class ProductService {
             if (array_key_exists($col, $fields) && $fields[$col] === '') {
                 $fields[$col] = null;
             }
+        }
+
+        // Normalize cost_price
+        if (array_key_exists('cost_price', $fields)) {
+            $fields['cost_price'] = ($fields['cost_price'] !== '' && $fields['cost_price'] !== null)
+                ? (float)$fields['cost_price'] : null;
+        }
+        if (array_key_exists('cost_currency', $fields) && empty($fields['cost_currency'])) {
+            $fields['cost_currency'] = 'PHP';
         }
 
         // Keep brand_model in sync with brand + model

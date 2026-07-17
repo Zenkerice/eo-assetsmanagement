@@ -11,6 +11,6 @@ define('LOW_STOCK_THRESHOLD', 10);
 define('APP_NAME', 'EO Asset Management');
 
 // Mail / SMTP configuration (Gmail with App Password)
-define('MAIL_FROM_EMAIL',    'rayvenompar@gmail.com');
+define('MAIL_FROM_EMAIL',    'scitdept2@empireonegroup.com');
 define('MAIL_FROM_NAME',     'EO Asset Management');
-define('MAIL_SMTP_PASSWORD', 'sqxk wfuy iybd ynfp');
+define('MAIL_SMTP_PASSWORD', 'hkxn rmbj aulz udcn');

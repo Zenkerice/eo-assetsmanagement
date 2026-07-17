@@ -320,8 +320,7 @@
             </button>
           </div>
           <div class="drop-zone" id="drop-zone"
-               ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"
-               onclick="document.getElementById('file-input').click()">
+               ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
             <input type="file" id="file-input" accept=".csv,.xlsx,.xls" onchange="onFileSelect(event)" />
             <span class="dz-icon">&#9729;</span>
             <div class="dz-title">Drop your file here, or click to browse</div>
@@ -438,6 +437,7 @@ const FIELDS = {
     { key:'purchase_date',        label:'Purchase Date',              required:false },
     { key:'supplier',             label:'Supplier / Vendor',          required:false },
     { key:'status',               label:'Status',                     required:false },
+    { key:'cost_price',           label:'Cost Price',                 required:false },
   ],
   categories: [
     { key:'name',        label:'Name',        required:true  },
@@ -456,9 +456,9 @@ function setType(t) {
 /* -- Template download -- */
 function downloadTemplate() {
   const fields  = FIELDS[importType];
-  const header  = fields.map(f => f.label).join(',');
+  const header  = fields.map(f => '"' + f.label.replace(/"/g, '""') + '"').join(',');
   const example = importType === 'assets'
-    ? '"Juan dela Cruz","EMP-001","Computers","Dell","XPS 15","SN-001234","Dell Laptop XPS 15","Dungganon","2024-01-15","Empire One","Active"'
+    ? '"Juan dela Cruz","EMP-001","Computers","Dell","XPS 15","SN-001234","Dell Laptop XPS 15","Dungganon","2024-01-15","Empire One","Active","15000.00"'
     : '"Computers","Desktop and laptop computers"';
   const csv  = header + '\n' + example;
   const blob = new Blob([csv], { type:'text/csv' });
@@ -818,6 +818,8 @@ async function importAsset(data) {
     assigned_employee:     data.assigned_employee     || '',
     assigned_employee_id:  data.assigned_employee_id  || '',
     asset_status:          asset_status,
+    cost_price:            data.cost_price && data.cost_price.trim() ? parseFloat(data.cost_price.replace(/[^\d.]/g, '')) || null : null,
+    cost_currency:         'PHP',
     quantity:              1
   });
   const product = response?.data || response;

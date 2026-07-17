@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 17, 2026 at 03:52 AM
+-- Generation Time: Jul 17, 2026 at 03:31 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -231,7 +231,9 @@ CREATE TABLE `products` (
   `po_id` int(11) DEFAULT NULL,
   `po_item_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `cost_price` decimal(14,2) DEFAULT NULL,
+  `cost_currency` varchar(10) DEFAULT 'PHP'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -319,13 +321,6 @@ CREATE TABLE `suppliers` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `suppliers`
---
-
-INSERT INTO `suppliers` (`id`, `name`, `contact_name`, `email`, `phone`, `address`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Eo', 'zen', 'zen@gmail.com', '09986789', 'dsasda', 'active', '2026-07-10 18:58:29', '2026-07-10 18:58:29');
-
 -- --------------------------------------------------------
 
 --
@@ -379,8 +374,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `employee_id`, `username`, `password`, `role`, `status`, `position`, `email`, `contact_number`, `created_at`) VALUES
-(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, 'zenangelopalay90@gmail.com', NULL, '2026-05-12 22:52:48'),
-(8, 'Raven', '098765678', 'raven', '$2y$12$v0BcC2erpIdV2d61R3NyleXRqwuc9wV0uH1vXVGxptMfvTfezl/Au', 'viewer', 'active', 'Team Leader', 'ompar@csr-scc.edu.ph', '09765678', '2026-07-16 10:34:57');
+(1, 'Administrator', NULL, 'admin', '$2y$12$FdA5C5NYevN7TSiifC33PuO3tJlBRzEgp66xinQyBOiizYvCtBBo6', 'admin', 'active', NULL, 'zenangelopalay90@gmail.com', NULL, '2026-05-12 22:52:48');
 
 --
 -- Indexes for dumped tables
@@ -602,7 +596,7 @@ ALTER TABLE `recurring_requests`
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `team_structure`
@@ -620,7 +614,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

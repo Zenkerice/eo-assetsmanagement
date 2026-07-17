@@ -2812,11 +2812,10 @@ function _rfInitRows() {
 
 function _rfAddRow() {
   const id = ++_rfRowId;
-  _rfRows[id] = { brand: '', model: '' };
+  _rfRows[id] = { category_id: '', category_name: '' };
   const container = document.getElementById('rf-asset-rows');
   if (!container) return;
 
-  // Build category options HTML (reuse loaded categories)
   const catOpts = '<option value="">-- Category --</option>'
     + (allCategories.length ? allCategories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('') : '');
 
@@ -2824,35 +2823,22 @@ function _rfAddRow() {
 
   const row = document.createElement('div');
   row.id = `rf-row-${id}`;
-  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start;';
   row.innerHTML = `
-    <!-- Category -->
-    <div>
-      <select id="rf-cat-${id}" onchange="_rfOnRowCategoryChange(${id})"
-        style="${SEL_STYLE}"
-        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"
-      >${catOpts}</select>
-    </div>
-    <!-- Brand combobox -->
-    <div style="position:relative;">
-      <input id="rf-brand-${id}" type="text" autocomplete="off" placeholder="Search brand…"
-        style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;"
-        onfocus="this.style.borderColor='var(--blue)';_rfShowBrandDd(${id})"
-        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_rfHideBrandDd(${id}),160)"
-        oninput="_rfFilterBrandDd(${id})" />
-      <div id="rf-brand-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
-    </div>
-    <!-- Model combobox -->
-    <div style="position:relative;">
-      <input id="rf-model-${id}" type="text" autocomplete="off" placeholder="Select brand first…" disabled
-        style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;opacity:.5;cursor:not-allowed;"
-        onfocus="this.style.borderColor='var(--blue)';_rfShowModelDd(${id})"
-        onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_rfHideModelDd(${id}),160)"
-        oninput="_rfFilterModelDd(${id})" />
-      <div id="rf-model-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
-    </div>`;
+    <select id="rf-cat-${id}" onchange="_rfOnCatSelect(${id})"
+      style="${SEL_STYLE}"
+      onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"
+    >${catOpts}</select>`;
   container.appendChild(row);
-  _rfRebuildBrandDropdown(id);
+}
+
+function _rfOnCatSelect(id) {
+  const catSel = document.getElementById(`rf-cat-${id}`);
+  if (!catSel || !catSel.value) return;
+  // Only spawn a new row if this is the last one
+  const ids = Object.keys(_rfRows).map(Number);
+  if (id === Math.max(...ids)) {
+    _rfAddRow();
+  }
 }
 
 function _rfOnRowCategoryChange(id) {
@@ -2962,58 +2948,21 @@ function _rfRebuildModelDropdown(id) {
     : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
 }
 
-function _rfShowModelDd(id) {
-  if (!_rfRows[id]?.brand && !document.getElementById(`rf-brand-${id}`)?.value) return;
-  _rfRebuildModelDropdown(id);
-  const dd = document.getElementById(`rf-model-dd-${id}`);
-  if (dd) dd.style.display = 'block';
-}
-function _rfHideModelDd(id) {
-  const dd = document.getElementById(`rf-model-dd-${id}`);
-  if (dd) dd.style.display = 'none';
-}
-function _rfFilterModelDd(id) {
-  _rfRebuildModelDropdown(id);
-  const dd = document.getElementById(`rf-model-dd-${id}`);
-  if (dd) dd.style.display = 'block';
-}
-
-function _rfSelectModelRow(id, model) {
-  const inp = document.getElementById(`rf-model-${id}`);
-  if (inp) inp.value = model;
-  _rfHideModelDd(id);
-  if (_rfRows[id]) _rfRows[id].model = model;
-  // If this is the last row and both brand+model are filled, add a new row
-  const ids = Object.keys(_rfRows).map(Number);
-  if (id === Math.max(...ids)) {
-    const brand = document.getElementById(`rf-brand-${id}`)?.value || '';
-    if (brand && model) _rfAddRow();
-  }
-}
-
-// Delegated click handler for rf dropdown options (avoids inline onclick quote issues)
-document.addEventListener('click', function(e) {
-  const opt = e.target.closest('.rf-dd-opt');
-  if (!opt) return;
-  const rowId = parseInt(opt.dataset.row, 10);
-  const val   = decodeURIComponent(opt.dataset.val);
-  if (opt.dataset.fn === 'brand') _rfSelectBrandRow(rowId, val);
-  else if (opt.dataset.fn === 'model') _rfSelectModelRow(rowId, val);
-});
-
-// Keep old helpers as stubs so any remaining references don't break
-function _rfFilterBrands() {}
-function _rfShowBrandDropdown() {}
-function _rfHideBrandDropdown() {}
-function _rfSelectBrand() {}
-function _rfClearBrand() {}
-function _rfGetSelectedBrand() { return null; }
-function _rfFilterModels() {}
-function _rfShowModelDropdown() {}
-function _rfHideModelDropdown() {}
-function _rfSelectModel() {}
-function _rfClearModel() {}
-function _rfGetSelectedModel() { return null; }
+// No-op stubs — brand/model fields removed, category-only mode
+function _rfShowModelDd(id) {}
+function _rfHideModelDd(id) {}
+function _rfFilterModelDd(id) {}
+function _rfSelectModelRow(id, model) {}
+function _rfShowBrandDd(id) {}
+function _rfHideBrandDd(id) {}
+function _rfFilterBrandDd(id) {}
+function _rfSelectBrandRow(id, brand) {}
+function _rfOnRowCategoryChange(id) {}
+function _rfRebuildBrandDropdown(id) {}
+function _rfRebuildModelDropdown(id) {}
+function _rfBrandPool(catId) { return []; }
+function _rfModelPool(catId, brand) { return []; }
+function _rfGetCatId(id) { return (document.getElementById(`rf-cat-${id}`)?.value || '').trim(); }
 
 async function _submitNonAdminRequest() {
   const name   = (document.getElementById('rf-name')?.value  || '').trim();
@@ -3026,28 +2975,24 @@ async function _submitNonAdminRequest() {
 
   if (!name) { showToast("Requestor's name is required.", 'error'); return; }
 
-  // Collect filled asset rows (per-row category + brand + model)
+  // Collect filled asset rows (category only)
   const assets = Object.keys(_rfRows).map(id => {
     const catSel = document.getElementById(`rf-cat-${id}`);
-    return {
-      category_id:   catSel?.value || null,
-      category_name: catSel?.options[catSel.selectedIndex]?.text?.replace(/^--\s*/, '').replace(/\s*--$/, '') || null,
-      brand: (document.getElementById(`rf-brand-${id}`)?.value || '').trim(),
-      model: (document.getElementById(`rf-model-${id}`)?.value || '').trim(),
-    };
-  }).filter(a => a.brand || a.model);
+    const catId   = catSel?.value || null;
+    const catName = catId ? (catSel?.options[catSel.selectedIndex]?.text || null) : null;
+    return { category_id: catId, category_name: catName };
+  }).filter(a => a.category_id);
 
   if (!assets.length && !desc) {
-    showToast('Please fill in at least one asset brand or provide a description.', 'error');
+    showToast('Please select at least one category or provide a description.', 'error');
     return;
   }
 
   const btn = document.getElementById('rf-submit-btn');
   if (btn) btn.disabled = true;
 
-  const firstAsset = assets[0] || {};
-  const resourceName = [firstAsset.brand, firstAsset.model].filter(Boolean).join(' ') ||
-    (firstAsset.category_name || 'Asset');
+  const firstAsset   = assets[0] || {};
+  const resourceName = firstAsset.category_name || 'Asset Request';
 
   try {
     await api.submitApproval({
@@ -3063,8 +3008,6 @@ async function _submitNonAdminRequest() {
         requestor_location_id: locId || null,
         category_id:           firstAsset.category_id   || null,
         category_name:         firstAsset.category_name || null,
-        brand:                 firstAsset.brand  || null,
-        model:                 firstAsset.model  || null,
         assets:                assets.length ? assets : null,
         description:           desc,
       },
@@ -4475,7 +4418,7 @@ _openSettingsPanel = function() {
       </div>
       <!-- Dynamic asset rows (Category + Brand + Model per row) -->
       <div class="form-group">
-        <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Assets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Assets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(select category)</span></span>
         <div id="rf-asset-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
       <!-- Description -->
