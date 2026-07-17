@@ -364,8 +364,8 @@
       <button class="modal-close" onclick="closeModal('modal-profile')">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="form-group"><label>Full Name *</label><input class="s-input" type="text" id="ep-name" placeholder="Your full name" /></div>
-      <div class="form-group"><label>Username *</label><input class="s-input" type="text" id="ep-username" placeholder="Username" /></div>
+      <div class="form-group"><label for="ep-name">Full Name *</label><input class="s-input" type="text" id="ep-name" placeholder="Your full name" autocomplete="name" /></div>
+      <div class="form-group"><label for="ep-username">Username *</label><input class="s-input" type="text" id="ep-username" placeholder="Username" autocomplete="username" /></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
@@ -382,8 +382,8 @@
       <button class="modal-close" onclick="closeModal('modal-password')">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="form-group"><label>New Password *</label><input class="s-input" type="password" id="pw-new" placeholder="Min. 6 characters" /></div>
-      <div class="form-group"><label>Confirm Password *</label><input class="s-input" type="password" id="pw-confirm" placeholder="Repeat new password" /></div>
+      <div class="form-group"><label for="pw-new">New Password *</label><input class="s-input" type="password" id="pw-new" placeholder="Min. 6 characters" autocomplete="new-password" /></div>
+      <div class="form-group"><label for="pw-confirm">Confirm Password *</label><input class="s-input" type="password" id="pw-confirm" placeholder="Repeat new password" autocomplete="new-password" /></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="savePassword()">Update Password</button>
@@ -401,20 +401,20 @@
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label>Location Name *</label>
-        <input class="s-input" type="text" id="loc-name" placeholder="e.g. Dungganon" />
+        <label for="loc-name">Location Name *</label>
+        <input class="s-input" type="text" id="loc-name" placeholder="e.g. Dungganon" autocomplete="off" />
       </div>
       <div class="form-group">
-        <label>Building</label>
-        <input class="s-input" type="text" id="loc-building" placeholder="e.g. Main Building" />
+        <label for="loc-building">Building</label>
+        <input class="s-input" type="text" id="loc-building" placeholder="e.g. Main Building" autocomplete="off" />
       </div>
       <div class="form-group">
-        <label>Floor</label>
-        <input class="s-input" type="text" id="loc-floor" placeholder="e.g. 2nd Floor" />
+        <label for="loc-floor">Floor</label>
+        <input class="s-input" type="text" id="loc-floor" placeholder="e.g. 2nd Floor" autocomplete="off" />
       </div>
       <div class="form-group">
-        <label>Room</label>
-        <input class="s-input" type="text" id="loc-room" placeholder="e.g. Server Room" />
+        <label for="loc-room">Room</label>
+        <input class="s-input" type="text" id="loc-room" placeholder="e.g. Server Room" autocomplete="off" />
       </div>
       <input type="hidden" id="loc-editing-id" />
     </div>

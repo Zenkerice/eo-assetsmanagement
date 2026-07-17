@@ -38,7 +38,7 @@
     .card .subtitle{font-size:14px;color:var(--muted2);margin-bottom:28px;}
     /* Form */
     .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
-    .form-group label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
+    .form-group label,.form-group .form-label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
     .input-wrap{position:relative;}
     .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.5;pointer-events:none;}
     .form-group input,.form-group select{width:100%;padding:12px 14px 12px 42px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color .15s,box-shadow .15s;outline:none;}
@@ -287,14 +287,14 @@
       <div class="alert error" id="login-error"></div>
       <form id="login-form" autocomplete="on">
         <div class="form-group">
-          <label>Username</label>
+          <label for="login-username">Username</label>
           <div class="input-wrap">
             <span class="input-icon">&#128100;</span>
             <input type="text" id="login-username" placeholder="Enter your username" autocomplete="username" required />
           </div>
         </div>
         <div class="form-group">
-          <label>Password</label>
+          <label for="login-password">Password</label>
           <div class="input-wrap">
             <span class="input-icon">&#128273;</span>
             <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" required />
@@ -315,56 +315,56 @@
       <div class="alert success" id="reg-success"></div>
       <form id="register-form" autocomplete="off">
         <div class="form-group">
-          <label>Full Name *</label>
+          <label for="reg-name">Full Name *</label>
           <div class="input-wrap">
             <span class="input-icon">&#128100;</span>
-            <input type="text" id="reg-name" placeholder="e.g. Raven Ompar" required />
+            <input type="text" id="reg-name" placeholder="e.g. Raven Ompar" required autocomplete="name" />
           </div>
         </div>
         <div class="form-group">
-          <label>Employee ID</label>
+          <label for="reg-employee-id">Employee ID</label>
           <div class="input-wrap">
             <span class="input-icon">&#127987;</span>
             <input type="text" id="reg-employee-id" placeholder="e.g. EMP-00123" autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
-          <label>Username *</label>
+          <label for="reg-username">Username *</label>
           <div class="input-wrap">
             <span class="input-icon">&#64;</span>
             <input type="text" id="reg-username" placeholder="e.g. raven" required autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
-          <label>Email</label>
+          <label for="reg-email">Email</label>
           <div class="input-wrap">
             <span class="input-icon">&#9993;</span>
-            <input type="email" id="reg-email" placeholder="e.g. eogs.example@gmail.com" autocomplete="off" />
+            <input type="email" id="reg-email" placeholder="e.g. eogs.example@gmail.com" autocomplete="email" />
           </div>
         </div>
         <div class="form-group">
-          <label>Contact Number</label>
+          <label for="reg-contact">Contact Number</label>
           <div class="input-wrap">
             <span class="input-icon">&#128222;</span>
             <input type="tel" id="reg-contact" placeholder="e.g. 09171234567" autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
-          <label>Password *</label>
+          <label for="reg-password">Password *</label>
           <div class="input-wrap">
             <span class="input-icon">&#128273;</span>
             <input type="password" id="reg-password" placeholder="Min. 6 characters" required autocomplete="new-password" />
           </div>
         </div>
         <div class="form-group">
-          <label>Confirm Password *</label>
+          <label for="reg-confirm">Confirm Password *</label>
           <div class="input-wrap">
             <span class="input-icon">&#128273;</span>
             <input type="password" id="reg-confirm" placeholder="Repeat your password" required autocomplete="new-password" />
           </div>
         </div>
         <div class="form-group" style="margin-bottom:8px;">
-          <label>Role *</label>
+          <span class="form-label">Role *</span>
         </div>
         <div class="role-grid" id="role-grid">
           <div class="role-card admin-theme" data-role="admin" onclick="selectRole(this)" id="admin-card" style="display:none;grid-column:1/-1;">

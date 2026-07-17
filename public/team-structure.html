@@ -320,15 +320,15 @@
       </div>
       <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
         <div class="form-group">
-          <label>Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <label for="newAgentEmployeeId">Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <input type="text" id="newAgentEmployeeId" class="modal-search" placeholder="e.g. EMP-0042" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Full Name <span style="color:var(--red)">*</span></label>
+          <label for="newAgentName">Full Name <span style="color:var(--red)">*</span></label>
           <input type="text" id="newAgentName" class="modal-search" placeholder="e.g. Raven Ompar" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <label for="newAgentStation">Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <input type="text" id="newAgentStation" class="modal-search" placeholder="e.g. JTV" autocomplete="off" />
         </div>
       </div>
@@ -351,15 +351,15 @@
       </div>
       <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
         <div class="form-group">
-          <label>Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <label for="editAgentEmployeeId">Employee ID <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <input type="text" id="editAgentEmployeeId" class="modal-search" placeholder="e.g. EMP-0042" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Full Name <span style="color:var(--red)">*</span></label>
+          <label for="editAgentName">Full Name <span style="color:var(--red)">*</span></label>
           <input type="text" id="editAgentName" class="modal-search" placeholder="e.g. Raven Ompar" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <label for="editAgentStation">Station / Account <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <input type="text" id="editAgentStation" class="modal-search" placeholder="e.g. JTV" autocomplete="off" />
         </div>
       </div>
@@ -390,7 +390,7 @@
 
           <!-- Assets row: Category | Brand | Model -->
           <div class="form-group" style="margin-bottom:4px">
-            <label>Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(available only)</span></label>
+            <label for="newAssetCategoryId">Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(available only)</span></label>
             <input type="hidden" id="newAssetProductId" />
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start">
               <!-- Category -->
@@ -417,7 +417,7 @@
 
           <!-- Serial Number dropdown (shown after model selected) -->
           <div class="form-group" id="newAssetSerialWrap" style="margin-top:8px;margin-bottom:4px;display:none">
-            <label>Serial Number <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(select unit)</span></label>
+            <label for="newAssetSerial">Serial Number <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(select unit)</span></label>
             <select id="newAssetSerial" onchange="_aaOnSerialChange()" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;width:100%;cursor:pointer;transition:border-color .15s">
               <option value="">-- Select serial number --</option>
             </select>
@@ -425,13 +425,13 @@
 
           <!-- Due back -->
           <div class="form-group" style="margin-bottom:10px;margin-top:10px">
-            <label>Due Back (optional)</label>
+            <label for="newAssetDueBack">Due Back (optional)</label>
             <input type="date" id="newAssetDueBack" />
           </div>
 
           <!-- Description / Notes textarea -->
           <div class="form-group" style="margin-bottom:12px">
-            <label>Description / Notes</label>
+            <label for="newAssetNotes">Description / Notes</label>
             <textarea id="newAssetNotes" placeholder="Reason for request or additional notes..."></textarea>
           </div>
 

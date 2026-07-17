@@ -477,7 +477,7 @@
     <div class="toolbar">
       <div class="search-wrap">
         <span class="search-icon">&#128269;</span>
-        <input type="text" id="search" placeholder="Search by name or description&hellip;" oninput="filterTable()" />
+        <input type="text" id="search" placeholder="Search by name or description&hellip;" oninput="filterTable()" autocomplete="off" />
       </div>
       <div class="toolbar-spacer"></div>
       <button class="sort-btn" id="sort-btn" onclick="toggleSort()">&#8645; Sort: <span id="sort-label">Name</span></button>
@@ -535,12 +535,12 @@
     <div class="form-body">
       <form id="cat-form" onsubmit="submitForm(event)" style="display:contents;">
         <div class="form-group">
-          <label>Name *</label>
-          <input type="text" name="name" placeholder="e.g. Electronics, Furniture&hellip;" required />
+          <label for="cat-name">Name *</label>
+          <input type="text" id="cat-name" name="name" placeholder="e.g. Electronics, Furniture&hellip;" required autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Description</label>
-          <textarea name="description" placeholder="Optional description&hellip;"></textarea>
+          <label for="cat-description">Description</label>
+          <textarea id="cat-description" name="description" placeholder="Optional description&hellip;"></textarea>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save Category</button>

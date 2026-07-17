@@ -525,24 +525,24 @@
           </div>
           <div><div class="portal-form-title">Request return</div><div class="portal-form-sub">Submit to facilities for pickup or drop-off</div></div>
         </div>
-        <div class="pfield"><label>Return ID</label>
+        <div class="pfield"><label for="pret-return-id">Return ID</label>
           <div style="position:relative;">
             <input id="pret-return-id" type="text" readonly
               style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;box-sizing:border-box;" />
             <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);pointer-events:none;">Auto</span>
           </div>
         </div>
-        <div class="pfield"><label>Asset to Return</label>
+        <div class="pfield"><label for="pret-asset">Asset to Return</label>
           <div class="pselect-wrap"><select id="pret-asset"><option value="">· Select an asset ·</option></select><span class="pselect-arrow">▾</span></div>
         </div>
-        <div class="pfield"><label>Return Method</label>
+        <div class="pfield"><label for="pret-method">Return Method</label>
           <div class="pselect-wrap"><select id="pret-method">
             <option value="dropoff">Drop off at IT desk</option>
             <option value="pickup">Schedule pickup</option>
             <option value="courier">Send via courier</option>
           </select><span class="pselect-arrow">▾</span></div>
         </div>
-        <div class="pfield"><label>Condition</label>
+        <div class="pfield"><label for="pret-condition">Condition</label>
           <div class="pselect-wrap"><select id="pret-condition">
             <option value="good">Good · no damage</option>
             <option value="minor">Minor wear</option>
@@ -550,7 +550,7 @@
             <option value="broken">Broken / non-functional</option>
           </select><span class="pselect-arrow">▾</span></div>
         </div>
-        <div class="pfield"><label>Notes (optional)</label>
+        <div class="pfield"><label for="pret-notes">Notes (optional)</label>
           <textarea id="pret-notes" placeholder="e.g. Slight scratch on armrest, otherwise functional·"></textarea>
         </div>
         <div class="pbtn-row">
@@ -590,7 +590,7 @@
 
           <!-- Request ID -->
           <div class="pfield">
-            <label>Request ID</label>
+            <label for="pob-request-id">Request ID</label>
             <div style="position:relative;">
               <input id="pob-request-id" type="text" readonly
                 style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;box-sizing:border-box;" />
@@ -600,7 +600,7 @@
 
           <!-- Requestor's Name -->
           <div class="pfield">
-            <label>Requestor's Name</label>
+            <label for="pob-name">Requestor's Name</label>
             <input id="pob-name" type="text" placeholder="Full name"
               style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;box-sizing:border-box;transition:border-color .15s;"
               onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
@@ -608,7 +608,7 @@
 
           <!-- Employee ID -->
           <div class="pfield">
-            <label>Employee ID</label>
+            <label for="pob-empid">Employee ID</label>
             <input id="pob-empid" type="text" placeholder="e.g. EMP001"
               style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;box-sizing:border-box;transition:border-color .15s;"
               onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
@@ -616,7 +616,7 @@
 
           <!-- Requestor's Location -->
           <div class="pfield">
-            <label>Requestor's Location</label>
+            <label for="pob-location">Requestor's Location</label>
             <div class="pselect-wrap">
               <select id="pob-location"
                 style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;padding-right:32px;appearance:none;-webkit-appearance:none;transition:border-color .15s;"
@@ -629,13 +629,13 @@
 
           <!-- Assets row: category / brand / model -->
           <div class="pfield">
-            <label>Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(available only)</span></label>
+            <span class="pfield-label">Assets <span style="font-size:10px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(available only)</span></span>
             <div id="pob-asset-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
           </div>
 
           <!-- Description / Notes -->
           <div class="pfield">
-            <label>Description / Notes</label>
+            <label for="pob-description">Description / Notes</label>
             <textarea id="pob-description" placeholder="Reason for request or additional notes…"
               style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;min-height:96px;resize:vertical;box-sizing:border-box;transition:border-color .15s;"
               onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
@@ -894,30 +894,30 @@
     </div>
     <div class="modal-body" style="gap:16px;">
       <div class="form-group">
-        <label>PO Number</label>
+        <label for="po-f-number">PO Number</label>
         <div style="display:flex;gap:8px;align-items:flex-end;">
           <input type="text" id="po-f-number" placeholder="Auto-generated" autocomplete="off" style="flex:1;" />
           <button class="btn btn-sm" type="button" onclick="genPoNumber()" id="po-gen-btn">&#8635; Generate</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Supplier *</label>
+        <label for="po-f-supplier">Supplier *</label>
         <select id="po-f-supplier">
           <option value="">· Select supplier ·</option>
         </select>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Order Date *</label>
+          <label for="po-f-order-date">Order Date *</label>
           <input type="date" id="po-f-order-date" />
         </div>
         <div class="form-group">
-          <label>Expected Delivery</label>
+          <label for="po-f-expected">Expected Delivery</label>
           <input type="date" id="po-f-expected" />
         </div>
       </div>
       <div class="form-group">
-        <label>Location</label>
+        <label for="po-f-location">Location</label>
         <select id="po-f-location">
           <option value="">· Select delivery location ·</option>
         </select>
@@ -925,7 +925,7 @@
       <!-- Line Items -->
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <label style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);">Items *</label>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);">Items *</span>
           <button class="btn btn-sm" type="button" onclick="addPoItem()" style="font-size:12px;">+ Add Item</button>
         </div>
         <div style="display:grid;grid-template-columns:1.2fr 2fr 1fr 1fr auto;gap:8px;margin-bottom:4px;padding:0 2px;">
@@ -941,7 +941,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Notes</label>
+        <label for="po-f-notes">Notes</label>
         <textarea id="po-f-notes" placeholder="Optional notes·" style="min-height:60px;"></textarea>
       </div>
     </div>
@@ -989,20 +989,20 @@
       <!-- -- SINGLE mode -- -->
       <div id="single-fields">
         <div class="form-group">
-          <label>Category *</label>
+          <label for="req-category">Category *</label>
           <select id="req-category" onchange="onReqCategoryChange()">
             <option value="">· Select category ·</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Asset *</label>
+          <label for="req-asset-search">Asset *</label>
           <input type="hidden" id="req-asset-id" />
           <input type="text" id="req-asset-search" placeholder="Select a category first·" autocomplete="off" oninput="onReqAssetSearch()" disabled />
           <div id="req-asset-results" style="display:none;"></div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Priority *</label>
+            <label for="req-priority">Priority *</label>
             <select id="req-priority">
               <option value="normal">Normal</option>
               <option value="urgent">Urgent</option>
@@ -1011,11 +1011,11 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Date Needed</label>
+          <label for="req-date">Date Needed</label>
           <input type="date" id="req-date" />
         </div>
         <div class="form-group">
-          <label>Reason / Notes *</label>
+          <label for="req-reason">Reason / Notes *</label>
           <textarea id="req-reason" placeholder="Why is this asset needed?"></textarea>
         </div>
       </div>
@@ -1024,7 +1024,7 @@
       <div id="bulk-fields" style="display:none;flex-direction:column;gap:12px;">
         <div class="form-row">
           <div class="form-group">
-            <label>Priority *</label>
+            <label for="bulk-priority">Priority *</label>
             <select id="bulk-priority">
               <option value="normal">Normal</option>
               <option value="urgent">Urgent</option>
@@ -1032,16 +1032,16 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Date Needed</label>
+            <label for="bulk-date">Date Needed</label>
             <input type="date" id="bulk-date" />
           </div>
         </div>
         <div class="form-group">
-          <label>Reason / Notes *</label>
+          <label for="bulk-reason">Reason / Notes *</label>
           <textarea id="bulk-reason" placeholder="Why are these assets needed?"></textarea>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:8px;">Assets * <span id="bulk-count-label" style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(0 added)</span></label>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:8px;">Assets * <span id="bulk-count-label" style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(0 added)</span></span>
           <div class="bulk-items-list" id="bulk-items-list"></div>
           <button type="button" class="bulk-add-btn" style="margin-top:8px" onclick="addBulkRow()">+ Add Asset</button>
         </div>
@@ -1168,27 +1168,27 @@
           </div>
           <div class="sp-form-grid">
             <div class="sp-field">
-              <label>Full name</label>
+              <label for="sp-fullname">Full name</label>
               <input type="text" id="sp-fullname" placeholder="Your full name" />
             </div>
             <div class="sp-field">
-              <label>Display name</label>
+              <label for="sp-displayname">Display name</label>
               <input type="text" id="sp-displayname" placeholder="Preferred name" />
             </div>
             <div class="sp-field">
-              <label>Email address</label>
+              <label for="sp-email">Email address</label>
               <input type="email" id="sp-email" placeholder="you@empireone.com" />
             </div>
             <div class="sp-field">
-              <label>Contact number</label>
+              <label for="sp-contact">Contact number</label>
               <input type="text" id="sp-contact" placeholder="+63 9XX XXX XXXX" />
             </div>
             <div class="sp-field">
-              <label>Role</label>
+              <label for="sp-role">Role</label>
               <input type="text" id="sp-role" readonly />
             </div>
             <div class="sp-field">
-              <label>Assigned site</label>
+              <label for="sp-site">Assigned site</label>
               <input type="text" id="sp-site" readonly />
             </div>
           </div>
@@ -1208,11 +1208,11 @@
           <div class="sp-card-sub">Change your login password. Use at least 6 characters.</div>
           <div class="sp-form-grid">
             <div class="sp-field" style="grid-column:1/-1">
-              <label>New password</label>
+              <label for="sp-pw-new">New password</label>
               <input type="password" id="sp-pw-new" placeholder="Min. 6 characters" />
             </div>
             <div class="sp-field" style="grid-column:1/-1">
-              <label>Confirm new password</label>
+              <label for="sp-pw-confirm">Confirm new password</label>
               <input type="password" id="sp-pw-confirm" placeholder="Repeat new password" />
             </div>
           </div>
@@ -1855,11 +1855,11 @@ function addBulkRow() {
   div.innerHTML = `
     <span class="bulk-row-num">#${list.children.length + 1}</span>
     <div class="form-group">
-      <label>Category *</label>
-      <select onchange="onBulkCatChange(${id}, this)">${_buildCatOptions('')}</select>
+      <label for="bulk-cat-${id}">Category *</label>
+      <select id="bulk-cat-${id}" onchange="onBulkCatChange(${id}, this)">${_buildCatOptions('')}</select>
     </div>
     <div class="form-group">
-      <label>Asset *</label>
+      <label for="bulk-asset-search-${id}">Asset *</label>
       <input type="text" placeholder="Select category first·"
              id="bulk-asset-search-${id}" autocomplete="off"
              disabled oninput="onBulkAssetSearch(${id}, this)" />
@@ -4388,7 +4388,7 @@ _openSettingsPanel = function() {
         <div style="display:flex;flex-direction:column;gap:8px;" id="mr-asset-rows"></div>
         <!-- Description -->
         <div style="display:flex;flex-direction:column;gap:5px;">
-          <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description</label>
+          <label for="mr-change-asset-desc" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description</label>
           <textarea id="mr-change-asset-desc" rows="3" placeholder="Describe the asset or any changes needed…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;resize:vertical;width:100%;transition:border-color .15s;line-height:1.5;"
             onfocus="this.style.borderColor='var(--blue)'"
             onblur="this.style.borderColor='var(--border2)'"
@@ -4449,7 +4449,7 @@ _openSettingsPanel = function() {
     <div id="request-form-body" style="padding:16px 24px;overflow-y:auto;flex:0 0 auto;display:flex;flex-direction:column;gap:10px;">
       <!-- Request ID (auto-generated, read-only) -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Request ID</label>
+        <label for="rf-request-id" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Request ID</label>
         <div style="position:relative;">
           <input id="rf-request-id" type="text" readonly
             style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);font-family:'DM Mono',monospace;font-size:13px;padding:10px 13px;outline:none;width:100%;cursor:default;letter-spacing:.5px;" />
@@ -4458,29 +4458,29 @@ _openSettingsPanel = function() {
       </div>
       <!-- Requestor's Name -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Name</label>
+        <label for="rf-name" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Name</label>
         <input id="rf-name" type="text" placeholder="Full name" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
       </div>
       <!-- Employee ID -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Employee ID</label>
+        <label for="rf-empid" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Employee ID</label>
         <input id="rf-empid" type="text" placeholder="Employee ID" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'" />
       </div>
       <!-- Requestor's Location -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Location</label>
+        <label for="rf-location" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Requestor's Location</label>
         <select id="rf-location" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
           <option value="">-- Select Location --</option>
         </select>
       </div>
       <!-- Dynamic asset rows (Category + Brand + Model per row) -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Assets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></label>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Assets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted);">(available only)</span></span>
         <div id="rf-asset-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
       <!-- Description -->
       <div class="form-group">
-        <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description / Notes</label>
+        <label for="rf-description" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description / Notes</label>
         <textarea id="rf-description" rows="3" placeholder="Reason for request or additional notes…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;resize:vertical;line-height:1.5;min-height:80px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
       </div>
     </div>

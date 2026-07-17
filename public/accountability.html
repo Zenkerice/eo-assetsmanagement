@@ -435,13 +435,13 @@
         <div class="doc-title">Asset Accountability Form</div>
         <!-- Hidden JS-wired fields -->
         <div class="hidden-field">
-          <input type="text" id="field-role">
-          <input type="text" id="field-contact">
-          <input type="text" id="field-email">
-          <input type="text" id="field-return-date">
-          <input type="text" id="field-purpose">
-          <input type="text" id="field-remarks">
-          <input type="date"  id="date-issued">
+          <input type="text" id="field-role" name="field-role" autocomplete="off">
+          <input type="text" id="field-contact" name="field-contact" autocomplete="off">
+          <input type="text" id="field-email" name="field-email" autocomplete="email">
+          <input type="text" id="field-return-date" name="field-return-date" autocomplete="off">
+          <input type="text" id="field-purpose" name="field-purpose" autocomplete="off">
+          <input type="text" id="field-remarks" name="field-remarks" autocomplete="off">
+          <input type="date"  id="date-issued" name="date-issued" autocomplete="off">
         </div>
         <!-- Employee info grid -->
         <table class="info-grid">
@@ -449,31 +449,31 @@
             <tr>
               <td style="width:55%">
                 <span class="cell-label">Complete Employee Name:</span>
-                <input type="text" id="field-fullname">
+                <input type="text" id="field-fullname" name="field-fullname" autocomplete="name">
               </td>
               <td>
                 <span class="cell-label">Account/Program:</span>
-                <input type="text" id="field-dept">
+                <input type="text" id="field-dept" name="field-dept" autocomplete="off">
               </td>
             </tr>
             <tr>
               <td>
                 <span class="cell-label">Employee #:</span>
-                <input type="text" id="field-empid">
+                <input type="text" id="field-empid" name="field-empid" autocomplete="off">
               </td>
               <td>
                 <span class="cell-label">Date of Issue:</span>
-                <input type="text" id="field-date-assigned">
+                <input type="text" id="field-date-assigned" name="field-date-assigned" autocomplete="off">
               </td>
             </tr>
             <tr>
               <td>
                 <span class="cell-label">Hire date:</span>
-                <input type="text" id="field-hire-date">
+                <input type="text" id="field-hire-date" name="field-hire-date" autocomplete="off">
               </td>
               <td>
                 <span class="cell-label">Location:</span>
-                <input type="text" id="field-location">
+                <input type="text" id="field-location" name="field-location" autocomplete="off">
               </td>
             </tr>
           </tbody>
@@ -725,7 +725,7 @@
         '<div class="ic-display' + (hasVal ? '' : ' empty') + '" id="' + id + '-display" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false">' +
         '<span class="ic-val" style="color:#000;' + (bold ? 'font-weight:600;' : '') + '">' + esc(displayText) + '</span>' +
         '<span class="ic-arrow">&#9660;</span></div>' +
-        '<input type="hidden" id="' + id + '" value="' + esc(value || '') + '">';
+        '<input type="hidden" id="' + id + '" name="' + id + '" value="' + esc(value || '') + '">';
       const dropdown = document.createElement('div');
       dropdown.className = 'ic-dropdown';
       dropdown.id = id + '-dropdown';
@@ -734,6 +734,9 @@
       if (searchable) {
         searchInput = document.createElement('input');
         searchInput.type = 'text';
+        searchInput.id = id + '-search';
+        searchInput.name = id + '-search';
+        searchInput.autocomplete = 'off';
         searchInput.placeholder = 'Search...';
         searchInput.style.cssText = 'width:100%;box-sizing:border-box;border:none;border-bottom:1px solid #ddd;padding:5px 8px;font-size:11px;font-family:Arial,sans-serif;outline:none;color:#111;background:#fff;';
         dropdown.appendChild(searchInput);
@@ -1018,8 +1021,8 @@
           <td id="td-brand-${i}" style="padding:3px 5px;"></td>
           <td id="td-sn-${i}" style="padding:3px 5px;"></td>
           <td id="td-cond-${i}"  style="padding:3px 5px;"></td>
-          <td><input type="text" id="asset-val-${i}" value="${esc(String(val))}"></td>
-          <td><input type="text" id="asset-rem-${i}" value="${esc(String(rem))}"></td>`;
+          <td><input type="text" id="asset-val-${i}" name="asset-val-${i}" autocomplete="off" value="${esc(String(val))}"></td>
+          <td><input type="text" id="asset-rem-${i}" name="asset-rem-${i}" autocomplete="off" value="${esc(String(rem))}"></td>`;
         tbody.appendChild(tr);
 
         const valInp = tr.querySelector(`#asset-val-${i}`);
@@ -1337,11 +1340,11 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                   <td class="asset-type-cell" style="padding:3px 5px;font-weight:600;color:#111;">${esc(displayType)}</td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayBrand)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displaySn)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayCond)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayVal)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayRem)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>`;
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayBrand)}</span></td>
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displaySn)}</span></td>
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayCond)}</span></td>
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayVal)}</span></td>
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayRem)}</span></td>`;
                 tbody.appendChild(tr);
               });
             }
@@ -1476,21 +1479,21 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                   <td class="asset-type-cell" style="padding:3px 5px;font-weight:600;color:#111;">${esc(displayType)}</td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayBrand)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayBrand)}</span></td>
                   <td id="td-sn-so-${i}" style="padding:3px 5px;">
                     ${isOccupied
-                      ? `<input type="text" id="asset-sn-${i}" value="${esc(existingSn)}"
+                      ? `<input type="text" id="asset-sn-${i}" name="asset-sn-${i}" autocomplete="off" value="${esc(existingSn)}"
                            placeholder="Enter serial no."
                            style="border:1px solid #29b6e8;border-radius:3px;background:#f0faff;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;outline:none;padding:2px 5px;box-sizing:border-box;"
                            onfocus="this.style.background='#e0f4ff';this.style.borderColor='#0a8dbf'"
                            onblur="this.style.background='#f0faff';this.style.borderColor='#29b6e8'">`
-                      : `<input type="text" id="asset-sn-${i}" value="" readonly
+                      : `<input type="text" id="asset-sn-${i}" name="asset-sn-${i}" autocomplete="off" value="" readonly
                            style="border:none;background:transparent;color:#999;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;">`
                     }
                   </td>
-                  <td style="padding:3px 5px;"><input type="text" value="${esc(displayCond)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" id="asset-val-${i}" value="${esc(displayVal)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
-                  <td style="padding:3px 5px;"><input type="text" id="asset-rem-${i}" value="${esc(displayRem)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>`;
+                  <td style="padding:3px 5px;"><span style="color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;display:block;width:100%;">${esc(displayCond)}</span></td>
+                  <td style="padding:3px 5px;"><input type="text" id="asset-val-${i}" name="asset-val-${i}" autocomplete="off" value="${esc(displayVal)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>
+                  <td style="padding:3px 5px;"><input type="text" id="asset-rem-${i}" name="asset-rem-${i}" autocomplete="off" value="${esc(displayRem)}" readonly style="border:none;background:transparent;color:#000;font-size:11.5px;font-family:Arial,'DM Sans',sans-serif;width:100%;pointer-events:none;"></td>`;
                 tbody.appendChild(tr);
 
                 // Also create hidden inputs that getFormAssets() expects for other fields

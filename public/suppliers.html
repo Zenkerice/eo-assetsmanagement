@@ -297,25 +297,25 @@ tbody tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="form-body">
       <div class="form-group">
-        <label>Company Name *</label>
+        <label for="f-name">Company Name *</label>
         <input type="text" id="f-name" placeholder="e.g. Acme Corp" autocomplete="off" />
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Contact Person</label>
+          <label for="f-contact">Contact Person</label>
           <input type="text" id="f-contact" placeholder="e.g. Juan dela Cruz" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Phone</label>
+          <label for="f-phone">Phone</label>
           <input type="text" id="f-phone" placeholder="+63 912 345 6789" autocomplete="off" />
         </div>
       </div>
       <div class="form-group">
-        <label>Email</label>
+        <label for="f-email">Email</label>
         <input type="email" id="f-email" placeholder="supplier@example.com" autocomplete="off" />
       </div>
       <div class="form-group">
-        <label>Address</label>
+        <label for="f-address">Address</label>
         <textarea id="f-address" placeholder="Street, City, Province..."></textarea>
       </div>
     </div>
@@ -335,31 +335,31 @@ tbody tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="form-body">
       <div class="form-group">
-        <label>PO Number</label>
+        <label for="po-f-number">PO Number</label>
         <div class="po-number-row">
           <input type="text" id="po-f-number" placeholder="Auto-generated" autocomplete="off" />
           <button class="btn btn-sm" id="po-gen-btn" type="button">&#8635; Generate</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Supplier *</label>
+        <label for="po-f-supplier">Supplier *</label>
         <select id="po-f-supplier">
           <option value="">-- Select supplier --</option>
         </select>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Order Date *</label>
+          <label for="po-f-order-date">Order Date *</label>
           <input type="date" id="po-f-order-date" />
         </div>
         <div class="form-group">
-          <label>Expected Delivery</label>
+          <label for="po-f-expected">Expected Delivery</label>
           <input type="date" id="po-f-expected" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group" style="grid-column:1/-1;">
-          <label>Location</label>
+          <label for="po-f-location">Location</label>
           <select id="po-f-location" style="width:100%;">
             <option value="">-- Select location --</option>
           </select>
@@ -368,7 +368,7 @@ tbody tr:hover td{background:rgba(255,255,255,0.02)}
       <!-- Line Items -->
       <div style="margin-top:4px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <label style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Items *</label>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Items *</span>
           <button class="btn btn-sm" id="po-add-item-btn" type="button" style="font-size:12px;">+ Add Item</button>
         </div>
         <!-- Column headers -->
@@ -387,7 +387,7 @@ tbody tr:hover td{background:rgba(255,255,255,0.02)}
         </div>
       </div>
       <div class="form-group">
-        <label>Notes</label>
+        <label for="po-f-notes">Notes</label>
         <textarea id="po-f-notes" placeholder="Optional notes..." style="min-height:60px;"></textarea>
       </div>
     </div>
