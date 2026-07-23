@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
@@ -11,7 +11,7 @@
   <meta http-equiv="Expires" content="0" />
   <title>My Asset Requests - EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -219,7 +219,7 @@
     .badge-po.received{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,.25)}
     .badge-po.cancelled{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,91,105,.25)}
 
-    /* -- PORTAL · 4-tab section ------------------------------------------ */
+    /* -- PORTAL � 4-tab section ------------------------------------------ */
     .portal-shell{max-width:680px;margin:0 auto;padding:28px 20px 60px}
     .portal-shell.wide{max-width:1060px;}
     /* Tab bar */
@@ -256,7 +256,7 @@
     @keyframes fieldSlideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
     @keyframes btnPulse{0%{box-shadow:0 0 0 0 rgba(41,182,232,0.45)}70%{box-shadow:0 0 0 8px rgba(41,182,232,0)}100%{box-shadow:0 0 0 0 rgba(41,182,232,0)}}
 
-    /* Return panel entrance — triggered by .anim-ready class added via JS */
+    /* Return panel entrance � triggered by .anim-ready class added via JS */
     #ppanel-return.anim-ready .portal-panel-title{animation:panelTitleIn .35s cubic-bezier(.22,.68,0,1.2) both}
     #ppanel-return.anim-ready .portal-panel-sub{animation:panelTitleIn .35s .06s cubic-bezier(.22,.68,0,1.2) both}
     #ppanel-return.anim-ready .portal-form-card{animation:formCardIn .4s .1s cubic-bezier(.22,.68,0,1.2) both}
@@ -317,7 +317,7 @@
     .pbtn.primary:hover{opacity:.88}
     .pbtn:hover{filter:brightness(1.1)}
     .pbtn:disabled{opacity:.4;cursor:not-allowed}
-    /* On behalf · teammate rows */
+    /* On behalf � teammate rows */
     .portal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
     .portal-box-label{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
     .ptm-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding-right:2px}
@@ -332,7 +332,7 @@
     .ptm-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
     .ptm-name{font-size:14px;font-weight:600;color:var(--text);flex:1}
     .ptm-dept{font-size:12px;color:var(--muted);flex-shrink:0}
-    /* On behalf · asset picker */
+    /* On behalf � asset picker */
     .pob-asset-label{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted2);margin:4px 0 10px}
     .pob-asset-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;padding-right:2px;margin-bottom:4px}
     .pob-asset-list::-webkit-scrollbar{width:4px}
@@ -357,7 +357,7 @@
     html[data-theme="light"] .pbadge.aging{background:rgba(217,119,6,0.10);color:#d97706;border-color:rgba(217,119,6,.25)}
     html[data-theme="light"] .pbadge.overdue{background:rgba(220,38,38,0.10);color:#dc2626;border-color:rgba(220,38,38,.25)}
 
-    /* ── Compact view (applied via JS when spw-compact pref is on) ── */
+    /* -- Compact view (applied via JS when spw-compact pref is on) -- */
     body.sp-compact .portal-asset-card{padding:9px 12px !important}
     body.sp-compact .portal-stat{padding:10px 14px !important}
     body.sp-compact .sp-row{padding:8px 0 !important}
@@ -365,7 +365,7 @@
     /* Serial number visibility */
     body.sp-hide-serials .sp-serial{display:none !important}
 
-    /* ── Settings panel ────────────────────────────────────────────────── */
+    /* -- Settings panel -------------------------------------------------- */
     .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s}
     .settings-overlay.open{opacity:1;pointer-events:auto}
     .settings-drawer{position:fixed;top:0;right:0;bottom:0;width:720px;max-width:100vw;background:var(--bg);z-index:601;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.22,.68,0,1.05);box-shadow:-8px 0 40px rgba(0,0,0,.5)}
@@ -505,12 +505,12 @@
       </div>
       <div style="margin-bottom:20px"></div>
       <div class="portal-stats">
-        <div class="portal-stat"><div class="portal-stat-label">Checked Out</div><div class="portal-stat-val" id="pstat-out">·</div></div>
-        <div class="portal-stat"><div class="portal-stat-label">Overdue Return</div><div class="portal-stat-val red" id="pstat-overdue">·</div></div>
+        <div class="portal-stat"><div class="portal-stat-label">Checked Out</div><div class="portal-stat-val" id="pstat-out">�</div></div>
+        <div class="portal-stat"><div class="portal-stat-label">Overdue Return</div><div class="portal-stat-val red" id="pstat-overdue">�</div></div>
       </div>
       <div class="portal-section-label">Assigned Assets</div>
       <div class="portal-asset-list" id="portal-asset-list">
-        <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading·</div>
+        <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading�</div>
       </div>
     </div>
 
@@ -533,25 +533,25 @@
           </div>
         </div>
         <div class="pfield"><label for="pret-asset">Asset to Return</label>
-          <div class="pselect-wrap"><select id="pret-asset"><option value="">· Select an asset ·</option></select><span class="pselect-arrow">▾</span></div>
+          <div class="pselect-wrap"><select id="pret-asset"><option value="">� Select an asset �</option></select><span class="pselect-arrow">?</span></div>
         </div>
         <div class="pfield"><label for="pret-method">Return Method</label>
           <div class="pselect-wrap"><select id="pret-method">
             <option value="dropoff">Drop off at IT desk</option>
             <option value="pickup">Schedule pickup</option>
             <option value="courier">Send via courier</option>
-          </select><span class="pselect-arrow">▾</span></div>
+          </select><span class="pselect-arrow">?</span></div>
         </div>
         <div class="pfield"><label for="pret-condition">Condition</label>
           <div class="pselect-wrap"><select id="pret-condition">
-            <option value="good">Good · no damage</option>
+            <option value="good">Good � no damage</option>
             <option value="minor">Minor wear</option>
-            <option value="damaged">Damaged · needs repair</option>
+            <option value="damaged">Damaged � needs repair</option>
             <option value="broken">Broken / non-functional</option>
-          </select><span class="pselect-arrow">▾</span></div>
+          </select><span class="pselect-arrow">?</span></div>
         </div>
         <div class="pfield"><label for="pret-notes">Notes (optional)</label>
-          <textarea id="pret-notes" placeholder="e.g. Slight scratch on armrest, otherwise functional·"></textarea>
+          <textarea id="pret-notes" placeholder="e.g. Slight scratch on armrest, otherwise functional�"></textarea>
         </div>
         <div class="pbtn-row">
           <button class="pbtn" onclick="clearReturnForm()">Cancel</button>
@@ -563,12 +563,12 @@
     <!-- ON BEHALF -->
     <div class="portal-panel" id="ppanel-onbehalf">
       <h2 class="portal-panel-title">Request on behalf</h2>
-      <p class="portal-panel-sub" id="pob-sub">· submit a request for a teammate</p>
+      <p class="portal-panel-sub" id="pob-sub">� submit a request for a teammate</p>
 
       <!-- Step 1: Select teammate -->
       <div class="portal-box" id="pob-tm-box">
         <div class="portal-box-label">Select Teammate</div>
-        <div class="ptm-list" id="ptm-list"><div style="color:var(--muted);font-size:13px;">Loading teammates·</div></div>
+        <div class="ptm-list" id="ptm-list"><div style="color:var(--muted);font-size:13px;">Loading teammates�</div></div>
       </div>
 
       <!-- Step 2: Request Asset form (shown after teammate selected) -->
@@ -582,7 +582,7 @@
             </div>
             <div>
               <div class="portal-form-title">Request Asset</div>
-              <div class="portal-form-sub">For: <strong id="pob-form-name" style="color:var(--blue);">·</strong></div>
+              <div class="portal-form-sub">For: <strong id="pob-form-name" style="color:var(--blue);">�</strong></div>
             </div>
             <button onclick="pobCancelForm()" style="margin-left:auto;background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer;display:grid;place-items:center;flex-shrink:0;"
               onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted2)'">&#10005;</button>
@@ -623,7 +623,7 @@
                 onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
                 <option value="">-- Select Location --</option>
               </select>
-              <span class="pselect-arrow">▾</span>
+              <span class="pselect-arrow">?</span>
             </div>
           </div>
 
@@ -636,7 +636,7 @@
           <!-- Description / Notes -->
           <div class="pfield">
             <label for="pob-description">Description / Notes</label>
-            <textarea id="pob-description" placeholder="Reason for request or additional notes…"
+            <textarea id="pob-description" placeholder="Reason for request or additional notes�"
               style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;min-height:96px;resize:vertical;box-sizing:border-box;transition:border-color .15s;"
               onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
           </div>
@@ -657,8 +657,8 @@
 
       <!-- Stats -->
       <div class="portal-stats" style="margin-bottom:20px;">
-        <div class="portal-stat"><div class="portal-stat-label">Pending</div><div class="portal-stat-val" id="mr-stat-pending">·</div></div>
-        <div class="portal-stat"><div class="portal-stat-label">Approved</div><div class="portal-stat-val" id="mr-stat-approved" style="color:var(--green)">·</div></div>
+        <div class="portal-stat"><div class="portal-stat-label">Pending</div><div class="portal-stat-val" id="mr-stat-pending">�</div></div>
+        <div class="portal-stat"><div class="portal-stat-label">Approved</div><div class="portal-stat-val" id="mr-stat-approved" style="color:var(--green)">�</div></div>
       </div>
 
       <!-- Filter -->
@@ -675,7 +675,7 @@
 
       <!-- List -->
       <div id="mr-list" style="display:flex;flex-direction:column;gap:10px;">
-        <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading…</div>
+        <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading�</div>
       </div>
     </div>
 
@@ -685,7 +685,7 @@
   <div class="page-top">
     <div>
       <h1 class="page-title">My Asset Requests</h1>
-      <div class="page-sub" id="page-sub">Loading·</div>
+      <div class="page-sub" id="page-sub">Loading�</div>
     </div>
     <button class="btn btn-primary" id="btn-new-request">+ New Request</button>
   </div>
@@ -716,7 +716,7 @@
   <div class="card">
     <div class="card-head">Request History</div>
     <div class="filter-bar">
-      <input type="text" id="search-input" placeholder="Search ticket, asset, reason·" oninput="renderTable()" />
+      <input type="text" id="search-input" placeholder="Search ticket, asset, reason�" oninput="renderTable()" />
       <select id="header-location-filter" onchange="onHeaderLocationChange()">
         <option value="">All Locations</option>
       </select>
@@ -748,7 +748,7 @@
           </tr>
         </thead>
         <tbody id="requests-table">
-          <tr><td colspan="8"><div class="empty-state">Loading·</div></td></tr>
+          <tr><td colspan="8"><div class="empty-state">Loading�</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -768,17 +768,17 @@
   <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
     <div class="stat-card blue">
       <div class="stat-label">&#128203; Total POs</div>
-      <div class="stat-value" id="po-stat-total">·</div>
+      <div class="stat-value" id="po-stat-total">�</div>
       <div class="stat-sub">all time</div>
     </div>
     <div class="stat-card amber">
       <div class="stat-label">&#9203; Pending</div>
-      <div class="stat-value" id="po-stat-pending">·</div>
+      <div class="stat-value" id="po-stat-pending">�</div>
       <div class="stat-sub">awaiting delivery</div>
     </div>
     <div class="stat-card green">
       <div class="stat-label">&#10003; Received</div>
-      <div class="stat-value" id="po-stat-received">·</div>
+      <div class="stat-value" id="po-stat-received">�</div>
       <div class="stat-sub">completed orders</div>
     </div>
   </div>
@@ -789,7 +789,7 @@
       <span id="po-list-count" style="font-size:12px;color:var(--muted);font-weight:400;font-family:'DM Sans',sans-serif;"></span>
     </div>
     <div class="filter-bar">
-      <input type="text" id="po-search-input" placeholder="Search PO number or supplier·" oninput="filterPoTable()" />
+      <input type="text" id="po-search-input" placeholder="Search PO number or supplier�" oninput="filterPoTable()" />
       <select id="po-filter-status" onchange="filterPoTable()">
         <option value="">All Statuses</option>
         <option value="pending">Pending</option>
@@ -813,7 +813,7 @@
           </tr>
         </thead>
         <tbody id="po-requests-table">
-          <tr><td colspan="8"><div class="empty-state">Loading·</div></td></tr>
+          <tr><td colspan="8"><div class="empty-state">Loading�</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -832,22 +832,22 @@
   <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
     <div class="stat-card blue">
       <div class="stat-label">Total Available</div>
-      <div class="stat-value" id="aa-stat-total">·</div>
+      <div class="stat-value" id="aa-stat-total">�</div>
       <div class="stat-sub">across all locations</div>
     </div>
     <div class="stat-card green">
       <div class="stat-label">This Location</div>
-      <div class="stat-value" id="aa-stat-location">·</div>
+      <div class="stat-value" id="aa-stat-location">�</div>
       <div class="stat-sub">filtered by location</div>
     </div>
     <div class="stat-card amber">
       <div class="stat-label">Categories</div>
-      <div class="stat-value" id="aa-stat-cats">·</div>
+      <div class="stat-value" id="aa-stat-cats">�</div>
       <div class="stat-sub">asset types</div>
     </div>
     <div class="stat-card" style="--accent:#9b73f7;border-top:3px solid #9b73f7;">
       <div class="stat-label" style="color:#9b73f7;">Showing</div>
-      <div class="stat-value" id="aa-stat-showing" style="color:#9b73f7;">·</div>
+      <div class="stat-value" id="aa-stat-showing" style="color:#9b73f7;">�</div>
       <div class="stat-sub">after filters</div>
     </div>
   </div>
@@ -855,7 +855,7 @@
   <div class="card">
     <div class="card-head">Asset Inventory</div>
     <div class="filter-bar">
-      <input type="text" id="aa-search-input" placeholder="Search by name or serial number·" oninput="aaRenderTable()" />
+      <input type="text" id="aa-search-input" placeholder="Search by name or serial number�" oninput="aaRenderTable()" />
       <select id="aa-location-filter" onchange="aaOnLocationChange()">
         <option value="">All Locations</option>
       </select>
@@ -876,7 +876,7 @@
           </tr>
         </thead>
         <tbody id="aa-assets-table">
-          <tr><td colspan="6"><div class="empty-state">Loading·</div></td></tr>
+          <tr><td colspan="6"><div class="empty-state">Loading�</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -903,7 +903,7 @@
       <div class="form-group">
         <label for="po-f-supplier">Supplier *</label>
         <select id="po-f-supplier">
-          <option value="">· Select supplier ·</option>
+          <option value="">� Select supplier �</option>
         </select>
       </div>
       <div class="form-row">
@@ -919,7 +919,7 @@
       <div class="form-group">
         <label for="po-f-location">Location</label>
         <select id="po-f-location">
-          <option value="">· Select delivery location ·</option>
+          <option value="">� Select delivery location �</option>
         </select>
       </div>
       <!-- Line Items -->
@@ -942,7 +942,7 @@
       </div>
       <div class="form-group">
         <label for="po-f-notes">Notes</label>
-        <textarea id="po-f-notes" placeholder="Optional notes·" style="min-height:60px;"></textarea>
+        <textarea id="po-f-notes" placeholder="Optional notes�" style="min-height:60px;"></textarea>
       </div>
     </div>
     <div class="modal-actions">
@@ -991,13 +991,13 @@
         <div class="form-group">
           <label for="req-category">Category *</label>
           <select id="req-category" onchange="onReqCategoryChange()">
-            <option value="">· Select category ·</option>
+            <option value="">� Select category �</option>
           </select>
         </div>
         <div class="form-group">
           <label for="req-asset-search">Asset *</label>
           <input type="hidden" id="req-asset-id" />
-          <input type="text" id="req-asset-search" placeholder="Select a category first·" autocomplete="off" oninput="onReqAssetSearch()" disabled />
+          <input type="text" id="req-asset-search" placeholder="Select a category first�" autocomplete="off" oninput="onReqAssetSearch()" disabled />
           <div id="req-asset-results" style="display:none;"></div>
         </div>
         <div class="form-row">
@@ -1047,7 +1047,7 @@
         </div>
         <div class="bulk-progress" id="bulk-progress">
           <div class="bulk-progress-bar-wrap"><div class="bulk-progress-bar" id="bulk-progress-bar" style="width:0%"></div></div>
-          <div class="bulk-progress-text" id="bulk-progress-text">Submitting·</div>
+          <div class="bulk-progress-text" id="bulk-progress-text">Submitting�</div>
         </div>
       </div>
 
@@ -1068,7 +1068,7 @@
     </div>
     <div class="modal-body" style="padding-top:16px;">
       <div class="assets-filter-row">
-        <input type="text" id="assets-search" class="assets-search" placeholder="Search by asset name or serial number·" oninput="renderAllAssetsTable()" />
+        <input type="text" id="assets-search" class="assets-search" placeholder="Search by asset name or serial number�" oninput="renderAllAssetsTable()" />
         <select id="assets-cat-filter" class="assets-cat-select" onchange="renderAllAssetsTable()">
           <option value="">All Categories</option>
         </select>
@@ -1085,7 +1085,7 @@
             </tr>
           </thead>
           <tbody id="all-assets-table">
-            <tr><td colspan="5"><div class="empty-state">Loading·</div></td></tr>
+            <tr><td colspan="5"><div class="empty-state">Loading�</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -1112,7 +1112,7 @@
 
 <div id="toast-container"></div>
 
-<!-- ── Settings Overlay + Drawer ──────────────────────────────────────── -->
+<!-- -- Settings Overlay + Drawer ---------------------------------------- -->
 <div class="settings-overlay" id="settings-overlay" onclick="_closeSettingsPanel()"></div>
 <div class="settings-drawer" id="settings-drawer">
   <!-- Header -->
@@ -1369,7 +1369,7 @@
 <script src="js/api.js?v=26"></script>
 <script src="js/auth.js?v=10"></script>
 <script src="js/toast.js?v=3"></script>
-<script src="js/sidebar.js?v=77"></script>
+<script src="js/sidebar.js?v=88"></script>
 <script src="js/approval_flow.js?v=2"></script>
 <script>
 const roleLabels = { admin: 'Admin', manager: 'Manager', staff: 'Staff', viewer: 'Supervisor' };
@@ -1405,8 +1405,8 @@ auth.initPage({
     document.getElementById('user-role').textContent = auth.getRoleDisplay(user);
     document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
     document.getElementById('page-sub').textContent =
-      auth.getRoleDisplay(user) + ' · ' + user.name;
-    // Reveal header right side · populated, no transition flash
+      auth.getRoleDisplay(user) + ' � ' + user.name;
+    // Reveal header right side � populated, no transition flash
     const _hr = document.getElementById('header-right');
     _hr.style.transition = 'none';
     _hr.style.visibility = 'visible';
@@ -1414,7 +1414,7 @@ auth.initPage({
     populateHeaderLocationFilter();
     updateHeaderAssetCount();
     if (window.refreshNotifDot) refreshNotifDot();
-    // Restore last active tab: ?tab= param → sessionStorage → default myassets
+    // Restore last active tab: ?tab= param ? sessionStorage ? default myassets
     const _tab = new URLSearchParams(window.location.search).get('tab')
       || sessionStorage.getItem('requests_active_tab')
       || 'myassets';
@@ -1467,7 +1467,7 @@ function onHeaderLocationChange() {
 }
 
 function updateHeaderAssetCount() {
-  // count display removed · location now lives in filter bar
+  // count display removed � location now lives in filter bar
 }
 
 function openAllAssetsModal() {
@@ -1508,10 +1508,10 @@ function renderAllAssetsTable() {
 
   tbody.innerHTML = assets.map(p => {
     const cat = catMap[p.category_id] || 'Uncategorized';
-    const loc = locMap[p.location_id] || '·';
+    const loc = locMap[p.location_id] || '�';
     return `<tr>
       <td><strong>${esc(p.name)}</strong></td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">${esc(p.sku || '·')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue)">${esc(p.sku || '�')}</td>
       <td>${esc(cat)}</td>
       <td>${esc(loc)}</td>
       <td><span class="pill available">Available</span></td>
@@ -1532,10 +1532,10 @@ function parsePayload(r) {
 }
 
 function fmtDate(s) {
-  if (!s) return '·';
+  if (!s) return '�';
   const raw = String(s);
   const d = new Date(raw.includes('T') ? raw : raw.replace(' ', 'T'));
-  if (isNaN(d.getTime())) return '·';
+  if (isNaN(d.getTime())) return '�';
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
@@ -1549,7 +1549,7 @@ function ticketId(r) {
 function assetLabel(r, payload) {
   const name = payload.asset_name || payload.name || r.resource_name || r.resource_type || 'Asset';
   const sub  = [payload.category_name, payload.serial_number || payload.sku, payload.station]
-    .filter(Boolean).join(' · ') || r.resource_type || 'Request';
+    .filter(Boolean).join(' � ') || r.resource_type || 'Request';
   return { name, sub };
 }
 
@@ -1616,7 +1616,7 @@ function renderTable() {
     const payload = parsePayload(r);
     const asset = assetLabel(r, payload);
     const qty = payload.quantity || 1;
-    const dateNeeded = payload.date_needed || payload.due_back || '·';
+    const dateNeeded = payload.date_needed || payload.due_back || '�';
     const priority = getPriority(r, payload);
 
     let actions = `<button class="btn btn-ghost btn-sm" onclick="openViewModal(${r.id})">View</button>`;
@@ -1632,7 +1632,7 @@ function renderTable() {
       <td><div class="asset-cell"><div class="name">${esc(asset.name)}</div><div class="sub">${esc(asset.sub)}</div></div></td>
       <td>${esc(String(qty))}</td>
       <td>${priorityPill(priority)}</td>
-      <td>${esc(dateNeeded === '·' ? '·' : fmtDate(dateNeeded))}</td>
+      <td>${esc(dateNeeded === '�' ? '�' : fmtDate(dateNeeded))}</td>
       <td>${fmtDate(r.created_at)}</td>
       <td>${statusPill(r.status)}</td>
       <td><div class="actions">${actions}</div></td>
@@ -1649,7 +1649,7 @@ function liabilityUrl(r, payload) {
   return 'accountability.html?' + params.toString();
 }
 
-// Location/station/employee helpers · kept as no-ops (fields removed from modal)
+// Location/station/employee helpers � kept as no-ops (fields removed from modal)
 function populateLocationDropdown() {}
 function filteredEmployees() { return []; }
 function populateStationDropdown() {}
@@ -1666,7 +1666,7 @@ function populateCategoryDropdown() {
   const catIds   = new Set(products.map(p => p.category_id).filter(Boolean));
   const cats     = allCategories.filter(c => catIds.has(c.id));
   const sel = document.getElementById('req-category');
-  sel.innerHTML = '<option value="">· Select category ·</option>'
+  sel.innerHTML = '<option value="">� Select category �</option>'
     + cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
   sel.disabled = !cats.length;
 }
@@ -1676,7 +1676,7 @@ function resetReqAssetSearch() {
   const inp = document.getElementById('req-asset-search');
   inp.value = '';
   inp.disabled = true;
-  inp.placeholder = 'Select a category first·';
+  inp.placeholder = 'Select a category first�';
   const res = document.getElementById('req-asset-results');
   res.style.display = 'none';
   res.innerHTML = '';
@@ -1691,7 +1691,7 @@ function onReqCategoryChange() {
   const inp  = document.getElementById('req-asset-search');
   inp.disabled = !pool.length;
   inp.placeholder = pool.length
-    ? `Search serial or asset name· (${pool.length} available)`
+    ? `Search serial or asset name� (${pool.length} available)`
     : 'No available assets in this category';
 }
 
@@ -1716,7 +1716,7 @@ function onReqAssetSearch() {
     + matches.slice(0, 8).map(p =>
         `<div class="asset-result-item" onclick="selectReqAsset(${p.id})">
           <span class="asset-result-name">${esc(p.name)}</span>
-          <span class="asset-result-sku">SN: ${esc(p.sku || '·')}</span>
+          <span class="asset-result-sku">SN: ${esc(p.sku || '�')}</span>
         </div>`).join('')
     + '</div>';
 }
@@ -1728,7 +1728,7 @@ function selectReqAsset(id) {
   document.getElementById('req-asset-search').value = asset.name;
   document.getElementById('req-asset-results').innerHTML =
     `<div class="asset-selected-pill">
-      <span><strong>${esc(asset.name)}</strong> · SN: ${esc(asset.sku || '·')}</span>
+      <span><strong>${esc(asset.name)}</strong> � SN: ${esc(asset.sku || '�')}</span>
       <button type="button" onclick="clearReqAsset()" title="Clear">&times;</button>
     </div>`;
   document.getElementById('req-asset-results').style.display = 'block';
@@ -1754,7 +1754,7 @@ async function openNewModal() {
   document.getElementById('bulk-date').value     = '';
   // Populate category dropdown directly
   const catSel = document.getElementById('req-category');
-  catSel.innerHTML = '<option value="">· Select category ·</option>'
+  catSel.innerHTML = '<option value="">� Select category �</option>'
     + allCategories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
   catSel.disabled = false;
   resetReqAssetSearch();
@@ -1789,7 +1789,7 @@ async function submitNewRequest() {
       action_type:   'create',
       resource_type: 'Assignment',
       resource_id:   null,
-      resource_name: asset.name + ' → ' + (user?.name || 'Requestor'),
+      resource_name: asset.name + ' ? ' + (user?.name || 'Requestor'),
       payload: {
         product_id:    assetId,
         assignee_name: user?.name || '',
@@ -1841,7 +1841,7 @@ function _buildCatOptions(selectedId) {
   const pool   = allProducts.filter(p => p.asset_status === 'available');
   const catIds = new Set(pool.map(p => p.category_id).filter(Boolean));
   const cats   = allCategories.filter(c => catIds.has(c.id));
-  return '<option value="">· Category ·</option>'
+  return '<option value="">� Category �</option>'
     + cats.map(c => `<option value="${c.id}" ${String(c.id) === String(selectedId) ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
 }
 
@@ -1860,12 +1860,12 @@ function addBulkRow() {
     </div>
     <div class="form-group">
       <label for="bulk-asset-search-${id}">Asset *</label>
-      <input type="text" placeholder="Select category first·"
+      <input type="text" placeholder="Select category first�"
              id="bulk-asset-search-${id}" autocomplete="off"
              disabled oninput="onBulkAssetSearch(${id}, this)" />
       <div id="bulk-asset-results-${id}" style="display:none;"></div>
     </div>
-    <button type="button" class="bulk-remove-btn" onclick="removeBulkRow(${id})" title="Remove">✕</button>
+    <button type="button" class="bulk-remove-btn" onclick="removeBulkRow(${id})" title="Remove">?</button>
   `;
   list.appendChild(div);
   _updateBulkCount();
@@ -1907,7 +1907,7 @@ function onBulkCatChange(id, sel) {
   const res = document.getElementById(`bulk-asset-results-${id}`);
   inp.value = '';
   inp.disabled = !catId;
-  inp.placeholder = catId ? 'Search asset or serial·' : 'Select category first·';
+  inp.placeholder = catId ? 'Search asset or serial�' : 'Select category first�';
   res.style.display = 'none';
   res.innerHTML = '';
 }
@@ -1939,7 +1939,7 @@ function onBulkAssetSearch(id, inp) {
              data-sku="${esc(p.sku||'')}"
              onclick="_onBulkResultClick(${id}, this)">
           <span class="asset-result-name">${esc(p.name)}</span>
-          <span class="asset-result-sku">SN: ${esc(p.sku||'·')}</span>
+          <span class="asset-result-sku">SN: ${esc(p.sku||'�')}</span>
         </div>`).join('')
     + '</div>';
 }
@@ -1958,7 +1958,7 @@ function selectBulkAsset(id, assetId, assetName, sku) {
   inp.value = assetName;
   const res = document.getElementById(`bulk-asset-results-${id}`);
   res.innerHTML = `<div class="asset-selected-pill">
-    <span><strong>${esc(assetName)}</strong> · SN: ${esc(sku||'·')}</span>
+    <span><strong>${esc(assetName)}</strong> � SN: ${esc(sku||'�')}</span>
     <button type="button" onclick="clearBulkAsset(${id})" title="Clear">&times;</button>
   </div>`;
   res.style.display = 'block';
@@ -2014,14 +2014,14 @@ async function submitBulkRequests() {
   for (const row of rows) {
     const asset    = allProducts.find(p => String(p.id) === String(row.assetId));
     const category = allCategories.find(c => String(c.id) === String(row.catId));
-    progressTxt.textContent = `Submitting ${done + 1} of ${rows.length}·`;
+    progressTxt.textContent = `Submitting ${done + 1} of ${rows.length}�`;
     bar.style.width = `${Math.round((done / rows.length) * 100)}%`;
     try {
       await api.submitApproval({
         action_type:   'create',
         resource_type: 'Assignment',
         resource_id:   null,
-        resource_name: (asset?.name || 'Asset') + ' → ' + (user?.name || 'Requestor'),
+        resource_name: (asset?.name || 'Asset') + ' ? ' + (user?.name || 'Requestor'),
         payload: {
           product_id:    String(row.assetId),
           assignee_name: user?.name || '',
@@ -2045,7 +2045,7 @@ async function submitBulkRequests() {
   }
 
   const succeeded = done - failed;
-  progressTxt.textContent = `Done · ${succeeded} submitted${failed ? ', ' + failed + ' failed' : ''}.`;
+  progressTxt.textContent = `Done � ${succeeded} submitted${failed ? ', ' + failed + ' failed' : ''}.`;
   bar.style.background = failed ? 'var(--amber)' : 'var(--green)';
 
   setTimeout(() => {
@@ -2076,8 +2076,8 @@ function openViewModal(id) {
     ${payload.serial_number ? `<div class="detail-row"><div class="detail-key">Serial No.</div><div class="detail-val">${esc(payload.serial_number)}</div></div>` : ''}
     <div class="detail-row"><div class="detail-key">Quantity</div><div class="detail-val">${esc(String(payload.quantity || 1))}</div></div>
     <div class="detail-row"><div class="detail-key">Priority</div><div class="detail-val">${priorityPill(getPriority(r, payload))}</div></div>
-    <div class="detail-row"><div class="detail-key">Date Needed</div><div class="detail-val">${esc((payload.date_needed || payload.due_back) ? fmtDate(payload.date_needed || payload.due_back) : '·')}</div></div>
-    <div class="detail-row"><div class="detail-key">Reason</div><div class="detail-val">${esc(r.notes || payload.reason || '·')}</div></div>
+    <div class="detail-row"><div class="detail-key">Date Needed</div><div class="detail-val">${esc((payload.date_needed || payload.due_back) ? fmtDate(payload.date_needed || payload.due_back) : '�')}</div></div>
+    <div class="detail-row"><div class="detail-key">Reason</div><div class="detail-val">${esc(r.notes || payload.reason || '�')}</div></div>
     <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val">${statusPill(r.status)}</div></div>
     <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val">${fmtDate(r.created_at)}</div></div>
     ${r.reviewed_by ? `<div class="detail-row"><div class="detail-key">Reviewed By</div><div class="detail-val">${esc(r.reviewed_by)}</div></div>` : ''}
@@ -2109,7 +2109,7 @@ document.getElementById('cancel-request-confirm-btn').addEventListener('click', 
   if (!_cancelRequestId) return;
   const id = _cancelRequestId;
   this.disabled = true;
-  this.textContent = 'Cancelling·';
+  this.textContent = 'Cancelling�';
   document.getElementById('cancel-request-modal').classList.remove('open');
   _cancelRequestId = null;
   await _doCancelRequest(id);
@@ -2174,7 +2174,7 @@ function showSection(section) {
   const isMyRequests = section === 'myrequests';
   const isPortal     = isMyAssets || isReturn || isOnBehalf || isMyRequests;
 
-  // Toggle content panels · portal section always shown, others hidden
+  // Toggle content panels � portal section always shown, others hidden
   document.getElementById('portal-section').style.display      = isPortal ? '' : 'none';
   document.getElementById('all-assets-section').style.display  = 'none';
   document.getElementById('po-section').style.display          = 'none';
@@ -2205,7 +2205,7 @@ document.getElementById('btn-myrequests').addEventListener('click', () => showSe
 document.getElementById('btn-new-po-req').addEventListener('click', openNewPoModal);
 
 /* ------------------------------------------------------
-   PO REQUEST · DATA
+   PO REQUEST � DATA
 ------------------------------------------------------ */
 let allPOs        = [];
 let allSuppliers  = [];
@@ -2306,11 +2306,11 @@ function aaRenderTable() {
 
   tbody.innerHTML = assets.map(p => {
     const cat   = catMap[p.category_id] || 'Uncategorized';
-    const loc   = locMap[p.location_id] || '·';
-    const brand = p.brand_model ? esc(p.brand_model) : '<span style="color:var(--muted)">·</span>';
+    const loc   = locMap[p.location_id] || '�';
+    const brand = p.brand_model ? esc(p.brand_model) : '<span style="color:var(--muted)">�</span>';
     return `<tr>
       <td><strong>${esc(p.name)}</strong></td>
-      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;">${esc(p.sku || '·')}</span></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;">${esc(p.sku || '�')}</span></td>
       <td>${esc(cat)}</td>
       <td>${brand}</td>
       <td>${esc(loc)}</td>
@@ -2366,7 +2366,7 @@ function renderPoTable() {
   const tbody = document.getElementById('po-requests-table');
   if (!data.length) {
     tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
-      <div style="font-size:32px;margin-bottom:10px;">📋</div>
+      <div style="font-size:32px;margin-bottom:10px;">??</div>
       <p>No purchase orders yet. Click <strong>New PO Request</strong> to get started.</p>
     </div></td></tr>`;
     return;
@@ -2380,12 +2380,12 @@ function renderPoTable() {
     const canCancel = po.status === 'pending';
 
     return `<tr>
-      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;">${esc(po.po_number || '·')}</span></td>
-      <td><strong>${esc(po.supplier_name || '·')}</strong></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);font-weight:600;">${esc(po.po_number || '�')}</span></td>
+      <td><strong>${esc(po.supplier_name || '�')}</strong></td>
       <td style="color:var(--muted2);font-size:12px;">${fmtDate(po.order_date)}</td>
-      <td style="color:var(--muted2);font-size:12px;">${po.expected_date ? fmtDate(po.expected_date) : '·'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;">${items.length} item${items.length !== 1 ? 's' : ''} · ${itemQty} unit${itemQty !== 1 ? 's' : ''}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;">₱${amount}</td>
+      <td style="color:var(--muted2);font-size:12px;">${po.expected_date ? fmtDate(po.expected_date) : '�'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${items.length} item${items.length !== 1 ? 's' : ''} � ${itemQty} unit${itemQty !== 1 ? 's' : ''}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;">?${amount}</td>
       <td>${statusBadge}</td>
       <td>
         <div class="actions">
@@ -2403,17 +2403,17 @@ function filterPoTable() {
 
 function poStatusBadge(status) {
   const labels = {
-    pending:         '⏳ Pending',
-    pending_receive: '📦 Pending Receive',
-    received:        '✅ Received',
-    cancelled:       '❌ Cancelled',
+    pending:         '? Pending',
+    pending_receive: '?? Pending Receive',
+    received:        '? Received',
+    cancelled:       '? Cancelled',
   };
   const label = labels[status] || status;
   return `<span class="badge-po ${esc(status)}">${label}</span>`;
 }
 
 /* ------------------------------------------------------
-   PO REQUEST · NEW MODAL
+   PO REQUEST � NEW MODAL
 ------------------------------------------------------ */
 async function openNewPoModal() {
   // Ensure suppliers/locations are loaded
@@ -2434,17 +2434,17 @@ async function openNewPoModal() {
   document.getElementById('po-f-order-date').value  = new Date().toISOString().slice(0, 10);
   document.getElementById('po-f-expected').value    = '';
   document.getElementById('po-items-container').innerHTML = '';
-  document.getElementById('po-items-total').textContent  = '₱0.00';
+  document.getElementById('po-items-total').textContent  = '?0.00';
   _poItemCount = 0;
 
   // Populate supplier dropdown
   const supSel = document.getElementById('po-f-supplier');
-  supSel.innerHTML = '<option value="">· Select supplier ·</option>'
+  supSel.innerHTML = '<option value="">� Select supplier �</option>'
     + allSuppliers.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
 
   // Populate location dropdown
   const locSel = document.getElementById('po-f-location');
-  locSel.innerHTML = '<option value="">· Select delivery location ·</option>'
+  locSel.innerHTML = '<option value="">� Select delivery location �</option>'
     + allLocations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
 
   // Add first item row
@@ -2473,15 +2473,15 @@ function addPoItem() {
   div.className    = 'po-item-row';
   div.dataset.item  = id;
 
-  const catOptions = '<option value="">· Category ·</option>'
+  const catOptions = '<option value="">� Category �</option>'
     + poCategories.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
 
   div.innerHTML = `
     <select onchange="recalcPoTotal()">${catOptions}</select>
-    <input type="text" placeholder="Product name·" autocomplete="off" oninput="recalcPoTotal()" />
+    <input type="text" placeholder="Product name�" autocomplete="off" oninput="recalcPoTotal()" />
     <input type="number" min="1" value="1" placeholder="Qty" oninput="recalcPoTotal()" />
     <input type="number" min="0" step="0.01" value="0" placeholder="Unit price" oninput="recalcPoTotal()" />
-    <button class="po-item-remove" type="button" onclick="removePoItem(this)" title="Remove">✕</button>
+    <button class="po-item-remove" type="button" onclick="removePoItem(this)" title="Remove">?</button>
   `;
   document.getElementById('po-items-container').appendChild(div);
   recalcPoTotal();
@@ -2506,7 +2506,7 @@ function recalcPoTotal() {
     total += qty * price;
   });
   document.getElementById('po-items-total').textContent =
-    '₱' + total.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+    '?' + total.toLocaleString('en-PH', { minimumFractionDigits: 2 });
 }
 
 async function submitPoRequest() {
@@ -2549,7 +2549,7 @@ async function submitPoRequest() {
 
   const btn = document.getElementById('po-submit-btn');
   btn.disabled = true;
-  btn.textContent = 'Submitting·';
+  btn.textContent = 'Submitting�';
 
   try {
     await api.createPurchaseOrder({
@@ -2575,7 +2575,7 @@ async function submitPoRequest() {
 }
 
 /* ------------------------------------------------------
-   PO REQUEST · VIEW MODAL
+   PO REQUEST � VIEW MODAL
 ------------------------------------------------------ */
 function openViewPoModal(id) {
   const po = allPOs.find(p => p.id === id);
@@ -2592,20 +2592,20 @@ function openViewPoModal(id) {
         ${item.category_name ? `<div style="font-size:11px;color:var(--muted);">${esc(item.category_name)}</div>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:16px;">
-        <span style="font-size:12px;color:var(--muted2);">₱${parseFloat(item.unit_price||0).toLocaleString('en-PH',{minimumFractionDigits:2})} · ${item.quantity}</span>
+        <span style="font-size:12px;color:var(--muted2);">?${parseFloat(item.unit_price||0).toLocaleString('en-PH',{minimumFractionDigits:2})} � ${item.quantity}</span>
         <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-dim);padding:3px 9px;border-radius:6px;">${item.quantity} unit${item.quantity!=1?'s':''}</span>
       </div>
     </div>`).join('');
 
-  document.getElementById('view-po-title').textContent = `PO: ${po.po_number || '·'}`;
+  document.getElementById('view-po-title').textContent = `PO: ${po.po_number || '�'}`;
   document.getElementById('view-po-body').innerHTML = `
-    <div class="detail-row"><span class="detail-key">PO Number</span><span class="detail-val" style="font-family:'DM Mono',monospace;color:var(--blue);font-weight:600;">${esc(po.po_number||'·')}</span></div>
-    <div class="detail-row"><span class="detail-key">Supplier</span><span class="detail-val">${esc(po.supplier_name||'·')}</span></div>
+    <div class="detail-row"><span class="detail-key">PO Number</span><span class="detail-val" style="font-family:'DM Mono',monospace;color:var(--blue);font-weight:600;">${esc(po.po_number||'�')}</span></div>
+    <div class="detail-row"><span class="detail-key">Supplier</span><span class="detail-val">${esc(po.supplier_name||'�')}</span></div>
     <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">${poStatusBadge(po.status)}</span></div>
     <div class="detail-row"><span class="detail-key">Order Date</span><span class="detail-val">${fmtDate(po.order_date)}</span></div>
-    <div class="detail-row"><span class="detail-key">Expected</span><span class="detail-val">${po.expected_date ? fmtDate(po.expected_date) : '·'}</span></div>
-    <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val">${esc(po.location_name||'·')}</span></div>
-    <div class="detail-row"><span class="detail-key">Created By</span><span class="detail-val">${esc(po.created_by||'·')}</span></div>
+    <div class="detail-row"><span class="detail-key">Expected</span><span class="detail-val">${po.expected_date ? fmtDate(po.expected_date) : '�'}</span></div>
+    <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val">${esc(po.location_name||'�')}</span></div>
+    <div class="detail-row"><span class="detail-key">Created By</span><span class="detail-val">${esc(po.created_by||'�')}</span></div>
     ${po.notes ? `<div class="detail-row"><span class="detail-key">Notes</span><span class="detail-val">${esc(po.notes)}</span></div>` : ''}
     <div style="margin-top:12px;">
       <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;">
@@ -2613,7 +2613,7 @@ function openViewPoModal(id) {
       </div>
       ${itemRows || '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No items found.</div>'}
       <div style="text-align:right;margin-top:10px;font-family:\'DM Mono\',monospace;font-size:15px;font-weight:700;color:var(--blue);">
-        Total: ₱${total}
+        Total: ?${total}
       </div>
     </div>
   `;
@@ -2621,7 +2621,7 @@ function openViewPoModal(id) {
 }
 
 /* ------------------------------------------------------
-   PO REQUEST · CANCEL
+   PO REQUEST � CANCEL
 ------------------------------------------------------ */
 async function cancelPoRequest(id) {
   const po = allPOs.find(p => p.id === id);
@@ -2639,7 +2639,7 @@ async function cancelPoRequest(id) {
 }
 
 /* ------------------------------------------------------
-   PORTAL · 4-TAB SECTION
+   PORTAL � 4-TAB SECTION
 ------------------------------------------------------ */
 let _portalLoaded    = false;
 let _portalAssets    = [];   // active assignments for current user
@@ -2653,7 +2653,7 @@ async function loadPortalSection() {
 
   // Fill On-behalf subtitle
   const roleLabel = { manager:'Manager', viewer:'Supervisor', staff:'Staff' }[user?.role] || (user?.role || '');
-  document.getElementById('pob-sub').textContent = roleLabel + ' · submit a request for a teammate';
+  document.getElementById('pob-sub').textContent = roleLabel + ' � submit a request for a teammate';
 
   try {
     // Use allSettled so one failing endpoint doesn't block the whole section
@@ -2676,7 +2676,7 @@ async function loadPortalSection() {
 
     // Populate return asset dropdown
     const retSel = document.getElementById('pret-asset');
-    retSel.innerHTML = '<option value="">· Select an asset ·</option>'
+    retSel.innerHTML = '<option value="">� Select an asset �</option>'
       + _portalAssets.map(a => {
           const status = getAssetStatus(a);
           const label  = status === 'overdue' ? ' (Overdue)' : status === 'aging' ? ' (Aging)' : '';
@@ -2788,7 +2788,7 @@ async function _openRequestFormModal() {
   document.getElementById('request-form-modal').classList.add('open');
 }
 
-// ── Asset rows (multi-row brand+model) ────────────────────────────────────
+// -- Asset rows (multi-row brand+model) ------------------------------------
 let _rfRowId = 0;
 const _rfRows = {}; // { id: { brand, model } }
 
@@ -2848,7 +2848,7 @@ function _rfOnRowCategoryChange(id) {
   const brandInp = document.getElementById(`rf-brand-${id}`);
   if (brandInp) brandInp.value = '';
   const modelInp = document.getElementById(`rf-model-${id}`);
-  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first�'; }
   _rfRebuildBrandDropdown(id);
 }
 
@@ -2922,7 +2922,7 @@ function _rfSelectBrandRow(id, brand) {
     modelInp.disabled    = false;
     modelInp.style.opacity = '1';
     modelInp.style.cursor  = 'text';
-    modelInp.placeholder   = 'Search model…';
+    modelInp.placeholder   = 'Search model�';
     modelInp.value         = '';
   }
   if (_rfRows[id]) _rfRows[id].model = '';
@@ -2948,7 +2948,7 @@ function _rfRebuildModelDropdown(id) {
     : '<div style="padding:10px 13px;font-size:13px;color:var(--muted);font-style:italic;">No models found</div>';
 }
 
-// No-op stubs — brand/model fields removed, category-only mode
+// No-op stubs � brand/model fields removed, category-only mode
 function _rfShowModelDd(id) {}
 function _rfHideModelDd(id) {}
 function _rfFilterModelDd(id) {}
@@ -3028,7 +3028,7 @@ let _mrData = [];
 
 async function _mrLoad() {
   const list = document.getElementById('mr-list');
-  if (list) list.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading…</div>';
+  if (list) list.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;">Loading�</div>';
   try {
     const res = await api.getApprovals();
     _mrData = (res.data || []).filter(r => r.resource_type === 'Asset');
@@ -3059,11 +3059,11 @@ function _mrRender() {
   }
 
   const statusStyle = {
-    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '⏳ Pending' },
-    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
-    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
-    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
-    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '⏳ Waiting for Approval' },
+    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '? Pending' },
+    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '? Approved' },
+    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '? Declined' },
+    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '?? Waiting for confirmation' },
+    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '? Waiting for Approval' },
   };
 
   list.innerHTML = rows.map(r => {
@@ -3072,13 +3072,13 @@ function _mrRender() {
     const brand = payload.brand || '';
     const model = payload.model || '';
     const cat   = payload.category_name || '';
-    const sub   = [brand, model, cat].filter(Boolean).join(' · ') || r.resource_name || r.resource_type;
+    const sub   = [brand, model, cat].filter(Boolean).join(' � ') || r.resource_name || r.resource_type;
     const reqId = payload.request_id || '';
     const date  = r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
     const reviewNote = r.review_notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;">"${esc(r.review_notes)}"</div>` : '';
     return `
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="width:38px;height:38px;border-radius:9px;background:${s.bg};border:1px solid ${s.border};display:grid;place-items:center;flex-shrink:0;font-size:16px;">📋</div>
+        <div style="width:38px;height:38px;border-radius:9px;background:${s.bg};border:1px solid ${s.border};display:grid;place-items:center;flex-shrink:0;font-size:16px;">??</div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.resource_name || 'Asset Request')}</div>
@@ -3109,11 +3109,11 @@ function _mrOpenView(id) {
 
   const payload  = typeof r.payload === 'string' ? JSON.parse(r.payload || '{}') : (r.payload || {});
   const statusStyle = {
-    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '⏳ Pending' },
-    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '✅ Approved' },
-    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '✖ Declined' },
-    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '📋 Waiting for confirmation' },
-    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '⏳ Waiting for Approval' },
+    pending:   { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)', label: '? Pending' },
+    approved:  { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(62,207,142,.25)',  label: '? Approved' },
+    rejected:  { bg: 'var(--red-dim)',   color: 'var(--red)',   border: 'rgba(244,91,105,.25)',  label: '? Declined' },
+    forwarded: { bg: 'var(--blue-dim)',  color: 'var(--blue)',  border: 'rgba(41,182,232,.25)',  label: '?? Waiting for confirmation' },
+    confirmed: { bg: 'var(--amber-dim)', color: 'var(--amber)', border: 'rgba(245,166,35,.25)',  label: '? Waiting for Approval' },
   };
   const s    = statusStyle[r.status] || statusStyle.pending;
 
@@ -3130,7 +3130,7 @@ function _mrOpenView(id) {
   if (confirmBtn) {
     if (r.status === 'confirmed') {
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '⏳ Waiting for Admin Approval';
+      confirmBtn.innerHTML = '? Waiting for Admin Approval';
       confirmBtn.style.opacity = '0.6';
       confirmBtn.style.cursor  = 'not-allowed';
     } else {
@@ -3142,7 +3142,7 @@ function _mrOpenView(id) {
   }
 
   if (r.status === 'forwarded' || r.status === 'confirmed') {
-    // Show accountability form iframe (readonly for both — staff cannot edit)
+    // Show accountability form iframe (readonly for both � staff cannot edit)
     titleEl.textContent = 'Asset Accountability Form';
     body.style.display   = 'none';
     iframe.style.display = 'block';
@@ -3181,7 +3181,7 @@ function _mrOpenView(id) {
     shell.style.maxHeight = '90vh';
     shell.style.overflow  = 'auto';
 
-    const date = r.created_at ? new Date(r.created_at).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
+    const date = r.created_at ? new Date(r.created_at).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : '�';
 
     function row(label, value) {
       if (!value) return '';
@@ -3196,14 +3196,14 @@ function _mrOpenView(id) {
         <span style="display:inline-flex;align-items:center;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${s.label}</span>
       </div>
       ${payload.request_id ? row('Request ID', `<span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;">${esc(payload.request_id)}</span>`) : ''}
-      ${row('Asset Requested', esc(r.resource_name || '—'))}
-      ${row('Category',        esc(payload.category_name || '—'))}
-      ${row('Brand',           esc(payload.brand  || '—'))}
-      ${row('Model',           esc(payload.model  || '—'))}
-      ${row('Requestor Name',  esc(payload.requestor_name || r.requested_by || '—'))}
-      ${row('Requestor ID',    esc(payload.requestor_id   || '—'))}
-      ${row('Location',        esc(payload.requestor_location || '—'))}
-      ${row('Description',     esc(payload.description || r.notes || '—'))}
+      ${row('Asset Requested', esc(r.resource_name || '�'))}
+      ${row('Category',        esc(payload.category_name || '�'))}
+      ${row('Brand',           esc(payload.brand  || '�'))}
+      ${row('Model',           esc(payload.model  || '�'))}
+      ${row('Requestor Name',  esc(payload.requestor_name || r.requested_by || '�'))}
+      ${row('Requestor ID',    esc(payload.requestor_id   || '�'))}
+      ${row('Location',        esc(payload.requestor_location || '�'))}
+      ${row('Description',     esc(payload.description || r.notes || '�'))}
       ${row('Submitted',       esc(date))}
       ${r.reviewed_by  ? row('Reviewed By', esc(r.reviewed_by)) : ''}
       ${r.review_notes ? row('Review Notes', `<span style="font-style:italic;color:${r.status === 'rejected' ? 'var(--red)' : 'var(--muted2)'};">"${esc(r.review_notes)}"</span>`) : ''}
@@ -3217,7 +3217,7 @@ function _mrOpenView(id) {
 async function _mrConfirmAsset() {
   if (!_mrViewRequestId) return;
   const btn = document.getElementById('mr-confirm-asset-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Confirming…'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '? Confirming�'; }
   try {
     const root = (typeof resolveProjectRoot === 'function') ? resolveProjectRoot() : '';
     const res  = await fetch(`${root}/api/approvals/${_mrViewRequestId}?action=confirm`, {
@@ -3273,7 +3273,7 @@ function _mrOpenChangeAsset() {
 let _mrBrandOptions = [];
 let _mrModelOptions = [];
 
-// ── Multi-row brand+model for Change Assets ───────────────────────────────
+// -- Multi-row brand+model for Change Assets -------------------------------
 let _mrRowId = 0;
 const _mrRows = {}; // { id: { brand, model } }
 
@@ -3297,7 +3297,7 @@ function _mrAddRow(prefillCatId, prefillCatName, prefillBrand, prefillModel) {
 
   const SEL_STYLE = `background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7080' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;`;
 
-  const catOpts = '<option value="">· Category ·</option>'
+  const catOpts = '<option value="">� Category �</option>'
     + allCategories.map(c => {
         const matchById   = prefillCatId   && String(c.id) === String(prefillCatId);
         const matchByName = prefillCatName && c.name.trim().toLowerCase() === prefillCatName.trim().toLowerCase();
@@ -3321,7 +3321,7 @@ function _mrAddRow(prefillCatId, prefillCatName, prefillBrand, prefillModel) {
     </div>
     <!-- Brand -->
     <div style="position:relative;">
-      <input id="mr-brand-${id}" type="text" ${INP('Search brand…', false, prefillBrand)}
+      <input id="mr-brand-${id}" type="text" ${INP('Search brand�', false, prefillBrand)}
         onfocus="this.style.borderColor='var(--blue)';_mrShowBrandDd(${id})"
         onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_mrHideBrandDd(${id}),160)"
         oninput="_mrFilterBrandDd(${id})" />
@@ -3329,7 +3329,7 @@ function _mrAddRow(prefillCatId, prefillCatName, prefillBrand, prefillModel) {
     </div>
     <!-- Model -->
     <div style="position:relative;">
-      <input id="mr-model-${id}" type="text" ${INP(prefillBrand ? 'Search model…' : 'Select brand first…', !prefillBrand, prefillModel)}
+      <input id="mr-model-${id}" type="text" ${INP(prefillBrand ? 'Search model�' : 'Select brand first�', !prefillBrand, prefillModel)}
         onfocus="this.style.borderColor='var(--blue)';_mrShowModelDd(${id})"
         onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_mrHideModelDd(${id}),160)"
         oninput="_mrFilterModelDd(${id})" />
@@ -3344,7 +3344,7 @@ function _mrOnRowCategoryChange(id) {
   const brandInp = document.getElementById(`mr-brand-${id}`);
   if (brandInp) brandInp.value = '';
   const modelInp = document.getElementById(`mr-model-${id}`);
-  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first�'; }
   _mrMaybeSpawnRow(id);
 }
 
@@ -3420,7 +3420,7 @@ function _mrSelectBrandRow(id, brand) {
   _mrHideBrandDd(id);
   if (_mrRows[id]) _mrRows[id].brand = brand;
   const modelInp = document.getElementById(`mr-model-${id}`);
-  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model…'; modelInp.value = ''; }
+  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model�'; modelInp.value = ''; }
   if (_mrRows[id]) _mrRows[id].model = '';
   _mrMaybeSpawnRow(id);
 }
@@ -3468,7 +3468,7 @@ function _mrPopulateChangeAssetDropdowns(payload) {
     const b = brand.toLowerCase().trim();
     // Try exact brand match first
     let prod = allProducts.find(p => (p.brand || '').toLowerCase().trim() === b);
-    // Fallback: brand is a combined "brand model" string — try startsWith
+    // Fallback: brand is a combined "brand model" string � try startsWith
     if (!prod) prod = allProducts.find(p => {
       const pb = (p.brand || '').toLowerCase().trim();
       return pb && b.startsWith(pb);
@@ -3544,7 +3544,7 @@ async function _mrSaveChangeAsset() {
     const catSel = document.getElementById(`mr-cat-${id}`);
     return {
       category_id:   catSel?.value || null,
-      category_name: catSel?.options[catSel.selectedIndex]?.text?.replace(/^·\s*/, '').replace(/\s*·$/, '') || null,
+      category_name: catSel?.options[catSel.selectedIndex]?.text?.replace(/^�\s*/, '').replace(/\s*�$/, '') || null,
       brand: (document.getElementById(`mr-brand-${id}`)?.value || '').trim(),
       model: (document.getElementById(`mr-model-${id}`)?.value || '').trim(),
     };
@@ -3553,7 +3553,7 @@ async function _mrSaveChangeAsset() {
   const firstAsset = assets[0] || {};
 
   const saveBtn = document.getElementById('mr-change-asset-save-btn');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '⏳ Saving…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '? Saving�'; }
   try {
     const root = (typeof resolveProjectRoot === 'function') ? resolveProjectRoot() : '';
     const res = await fetch(`${root}/api/approvals/${_mrViewRequestId}?action=change_asset`, {
@@ -3587,7 +3587,7 @@ async function _mrSaveChangeAsset() {
 
     _mrCloseChangeAsset();
     showToast('Asset details updated. Your request is back in pending review.', 'success');
-    // Reload My Requests list so the status updates from "Waiting for confirmation" → "Pending"
+    // Reload My Requests list so the status updates from "Waiting for confirmation" ? "Pending"
     await _mrLoad();
   } catch(e) {
     showToast(e.message || 'Failed to save changes.', 'error');
@@ -3698,10 +3698,10 @@ function renderPortalAssets() {
     const catLabel = esc(a.category_name || 'Asset');
     const dateStr  = a.assigned_at ? new Date(a.assigned_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     const serial   = a.serial_number || a.product_sku || '';
-    const serialPart = serial ? ` · <span class="sp-serial" style="font-family:'DM Mono',monospace;font-size:11px">${esc(serial)}</span>` : '';
+    const serialPart = serial ? ` � <span class="sp-serial" style="font-family:'DM Mono',monospace;font-size:11px">${esc(serial)}</span>` : '';
     const sub      = status === 'overdue'
-      ? `Overdue · Due ${fmtDate(a.due_back)} · ${catLabel}${serialPart}`
-      : `Checked out${dateStr ? ' · ' + dateStr : ''} · ${catLabel}${serialPart}`;
+      ? `Overdue � Due ${fmtDate(a.due_back)} � ${catLabel}${serialPart}`
+      : `Checked out${dateStr ? ' � ' + dateStr : ''} � ${catLabel}${serialPart}`;
     const iconCls  = status === 'aging' ? 'amber' : status === 'overdue' ? 'red' : '';
     return `<div class="portal-asset-card" style="animation-delay:${i * 70}ms">
       <div class="portal-asset-icon ${iconCls}">${assetIconSvg(status)}</div>
@@ -3749,7 +3749,7 @@ async function submitPortalReturn() {
       action_type:   'delete',
       resource_type: 'Assignment',
       resource_id:   parseInt(assetId),
-      resource_name: (asset?.product_name || 'Asset') + ' · return by ' + (auth.currentUser?.name || ''),
+      resource_name: (asset?.product_name || 'Asset') + ' � return by ' + (auth.currentUser?.name || ''),
       payload: {
         return_id:     returnId || null,
         assignment_id: assetId,
@@ -3758,7 +3758,7 @@ async function submitPortalReturn() {
         return_method: method,
         notes,
       },
-      notes: `Return request: ${condition}${notes ? ' · ' + notes : ''}`,
+      notes: `Return request: ${condition}${notes ? ' � ' + notes : ''}`,
     });
 
     clearReturnForm();
@@ -3773,9 +3773,9 @@ async function submitPortalReturn() {
 // -- On Behalf ---------------------------------------------------------
 const TM_COLORS = ['#3b82f6','#16a34a','#d97706','#7c3aed','#e11d48','#0891b2','#15803d','#b45309'];
 
-let _selectedPobAssetId = null; // legacy — kept so no other ref breaks
+let _selectedPobAssetId = null; // legacy � kept so no other ref breaks
 
-// ── pob asset rows (category / brand / model) ─────────────────────────────
+// -- pob asset rows (category / brand / model) -----------------------------
 let _pobRowId   = 0;
 const _pobRows  = {};
 let _pobAllAssets = [];
@@ -3806,14 +3806,14 @@ function _pobAddRow() {
         onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">${catOpts}</select>
     </div>
     <div style="position:relative;">
-      <input id="pob-brand-${id}" type="text" autocomplete="off" placeholder="Search brand…" style="${BASE}"
+      <input id="pob-brand-${id}" type="text" autocomplete="off" placeholder="Search brand�" style="${BASE}"
         onfocus="this.style.borderColor='var(--blue)';_pobShowBrandDd(${id})"
         onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_pobHideBrandDd(${id}),160)"
         oninput="_pobFilterBrandDd(${id})" />
       <div id="pob-brand-dd-${id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:600;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:3px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>
     </div>
     <div style="position:relative;">
-      <input id="pob-model-${id}" type="text" autocomplete="off" placeholder="Select brand first…" disabled
+      <input id="pob-model-${id}" type="text" autocomplete="off" placeholder="Select brand first�" disabled
         style="${BASE}opacity:.5;cursor:not-allowed;"
         onfocus="this.style.borderColor='var(--blue)';_pobShowModelDd(${id})"
         onblur="this.style.borderColor='var(--border2)';setTimeout(()=>_pobHideModelDd(${id}),160)"
@@ -3829,7 +3829,7 @@ function _pobOnRowCatChange(id) {
   const brandInp = document.getElementById(`pob-brand-${id}`);
   if (brandInp) brandInp.value = '';
   const modelInp = document.getElementById(`pob-model-${id}`);
-  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first…'; }
+  if (modelInp) { modelInp.value = ''; modelInp.disabled = true; modelInp.style.opacity = '.5'; modelInp.style.cursor = 'not-allowed'; modelInp.placeholder = 'Select brand first�'; }
   _pobRebuildBrandDd(id);
 }
 function _pobGetCatId(id) { return (document.getElementById(`pob-cat-${id}`)?.value || '').trim(); }
@@ -3886,7 +3886,7 @@ function _pobSelectBrand(id, brand) {
   const inp = document.getElementById(`pob-brand-${id}`); if (inp) inp.value = brand;
   _pobHideBrandDd(id); if (_pobRows[id]) _pobRows[id].brand = brand;
   const modelInp = document.getElementById(`pob-model-${id}`);
-  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model…'; modelInp.value = ''; }
+  if (modelInp) { modelInp.disabled = false; modelInp.style.opacity = '1'; modelInp.style.cursor = 'text'; modelInp.placeholder = 'Search model�'; modelInp.value = ''; }
   if (_pobRows[id]) _pobRows[id].model = ''; _pobRebuildModelDd(id);
 }
 function _pobSelectModel(id, model) {
@@ -3902,7 +3902,7 @@ document.addEventListener('click', function(e) {
   else if (opt.dataset.fn === 'model') _pobSelectModel(rowId, val);
 });
 
-// ── Teammate list ─────────────────────────────────────────────────────────
+// -- Teammate list ---------------------------------------------------------
 function renderTeammateList() {
   const list = document.getElementById('ptm-list');
   if (!_portalTeammates.length) {
@@ -3912,7 +3912,7 @@ function renderTeammateList() {
   list.innerHTML = _portalTeammates.map((e, i) => {
     const initials = (e.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     const color    = TM_COLORS[i % TM_COLORS.length];
-    const dept     = [e.role ? (e.role.charAt(0).toUpperCase()+e.role.slice(1)) : '', e.department || e.station || ''].filter(Boolean).join(' · ');
+    const dept     = [e.role ? (e.role.charAt(0).toUpperCase()+e.role.slice(1)) : '', e.department || e.station || ''].filter(Boolean).join(' � ');
     const sel      = _selectedTm?.id === e.id;
     return `<div class="ptm ${sel ? 'selected' : ''}" onclick="selectTm(${e.id})">
       <div class="ptm-radio"></div>
@@ -3931,7 +3931,7 @@ function selectTm(id) {
 
 function updateObLabel() {
   const nameEl = document.getElementById('pob-submit-name');
-  if (nameEl) nameEl.textContent = _selectedTm?.name || '·';
+  if (nameEl) nameEl.textContent = _selectedTm?.name || '�';
   if (_selectedTm) loadPobForm();
 }
 
@@ -4049,7 +4049,7 @@ async function submitOnBehalf() {
 
 
 /* -- Settings Panel --------------------------------------------------- */
-// Snapshot of profile values when the panel was opened — used to detect real changes
+// Snapshot of profile values when the panel was opened � used to detect real changes
 var _spOriginalProfile = {};
 
 function _openSettingsPanel() {
@@ -4109,7 +4109,7 @@ async function _saveProfile() {
   var email    = (document.getElementById('sp-email')?.value       || '').trim();
   var contact  = (document.getElementById('sp-contact')?.value     || '').trim();
 
-  // Use display name as the canonical name — it's what the user sees and edits.
+  // Use display name as the canonical name � it's what the user sees and edits.
   // Fall back to full name if display is empty.
   var resolvedName = display || fullname;
   if (!resolvedName) { showToast('Full name is required.', 'error'); return; }
@@ -4171,7 +4171,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') _closeSettingsPanel();
 });
 
-/* -- Notification & Workspace prefs (localStorage) ─────────────────── */
+/* -- Notification & Workspace prefs (localStorage) ------------------- */
 var _SP_PREFS_KEY = 'empireone_sp_prefs';
 
 var _SP_DEFAULTS = {
@@ -4332,7 +4332,7 @@ _openSettingsPanel = function() {
         <!-- Description -->
         <div style="display:flex;flex-direction:column;gap:5px;">
           <label for="mr-change-asset-desc" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description</label>
-          <textarea id="mr-change-asset-desc" rows="3" placeholder="Describe the asset or any changes needed…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;resize:vertical;width:100%;transition:border-color .15s;line-height:1.5;"
+          <textarea id="mr-change-asset-desc" rows="3" placeholder="Describe the asset or any changes needed�" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;resize:vertical;width:100%;transition:border-color .15s;line-height:1.5;"
             onfocus="this.style.borderColor='var(--blue)'"
             onblur="this.style.borderColor='var(--border2)'"
           ></textarea>
@@ -4424,7 +4424,7 @@ _openSettingsPanel = function() {
       <!-- Description -->
       <div class="form-group">
         <label for="rf-description" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);">Description / Notes</label>
-        <textarea id="rf-description" rows="3" placeholder="Reason for request or additional notes…" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;resize:vertical;line-height:1.5;min-height:80px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
+        <textarea id="rf-description" rows="3" placeholder="Reason for request or additional notes�" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 13px;outline:none;width:100%;resize:vertical;line-height:1.5;min-height:80px;transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'"></textarea>
       </div>
     </div>
 

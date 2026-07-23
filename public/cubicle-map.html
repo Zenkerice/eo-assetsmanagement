@@ -3,12 +3,12 @@
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=11" />
+  <link rel="stylesheet" href="css/theme.css?v=12" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cubicle Map &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -101,7 +101,7 @@
     html[data-theme="light"] .floor-card{background:#ffffff;border-color:rgba(0,0,0,0.10);}
     html[data-theme="light"] .floor-card-head{border-bottom-color:rgba(0,0,0,0.08);}
     html[data-theme="light"] .floor-card-head h2{color:#1e40af;}
-    html[data-theme="light"] .floor-body{background:#f8fafc;}
+    html[data-theme="light"] .floor-body{background:#ffffff;}
     html[data-theme="light"] .sdc-head{border-bottom-color:rgba(0,0,0,0.08);}
     html[data-theme="light"] .sdc-name{color:#0f172a;}
     html[data-theme="light"] .sdc-badge{color:#475569;}
@@ -234,14 +234,14 @@
 <div id="toast-container"></div>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/sidebar.js?v=77"></script>
+<script src="js/sidebar.js?v=88"></script>
 <script src="js/toast.js"></script>
 <script>
 /* -- Theme palette -- */
 function _isDark(){ return document.documentElement.getAttribute('data-theme') !== 'light'; }
 function _pal(){
-  if(_isDark()) return { floor:'#0c1a2c',desk:'#1a2c44',deskStr:'#27374f',spine:'#324867',divider:'#27374f',label:'#5d7290',walkBg:'#0e1a2c',walkStr:'#16263e',walkText:'#33455f',emptyFill:'#16243a',emptyStr:'#33455f',selRing:'#29b6e8' };
-  return { floor:'#dbe7f7',desk:'#c8d8ef',deskStr:'#a8bcda',spine:'#94adc8',divider:'#a8bcda',label:'#4a6785',walkBg:'#b8cce0',walkStr:'#8aaac4',walkText:'#5a7a9a',emptyFill:'#e8f0fa',emptyStr:'#94adc8',selRing:'#1d6fa4' };
+  if(_isDark()) return { floor:'#0a0e1a',desk:'#0d1a2a',deskStr:'#162234',spine:'#1e304a',divider:'#1e304a',label:'#3d5470',walkBg:'#080f1a',walkStr:'#101e30',walkText:'#243650',emptyFill:'#0b1622',emptyStr:'#1e304a',selRing:'#29b6e8' };
+  return { floor:'#ffffff',desk:'#eef3fb',deskStr:'#c8d8ef',spine:'#a8bcda',divider:'#c8d8ef',label:'#6b84a8',walkBg:'#f0f4ff',walkStr:'#c8d8ef',walkText:'#8aa0c0',emptyFill:'#f4f7fd',emptyStr:'#c0d0e8',selRing:'#1d6fa4' };
 }
 /* -- Geometry -- */
 const CHAIR_R=12, CHAIR_OFFSET=17, PAIR_W=70, PAIRS_PER_ROW=8;

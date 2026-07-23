@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
-  <link rel="stylesheet" href="css/theme.css?v=11" />
+  <link rel="stylesheet" href="css/theme.css?v=12" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -30,8 +30,6 @@
     [data-theme="light"] .brand-empire-login { color: #1a2a8a; }
     /* Tab switcher */
     .tab-bar{display:flex;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px;margin-bottom:28px;}
-    .tab-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border-radius:6px;transition:all .15s;}
-    .tab-btn.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
     /* Card */
     .card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:36px;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
     .card h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.4px;margin-bottom:6px;}
@@ -40,7 +38,9 @@
     .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
     .form-group label,.form-group .form-label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);}
     .input-wrap{position:relative;}
-    .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.5;pointer-events:none;}
+    .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.5;transition:opacity .2s,transform .2s cubic-bezier(0.34,1.56,0.64,1);}
+    .input-icon svg{width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;}
+    .form-group:focus-within .input-icon{opacity:1;transform:translateY(-50%) scale(1.15);}
     .form-group input,.form-group select{width:100%;padding:12px 14px 12px 42px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color .15s,box-shadow .15s;outline:none;}
     .form-group select{padding-left:14px;cursor:pointer;}
     .form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);}
@@ -70,11 +70,19 @@
       background:var(--border2);
       transition:background .18s;
     }
-    .role-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 24px rgba(41,182,232,0.15);}
+    .role-card:hover{border-color:var(--blue);box-shadow:0 8px 24px rgba(41,182,232,0.15);}
     .role-card:hover::before{background:var(--blue);}
     .role-card.selected{border-color:var(--blue);background:var(--blue-dim);box-shadow:0 0 0 3px rgba(41,182,232,0.15);}
     .role-card.selected::before{background:var(--blue);}
-    .role-card:active{transform:scale(0.98);}
+    .role-card:active{transform:scale(0.95);}
+    .role-card.bounce{animation:roleCardBounce .5s cubic-bezier(0.34,1.8,0.64,1) forwards;}
+    @keyframes roleCardBounce{
+      0%  {transform:scale(1);}
+      30% {transform:scale(0.93);}
+      60% {transform:scale(1.07);}
+      80% {transform:scale(0.98);}
+      100%{transform:scale(1);}
+    }
     .role-icon-wrap{
       width:42px;height:42px;
       border-radius:10px;
@@ -87,7 +95,7 @@
     .role-card:hover .role-icon-wrap,.role-card.selected .role-icon-wrap{
       background:rgba(41,182,232,0.2);
       border-color:rgba(41,182,232,0.4);
-      transform:scale(1.08) rotate(-4deg);
+      transform:scale(1.12) rotate(-6deg);
     }
     .role-icon-wrap svg{width:22px;height:22px;color:var(--blue);stroke:var(--blue);}
     .role-card-body{display:flex;flex-direction:column;gap:3px;}
@@ -258,20 +266,143 @@
     .btn-submit.loading .btn-text{display:none;}
 
     .footer{text-align:center;margin-top:24px;font-size:13px;color:var(--muted);}
-    /* Panel visibility */
-    .panel{display:none;}
+
+    /* ── Panel visibility & slide animation ── */
+    .panel{display:none;opacity:0;}
     .panel.active{display:block;}
+    .panel.anim-in{
+      animation: panelIn .32s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .panel.anim-out{
+      animation: panelOut .2s ease-in forwards;
+    }
+    @keyframes panelIn{
+      from{opacity:0;transform:translateY(14px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    @keyframes panelOut{
+      from{opacity:1;transform:translateY(0);}
+      to{opacity:0;transform:translateY(-10px);}
+    }
+
+    /* ── Tab bar sliding pill ── */
+    .tab-bar{position:relative;}
+    .tab-pill{
+      position:absolute;
+      top:4px;bottom:4px;
+      border-radius:6px;
+      background:var(--bg2);
+      box-shadow:0 1px 4px rgba(0,0,0,0.3);
+      transition:left .28s cubic-bezier(0.34,1.56,0.64,1),width .28s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events:none;
+      z-index:0;
+    }
+    .tab-btn{position:relative;z-index:1;flex:1;padding:10px;border:none;background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border-radius:6px;transition:color .2s;}
+    .tab-btn.active{background:transparent;box-shadow:none;color:var(--text);}
+
+    /* ── Card entrance ── */
+    .card{
+      animation: cardEntrance .45s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes cardEntrance{
+      from{opacity:0;transform:translateY(28px) scale(0.97);}
+      to{opacity:1;transform:translateY(0) scale(1);}
+    }
+
+    /* ── Wrap entrance ── */
+    .wrap{
+      animation: wrapFade .5s ease both;
+    }
+    @keyframes wrapFade{
+      from{opacity:0;transform:translateY(16px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    /* ── Input focus animation ── */
+    .form-group input,
+    .form-group select,
+    .position-select{
+      transition:border-color .2s,box-shadow .2s,transform .15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .position-select:focus{
+      transform:translateY(-1px);
+    }
+
+    /* ── Label float on focus ── */
+    .form-group label,
+    .form-group .form-label{
+      transition:color .2s,letter-spacing .2s;
+    }
+    .form-group:focus-within label,
+    .form-group:focus-within .form-label{
+      color:var(--blue);
+      letter-spacing:.8px;
+    }
+
+    /* ── Button animations ── */
+    .btn-submit{
+      transition:background .18s,transform .15s cubic-bezier(0.34,1.56,0.64,1),box-shadow .18s;
+      position:relative;overflow:hidden;
+    }
+    .btn-submit:hover:not(:disabled){
+      background:#6b9ef8;
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(41,182,232,0.35);
+    }
+    .btn-submit:active:not(:disabled){
+      transform:scale(0.97) translateY(0);
+      box-shadow:none;
+    }
+    /* Ripple */
+    .ripple{
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,0.25);
+      transform:scale(0);
+      animation:rippleAnim .55s linear;
+      pointer-events:none;
+    }
+    @keyframes rippleAnim{
+      to{transform:scale(4);opacity:0;}
+    }
+
+    /* ── Alert slide-in ── */
+    .alert.show{
+      display:block;
+      animation:alertIn .25s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes alertIn{
+      from{opacity:0;transform:translateY(-6px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    /* ── Role card stagger on panel enter ── */
+    .role-card{
+      opacity:0;
+      animation:none;
+    }
+    .panel.active .role-card:nth-child(1){animation:roleCardIn .3s .05s cubic-bezier(0.22,1,0.36,1) forwards;}
+    .panel.active .role-card:nth-child(2){animation:roleCardIn .3s .12s cubic-bezier(0.22,1,0.36,1) forwards;}
+    .panel.active .role-card:nth-child(3){animation:roleCardIn .3s .19s cubic-bezier(0.22,1,0.36,1) forwards;}
+    .panel.active .role-card:nth-child(4){animation:roleCardIn .3s .26s cubic-bezier(0.22,1,0.36,1) forwards;}
+    @keyframes roleCardIn{
+      from{opacity:0;transform:translateY(10px) scale(0.97);}
+      to{opacity:1;transform:translateY(0) scale(1);}
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
  <div class="brand" style="line-height:0;">
-  <a href="login.html" class="brand-wordmark" style="display:inline-flex;align-items:baseline;gap:0;text-decoration:none;">
-    <span class="brand-empire-login" style="font-family:'DM Sans',sans-serif;font-size:44px;font-weight:800;letter-spacing:-1.2px;-webkit-text-stroke:0.5px currentColor;">Empire</span><span style="font-family:'DM Sans',sans-serif;font-size:44px;font-weight:800;letter-spacing:-1.2px;color:#29b6e8;-webkit-text-stroke:0.5px #29b6e8;">One</span>
+  <a href="login.html" style="display:inline-flex;align-items:center;text-decoration:none;">
+    <img src="logo.png" alt="EmpireOne" style="height:90px;width:auto;" />
   </a>
 </div>
 
-  <div class="tab-bar">
+  <div class="tab-bar" id="tab-bar">
+    <div class="tab-pill" id="tab-pill"></div>
     <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
     <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Create Account</button>
   </div>
@@ -289,14 +420,14 @@
         <div class="form-group">
           <label for="login-username">Username</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128100;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
             <input type="text" id="login-username" placeholder="Enter your username" autocomplete="username" required />
           </div>
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128273;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
             <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" required />
           </div>
         </div>
@@ -317,49 +448,49 @@
         <div class="form-group">
           <label for="reg-name">Full Name *</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128100;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
             <input type="text" id="reg-name" placeholder="e.g. Raven Ompar" required autocomplete="name" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-employee-id">Employee ID</label>
           <div class="input-wrap">
-            <span class="input-icon">&#127987;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
             <input type="text" id="reg-employee-id" placeholder="e.g. EMP-00123" autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-username">Username *</label>
           <div class="input-wrap">
-            <span class="input-icon">&#64;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg></span>
             <input type="text" id="reg-username" placeholder="e.g. raven" required autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-email">Email</label>
           <div class="input-wrap">
-            <span class="input-icon">&#9993;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
             <input type="email" id="reg-email" placeholder="e.g. eogs.example@gmail.com" autocomplete="email" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-contact">Contact Number</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128222;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.93 5.93l.61-.61a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.24 16.92z"/></svg></span>
             <input type="tel" id="reg-contact" placeholder="e.g. 09171234567" autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-password">Password *</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128273;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
             <input type="password" id="reg-password" placeholder="Min. 6 characters" required autocomplete="new-password" />
           </div>
         </div>
         <div class="form-group">
           <label for="reg-confirm">Confirm Password *</label>
           <div class="input-wrap">
-            <span class="input-icon">&#128273;</span>
+            <span class="input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><polyline points="9 17 11 19 15 15"/></svg></span>
             <input type="password" id="reg-confirm" placeholder="Repeat your password" required autocomplete="new-password" />
           </div>
         </div>
@@ -457,14 +588,76 @@
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* -- Tab switching -- */
+/* ── Tab pill positioning ── */
+function positionPill(tab) {
+  const pill = document.getElementById('tab-pill');
+  const btn  = document.getElementById('tab-' + tab);
+  const bar  = document.getElementById('tab-bar');
+  const barRect = bar.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  pill.style.left  = (btnRect.left - barRect.left) + 'px';
+  pill.style.width = btnRect.width + 'px';
+}
+
+/* ── Tab switching with animation ── */
 function switchTab(tab) {
-  document.getElementById('panel-login').classList.toggle('active',    tab === 'login');
-  document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+  const panels   = { login: document.getElementById('panel-login'),    register: document.getElementById('panel-register') };
+  const fromTab  = tab === 'login' ? 'register' : 'login';
+  const fromPanel = panels[fromTab];
+  const toPanel   = panels[tab];
+
+  /* Animate out current */
+  if (fromPanel.classList.contains('active')) {
+    fromPanel.classList.remove('anim-in');
+    fromPanel.classList.add('anim-out');
+    setTimeout(() => {
+      fromPanel.classList.remove('active', 'anim-out');
+      /* Animate in next */
+      toPanel.classList.add('active');
+      requestAnimationFrame(() => {
+        toPanel.classList.add('anim-in');
+      });
+    }, 200);
+  } else {
+    toPanel.classList.add('active');
+    requestAnimationFrame(() => toPanel.classList.add('anim-in'));
+  }
+
   document.getElementById('tab-login').classList.toggle('active',    tab === 'login');
   document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  positionPill(tab);
   clearAlerts();
 }
+
+/* ── Ripple on buttons ── */
+function addRipple(btn, e) {
+  const rect   = btn.getBoundingClientRect();
+  const size   = Math.max(rect.width, rect.height);
+  const x      = e.clientX - rect.left - size / 2;
+  const y      = e.clientY - rect.top  - size / 2;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
+  btn.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+}
+document.querySelectorAll('.btn-submit').forEach(btn => {
+  btn.addEventListener('click', (e) => { if (!btn.disabled) addRipple(btn, e); });
+});
+
+/* Init pill on load */
+window.addEventListener('load', () => {
+  positionPill('login');
+  /* Trigger entrance animation on active panel */
+  const active = document.querySelector('.panel.active');
+  if (active) {
+    requestAnimationFrame(() => active.classList.add('anim-in'));
+  }
+});
+window.addEventListener('resize', () => {
+  const activeTab = document.getElementById('tab-login').classList.contains('active') ? 'login' : 'register';
+  positionPill(activeTab);
+});
 
 function clearAlerts() {
   ['login-error','reg-error','reg-success'].forEach(id => {
@@ -482,6 +675,16 @@ function selectRole(card) {
   selectedRole = card.dataset.role;
   updatePositionOptions(selectedRole);
 }
+
+/* Bounce on hover */
+document.querySelectorAll('.role-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    card.classList.remove('bounce');
+    void card.offsetWidth;
+    card.classList.add('bounce');
+    card.addEventListener('animationend', () => card.classList.remove('bounce'), { once: true });
+  });
+});
 
 const rolePositions = {
   admin:   ['Operations Manager', 'Compliance Manager', 'IT Staff'],

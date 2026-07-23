@@ -7,6 +7,9 @@
  *   Light — sidebar: #1a3a8a (blue)        |  content: #ffffff (white)
  */
 
+/* ── Global h1 font ── */
+h1 { font-family: 'Montserrat', sans-serif !important; }
+
 /* ── Smooth transition on every element ─────────────────────────────── */
 *, *::before, *::after {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -397,8 +400,9 @@ html[data-theme="light"] {
   flex-shrink: 0;
 }
 .topbar h1,
+.topbar h1,
 .topbar-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.5px;

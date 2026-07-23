@@ -116,7 +116,7 @@ function _renderSidebar(categories) {
   asideEl.innerHTML = `
     <div class="sidebar-brand">
       <a href="index.html" class="brand-wordmark">
-        <span class="brand-empire">Empire</span><span class="brand-one">One</span>
+        <img src="logo.png" alt="EmpireOne" class="sidebar-logo" />
       </a>
       <button class="sb-toggle-btn" onclick="_sbToggle()" aria-label="Toggle sidebar" title="Collapse sidebar">
         <span class="sb-toggle-line"></span>
@@ -277,7 +277,7 @@ if (!document.getElementById('_global-light-styles')) {
     html[data-theme="light"] .panel-header h2,
     html[data-theme="light"] .stat-value { color: #1e40af !important; }
     html[data-theme="light"] body,
-    html[data-theme="light"] .main { background: #f0f4ff !important; }
+    html[data-theme="light"] .main { background: #f4f6fb !important; }
     /* Light mode: make cards pop */
     html[data-theme="light"] .stat-card,
     html[data-theme="light"] .chart-card,
@@ -344,29 +344,33 @@ if (!document.getElementById('_sidebar-styles-v3')) {
       top: 0; left: 0; bottom: 0;
       z-index: 100;
     }
-    /* Light mode: dark blue sidebar */
+    /* Light mode: match page background */
     html[data-theme="light"] .sidebar {
-      background: #1e40af !important;
-      border-right: 1px solid rgba(255,255,255,0.08) !important;
+      background: #f4f6fb !important;
+      border-right: 1px solid #d0d8ee !important;
     }
-    html[data-theme="light"] .sidebar-brand    { border-bottom-color: rgba(255,255,255,0.12) !important; }
-    html[data-theme="light"] .nav-section      { color: rgba(255,255,255,0.45) !important; }
-    html[data-theme="light"] .nav-item         { color: rgba(255,255,255,0.85) !important; }
-    html[data-theme="light"] .nav-item:hover   { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
-    html[data-theme="light"] .nav-item.active  { background: rgba(255,255,255,0.20) !important; color: #ffffff !important; }
-    html[data-theme="light"] .folder-arrow     { color: rgba(255,255,255,0.45) !important; }
-    html[data-theme="light"] .nav-empty        { color: rgba(255,255,255,0.40) !important; }
-    html[data-theme="light"] .sidebar-footer   { border-top-color: rgba(255,255,255,0.12) !important; }
-    html[data-theme="light"] .user-name        { color: #ffffff !important; }
-    html[data-theme="light"] .user-role        { color: rgba(255,255,255,0.55) !important; }
-    html[data-theme="light"] .logout-btn       { color: #9aa0b2 !important; }
-    html[data-theme="light"] .logout-btn:hover { background: rgba(244,91,105,0.25) !important; color: #ffffff !important; }
-    html[data-theme="light"] .theme-toggle-btn { color: #9aa0b2 !important; }
-    html[data-theme="light"] .theme-toggle-btn:hover { background: rgba(255,255,255,0.12) !important; color: #ffffff !important; }
+    html[data-theme="light"] .sidebar-brand    { border-bottom: 1px solid rgba(0,0,0,0.08) !important; background: #ffffff !important; }
+    html[data-theme="light"] .nav-section      { color: #7a8ab0 !important; }
+    html[data-theme="light"] .nav-item         { color: #2d3a5e !important; }
+    html[data-theme="light"] .nav-item:hover   { background: rgba(41,182,232,0.12) !important; color: #1a2a6e !important; }
+    html[data-theme="light"] .nav-item.active  { background: rgba(41,182,232,0.18) !important; color: #1a2a6e !important; font-weight: 600; }
+    html[data-theme="light"] .nav-item.active::before { background: #29b6e8 !important; }
+    html[data-theme="light"] .folder-arrow     { color: #7a8ab0 !important; }
+    html[data-theme="light"] .nav-empty        { color: #9aa0b2 !important; }
+    html[data-theme="light"] .sidebar-footer   { border-top-color: #d0d8ee !important; background: #e8edf8 !important; }
+    html[data-theme="light"] .user-name        { color: #1a2a6e !important; }
+    html[data-theme="light"] .user-role        { color: #7a8ab0 !important; }
+    html[data-theme="light"] .logout-btn       { color: #7a8ab0 !important; }
+    html[data-theme="light"] .logout-btn:hover { background: rgba(244,91,105,0.15) !important; color: #f45b69 !important; }
+    html[data-theme="light"] .theme-toggle-btn { color: #7a8ab0 !important; }
+    html[data-theme="light"] .theme-toggle-btn:hover { background: rgba(41,182,232,0.12) !important; color: #1a2a6e !important; }
     html[data-theme="light"] .nav-badge        { background: #29b6e8 !important; color: #fff !important; }
-    html[data-theme="light"] .sidebar-folder-body { background: rgba(0,0,0,0.15) !important; }
-    html[data-theme="light"] .nav-dot          { background: rgba(255,255,255,0.45) !important; }
-    html[data-theme="light"] .nav-item.active .nav-dot { background: #ffffff !important; }
+    html[data-theme="light"] .sidebar-folder-body { background: rgba(0,0,0,0.04) !important; }
+    html[data-theme="light"] .nav-dot          { background: #9aa0b2 !important; }
+    html[data-theme="light"] .nav-item.active .nav-dot { background: #29b6e8 !important; }
+    html[data-theme="light"] .sb-toggle-line   { background: #2d3a5e !important; }
+    html[data-theme="light"] .avatar           { background: linear-gradient(135deg, #29b6e8, #1a3a8a) !important; }
+    html[data-theme="light"] .nav-icon svg     { stroke: currentColor !important; }
 
     /* ── Brand ── */
     .sidebar-brand {
@@ -377,7 +381,7 @@ if (!document.getElementById('_sidebar-styles-v3')) {
       border-bottom: 1px solid rgba(255,255,255,0.10);
       flex-shrink: 0;
       position: relative;
-      min-height: 64px;
+      height: 98px;
     }
 
     /* ── Sidebar collapse toggle button (hamburger ↔ X) ── */
@@ -466,6 +470,15 @@ if (!document.getElementById('_sidebar-styles-v3')) {
     .brand-wordmark:hover {
       opacity: 0.85;
       transform: scale(1.04);
+    }
+    .sidebar-logo {
+      height: 52px;
+      width: auto;
+      display: block;
+      mix-blend-mode: screen;
+    }
+    html[data-theme="light"] .sidebar-logo {
+      mix-blend-mode: multiply;
     }
     .sidebar .brand-empire {
       font-family: 'DM Sans', sans-serif;

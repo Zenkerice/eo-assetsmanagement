@@ -1,14 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/theme.js"></script>
   <script src="js/utils.js?v=2"></script>
-  <link rel="stylesheet" href="css/theme.css?v=11" />
+  <link rel="stylesheet" href="css/theme.css?v=12" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Team Structure &mdash; EmpireOne</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -160,7 +160,7 @@
     /* -- Entrance animations ----------------------------------------------- */
     .ts-animate{animation:slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both}
     .ts-fade{animation:fadeIn 0.35s ease both}
-    /* Stagger delays — up to 20 rows */
+    /* Stagger delays � up to 20 rows */
     .ts-d1{animation-delay:.04s}.ts-d2{animation-delay:.08s}.ts-d3{animation-delay:.12s}
     .ts-d4{animation-delay:.16s}.ts-d5{animation-delay:.20s}.ts-d6{animation-delay:.24s}
     .ts-d7{animation-delay:.28s}.ts-d8{animation-delay:.32s}.ts-d9{animation-delay:.36s}
@@ -190,7 +190,7 @@
       <!-- Role search -->
       <div style="padding:10px 12px 6px;position:relative">
         <svg style="position:absolute;left:21px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.45" width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input id="roleSearch" type="text" placeholder="Search by name or role…" oninput="filterRoles(this.value)" autocomplete="off"
+        <input id="roleSearch" type="text" placeholder="Search by name or role�" oninput="filterRoles(this.value)" autocomplete="off"
           style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px 7px 28px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor=''" />
       </div>
 
@@ -241,7 +241,7 @@
         </div>
         <div style="padding:6px 10px 4px;position:relative">
           <svg style="position:absolute;left:19px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.45" width="13" height="13" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M14 14l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input id="unassignedSearch" type="text" placeholder="Search members…" oninput="filterUnassignedPool(this.value)" autocomplete="off"
+          <input id="unassignedSearch" type="text" placeholder="Search members�" oninput="filterUnassignedPool(this.value)" autocomplete="off"
             style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px 7px 28px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor=''" />
         </div>
         <div class="unassigned-pool" id="pool-unassigned">
@@ -455,11 +455,11 @@
   <script src="js/api.js?v=26"></script>
   <script src="js/auth.js?v=9"></script>
   <script src="js/toast.js?v=3"></script>
-  <script src="js/sidebar.js?v=77"></script>
+  <script src="js/sidebar.js?v=88"></script>
   <script>
   /* =====================================================================
 
-     Team Structure — full rewrite (clean, no accumulated patches)
+     Team Structure � full rewrite (clean, no accumulated patches)
 
      All IDs are normalized to integers at ingestion. 0 is never valid.
 
@@ -583,7 +583,7 @@
 
   
 
-      // Normalize and validate all IDs at ingestion — prevents type mismatches throughout
+      // Normalize and validate all IDs at ingestion � prevents type mismatches throughout
 
       allUsers = (users || [])
 
@@ -773,7 +773,7 @@
    * Returns true if this employee record corresponds to a user who already
    * appears in one of the named-role groups (Manager / Supervisor / Staff).
    * Matches on: employee_id string, numeric users.id stored in employee_id,
-   * and full name (case-insensitive) — all three to be safe.
+   * and full name (case-insensitive) � all three to be safe.
    */
   function _isNamedRoleEmployee(emp) {
     const NAMED_ROLES = new Set(['staff', 'viewer', 'manager']);
@@ -1087,7 +1087,7 @@
 
     const btn = document.getElementById('unassignConfirmBtn');
 
-    btn.disabled = true; btn.textContent = 'Unassigning…';
+    btn.disabled = true; btn.textContent = 'Unassigning�';
 
     closeUnassignModal();
 
@@ -1107,7 +1107,7 @@
 
   /* -- Assign modal ---------------------------------------------------- */
 
-  // Maps synthetic negative IDs → product-sourced employee entries
+  // Maps synthetic negative IDs ? product-sourced employee entries
 
   const _productPoolMap = new Map();
 
@@ -1278,7 +1278,7 @@
 
   function toggleModalEmp(rawId) {
 
-    // rawId comes from data-emp-id attribute — could be positive (real) or negative (synthetic)
+    // rawId comes from data-emp-id attribute � could be positive (real) or negative (synthetic)
 
     const empId = toInt(rawId);
 
@@ -1356,13 +1356,13 @@
 
         if (id > 0) {
 
-          // Real employee — send as-is
+          // Real employee � send as-is
 
           realIds.push(id);
 
         } else {
 
-          // Synthetic (product-sourced) — create a real employee record first
+          // Synthetic (product-sourced) � create a real employee record first
 
           const entry = _productPoolMap.get(id);
 
@@ -1640,7 +1640,7 @@
 
   }
 
-  // ── Add-asset combobox helpers ────────────────────────────────────────────
+  // -- Add-asset combobox helpers --------------------------------------------
 
   function _aaPool() {
     const catId = document.getElementById('newAssetCategoryId')?.value || '';
@@ -1762,7 +1762,7 @@
     const catId = document.getElementById('newAssetCategoryId')?.value || '';
 
     // Filter strictly: category match + exact brand match + exact model match
-    // Both brand and model must match — no loose !brand || passthrough
+    // Both brand and model must match � no loose !brand || passthrough
     const units = allProducts.filter(p =>
       p.asset_status === 'available' &&
       (!catId || String(p.category_id) === catId) &&
